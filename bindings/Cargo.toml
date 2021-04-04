@@ -1,0 +1,14 @@
+[package]
+name = "windows_bindings"
+version = "0.1.0"
+authors = ["Karlitos"]
+edition = "2018"
+
+[profile.release]
+lto = true
+
+[build-dependencies]
+windows = "0.7"
+
+[dependencies]
+windows = "0.7"
