@@ -1,0 +1,40 @@
+[package]
+name = "trilogy_save_editor"
+version = "0.1.0"
+authors = ["Karlitos <ke0opt4cq@relay.firefox.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.release]
+lto = true
+
+[dependencies]
+# Windows
+windows = "0.7"
+bindings = { path = "bindings", package = "windows_bindings" }
+# Std-like
+anyhow = "1.0"
+# Async
+# async-trait = "0.1"
+tokio = { version = "1.0", features = [
+    "rt-multi-thread",
+    "sync",
+    "parking_lot",
+    "macros",
+    # "fs",
+    # "io-util",
+], default-features = false }
+# Sync
+# parking_lot = "0.11"
+# flume = { version = "0.10", features = ["async"], default-features = false }
+# Parallelism
+# rayon = "1.5"
+# Utils
+# lazy_static = "1.4"
+# serde = "1.0"
+# Dear ImGui
+# imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
+# imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs" }
+# imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs" }
+# glium = "0.29"
+# clipboard = "0.5"
