@@ -25,15 +25,15 @@ mod appearance;
 
 #[derive(Serializable, Debug)]
 pub struct Me3SaveGame {
-    version: i32,
-    debug_name: String,
-    seconds_played: f32,
-    disc: i32,
-    base_level_name: String,
-    base_level_name_display_override_as_read: String,
-    difficulty: Difficulty,
-    end_game_state: EndGameState,
-    timestamp: SaveTimeStamp,
+    pub version: i32,
+    pub debug_name: String,
+    pub seconds_played: f32,
+    pub disc: i32,
+    pub base_level_name: String,
+    pub base_level_name_display_override_as_read: String,
+    pub difficulty: Difficulty,
+    pub end_game_state: EndGameState,
+    pub timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotation,
     current_loading_tip: i32,
@@ -74,7 +74,7 @@ pub struct Me3SaveGame {
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
     use_modules: Vec<Guid>,
-    conversation_mode: AutoReplyModeOptions,
+    pub conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
     saved_objective_text: i32,
     checksum: Checksum,
@@ -90,7 +90,7 @@ impl Serializable for Checksum {
 }
 
 #[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
-enum Difficulty {
+pub enum Difficulty {
     Narrative = 0,
     Casual = 1,
     Normal = 2,
@@ -100,7 +100,7 @@ enum Difficulty {
 }
 
 #[derive(FromPrimitive, ToPrimitive, Debug)]
-enum EndGameState {
+pub enum EndGameState {
     NotFinished = 0,
     OutInABlazeOfGlory = 1,
     LivedToFightAgain = 2,
@@ -113,11 +113,11 @@ impl Serializable for EndGameState {
 }
 
 #[derive(Serializable, Debug)]
-struct SaveTimeStamp {
-    seconds_since_midnight: i32,
-    day: i32,
-    month: i32,
-    year: i32,
+pub struct SaveTimeStamp {
+    pub seconds_since_midnight: i32,
+    pub day: i32,
+    pub month: i32,
+    pub year: i32,
 }
 
 #[derive(Serializable, Debug)]
@@ -157,7 +157,7 @@ struct LevelTreasure {
 
 #[allow(clippy::enum_variant_names)]
 #[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
-enum AutoReplyModeOptions {
+pub enum AutoReplyModeOptions {
     AllDecisions = 0,
     MajorDecisions = 1,
     NoDecisions = 2,

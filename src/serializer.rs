@@ -133,7 +133,7 @@ where
     }
 
     // IndexMap
-    fn deserialize_from_hashmap<K, V>(input: &mut SaveCursor) -> Result<IndexMap<K, V>>
+    fn deserialize_from_indexmap<K, V>(input: &mut SaveCursor) -> Result<IndexMap<K, V>>
     where
         K: Serializable + Eq + Hash,
         V: Serializable,
@@ -204,6 +204,6 @@ where
     V: Serializable,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_hashmap(input)
+        Self::deserialize_from_indexmap(input)
     }
 }

@@ -7,16 +7,14 @@ extern crate num_derive;
 extern crate serializable_derive;
 
 use anyhow::Result;
-use mass_effect_3::Me3SaveGame;
-use serializer::{SaveCursor, Serializable};
 use std::{
     panic::{self, PanicInfo},
-    time::Instant,
 };
-use tokio::{fs::File, io::AsyncReadExt};
 
 mod mass_effect_3;
 mod serializer;
+mod event_handler;
+mod ui;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,36 +26,17 @@ async fn main() -> Result<()> {
         panic_hook(e);
     }));
 
-    // Code start here
-    let mut input = Vec::new();
-    {
-        let mut file = File::open("test/NewGamePlusSave.pcsav").await?;
-        file.read_to_end(&mut input).await?;
-    }
+    let (event_addr, event_rx) = flume::unbounded();
+    let (ui_addr, ui_rx) = flume::unbounded();
 
-    let mut input = SaveCursor::new(input);
+    let event_loop = tokio::spawn(async move {
+        event_handler::event_loop(event_rx, ui_addr).await;
+    });
 
-    let now = Instant::now();
-    let me3_save_game = Me3SaveGame::deserialize(&mut input)?;
-    let elapsed = now.elapsed().as_secs_f32();
-    println!("{:#?}", me3_save_game);
-    println!("Parse: {}s", elapsed);
-
-    // let save_game = Me3SaveGame {
-    //     version: 59,
-    //     debug_name: String::from("Cécé 💖 lolz"),
-    //     seconds_played: 199777.55,
-    //     disc: 0,
-    //     base_level_name: String::from("Biop_End002"),
-    // };
-
-    // let output = bincode_options.serialize(&save_game)?;
-
-    // {
-    //     let mut file = File::create("test/serialized.pcsav").await?;
-    //     file.write_all(&output).await?;
-    // }
-
+    ui::run(event_addr, ui_rx, || {
+        // Code de fin de programme
+    });
+    let _ = event_loop.await;
     Ok(())
 }
 
