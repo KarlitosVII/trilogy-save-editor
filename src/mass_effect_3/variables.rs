@@ -23,20 +23,10 @@ pub(super) struct Me1PlotTable {
     float_variables: IndexMap<i32, f32>,
 }
 
-// #[derive(Debug)]
+#[derive(Debug)]
 pub(super) struct BitArray {
     variables: Vec<bool>,
 }
-// FIXME: virer ça quand plus besoin
-impl Debug for BitArray {
-    #[allow(unused_variables)]
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let BitArray { variables } = self;
-
-        f.write_str("BitArray")
-    }
-}
-
 impl Serializable for BitArray {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         let num_bytes = Self::deserialize_from::<u32>(input)?;

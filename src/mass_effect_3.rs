@@ -77,7 +77,16 @@ pub struct Me3SaveGame {
     conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
     saved_objective_text: i32,
-    checksum: u32,
+    checksum: Checksum,
+}
+
+#[derive(Debug)]
+struct Checksum(u32);
+
+impl Serializable for Checksum {
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        Ok(Self(Self::deserialize_from(input)?))
+    }
 }
 
 #[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
@@ -133,39 +142,40 @@ struct GawAsset {
 
 #[derive(Serializable, Debug)]
 struct DependentDlc {
-	id: i32,
-	name: String,
-	canonical_name: String,
+    id: i32,
+    name: String,
+    canonical_name: String,
 }
 
 #[derive(Serializable, Debug)]
 struct LevelTreasure {
-	level_name: String,
-	credits: i32,
-	xp: i32,
-	items: Vec<String>,
+    level_name: String,
+    credits: i32,
+    xp: i32,
+    items: Vec<String>,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
 enum AutoReplyModeOptions {
-	AllDecisions = 0,
-	MajorDecisions = 1,
-	NoDecisions = 2,
+    AllDecisions = 0,
+    MajorDecisions = 1,
+    NoDecisions = 2,
 }
 
 #[derive(Serializable, Debug)]
 struct ObjectiveMarker {
-	marker_owned_data: String,
-	marker_offset: Vector,
-	marker_label: i32,
-	bone_to_attach_to: String,
-	marker_icin_type: ObjectiveMarkerIconType,
+    marker_owned_data: String,
+    marker_offset: Vector,
+    marker_label: i32,
+    bone_to_attach_to: String,
+    marker_icin_type: ObjectiveMarkerIconType,
 }
 
 #[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
 enum ObjectiveMarkerIconType {
-	None = 0,
-	Attack = 1,
-	Supply = 2,
-	Alert = 3,
+    None = 0,
+    Attack = 1,
+    Supply = 2,
+    Alert = 3,
 }

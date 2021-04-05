@@ -74,16 +74,16 @@ pub(super) struct WeaponMod {
 
 #[derive(Serializable, Debug)]
 pub(super) struct WeaponLoadout {
-	assaul_rifle: String,
-	shotgun: String,
-	sniper_rifle: String,
-	submachine_gun: String,
-	pistol: String,
-	heavy_weapon: String,
+    assaul_rifle: String,
+    shotgun: String,
+    sniper_rifle: String,
+    submachine_gun: String,
+    pistol: String,
+    heavy_weapon: String,
 }
 
 #[derive(Serializable, Debug)]
 pub(super) struct Hotkey {
-	pawn_name: String,
-	power_name: String,
+    pawn_name: String,
+    power_name: String,
 }

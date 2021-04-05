@@ -9,7 +9,10 @@ extern crate serializable_derive;
 use anyhow::Result;
 use mass_effect_3::Me3SaveGame;
 use serializer::{SaveCursor, Serializable};
-use std::{panic::{self, PanicInfo}, time::Instant};
+use std::{
+    panic::{self, PanicInfo},
+    time::Instant,
+};
 use tokio::{fs::File, io::AsyncReadExt};
 
 mod mass_effect_3;
