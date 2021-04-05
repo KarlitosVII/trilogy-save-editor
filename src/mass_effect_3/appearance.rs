@@ -74,7 +74,7 @@ enum PlayerAppearanceType {
     Full = 1,
 }
 
-#[derive(Serializable)]
+#[derive(Serializable, Debug)]
 struct HeadMorph {
     hair_mesh: String,
     accessory_mesh: Vec<String>,
@@ -87,28 +87,6 @@ struct HeadMorph {
     scalar_parameters: Vec<ScalarParameter>,
     vector_parameters: Vec<VectorParameter>,
     texture_parameters: Vec<TextureParameter>,
-}
-
-// FIXME: virer ça quand plus besoin
-impl Debug for HeadMorph {
-    #[allow(unused_variables)]
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let HeadMorph {
-            hair_mesh,
-            accessory_mesh,
-            morph_features,
-            offset_bones,
-            lod0_vertices,
-            lod1_vertices,
-            lod2_vertices,
-            lod3_vertices,
-            scalar_parameters,
-            vector_parameters,
-            texture_parameters,
-        } = self;
-
-        f.write_str("HeadMorph")
-    }
 }
 
 #[derive(Serializable, Debug)]
