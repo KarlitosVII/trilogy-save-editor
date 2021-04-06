@@ -129,107 +129,103 @@ impl<'a> Ui<'a> {
         // Tabs
         TabBar::new(im_str!("main-tabs")).build(imgui, || {
             TabItem::new(im_str!("Raw")).build(imgui, || {
-                if CollapsingHeader::new(im_str!("General")).default_open(true).build(imgui) {
-                    let Me3SaveGame {
-                        seconds_played,
-                        difficulty,
-                        end_game_state,
-                        conversation_mode,
-                        timestamp,
-                        ..
-                    } = save_game;
-
-                    seconds_played.draw_raw_ui(self, "Second Played");
-                    difficulty.draw_raw_ui(self, "Difficulty");
-                    end_game_state.draw_raw_ui(self, "End Game State");
-                    conversation_mode.draw_raw_ui(self, "Conversation Mode");
-                    TreeNode::new(im_str!("Timestamp")).default_open(true).build(imgui, || {
-                        self.draw_edit_i32(
-                            "Seconds since midnight",
-                            &mut timestamp.seconds_since_midnight,
-                        );
-                        self.draw_edit_i32("Day", &mut timestamp.day);
-                        self.draw_edit_i32("Month", &mut timestamp.month);
-                        self.draw_edit_i32("Year", &mut timestamp.year);
-                    });
-                }
+                ChildWindow::new("mass_effect_3").size([0.0, 0.0]).build(self.imgui, || {
+                    save_game.draw_raw_ui(self, "Mass Effect 3");
+                });
             });
         });
     }
 
-    pub fn draw_edit_string(&self, text: &'static str, value: &mut ImString) {
+    // Edit boxes
+    pub fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
+        self.draw_colored_bg(ident, || {
+            self.imgui.input_text(&ImString::new(ident), value).build();
+        });
+    }
+
+    pub fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
         let imgui = self.imgui;
 
-        self.draw_colored_bg(text, || {
+        self.draw_colored_bg(ident, || {
             let width = imgui.push_item_width(100.0);
-
-            imgui.input_text(&ImString::new(text), value).build();
-            Self::show_help_marker(imgui, "Drag or double-click to edit");
+            imgui.checkbox(&ImString::new(ident), value);
             width.pop(imgui);
         });
     }
 
-    pub fn draw_edit_i32(&self, text: &'static str, value: &mut i32) {
+    pub fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
         let imgui = self.imgui;
 
-        self.draw_colored_bg(text, || {
+        self.draw_colored_bg(ident, || {
             let width = imgui.push_item_width(100.0);
-            Drag::new(&ImString::new(text)).build(imgui, value);
-            Self::show_help_marker(imgui, "Drag or double-click to edit");
+            InputInt::new(imgui, &ImString::new(ident), value).build();
             width.pop(imgui);
         });
     }
 
-    pub fn draw_edit_f32(&self, text: &'static str, value: &mut f32) {
+    pub fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
         let imgui = self.imgui;
 
-        self.draw_colored_bg(text, || {
+        self.draw_colored_bg(ident, || {
             let width = imgui.push_item_width(100.0);
-            Drag::new(&ImString::new(text)).build(imgui, value);
-            Self::show_help_marker(imgui, "Drag or double-click to edit");
+            InputFloat::new(imgui, &ImString::new(ident), value).build();
             width.pop(imgui);
         });
     }
 
-    pub fn draw_enum(&self, text: &'static str, current_item: &mut usize, items: &[&ImStr]) {
+    pub fn draw_edit_enum(&self, ident: &str, current_item: &mut usize, items: &[&ImStr]) {
         let imgui = self.imgui;
 
-        self.draw_colored_bg(text, || {
+        self.draw_colored_bg(ident, || {
             let width = imgui.push_item_width(200.0);
-            ComboBox::new(&ImString::new(text)).build_simple_string(imgui, current_item, items);
+            ComboBox::new(&ImString::new(ident)).build_simple_string(imgui, current_item, items);
             width.pop(imgui);
         });
     }
 
-    fn draw_colored_bg<F>(&self, id: &'static str, inner: F)
+    // View widgets
+    pub fn draw_struct<F>(&self, ident: &str, fields: F)
+    where
+        F: FnOnce(),
+    {
+        TreeNode::new(&ImString::new(ident)).build(self.imgui, fields);
+    }
+
+    pub fn draw_vec<F>(&self, ident: &str, len: usize, mut items: F)
+    where
+        F: FnMut(usize),
+    {
+        TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
+            if len != 0 {
+                // let mut clipper = ListClipper::new(len as i32).begin(imgui);
+                // while clipper.step() {
+                //     for i in clipper.display_start()..clipper.display_end() {
+                    for i in 0..len {
+                        items(i as usize);
+                    }
+                // }
+            }
+        });
+    }
+
+    // Helpers
+    fn draw_colored_bg<F>(&self, id: &str, inner: F)
     where
         F: FnOnce(),
     {
         let bg = self.bg_colors();
-        ChildWindow::new(id).size([0.0, 19.0]).build(self.imgui, || {
-            inner();
-        });
+        ChildWindow::new(id).size([0.0, 19.0]).build(self.imgui, inner);
         bg.pop();
     }
 
     fn bg_colors(&self) -> ColorStackToken {
-        const BG_DARK: [f32; 4] = [0.1, 0.1, 0.1, 1.0];
-        const BG_LIGHT: [f32; 4] = [0.15, 0.15, 0.15, 1.0];
+        let bg_dark = [0.1, 0.1, 0.1, 1.0];
+        let bg_light = [0.15, 0.15, 0.15, 1.0];
 
-        let bg = [BG_DARK, BG_LIGHT];
+        let bgs = [bg_dark, bg_light];
 
         let bg_count = self.bg_count.fetch_add(1, Ordering::AcqRel);
-        self.imgui.push_style_color(StyleColor::ChildBg, bg[bg_count % bg.len()])
-    }
-
-    fn show_help_marker(imgui: &ImguiUi, desc: &'static str) {
-        imgui.same_line();
-        imgui.text_disabled(im_str!("(?)"));
-        if imgui.is_item_hovered() {
-            imgui.tooltip(|| {
-                imgui.text(desc);
-            });
-        }
+        self.imgui.push_style_color(StyleColor::ChildBg, bgs[bg_count % bgs.len()])
     }
 
     // Style
@@ -249,7 +245,7 @@ impl<'a> Ui<'a> {
             self.imgui.push_style_color(StyleColor::FrameBgActive, theme.active_color),
             self.imgui.push_style_color(StyleColor::FrameBgHovered, theme.hover_color),
             self.imgui.push_style_color(StyleColor::TextSelectedBg, theme.active_color),
-            self.imgui.push_style_color(StyleColor::Button, theme.color),
+            self.imgui.push_style_color(StyleColor::Button, theme.bg_color),
             self.imgui.push_style_color(StyleColor::ButtonActive, theme.active_color),
             self.imgui.push_style_color(StyleColor::ButtonHovered, theme.hover_color),
             self.imgui.push_style_color(StyleColor::Tab, theme.color),
