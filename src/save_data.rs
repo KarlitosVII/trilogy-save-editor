@@ -46,7 +46,7 @@ where
     Self: Sized,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self>;
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &'static str);
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str);
 
     // Generic
     fn deserialize_from<'a, D>(input: &'a mut SaveCursor) -> Result<D>
@@ -162,16 +162,26 @@ impl<const LENGTH: usize> SaveData for [u8; LENGTH] {
         Ok(array)
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
 // Implémentation des types std
+impl SaveData for i32 {
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from(input)
+    }
+
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        ui.draw_edit_i32(ident, self);
+    }
+}
+
 impl SaveData for f32 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(input)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &'static str) {
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
         ui.draw_edit_f32(ident, self);
     }
 }
@@ -183,21 +193,23 @@ macro_rules! impl_save_data {
                 Self::deserialize_from(input)
             }
 
-            fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+            fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
         }
     };
 }
 
+impl_save_data!(u8);
 impl_save_data!(i8);
 impl_save_data!(u32);
-impl_save_data!(i32);
 
 impl SaveData for bool {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_bool(input)
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        ui.draw_edit_bool(ident, self);
+    }
 }
 
 impl SaveData for ImString {
@@ -205,7 +217,7 @@ impl SaveData for ImString {
         Self::deserialize_from_string(input)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &'static str) {
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
         ui.draw_edit_string(ident, self);
     }
 }
@@ -218,7 +230,12 @@ where
         Self::deserialize_from_array(input)
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        ui.draw_vec(ident, self.len(), |i|{
+            let ident = i.to_string();
+            self[i].draw_raw_ui(ui, &ident);
+        });
+    }
 }
 
 impl<K, V> SaveData for IndexMap<K, V>
@@ -230,5 +247,5 @@ where
         Self::deserialize_from_indexmap(input)
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
 }

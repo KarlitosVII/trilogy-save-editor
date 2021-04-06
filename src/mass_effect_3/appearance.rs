@@ -71,7 +71,7 @@ impl SaveData for Appearance {
         })
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]

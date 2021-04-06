@@ -25,7 +25,9 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         _ => panic!("non named fields not supported"),
     };
 
-    let fields = fields.into_iter().map(|f| {
+    let name = &ast.ident;
+
+    let deserialize_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_type = &f.ty;
 
@@ -34,16 +36,28 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         }
     });
 
-    let name = &ast.ident;
+    let draw_fields = fields.iter().map(|f| {
+        let field_name = &f.ident;
+        let field_string = field_name.as_ref().unwrap().to_string();
+
+        quote! {
+            self.#field_name.draw_raw_ui(ui, #field_string);
+        }
+    });
+
     let gen = quote! {
         impl crate::save_data::SaveData for #name {
             fn deserialize(input: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 Ok(Self {
-                    #(#fields),*
+                    #(#deserialize_fields),*
                 })
             }
 
-            fn draw_raw_ui(&mut self, _ui: &crate::ui::Ui, _ident: &'static str) {}
+            fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &str) {
+                ui.draw_struct(ident, || {
+                    #(#draw_fields)*
+                });
+            }
         }
     };
     gen.into()
@@ -55,11 +69,14 @@ fn impl_save_data_enum(
     let name = &ast.ident;
 
     // Exception
-    let deserialize_enum_from_repr = if name == "EndGameState" {
-        Ident::new("deserialize_enum_from_u32", Span::call_site())
-    } else {
-        Ident::new("deserialize_enum_from_u8", Span::call_site())
-    };
+    let deserialize_enum_from_repr = Ident::new(
+        if name == "EndGameState" {
+            "deserialize_enum_from_u32"
+        } else {
+            "deserialize_enum_from_u8"
+        },
+        Span::call_site(),
+    );
 
     // Variants
     let let_variants = variants.iter().enumerate().map(|(i, v)| {
@@ -100,23 +117,23 @@ fn impl_save_data_enum(
                 Self::#deserialize_enum_from_repr(input)
             }
 
-            fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &'static str) {
+            fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &str) {
                 #(#let_variants)*
 
-                let items = vec![#(#array_variants),*];
+                let items = [#(#array_variants),*];
 
                 let (mut edit_item, current_item) = match self {
                     #(#match_variants),*
                 };
 
-                ui.draw_enum(ident, &mut edit_item, &items);
+                ui.draw_edit_enum(ident, &mut edit_item, &items);
 
                 if edit_item != current_item
                 {
                     *self = match edit_item {
                         #(#edit_variants),*,
                         _ => unreachable!(),
-                    }
+                    };
                 }
             }
         }

@@ -26,18 +26,18 @@ mod appearance;
 
 #[derive(SaveData, Debug)]
 pub struct Me3SaveGame {
-    pub version: i32,
-    pub debug_name: ImString,
-    pub seconds_played: f32,
-    pub disc: i32,
-    pub base_level_name: ImString,
-    pub base_level_name_display_override_as_read: ImString,
-    pub difficulty: Difficulty,
-    pub end_game_state: EndGameState,
-    pub timestamp: SaveTimeStamp,
+    version: i32,
+    debug_name: Vec<u8>,
+    seconds_played: f32,
+    disc: [u8; 4],
+    base_level_name: ImString,
+    base_level_name_display_override_as_read: ImString,
+    difficulty: Difficulty,
+    end_game_state: EndGameState,
+    timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotation,
-    current_loading_tip: i32,
+    current_loading_tip: [u8; 4],
     levels: Vec<Level>,
     streaming_records: Vec<StreamingRecord>,
     kismet_records: Vec<[u8; 20]>,
@@ -74,10 +74,10 @@ pub struct Me3SaveGame {
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
-    use_modules: Vec<Guid>,
-    pub conversation_mode: AutoReplyModeOptions,
+    use_modules: Vec<[u8; 16]>,
+    conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
-    saved_objective_text: i32,
+    saved_objective_text: [u8; 4],
     checksum: Checksum,
 }
 
@@ -89,11 +89,11 @@ impl SaveData for Checksum {
         Ok(Self(Self::deserialize_from(input)?))
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
-pub enum Difficulty {
+enum Difficulty {
     Narrative = 0,
     Casual = 1,
     Normal = 2,
@@ -103,18 +103,18 @@ pub enum Difficulty {
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
-pub enum EndGameState {
+enum EndGameState {
     NotFinished = 0,
     OutInABlazeOfGlory = 1,
     LivedToFightAgain = 2,
 }
 
 #[derive(SaveData, Debug)]
-pub struct SaveTimeStamp {
-    pub seconds_since_midnight: i32,
-    pub day: i32,
-    pub month: i32,
-    pub year: i32,
+struct SaveTimeStamp {
+    seconds_since_midnight: i32,
+    day: i32,
+    month: i32,
+    year: i32,
 }
 
 #[derive(SaveData, Debug)]
@@ -167,7 +167,7 @@ struct LevelTreasure {
 
 #[allow(clippy::enum_variant_names)]
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
-pub enum AutoReplyModeOptions {
+enum AutoReplyModeOptions {
     AllDecisions = 0,
     MajorDecisions = 1,
     NoDecisions = 2,
@@ -179,7 +179,7 @@ struct ObjectiveMarker {
     marker_offset: Vector,
     marker_label: i32,
     bone_to_attach_to: ImString,
-    marker_icin_type: ObjectiveMarkerIconType,
+    marker_icon_type: ObjectiveMarkerIconType,
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
