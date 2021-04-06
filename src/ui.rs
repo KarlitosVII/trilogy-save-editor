@@ -1,12 +1,9 @@
 use anyhow::Error;
 use flume::{Receiver, Sender};
 use imgui::{Ui as ImguiUi, *};
-use std::{
-    fmt::Debug,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame};
+use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame, save_data::SaveData};
 
 mod support;
 
@@ -20,12 +17,12 @@ struct ErrorState {
 // Events
 pub enum UiEvent {
     Error(Error),
-    MassEffect3(Me3SaveGame),
+    MassEffect3(Box<Me3SaveGame>),
 }
 
 enum SaveGame {
     None,
-    MassEffect3(Me3SaveGame),
+    MassEffect3(Box<Me3SaveGame>),
 }
 
 // UI
@@ -41,7 +38,9 @@ where
     system.main_loop(
         move |_, imgui| {
             rx.try_iter().for_each(|ui_event| match ui_event {
-                UiEvent::MassEffect3(me3_save_game) => save_game = SaveGame::MassEffect3(me3_save_game),
+                UiEvent::MassEffect3(me3_save_game) => {
+                    save_game = SaveGame::MassEffect3(me3_save_game)
+                }
                 UiEvent::Error(err) => {
                     error_state.errors.push(err);
                     error_state.is_opened = true;
@@ -49,13 +48,13 @@ where
             });
 
             let ui = Ui::new(imgui, &event_addr);
-            ui.draw(&mut error_state,&mut save_game);
+            ui.draw(&mut error_state, &mut save_game);
         },
         exit_fn,
     );
 }
 
-struct Ui<'a> {
+pub struct Ui<'a> {
     imgui: &'a ImguiUi<'a>,
     event_addr: Sender<MainEvent>,
     bg_count: AtomicUsize,
@@ -63,11 +62,7 @@ struct Ui<'a> {
 
 impl<'a> Ui<'a> {
     fn new(imgui: &'a ImguiUi<'a>, event_addr: &Sender<MainEvent>) -> Self {
-        Self {
-            imgui,
-            event_addr: Sender::clone(event_addr),
-            bg_count: AtomicUsize::new(0),
-        }
+        Self { imgui, event_addr: Sender::clone(event_addr), bg_count: AtomicUsize::new(0) }
     }
 
     fn draw(&self, error_state: &mut ErrorState, save_game: &mut SaveGame) {
@@ -83,7 +78,7 @@ impl<'a> Ui<'a> {
             .menu_bar(true)
             .collapsible(false);
 
-        let mut colors = self.style_colors();
+        let mut colors = self.style_colors(save_game);
         let style = imgui.push_style_var(StyleVar::WindowRounding(0.0));
         window.build(imgui, || {
             // Main menu bar
@@ -101,20 +96,18 @@ impl<'a> Ui<'a> {
                     imgui.open_popup(im_str!("Error"));
                 }
 
-                PopupModal::new(im_str!("Error"))
-                    .always_auto_resize(true)
-                    .build(imgui, || {
-                        errors.iter().for_each(|error| {
-                            imgui.text(error.to_string());
-                        });
-                        imgui.separator();
-
-                        if imgui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
-                            *is_opened = false;
-                            errors.clear();
-                            imgui.close_current_popup();
-                        }
+                PopupModal::new(im_str!("Error")).always_auto_resize(true).build(imgui, || {
+                    errors.iter().for_each(|error| {
+                        imgui.text(error.to_string());
                     });
+                    imgui.separator();
+
+                    if imgui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
+                        *is_opened = false;
+                        errors.clear();
+                        imgui.close_current_popup();
+                    }
+                });
             }
 
             match save_game {
@@ -136,10 +129,7 @@ impl<'a> Ui<'a> {
         // Tabs
         TabBar::new(im_str!("main-tabs")).build(imgui, || {
             TabItem::new(im_str!("Raw")).build(imgui, || {
-                if CollapsingHeader::new(im_str!("General"))
-                    .default_open(true)
-                    .build(imgui)
-                {
+                if CollapsingHeader::new(im_str!("General")).default_open(true).build(imgui) {
                     let Me3SaveGame {
                         seconds_played,
                         difficulty,
@@ -149,12 +139,15 @@ impl<'a> Ui<'a> {
                         ..
                     } = save_game;
 
-                    self.draw_edit_f32("Second Played", seconds_played);
-                    self.draw_enum("Difficulty", difficulty);
-                    self.draw_enum("EndGameState", end_game_state);
-                    self.draw_enum("ConversationMode", conversation_mode);
+                    seconds_played.draw_raw_ui(self, "Second Played");
+                    difficulty.draw_raw_ui(self, "Difficulty");
+                    end_game_state.draw_raw_ui(self, "End Game State");
+                    conversation_mode.draw_raw_ui(self, "Conversation Mode");
                     TreeNode::new(im_str!("Timestamp")).default_open(true).build(imgui, || {
-                        self.draw_edit_i32("Second since midnight", &mut timestamp.seconds_since_midnight);
+                        self.draw_edit_i32(
+                            "Seconds since midnight",
+                            &mut timestamp.seconds_since_midnight,
+                        );
                         self.draw_edit_i32("Day", &mut timestamp.day);
                         self.draw_edit_i32("Month", &mut timestamp.month);
                         self.draw_edit_i32("Year", &mut timestamp.year);
@@ -164,42 +157,53 @@ impl<'a> Ui<'a> {
         });
     }
 
-    fn draw_edit_i32(&self, text: &str, value: &mut i32) {
+    pub fn draw_edit_string(&self, text: &'static str, value: &mut ImString) {
         let imgui = self.imgui;
 
         self.draw_colored_bg(text, || {
             let width = imgui.push_item_width(100.0);
-            Drag::new(&im_str!("{}", text)).build(imgui, value);
+
+            imgui.input_text(&ImString::new(text), value).build();
             Self::show_help_marker(imgui, "Drag or double-click to edit");
             width.pop(imgui);
         });
     }
 
-    fn draw_edit_f32(&self, text: &str, value: &mut f32) {
+    pub fn draw_edit_i32(&self, text: &'static str, value: &mut i32) {
         let imgui = self.imgui;
 
         self.draw_colored_bg(text, || {
             let width = imgui.push_item_width(100.0);
-            Drag::new(&im_str!("{}", text)).build(imgui, value);
+            Drag::new(&ImString::new(text)).build(imgui, value);
             Self::show_help_marker(imgui, "Drag or double-click to edit");
             width.pop(imgui);
         });
     }
 
-    fn draw_enum<T: Debug>(&self, text: &str, value: &T) {
+    pub fn draw_edit_f32(&self, text: &'static str, value: &mut f32) {
         let imgui = self.imgui;
 
         self.draw_colored_bg(text, || {
-            imgui.align_text_to_frame_padding();
-            imgui.text(im_str!("{:?}", value));
-            imgui.same_line_with_pos(200.0);
-            imgui.text(text);
+            let width = imgui.push_item_width(100.0);
+            Drag::new(&ImString::new(text)).build(imgui, value);
+            Self::show_help_marker(imgui, "Drag or double-click to edit");
+            width.pop(imgui);
         });
     }
 
-    fn draw_colored_bg<F>(&self, id: &str, inner: F)
+    pub fn draw_enum(&self, text: &'static str, current_item: &mut usize, items: &[&ImStr]) {
+        let imgui = self.imgui;
+
+        self.draw_colored_bg(text, || {
+            let width = imgui.push_item_width(200.0);
+            ComboBox::new(&ImString::new(text)).build_simple_string(imgui, current_item, items);
+            width.pop(imgui);
+        });
+    }
+
+    fn draw_colored_bg<F>(&self, id: &'static str, inner: F)
     where
-        F: FnOnce() -> (),
+        F: FnOnce(),
     {
         let bg = self.bg_colors();
         ChildWindow::new(id).size([0.0, 19.0]).build(self.imgui, || {
@@ -215,11 +219,10 @@ impl<'a> Ui<'a> {
         let bg = [BG_DARK, BG_LIGHT];
 
         let bg_count = self.bg_count.fetch_add(1, Ordering::AcqRel);
-        self.imgui
-            .push_style_color(StyleColor::ChildBg, bg[bg_count % bg.len()])
+        self.imgui.push_style_color(StyleColor::ChildBg, bg[bg_count % bg.len()])
     }
 
-    fn show_help_marker(imgui: &ImguiUi, desc: &str) {
+    fn show_help_marker(imgui: &ImguiUi, desc: &'static str) {
         imgui.same_line();
         imgui.text_disabled(im_str!("(?)"));
         if imgui.is_item_hovered() {
@@ -230,29 +233,38 @@ impl<'a> Ui<'a> {
     }
 
     // Style
-    fn style_colors(&self) -> Vec<ColorStackToken> {
-        const RED_BG: [f32; 4] = [0.40, 0.0, 0.0, 1.0];
-        const RED: [f32; 4] = [0.53, 0.0, 0.0, 1.0];
-        const RED_ACTIVE: [f32; 4] = [0.68, 0.0, 0.0, 1.0];
-        const RED_HOVER: [f32; 4] = [0.86, 0.0, 0.0, 1.0];
+    fn style_colors(&self, save_game: &SaveGame) -> Vec<ColorStackToken> {
+        let theme = match save_game {
+            SaveGame::None | SaveGame::MassEffect3(_) => Theme {
+                bg_color: [0.40, 0.0, 0.0, 1.0],
+                color: [0.53, 0.0, 0.0, 1.0],
+                active_color: [0.68, 0.0, 0.0, 1.0],
+                hover_color: [0.86, 0.0, 0.0, 1.0],
+            },
+        };
 
         vec![
-            self.imgui.push_style_color(StyleColor::TitleBgActive, RED_ACTIVE),
-            self.imgui.push_style_color(StyleColor::FrameBg, RED_BG),
-            self.imgui.push_style_color(StyleColor::FrameBgActive, RED_ACTIVE),
-            self.imgui.push_style_color(StyleColor::FrameBgHovered, RED_HOVER),
-            self.imgui.push_style_color(StyleColor::TextSelectedBg, RED_ACTIVE),
-            self.imgui.push_style_color(StyleColor::Button, RED),
-            self.imgui.push_style_color(StyleColor::ButtonActive, RED_ACTIVE),
-            self.imgui.push_style_color(StyleColor::ButtonHovered, RED_HOVER),
-            self.imgui.push_style_color(StyleColor::Tab, RED),
-            self.imgui.push_style_color(StyleColor::TabActive, RED_ACTIVE),
-            self.imgui.push_style_color(StyleColor::TabHovered, RED_HOVER),
-            self.imgui.push_style_color(StyleColor::Header, RED_BG),
-            self.imgui.push_style_color(StyleColor::HeaderActive, RED_ACTIVE),
-            self.imgui.push_style_color(StyleColor::HeaderHovered, RED_HOVER),
-            self.imgui
-                .push_style_color(StyleColor::PlotHistogram, [1.0, 0.62, 0.24, 1.0]), // Progress bar
+            self.imgui.push_style_color(StyleColor::TitleBgActive, theme.active_color),
+            self.imgui.push_style_color(StyleColor::FrameBg, theme.bg_color),
+            self.imgui.push_style_color(StyleColor::FrameBgActive, theme.active_color),
+            self.imgui.push_style_color(StyleColor::FrameBgHovered, theme.hover_color),
+            self.imgui.push_style_color(StyleColor::TextSelectedBg, theme.active_color),
+            self.imgui.push_style_color(StyleColor::Button, theme.color),
+            self.imgui.push_style_color(StyleColor::ButtonActive, theme.active_color),
+            self.imgui.push_style_color(StyleColor::ButtonHovered, theme.hover_color),
+            self.imgui.push_style_color(StyleColor::Tab, theme.color),
+            self.imgui.push_style_color(StyleColor::TabActive, theme.active_color),
+            self.imgui.push_style_color(StyleColor::TabHovered, theme.hover_color),
+            self.imgui.push_style_color(StyleColor::Header, theme.bg_color),
+            self.imgui.push_style_color(StyleColor::HeaderActive, theme.active_color),
+            self.imgui.push_style_color(StyleColor::HeaderHovered, theme.hover_color),
         ]
     }
+}
+
+struct Theme {
+    bg_color: [f32; 4],
+    color: [f32; 4],
+    active_color: [f32; 4],
+    hover_color: [f32; 4],
 }

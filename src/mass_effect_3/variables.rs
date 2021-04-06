@@ -2,7 +2,10 @@ use anyhow::Result;
 use indexmap::IndexMap;
 use std::fmt::Debug;
 
-use crate::serializer::{SaveCursor, SaveData};
+use crate::{
+    save_data::{SaveCursor, SaveData},
+    ui::Ui,
+};
 
 #[derive(SaveData, Debug)]
 pub(super) struct PlotTable {
@@ -41,6 +44,8 @@ impl SaveData for BitArray {
 
         Ok(Self { variables })
     }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
 }
 
 #[derive(SaveData, Debug)]

@@ -4,17 +4,18 @@ use bincode::{
     DefaultOptions, Options,
 };
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
+use imgui::ImString;
 use indexmap::IndexMap;
 use lazy_static::lazy_static;
 use num_traits::FromPrimitive;
 use serde::Deserialize;
 use std::{hash::Hash, mem::size_of, usize};
 
+use crate::ui::Ui;
+
 lazy_static! {
     pub static ref BINCODE: WithOtherTrailing<WithOtherIntEncoding<DefaultOptions, FixintEncoding>, AllowTrailing> =
-        bincode::DefaultOptions::new()
-            .with_fixint_encoding()
-            .allow_trailing_bytes();
+        bincode::DefaultOptions::new().with_fixint_encoding().allow_trailing_bytes();
 }
 
 pub struct SaveCursor {
@@ -45,6 +46,7 @@ where
     Self: Sized,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self>;
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &'static str);
 
     // Generic
     fn deserialize_from<'a, D>(input: &'a mut SaveCursor) -> Result<D>
@@ -76,39 +78,37 @@ where
     }
 
     // String
-    fn deserialize_from_string(input: &mut SaveCursor) -> Result<String> {
+    fn deserialize_from_string(input: &mut SaveCursor) -> Result<ImString> {
         let len = Self::deserialize_from::<i32>(input)?;
 
         if len == 0 {
-            return Ok(String::new());
+            return Ok(ImString::default());
         }
 
         let string = if len < 0 {
             // Unicode
             let string_len = (len.abs() * 2) as usize;
 
-            let mut bytes = input.read(string_len)?.to_owned();
-            bytes.truncate(bytes.len() - 2);
+            let bytes = input.read(string_len)?.to_owned();
 
             let (decoded, _, had_errors) = UTF_16LE.decode(&bytes);
             if had_errors {
                 bail!("string encoding error");
             }
 
-            decoded.to_string()
+            ImString::new(decoded)
         } else {
             // Ascii
             let string_len = len as usize;
 
-            let mut bytes = input.read(string_len)?.to_owned();
-            bytes.truncate(bytes.len() - 1);
+            let bytes = input.read(string_len)?.to_owned();
 
             let (decoded, _, had_errors) = WINDOWS_1252.decode(&bytes);
             if had_errors {
                 bail!("string encoding error");
             }
 
-            decoded.to_string()
+            ImString::new(decoded)
         };
 
         Ok(string)
@@ -152,40 +152,61 @@ where
     }
 }
 
+// Implémentation des dummy
+impl<const LENGTH: usize> SaveData for [u8; LENGTH] {
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        let mut array = [0; LENGTH];
+        for byte in array.iter_mut() {
+            *byte = Self::deserialize_from(input)?
+        }
+        Ok(array)
+    }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+}
+
 // Implémentation des types std
-impl SaveData for bool {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_bool(input)
-    }
-}
-
-impl SaveData for i8 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(input)
-    }
-}
-
-impl SaveData for u32 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(input)
-    }
-}
-
-impl SaveData for i32 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(input)
-    }
-}
-
 impl SaveData for f32 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(input)
     }
+
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &'static str) {
+        ui.draw_edit_f32(ident, self);
+    }
 }
 
-impl SaveData for String {
+macro_rules! impl_save_data {
+    ($type:ty) => {
+        impl SaveData for $type {
+            fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+                Self::deserialize_from(input)
+            }
+
+            fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+        }
+    };
+}
+
+impl_save_data!(i8);
+impl_save_data!(u32);
+impl_save_data!(i32);
+
+impl SaveData for bool {
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from_bool(input)
+    }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
+}
+
+impl SaveData for ImString {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_string(input)
+    }
+
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &'static str) {
+        ui.draw_edit_string(ident, self);
     }
 }
 
@@ -196,6 +217,8 @@ where
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_array(input)
     }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
 }
 
 impl<K, V> SaveData for IndexMap<K, V>
@@ -206,4 +229,6 @@ where
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_indexmap(input)
     }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
 }

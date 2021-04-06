@@ -1,13 +1,14 @@
 use anyhow::Result;
+use imgui::ImString;
 use indexmap::IndexMap;
 
-use crate::serializer::{SaveCursor, SaveData};
+use crate::{
+    save_data::{SaveCursor, SaveData},
+    ui::Ui,
+};
 
 mod guid;
 use guid::*;
-
-mod uninteresting;
-use uninteresting::*;
 
 mod player;
 use player::*;
@@ -26,11 +27,11 @@ mod appearance;
 #[derive(SaveData, Debug)]
 pub struct Me3SaveGame {
     pub version: i32,
-    pub debug_name: String,
+    pub debug_name: ImString,
     pub seconds_played: f32,
     pub disc: i32,
-    pub base_level_name: String,
-    pub base_level_name_display_override_as_read: String,
+    pub base_level_name: ImString,
+    pub base_level_name_display_override_as_read: ImString,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     pub timestamp: SaveTimeStamp,
@@ -39,18 +40,18 @@ pub struct Me3SaveGame {
     current_loading_tip: i32,
     levels: Vec<Level>,
     streaming_records: Vec<StreamingRecord>,
-    kismet_records: Vec<Dummy20Bytes>,
-    doors: Vec<Dummy18Bytes>,
-    placeables: Vec<Dummy18Bytes>,
-    pawns: Vec<Dummy16Bytes>,
+    kismet_records: Vec<[u8; 20]>,
+    doors: Vec<[u8; 18]>,
+    placeables: Vec<[u8; 18]>,
+    pawns: Vec<[u8; 16]>,
     player: Player,
     powers: Vec<Power>,
     gaw_assets: Vec<GawAsset>,
     weapons: Vec<Weapon>,
     weapons_mods: Vec<WeaponMod>,
     weapons_loadout: WeaponLoadout,
-    primary_weapon: String,
-    secondary_weapon: String,
+    primary_weapon: ImString,
+    secondary_weapon: ImString,
     loadout_weapon_group: Vec<i32>,
     hotkeys: Vec<Hotkey>,
     current_health: f32,
@@ -63,13 +64,13 @@ pub struct Me3SaveGame {
     probes: i32,
     current_fuel: f32,
     grenades: i32,
-    face_code: String,
+    face_code: ImString,
     class_friendly_name: i32,
     character_guid: Guid,
     henchmen: Vec<Henchman>,
     plot: PlotTable,
     me1_plot: Me1PlotTable,
-    player_variables: IndexMap<String, i32>,
+    player_variables: IndexMap<ImString, i32>,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
@@ -87,6 +88,8 @@ impl SaveData for Checksum {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Ok(Self(Self::deserialize_from(input)?))
     }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
@@ -99,17 +102,11 @@ pub enum Difficulty {
     WhatIsBeyondInsanity = 5,
 }
 
-#[derive(FromPrimitive, ToPrimitive, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 pub enum EndGameState {
     NotFinished = 0,
     OutInABlazeOfGlory = 1,
     LivedToFightAgain = 2,
-}
-
-impl SaveData for EndGameState {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_enum_from_u32(input)
-    }
 }
 
 #[derive(SaveData, Debug)]
@@ -135,6 +132,19 @@ struct Rotation {
 }
 
 #[derive(SaveData, Debug)]
+struct Level {
+    name: ImString,
+    should_be_loaded: bool,
+    should_be_visible: bool,
+}
+
+#[derive(SaveData, Debug)]
+struct StreamingRecord {
+    name: ImString,
+    is_active: bool,
+}
+
+#[derive(SaveData, Debug)]
 struct GawAsset {
     id: i32,
     strength: i32,
@@ -143,16 +153,16 @@ struct GawAsset {
 #[derive(SaveData, Debug)]
 struct DependentDlc {
     id: i32,
-    name: String,
-    canonical_name: String,
+    name: ImString,
+    canonical_name: ImString,
 }
 
 #[derive(SaveData, Debug)]
 struct LevelTreasure {
-    level_name: String,
+    level_name: ImString,
     credits: i32,
     xp: i32,
-    items: Vec<String>,
+    items: Vec<ImString>,
 }
 
 #[allow(clippy::enum_variant_names)]
@@ -165,10 +175,10 @@ pub enum AutoReplyModeOptions {
 
 #[derive(SaveData, Debug)]
 struct ObjectiveMarker {
-    marker_owned_data: String,
+    marker_owned_data: ImString,
     marker_offset: Vector,
     marker_label: i32,
-    bone_to_attach_to: String,
+    bone_to_attach_to: ImString,
     marker_icin_type: ObjectiveMarkerIconType,
 }
 
