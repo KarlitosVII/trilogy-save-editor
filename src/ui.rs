@@ -1,19 +1,31 @@
+use anyhow::Error;
 use flume::{Receiver, Sender};
 use imgui::{Ui as ImguiUi, *};
-use std::fmt::Debug;
+use std::{
+    fmt::Debug,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame};
 
 mod support;
 
+// States
+#[derive(Default)]
+struct ErrorState {
+    errors: Vec<Error>,
+    is_opened: bool,
+}
+
 // Events
 pub enum UiEvent {
+    Error(Error),
     MassEffect3(Me3SaveGame),
 }
 
 enum SaveGame {
-    MassEffect3(Me3SaveGame),
     None,
+    MassEffect3(Me3SaveGame),
 }
 
 // UI
@@ -21,6 +33,7 @@ pub fn run<F>(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, exit_fn: F)
 where
     F: Fn() + 'static,
 {
+    let mut error_state = ErrorState::default();
     let mut save_game = SaveGame::None;
 
     // UI
@@ -29,10 +42,14 @@ where
         move |_, imgui| {
             rx.try_iter().for_each(|ui_event| match ui_event {
                 UiEvent::MassEffect3(me3_save_game) => save_game = SaveGame::MassEffect3(me3_save_game),
+                UiEvent::Error(err) => {
+                    error_state.errors.push(err);
+                    error_state.is_opened = true;
+                }
             });
 
             let ui = Ui::new(imgui, &event_addr);
-            ui.draw(&mut save_game);
+            ui.draw(&mut error_state,&mut save_game);
         },
         exit_fn,
     );
@@ -41,6 +58,7 @@ where
 struct Ui<'a> {
     imgui: &'a ImguiUi<'a>,
     event_addr: Sender<MainEvent>,
+    bg_count: AtomicUsize,
 }
 
 impl<'a> Ui<'a> {
@@ -48,12 +66,13 @@ impl<'a> Ui<'a> {
         Self {
             imgui,
             event_addr: Sender::clone(event_addr),
+            bg_count: AtomicUsize::new(0),
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
-    fn draw(&self, save_game: &mut SaveGame) {
-        let imgui = &self.imgui;
+    fn draw(&self, error_state: &mut ErrorState, save_game: &mut SaveGame) {
+        let imgui = self.imgui;
+
         // Main window
         let window = Window::new(im_str!("main"))
             .size([1000.0, 700.0], Condition::Always)
@@ -70,33 +89,33 @@ impl<'a> Ui<'a> {
             // Main menu bar
             if let Some(menu_bar) = imgui.begin_menu_bar() {
                 if imgui.button(im_str!("Open")) {
-                    self.open_mass_effect_3();
+                    let _ = self.event_addr.send(MainEvent::OpenMassEffect3);
                 }
                 menu_bar.end();
             }
 
             // Error popup
-            // {
-            //     let ErrorState { errors, is_opened } = error_state;
-            //     if *is_opened {
-            //         imgui.open_popup(im_str!("Erreur"));
-            //     }
+            {
+                let ErrorState { errors, is_opened } = error_state;
+                if *is_opened {
+                    imgui.open_popup(im_str!("Error"));
+                }
 
-            //     PopupModal::new(im_str!("Erreur"))
-            //         .always_auto_resize(true)
-            //         .build(imgui, || {
-            //             errors.iter().for_each(|error| {
-            //                 imgui.text(error.to_string());
-            //             });
-            //             imgui.separator();
+                PopupModal::new(im_str!("Error"))
+                    .always_auto_resize(true)
+                    .build(imgui, || {
+                        errors.iter().for_each(|error| {
+                            imgui.text(error.to_string());
+                        });
+                        imgui.separator();
 
-            //             if imgui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
-            //                 *is_opened = false;
-            //                 errors.clear();
-            //                 imgui.close_current_popup();
-            //             }
-            //         });
-            // }
+                        if imgui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
+                            *is_opened = false;
+                            errors.clear();
+                            imgui.close_current_popup();
+                        }
+                    });
+            }
 
             match save_game {
                 SaveGame::None => imgui.text(im_str!("Rien ici")),
@@ -112,12 +131,15 @@ impl<'a> Ui<'a> {
     }
 
     fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) {
-        let imgui = &self.imgui;
+        let imgui = self.imgui;
 
         // Tabs
         TabBar::new(im_str!("main-tabs")).build(imgui, || {
             TabItem::new(im_str!("Raw")).build(imgui, || {
-                TreeNode::new(im_str!("Mass Effect 3")).leaf(true).build(imgui, || {
+                if CollapsingHeader::new(im_str!("General"))
+                    .default_open(true)
+                    .build(imgui)
+                {
                     let Me3SaveGame {
                         seconds_played,
                         difficulty,
@@ -127,85 +149,85 @@ impl<'a> Ui<'a> {
                         ..
                     } = save_game;
 
-                    TreeNode::new(im_str!("General")).default_open(true).build(imgui, || {
-                        self.draw_edit_f32("Second Played", seconds_played);
-                        self.draw_enum(difficulty);
-                        self.draw_enum(end_game_state);
-                        self.draw_enum(conversation_mode);
-                        self.draw_enum(timestamp);
+                    self.draw_edit_f32("Second Played", seconds_played);
+                    self.draw_enum("Difficulty", difficulty);
+                    self.draw_enum("EndGameState", end_game_state);
+                    self.draw_enum("ConversationMode", conversation_mode);
+                    TreeNode::new(im_str!("Timestamp")).default_open(true).build(imgui, || {
+                        self.draw_edit_i32("Second since midnight", &mut timestamp.seconds_since_midnight);
+                        self.draw_edit_i32("Day", &mut timestamp.day);
+                        self.draw_edit_i32("Month", &mut timestamp.month);
+                        self.draw_edit_i32("Year", &mut timestamp.year);
                     });
-                });
+                }
             });
         });
     }
 
     fn draw_edit_i32(&self, text: &str, value: &mut i32) {
-        let imgui = &self.imgui;
+        let imgui = self.imgui;
 
-        let width = imgui.push_item_width(100.0);
-        imgui.input_int(&im_str!("{}", text), value).build();
-        width.pop(imgui);
+        self.draw_colored_bg(text, || {
+            let width = imgui.push_item_width(100.0);
+            Drag::new(&im_str!("{}", text)).build(imgui, value);
+            Self::show_help_marker(imgui, "Drag or double-click to edit");
+            width.pop(imgui);
+        });
     }
 
     fn draw_edit_f32(&self, text: &str, value: &mut f32) {
-        let imgui = &self.imgui;
+        let imgui = self.imgui;
 
-        let width = imgui.push_item_width(100.0);
-        imgui.input_float(&im_str!("{}", text), value).build();
-        width.pop(imgui);
+        self.draw_colored_bg(text, || {
+            let width = imgui.push_item_width(100.0);
+            Drag::new(&im_str!("{}", text)).build(imgui, value);
+            Self::show_help_marker(imgui, "Drag or double-click to edit");
+            width.pop(imgui);
+        });
     }
 
-    fn draw_enum<T: Debug>(&self, value: &T) {
-        let imgui = &self.imgui;
+    fn draw_enum<T: Debug>(&self, text: &str, value: &T) {
+        let imgui = self.imgui;
 
-        imgui.text(im_str!("{:?}", value));
+        self.draw_colored_bg(text, || {
+            imgui.align_text_to_frame_padding();
+            imgui.text(im_str!("{:?}", value));
+            imgui.same_line_with_pos(200.0);
+            imgui.text(text);
+        });
     }
 
-    // fn draw_log(&self, log: &IndexMap<String, Vec<UiEvent>>) {
-    //     let imgui = &self.imgui;
-    //     ChildWindow::new(im_str!("log")).build(imgui, || {
-    //         if !log.is_empty() {
-    //             log.iter().for_each(|(grab_id, grab_log)| {
-    //                 if CollapsingHeader::new(&ImString::new(grab_id))
-    //                     .default_open(true)
-    //                     .build(imgui)
-    //                 {
-    //                     self.draw_log_grab(grab_id, grab_log);
-    //                 }
-    //             });
-    //         }
-    //         if imgui.scroll_y() >= imgui.scroll_max_y() {
-    //             imgui.set_scroll_here_y();
-    //         }
-    //     });
-    // }
+    fn draw_colored_bg<F>(&self, id: &str, inner: F)
+    where
+        F: FnOnce() -> (),
+    {
+        let bg = self.bg_colors();
+        ChildWindow::new(id).size([0.0, 19.0]).build(self.imgui, || {
+            inner();
+        });
+        bg.pop();
+    }
 
-    // fn draw_log_grab(&self, id: &str, grab_log: &[UiEvent]) {
-    //     let imgui = &self.imgui;
-    //     if !grab_log.is_empty() {
-    //         let mut clipper = ListClipper::new(grab_log.len() as i32).begin(imgui);
-    //         while clipper.step() {
-    //             for line in clipper.display_start()..clipper.display_end() {
-    //                 ChildWindow::new(&im_str!("{}-{}", id, line))
-    //                     .size([0.0, 19.0])
-    //                     .build(imgui, || match &grab_log[line as usize] {
-    //                         UiEvent::Error(e) => imgui.text_colored([1.0, 0.0, 0.0, 1.0], im_str!("Erreur : {}", e)),
-    //                         UiEvent::Message(msg) => imgui.text_colored([0.0, 1.0, 0.0, 1.0], msg),
-    //                         UiEvent::Download(path, progress) => {
-    //                             ProgressBar::new(*progress)
-    //                                 .overlay_text(&ImString::new(path))
-    //                                 .size([-38.0, 0.0])
-    //                                 .build(imgui);
-    //                             imgui.same_line();
-    //                             imgui.text(im_str!("{}%", (*progress * 100.0) as i32));
-    //                         }
-    //                         UiEvent::Finish => imgui.separator(),
-    //                         UiEvent::Start => unreachable!(),
-    //                     });
-    //             }
-    //         }
-    //     }
-    // }
+    fn bg_colors(&self) -> ColorStackToken {
+        const BG_DARK: [f32; 4] = [0.1, 0.1, 0.1, 1.0];
+        const BG_LIGHT: [f32; 4] = [0.15, 0.15, 0.15, 1.0];
+
+        let bg = [BG_DARK, BG_LIGHT];
+
+        let bg_count = self.bg_count.fetch_add(1, Ordering::AcqRel);
+        self.imgui
+            .push_style_color(StyleColor::ChildBg, bg[bg_count % bg.len()])
+    }
+
+    fn show_help_marker(imgui: &ImguiUi, desc: &str) {
+        imgui.same_line();
+        imgui.text_disabled(im_str!("(?)"));
+        if imgui.is_item_hovered() {
+            imgui.tooltip(|| {
+                imgui.text(desc);
+            });
+        }
+    }
 
     // Style
     fn style_colors(&self) -> Vec<ColorStackToken> {
@@ -217,6 +239,8 @@ impl<'a> Ui<'a> {
         vec![
             self.imgui.push_style_color(StyleColor::TitleBgActive, RED_ACTIVE),
             self.imgui.push_style_color(StyleColor::FrameBg, RED_BG),
+            self.imgui.push_style_color(StyleColor::FrameBgActive, RED_ACTIVE),
+            self.imgui.push_style_color(StyleColor::FrameBgHovered, RED_HOVER),
             self.imgui.push_style_color(StyleColor::TextSelectedBg, RED_ACTIVE),
             self.imgui.push_style_color(StyleColor::Button, RED),
             self.imgui.push_style_color(StyleColor::ButtonActive, RED_ACTIVE),
@@ -230,10 +254,5 @@ impl<'a> Ui<'a> {
             self.imgui
                 .push_style_color(StyleColor::PlotHistogram, [1.0, 0.62, 0.24, 1.0]), // Progress bar
         ]
-    }
-
-    // Actions
-    fn open_mass_effect_3(&self) {
-        let _ = self.event_addr.send(MainEvent::OpenMassEffect3);
     }
 }

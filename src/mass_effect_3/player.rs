@@ -1,10 +1,10 @@
 use anyhow::Result;
 
-use crate::serializer::{SaveCursor, Serializable};
+use crate::serializer::{SaveCursor, SaveData};
 
 use super::appearance::Appearance;
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Player {
     is_female: bool,
     class_name: String,
@@ -25,7 +25,7 @@ pub(super) struct Player {
     emissive_id: i32,
 }
 
-#[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 enum Origin {
     None = 0,
     Spacer = 1,
@@ -33,7 +33,7 @@ enum Origin {
     Earthborn = 3,
 }
 
-#[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 enum Notoriety {
     None = 0,
     Survivor = 1,
@@ -41,7 +41,7 @@ enum Notoriety {
     Ruthless = 3,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Power {
     name: String,
     current_rank: f32,
@@ -55,7 +55,7 @@ pub(super) struct Power {
     wheel_display_index: i32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Weapon {
     class_name: String,
     ammo_used_count: i32,
@@ -66,13 +66,13 @@ pub(super) struct Weapon {
     ammo_power_source_tag: String,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct WeaponMod {
     weapon_class_name: String,
     weapon_mod_class_names: Vec<String>,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct WeaponLoadout {
     assaul_rifle: String,
     shotgun: String,
@@ -82,7 +82,7 @@ pub(super) struct WeaponLoadout {
     heavy_weapon: String,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Hotkey {
     pawn_name: String,
     power_name: String,

@@ -10,7 +10,7 @@ lto = true
 
 [dependencies]
 # Macro
-serializable_derive = { path = "serializable_derive" }
+save_data_derive = { path = "save_data_derive" }
 # Windows
 windows = "0.7"
 bindings = { path = "bindings", package = "windows_bindings" }

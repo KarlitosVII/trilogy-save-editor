@@ -1,11 +1,11 @@
 use anyhow::Result;
 use std::fmt::Debug;
 
-use crate::serializer::{SaveCursor, Serializable};
+use crate::serializer::{SaveCursor, SaveData};
 
 pub(super) struct Guid(Vec<u8>);
 
-impl Serializable for Guid {
+impl SaveData for Guid {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         let guid = input.read(16)?.to_owned();
         Ok(Self(guid))

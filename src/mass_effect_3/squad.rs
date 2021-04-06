@@ -1,10 +1,10 @@
 use anyhow::Result;
 
-use crate::serializer::{SaveCursor, Serializable};
+use crate::serializer::{SaveCursor, SaveData};
 
 use super::player::{Power, Weapon, WeaponLoadout, WeaponMod};
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Henchman {
     tag: String,
     powers: Vec<Power>,
