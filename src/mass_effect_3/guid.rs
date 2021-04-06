@@ -1,7 +1,10 @@
 use anyhow::Result;
 use std::fmt::Debug;
 
-use crate::serializer::{SaveCursor, SaveData};
+use crate::{
+    save_data::{SaveCursor, SaveData},
+    ui::Ui,
+};
 
 pub(super) struct Guid(Vec<u8>);
 
@@ -10,6 +13,8 @@ impl SaveData for Guid {
         let guid = input.read(16)?.to_owned();
         Ok(Self(guid))
     }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
 }
 
 impl Debug for Guid {

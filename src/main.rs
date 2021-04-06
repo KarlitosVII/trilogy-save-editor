@@ -7,13 +7,11 @@ extern crate num_derive;
 extern crate save_data_derive;
 
 use anyhow::Result;
-use std::{
-    panic::{self, PanicInfo},
-};
+use std::panic::{self, PanicInfo};
 
-mod mass_effect_3;
-mod serializer;
 mod event_handler;
+mod mass_effect_3;
+mod save_data;
 mod ui;
 
 #[tokio::main]

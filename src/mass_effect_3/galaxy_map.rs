@@ -1,7 +1,3 @@
-use anyhow::Result;
-
-use crate::serializer::{SaveCursor, SaveData};
-
 #[derive(SaveData, Debug)]
 pub(super) struct GalaxyMap {
     planets: Vec<Planet>,

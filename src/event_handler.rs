@@ -4,7 +4,7 @@ use tokio::{fs::File, io::AsyncReadExt};
 
 use crate::{
     mass_effect_3::Me3SaveGame,
-    serializer::{SaveCursor, SaveData},
+    save_data::{SaveCursor, SaveData},
     ui::UiEvent,
 };
 
@@ -25,7 +25,7 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
 
                     let mut input = SaveCursor::new(input);
                     let me3_save_game = Me3SaveGame::deserialize(&mut input)?;
-                    let _ = ui_addr.send_async(UiEvent::MassEffect3(me3_save_game)).await;
+                    let _ = ui_addr.send_async(UiEvent::MassEffect3(Box::new(me3_save_game))).await;
                 }
             };
             Ok::<_, Error>(())

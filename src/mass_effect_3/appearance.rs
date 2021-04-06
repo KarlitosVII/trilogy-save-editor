@@ -1,7 +1,11 @@
 use anyhow::Result;
+use imgui::ImString;
 use std::fmt::Debug;
 
-use crate::serializer::{SaveCursor, SaveData};
+use crate::{
+    save_data::{SaveCursor, SaveData},
+    ui::Ui,
+};
 
 use super::Vector;
 
@@ -66,6 +70,8 @@ impl SaveData for Appearance {
             head_morph,
         })
     }
+
+    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &'static str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
@@ -76,8 +82,8 @@ enum PlayerAppearanceType {
 
 #[derive(SaveData, Debug)]
 struct HeadMorph {
-    hair_mesh: String,
-    accessory_mesh: Vec<String>,
+    hair_mesh: ImString,
+    accessory_mesh: Vec<ImString>,
     morph_features: Vec<MorphFeature>,
     offset_bones: Vec<OffsetBone>,
     lod0_vertices: Vec<Vector>,
@@ -91,25 +97,25 @@ struct HeadMorph {
 
 #[derive(SaveData, Debug)]
 struct MorphFeature {
-    feature: String,
+    feature: ImString,
     offset: f32,
 }
 
 #[derive(SaveData, Debug)]
 struct OffsetBone {
-    name: String,
+    name: ImString,
     offset: Vector,
 }
 
 #[derive(SaveData, Debug)]
 struct ScalarParameter {
-    name: String,
+    name: ImString,
     value: f32,
 }
 
 #[derive(SaveData, Debug)]
 struct VectorParameter {
-    name: String,
+    name: ImString,
     value: LinearColor,
 }
 
@@ -123,6 +129,6 @@ struct LinearColor {
 
 #[derive(SaveData, Debug)]
 struct TextureParameter {
-    name: String,
-    value: String,
+    name: ImString,
+    value: ImString,
 }
