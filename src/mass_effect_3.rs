@@ -1,7 +1,7 @@
 use anyhow::Result;
 use indexmap::IndexMap;
 
-use crate::serializer::{SaveCursor, Serializable};
+use crate::serializer::{SaveCursor, SaveData};
 
 mod guid;
 use guid::*;
@@ -23,7 +23,7 @@ use galaxy_map::*;
 
 mod appearance;
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub struct Me3SaveGame {
     pub version: i32,
     pub debug_name: String,
@@ -83,13 +83,13 @@ pub struct Me3SaveGame {
 #[derive(Debug)]
 struct Checksum(u32);
 
-impl Serializable for Checksum {
+impl SaveData for Checksum {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Ok(Self(Self::deserialize_from(input)?))
     }
 }
 
-#[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 pub enum Difficulty {
     Narrative = 0,
     Casual = 1,
@@ -106,13 +106,13 @@ pub enum EndGameState {
     LivedToFightAgain = 2,
 }
 
-impl Serializable for EndGameState {
+impl SaveData for EndGameState {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_enum_from_u32(input)
     }
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub struct SaveTimeStamp {
     pub seconds_since_midnight: i32,
     pub day: i32,
@@ -120,34 +120,34 @@ pub struct SaveTimeStamp {
     pub year: i32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct Vector {
     x: f32,
     y: f32,
     z: f32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct Rotation {
     pitch: i32,
     yaw: i32,
     roll: i32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct GawAsset {
     id: i32,
     strength: i32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct DependentDlc {
     id: i32,
     name: String,
     canonical_name: String,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct LevelTreasure {
     level_name: String,
     credits: i32,
@@ -156,14 +156,14 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 pub enum AutoReplyModeOptions {
     AllDecisions = 0,
     MajorDecisions = 1,
     NoDecisions = 2,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct ObjectiveMarker {
     marker_owned_data: String,
     marker_offset: Vector,
@@ -172,7 +172,7 @@ struct ObjectiveMarker {
     marker_icin_type: ObjectiveMarkerIconType,
 }
 
-#[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 enum ObjectiveMarkerIconType {
     None = 0,
     Attack = 1,

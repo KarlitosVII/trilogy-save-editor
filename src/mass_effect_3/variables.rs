@@ -2,9 +2,9 @@ use anyhow::Result;
 use indexmap::IndexMap;
 use std::fmt::Debug;
 
-use crate::serializer::{SaveCursor, Serializable};
+use crate::serializer::{SaveCursor, SaveData};
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct PlotTable {
     bool_variables: BitArray,
     int_variables: IndexMap<i32, i32>,
@@ -16,7 +16,7 @@ pub(super) struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Me1PlotTable {
     bool_variables: BitArray,
     int_variables: IndexMap<i32, i32>,
@@ -27,7 +27,7 @@ pub(super) struct Me1PlotTable {
 pub(super) struct BitArray {
     variables: Vec<bool>,
 }
-impl Serializable for BitArray {
+impl SaveData for BitArray {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         let num_bytes = Self::deserialize_from::<u32>(input)?;
 
@@ -43,7 +43,7 @@ impl Serializable for BitArray {
     }
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,
@@ -51,12 +51,12 @@ pub(super) struct PlotQuest {
     history: Vec<i32>,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct PlotCodexPage {
     page: i32,
     is_new: bool,

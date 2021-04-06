@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::fmt::Debug;
 
-use crate::serializer::{SaveCursor, Serializable};
+use crate::serializer::{SaveCursor, SaveData};
 
 use super::Vector;
 
@@ -25,7 +25,7 @@ pub(super) struct Appearance {
     head_morph: Option<HeadMorph>,
 }
 
-impl Serializable for Appearance {
+impl SaveData for Appearance {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         let combat_appearance = PlayerAppearanceType::deserialize(input)?;
         let casual_id = i32::deserialize(input)?;
@@ -68,13 +68,13 @@ impl Serializable for Appearance {
     }
 }
 
-#[derive(FromPrimitive, ToPrimitive, Serializable, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
 enum PlayerAppearanceType {
     Parts = 0,
     Full = 1,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct HeadMorph {
     hair_mesh: String,
     accessory_mesh: Vec<String>,
@@ -89,31 +89,31 @@ struct HeadMorph {
     texture_parameters: Vec<TextureParameter>,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct MorphFeature {
     feature: String,
     offset: f32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct OffsetBone {
     name: String,
     offset: Vector,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct ScalarParameter {
     name: String,
     value: f32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct VectorParameter {
     name: String,
     value: LinearColor,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct LinearColor {
     r: f32,
     g: f32,
@@ -121,7 +121,7 @@ struct LinearColor {
     a: f32,
 }
 
-#[derive(Serializable, Debug)]
+#[derive(SaveData, Debug)]
 struct TextureParameter {
     name: String,
     value: String,

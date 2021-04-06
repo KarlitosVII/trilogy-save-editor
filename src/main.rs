@@ -4,7 +4,7 @@
 #[macro_use]
 extern crate num_derive;
 #[macro_use]
-extern crate serializable_derive;
+extern crate save_data_derive;
 
 use anyhow::Result;
 use std::{

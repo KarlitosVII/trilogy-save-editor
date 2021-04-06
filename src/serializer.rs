@@ -40,7 +40,7 @@ impl SaveCursor {
     }
 }
 
-pub trait Serializable
+pub trait SaveData
 where
     Self: Sized,
 {
@@ -117,7 +117,7 @@ where
     // Array
     fn deserialize_from_array<D>(input: &mut SaveCursor) -> Result<Vec<D>>
     where
-        D: Serializable,
+        D: SaveData,
     {
         let len = Self::deserialize_from::<u32>(input)?;
         let mut vec = Vec::with_capacity(len as usize);
@@ -135,8 +135,8 @@ where
     // IndexMap
     fn deserialize_from_indexmap<K, V>(input: &mut SaveCursor) -> Result<IndexMap<K, V>>
     where
-        K: Serializable + Eq + Hash,
-        V: Serializable,
+        K: SaveData + Eq + Hash,
+        V: SaveData,
     {
         let len = Self::deserialize_from::<u32>(input)?;
         let mut map = IndexMap::with_capacity(len as usize);
@@ -153,55 +153,55 @@ where
 }
 
 // Implémentation des types std
-impl Serializable for bool {
+impl SaveData for bool {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_bool(input)
     }
 }
 
-impl Serializable for i8 {
+impl SaveData for i8 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(input)
     }
 }
 
-impl Serializable for u32 {
+impl SaveData for u32 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(input)
     }
 }
 
-impl Serializable for i32 {
+impl SaveData for i32 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(input)
     }
 }
 
-impl Serializable for f32 {
+impl SaveData for f32 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(input)
     }
 }
 
-impl Serializable for String {
+impl SaveData for String {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_string(input)
     }
 }
 
-impl<D> Serializable for Vec<D>
+impl<D> SaveData for Vec<D>
 where
-    D: Serializable,
+    D: SaveData,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_array(input)
     }
 }
 
-impl<K, V> Serializable for IndexMap<K, V>
+impl<K, V> SaveData for IndexMap<K, V>
 where
-    K: Serializable + Eq + Hash,
-    V: Serializable,
+    K: SaveData + Eq + Hash,
+    V: SaveData,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_indexmap(input)
