@@ -45,7 +45,12 @@ impl SaveData for BitArray {
         Ok(Self { variables })
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        ui.draw_bitarray(ident, self.variables.len(), |i| {
+            let ident = i.to_string();
+            self.variables[i].draw_raw_ui(ui, &ident);
+        });
+    }
 }
 
 #[derive(SaveData, Debug)]

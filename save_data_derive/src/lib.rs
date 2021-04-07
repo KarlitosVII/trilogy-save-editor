@@ -27,12 +27,30 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let name = &ast.ident;
 
-    let deserialize_fields = fields.iter().map(|f| {
+    let deserialize_lets = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_type = &f.ty;
 
+        // Exception
+        if field_name.as_ref().unwrap() == "head_morph" {
+            quote! {
+                let head_morph = match has_head_morph {
+                    true => Some(<crate::mass_effect_3::appearance::HeadMorph as crate::save_data::SaveData>::deserialize(input)?),
+                    false => None,
+                };
+            }
+        } else {
+            quote! {
+                let #field_name = <#field_type as crate::save_data::SaveData>::deserialize(input)?;
+            }
+        }
+    });
+
+    let deserialize_fields = fields.iter().map(|f| {
+        let field_name = &f.ident;
+
         quote! {
-            #field_name: <#field_type as crate::save_data::SaveData>::deserialize(input)?
+            #field_name
         }
     });
 
@@ -48,6 +66,8 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
     let gen = quote! {
         impl crate::save_data::SaveData for #name {
             fn deserialize(input: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
+                #(#deserialize_lets)*
+
                 Ok(Self {
                     #(#deserialize_fields),*
                 })

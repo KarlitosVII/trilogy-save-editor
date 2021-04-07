@@ -14,9 +14,7 @@ impl SaveData for Guid {
         Ok(Self(guid))
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {
-        //TODO: Guid
-    }
+    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
 impl Debug for Guid {

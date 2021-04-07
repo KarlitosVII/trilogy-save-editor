@@ -3,7 +3,7 @@ use imgui::ImString;
 use indexmap::IndexMap;
 
 use crate::{
-    save_data::{SaveCursor, SaveData},
+    save_data::{Dummy, SaveCursor, SaveData},
     ui::Ui,
 };
 
@@ -27,9 +27,9 @@ mod appearance;
 #[derive(SaveData, Debug)]
 pub struct Me3SaveGame {
     version: i32,
-    debug_name: Vec<u8>,
+    debug_name: Vec<Dummy<1>>,
     seconds_played: f32,
-    disc: [u8; 4],
+    disc: Dummy<4>,
     base_level_name: ImString,
     base_level_name_display_override_as_read: ImString,
     difficulty: Difficulty,
@@ -37,13 +37,13 @@ pub struct Me3SaveGame {
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotation,
-    current_loading_tip: [u8; 4],
+    current_loading_tip: Dummy<4>,
     levels: Vec<Level>,
     streaming_records: Vec<StreamingRecord>,
-    kismet_records: Vec<[u8; 20]>,
-    doors: Vec<[u8; 18]>,
-    placeables: Vec<[u8; 18]>,
-    pawns: Vec<[u8; 16]>,
+    kismet_records: Vec<Dummy<20>>,
+    doors: Vec<Dummy<18>>,
+    placeables: Vec<Dummy<18>>,
+    pawns: Vec<Dummy<16>>,
     player: Player,
     powers: Vec<Power>,
     gaw_assets: Vec<GawAsset>,
@@ -74,10 +74,10 @@ pub struct Me3SaveGame {
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
-    use_modules: Vec<[u8; 16]>,
+    use_modules: Vec<Dummy<16>>,
     conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
-    saved_objective_text: [u8; 4],
+    saved_objective_text: Dummy<4>,
     checksum: Checksum,
 }
 
@@ -89,7 +89,7 @@ impl SaveData for Checksum {
         Ok(Self(Self::deserialize_from(input)?))
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
+    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]

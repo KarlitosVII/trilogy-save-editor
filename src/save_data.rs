@@ -9,7 +9,7 @@ use indexmap::IndexMap;
 use lazy_static::lazy_static;
 use num_traits::FromPrimitive;
 use serde::Deserialize;
-use std::{hash::Hash, mem::size_of, usize};
+use std::{any::type_name, fmt::Display, hash::Hash, mem::size_of, usize};
 
 use crate::ui::Ui;
 
@@ -40,6 +40,8 @@ impl SaveCursor {
         Ok(slice)
     }
 }
+
+pub type Dummy<const LEN: usize> = [u8; LEN];
 
 pub trait SaveData
 where
@@ -153,9 +155,9 @@ where
 }
 
 // Implémentation des dummy
-impl<const LENGTH: usize> SaveData for [u8; LENGTH] {
+impl<const LEN: usize> SaveData for Dummy<LEN> {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        let mut array = [0; LENGTH];
+        let mut array = [0; LEN];
         for byte in array.iter_mut() {
             *byte = Self::deserialize_from(input)?
         }
@@ -186,22 +188,6 @@ impl SaveData for f32 {
     }
 }
 
-macro_rules! impl_save_data {
-    ($type:ty) => {
-        impl SaveData for $type {
-            fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-                Self::deserialize_from(input)
-            }
-
-            fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
-        }
-    };
-}
-
-impl_save_data!(u8);
-impl_save_data!(i8);
-impl_save_data!(u32);
-
 impl SaveData for bool {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_bool(input)
@@ -222,16 +208,36 @@ impl SaveData for ImString {
     }
 }
 
-impl<D> SaveData for Vec<D>
+impl<T> SaveData for Option<T>
 where
-    D: SaveData,
+    T: SaveData,
+{
+    fn deserialize(_: &mut SaveCursor) -> Result<Self> {
+        unreachable!();
+    }
+
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        if let Some(this) = self {
+            this.draw_raw_ui(ui, ident);
+        }
+    }
+}
+
+impl<T> SaveData for Vec<T>
+where
+    T: SaveData,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_array(input)
     }
 
     fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
-        ui.draw_vec(ident, self.len(), |i|{
+        // Ignore Dummy
+        if type_name::<T>().contains("[u8; ") {
+            return;
+        }
+
+        ui.draw_vec(ident, self.len(), |i| {
             let ident = i.to_string();
             self[i].draw_raw_ui(ui, &ident);
         });
@@ -240,12 +246,19 @@ where
 
 impl<K, V> SaveData for IndexMap<K, V>
 where
-    K: SaveData + Eq + Hash,
+    K: SaveData + Eq + Hash + Display,
     V: SaveData,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_indexmap(input)
     }
 
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        ui.draw_hashmap(ident, self.len(), |i| {
+            if let Some((key, value)) = self.get_index_mut(i) {
+                key.draw_raw_ui(ui, "##k");
+                value.draw_raw_ui(ui, "##v");
+            }
+        });
+    }
 }
