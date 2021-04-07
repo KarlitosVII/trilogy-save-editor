@@ -1,8 +1,11 @@
 extern crate proc_macro;
 
-use proc_macro::{TokenStream};
+use proc_macro::TokenStream;
 use quote::quote;
-use syn::{self, DeriveInput, Fields, Ident, Variant, __private::Span, parse_macro_input, punctuated::Punctuated, token::Comma};
+use syn::{
+    self, DeriveInput, Fields, Ident, Variant, __private::Span, parse_macro_input,
+    punctuated::Punctuated, token::Comma,
+};
 
 #[proc_macro_derive(SaveData)]
 pub fn save_data_derive(input: TokenStream) -> TokenStream {
@@ -24,30 +27,12 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let name = &ast.ident;
 
-    let deserialize_lets = fields.iter().map(|f| {
+    let deserialize_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_type = &f.ty;
 
-        // Exception
-        if field_name.as_ref().unwrap() == "head_morph" {
-            quote! {
-                let head_morph = match has_head_morph {
-                    true => Some(<crate::mass_effect_3::appearance::HeadMorph as crate::save_data::SaveData>::deserialize(input)?),
-                    false => None,
-                };
-            }
-        } else {
-            quote! {
-                let #field_name = <#field_type as crate::save_data::SaveData>::deserialize(input)?;
-            }
-        }
-    });
-
-    let deserialize_fields = fields.iter().map(|f| {
-        let field_name = &f.ident;
-
         quote! {
-            #field_name
+            #field_name: <#field_type as crate::save_data::SaveData>::deserialize(input)?
         }
     });
 
@@ -63,8 +48,6 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
     let gen = quote! {
         impl crate::save_data::SaveData for #name {
             fn deserialize(input: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
-                #(#deserialize_lets)*
-
                 Ok(Self {
                     #(#deserialize_fields),*
                 })

@@ -31,13 +31,22 @@ impl SaveCursor {
     pub fn read(&mut self, num_bytes: usize) -> Result<&[u8]> {
         let end = self.position + num_bytes;
         if self.bytes.len() < end {
-            bail!("unexpected end of file");
+            bail!("Unexpected end of file");
         }
 
         let slice = &self.bytes[self.position..end];
         self.position = end;
 
         Ok(slice)
+    }
+
+    pub fn rshift_position(&mut self, shift: usize) -> Result<()> {
+        if self.position < shift {
+            bail!("Position can't be negative");
+        }
+
+        self.position -= shift;
+        Ok(())
     }
 }
 
@@ -95,7 +104,7 @@ where
 
             let (decoded, _, had_errors) = UTF_16LE.decode(&bytes);
             if had_errors {
-                bail!("string encoding error");
+                bail!("String encoding error");
             }
 
             ImString::new(decoded)
@@ -107,7 +116,7 @@ where
 
             let (decoded, _, had_errors) = WINDOWS_1252.decode(&bytes);
             if had_errors {
-                bail!("string encoding error");
+                bail!("String encoding error");
             }
 
             ImString::new(decoded)
@@ -212,13 +221,21 @@ impl<T> SaveData for Option<T>
 where
     T: SaveData,
 {
-    fn deserialize(_: &mut SaveCursor) -> Result<Self> {
-        unreachable!();
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        input.rshift_position(4)?;
+        let is_some = Self::deserialize_from_bool(input)?;
+
+        let inner = match is_some {
+            true => Some(T::deserialize(input)?),
+            false => None,
+        };
+
+        Ok(inner)
     }
 
     fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
-        if let Some(this) = self {
-            this.draw_raw_ui(ui, ident);
+        if let Some(inner) = self {
+            inner.draw_raw_ui(ui, ident);
         }
     }
 }
