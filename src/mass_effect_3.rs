@@ -7,9 +7,6 @@ use crate::{
     ui::Ui,
 };
 
-mod guid;
-use guid::*;
-
 mod player;
 use player::*;
 
@@ -66,7 +63,7 @@ pub struct Me3SaveGame {
     grenades: i32,
     face_code: ImString,
     class_friendly_name: i32,
-    character_guid: Guid,
+    character_guid: Dummy<16>,
     henchmen: Vec<Henchman>,
     plot: PlotTable,
     me1_plot: Me1PlotTable,
