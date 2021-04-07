@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, bail};
 use imgui::ImString;
 use indexmap::IndexMap;
 
@@ -26,7 +26,7 @@ mod appearance;
 
 #[derive(SaveData)]
 pub struct Me3SaveGame {
-    version: i32,
+    version: Version,
     debug_name: Vec<Dummy<1>>,
     seconds_played: f32,
     disc: Dummy<4>,
@@ -79,6 +79,22 @@ pub struct Me3SaveGame {
     objectice_markers: Vec<ObjectiveMarker>,
     saved_objective_text: Dummy<4>,
     checksum: Checksum,
+}
+
+struct Version(i32);
+
+impl SaveData for Version {
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        let version = Self::deserialize_from(input)?;
+
+        if version != 59 {
+            bail!("Wrong save version, please use a save from the last version of the game")
+        }
+
+        Ok(Self(version))
+    }
+
+    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
 struct Checksum(u32);
