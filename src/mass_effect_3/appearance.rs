@@ -1,15 +1,12 @@
-use anyhow::Result;
 use imgui::ImString;
 use std::fmt::Debug;
+use anyhow::Result;
 
-use crate::{
-    save_data::{SaveCursor, SaveData},
-    ui::Ui,
-};
+use crate::{save_data::{SaveCursor, SaveData}, ui::Ui};
 
 use super::Vector;
 
-#[derive(Debug)]
+#[derive(SaveData, Debug)]
 pub(super) struct Appearance {
     combat_appearance: PlayerAppearanceType,
     casual_id: i32,
@@ -27,51 +24,6 @@ pub(super) struct Appearance {
     helmet_id: i32,
     has_head_morph: bool,
     head_morph: Option<HeadMorph>,
-}
-
-impl SaveData for Appearance {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        let combat_appearance = PlayerAppearanceType::deserialize(input)?;
-        let casual_id = i32::deserialize(input)?;
-        let full_body_id = i32::deserialize(input)?;
-        let torso_id = i32::deserialize(input)?;
-        let shoulder_id = i32::deserialize(input)?;
-        let arm_id = i32::deserialize(input)?;
-        let leg_id = i32::deserialize(input)?;
-        let specular_id = i32::deserialize(input)?;
-        let tint1_id = i32::deserialize(input)?;
-        let tint2_id = i32::deserialize(input)?;
-        let tint3_id = i32::deserialize(input)?;
-        let pattern_id = i32::deserialize(input)?;
-        let pattern_color_id = i32::deserialize(input)?;
-        let helmet_id = i32::deserialize(input)?;
-        let has_head_morph = bool::deserialize(input)?;
-        let head_morph = match has_head_morph {
-            true => Some(HeadMorph::deserialize(input)?),
-            false => None,
-        };
-
-        Ok(Self {
-            combat_appearance,
-            casual_id,
-            full_body_id,
-            torso_id,
-            shoulder_id,
-            arm_id,
-            leg_id,
-            specular_id,
-            tint1_id,
-            tint2_id,
-            tint3_id,
-            pattern_id,
-            pattern_color_id,
-            helmet_id,
-            has_head_morph,
-            head_morph,
-        })
-    }
-
-    fn draw_raw_ui(&mut self, _ui: &Ui, _ident: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
@@ -119,12 +71,24 @@ struct VectorParameter {
     value: LinearColor,
 }
 
-#[derive(SaveData, Debug)]
-struct LinearColor {
-    r: f32,
-    g: f32,
-    b: f32,
-    a: f32,
+#[derive(Debug)]
+struct LinearColor (
+    [f32; 4]
+);
+
+impl SaveData for LinearColor {
+    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+        Ok(Self ([
+            SaveData::deserialize(input)?,
+            SaveData::deserialize(input)?,
+            SaveData::deserialize(input)?,
+            SaveData::deserialize(input)?,
+        ]))
+    }
+
+    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+        ui.draw_edit_color(ident, &mut self.0);
+    }
 }
 
 #[derive(SaveData, Debug)]

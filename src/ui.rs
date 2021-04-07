@@ -183,6 +183,16 @@ impl<'a> Ui<'a> {
         });
     }
 
+    pub fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
+        let imgui = self.imgui;
+
+        self.draw_colored_bg(ident, || {
+            let width = imgui.push_item_width(200.0);
+            ColorEdit::new(&ImString::new(ident), color).build(imgui);
+            width.pop(imgui);
+        });
+    }
+
     // View widgets
     pub fn draw_struct<F>(&self, ident: &str, fields: F)
     where
@@ -197,13 +207,46 @@ impl<'a> Ui<'a> {
     {
         TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
             if len != 0 {
-                // let mut clipper = ListClipper::new(len as i32).begin(imgui);
-                // while clipper.step() {
-                //     for i in clipper.display_start()..clipper.display_end() {
-                    for i in 0..len {
+                for i in 0..len {
+                    items(i as usize);
+                }
+            } else {
+                self.imgui.text("Empty");
+            }
+        });
+    }
+
+    pub fn draw_bitarray<F>(&self, ident: &str, len: usize, mut items: F)
+    where
+        F: FnMut(usize),
+    {
+        TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
+            if len != 0 {
+                let mut clipper = ListClipper::new(len as i32).begin(self.imgui);
+                while clipper.step() {
+                    for i in clipper.display_start()..clipper.display_end() {
                         items(i as usize);
                     }
-                // }
+                }
+            } else {
+                self.imgui.text("Empty");
+            }
+        });
+    }
+
+    pub fn draw_hashmap<F>(&self, ident: &str, len: usize, mut items: F)
+    where
+        F: FnMut(usize),
+    {
+        TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
+            if len != 0 {
+                for i in 0..len {
+                    TreeNode::new(&ImString::new(i.to_string())).build(self.imgui, || {
+                        items(i as usize);
+                    });
+                }
+            } else {
+                self.imgui.text("Empty");
             }
         });
     }
@@ -254,6 +297,7 @@ impl<'a> Ui<'a> {
             self.imgui.push_style_color(StyleColor::Header, theme.bg_color),
             self.imgui.push_style_color(StyleColor::HeaderActive, theme.active_color),
             self.imgui.push_style_color(StyleColor::HeaderHovered, theme.hover_color),
+            self.imgui.push_style_color(StyleColor::CheckMark, [1.0, 1.0, 1.0, 1.0]),
         ]
     }
 }
