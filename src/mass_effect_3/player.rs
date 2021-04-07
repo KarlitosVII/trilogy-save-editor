@@ -2,7 +2,7 @@ use imgui::ImString;
 
 use super::appearance::Appearance;
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 pub(super) struct Player {
     is_female: bool,
     class_name: ImString,
@@ -23,7 +23,7 @@ pub(super) struct Player {
     emissive_id: i32,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum Origin {
     None = 0,
     Spacer = 1,
@@ -31,7 +31,7 @@ enum Origin {
     Earthborn = 3,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum Notoriety {
     None = 0,
     Survivor = 1,
@@ -39,7 +39,7 @@ enum Notoriety {
     Ruthless = 3,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct Power {
     name: ImString,
     current_rank: f32,
@@ -53,7 +53,7 @@ pub(super) struct Power {
     wheel_display_index: i32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct Weapon {
     class_name: ImString,
     ammo_used_count: i32,
@@ -64,13 +64,13 @@ pub(super) struct Weapon {
     ammo_power_source_tag: ImString,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct WeaponMod {
     weapon_class_name: ImString,
     weapon_mod_class_names: Vec<ImString>,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct WeaponLoadout {
     assaul_rifle: ImString,
     shotgun: ImString,
@@ -80,7 +80,7 @@ pub(super) struct WeaponLoadout {
     heavy_weapon: ImString,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct Hotkey {
     pawn_name: ImString,
     power_name: ImString,

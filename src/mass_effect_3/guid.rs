@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::fmt::Debug;
 
 use crate::{
     save_data::{SaveCursor, SaveData},
@@ -15,14 +14,4 @@ impl SaveData for Guid {
     }
 
     fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
-}
-
-impl Debug for Guid {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut string = String::new();
-        for b in self.0.iter() {
-            string += &format!("{:2x}", b);
-        }
-        f.write_str(&string)
-    }
 }

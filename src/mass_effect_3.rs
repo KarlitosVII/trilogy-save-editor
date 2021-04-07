@@ -16,7 +16,7 @@ use player::*;
 mod squad;
 use squad::*;
 
-mod variables;
+pub mod variables;
 use variables::*;
 
 mod galaxy_map;
@@ -24,7 +24,7 @@ use galaxy_map::*;
 
 mod appearance;
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 pub struct Me3SaveGame {
     version: i32,
     debug_name: Vec<Dummy<1>>,
@@ -81,7 +81,6 @@ pub struct Me3SaveGame {
     checksum: Checksum,
 }
 
-#[derive(Debug)]
 struct Checksum(u32);
 
 impl SaveData for Checksum {
@@ -92,7 +91,7 @@ impl SaveData for Checksum {
     fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum Difficulty {
     Narrative = 0,
     Casual = 1,
@@ -102,14 +101,14 @@ enum Difficulty {
     WhatIsBeyondInsanity = 5,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum EndGameState {
     NotFinished = 0,
     OutInABlazeOfGlory = 1,
     LivedToFightAgain = 2,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 struct SaveTimeStamp {
     seconds_since_midnight: i32,
     day: i32,
@@ -117,47 +116,47 @@ struct SaveTimeStamp {
     year: i32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct Vector {
     x: f32,
     y: f32,
     z: f32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 struct Rotation {
     pitch: i32,
     yaw: i32,
     roll: i32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct Level {
     name: ImString,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct StreamingRecord {
     name: ImString,
     is_active: bool,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct GawAsset {
     id: i32,
     strength: i32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct DependentDlc {
     id: i32,
     name: ImString,
     canonical_name: ImString,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct LevelTreasure {
     level_name: ImString,
     credits: i32,
@@ -166,14 +165,14 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum AutoReplyModeOptions {
     AllDecisions = 0,
     MajorDecisions = 1,
     NoDecisions = 2,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct ObjectiveMarker {
     marker_owned_data: ImString,
     marker_offset: Vector,
@@ -182,10 +181,16 @@ struct ObjectiveMarker {
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum ObjectiveMarkerIconType {
     None = 0,
     Attack = 1,
     Supply = 2,
     Alert = 3,
+}
+
+impl Default for ObjectiveMarkerIconType {
+    fn default() -> Self {
+        ObjectiveMarkerIconType::None
+    }
 }

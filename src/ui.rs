@@ -1,7 +1,11 @@
 use anyhow::Error;
 use flume::{Receiver, Sender};
 use imgui::{Ui as ImguiUi, *};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use indexmap::IndexMap;
+use std::{
+    hash::Hash,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame, save_data::SaveData};
 
@@ -201,31 +205,51 @@ impl<'a> Ui<'a> {
         TreeNode::new(&ImString::new(ident)).build(self.imgui, fields);
     }
 
-    pub fn draw_vec<F>(&self, ident: &str, len: usize, mut items: F)
+    pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
     where
-        F: FnMut(usize),
+        T: SaveData + Default,
     {
-        TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
-            if len != 0 {
-                for i in 0..len {
-                    items(i as usize);
+        let imgui = self.imgui;
+
+        TreeNode::new(&ImString::new(ident)).build(imgui, || {
+            if !list.is_empty() {
+                // Item
+                let mut remove = None;
+                for (i, item) in list.iter_mut().enumerate() {
+                    if imgui.small_button(&im_str!("remove##x-{}", i)) {
+                        remove = Some(i);
+                    }
+                    imgui.same_line();
+                    item.draw_raw_ui(self, &i.to_string());
+                }
+
+                // Remove
+                if let Some(i) = remove {
+                    list.remove(i);
+                }
+
+                // Add
+                if imgui.button(&im_str!("add##add-{}", ident)) {
+                    // Ça ouvre automatiquement le tree node de l'élément ajouté
+                    TreeNode::new(&ImString::new(&list.len().to_string()))
+                        .opened(true, Condition::Always)
+                        .build(imgui, || {});
+
+                    list.push(T::default());
                 }
             } else {
-                self.imgui.text("Empty");
+                imgui.text("Empty");
             }
         });
     }
 
-    pub fn draw_bitarray<F>(&self, ident: &str, len: usize, mut items: F)
-    where
-        F: FnMut(usize),
-    {
+    pub fn draw_bitarray(&self, ident: &str, list: &mut Vec<bool>) {
         TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
-            if len != 0 {
-                let mut clipper = ListClipper::new(len as i32).begin(self.imgui);
+            if !list.is_empty() {
+                let mut clipper = ListClipper::new(list.len() as i32).begin(self.imgui);
                 while clipper.step() {
                     for i in clipper.display_start()..clipper.display_end() {
-                        items(i as usize);
+                        list[i as usize].draw_raw_ui(self, &i.to_string());
                     }
                 }
             } else {
@@ -234,19 +258,48 @@ impl<'a> Ui<'a> {
         });
     }
 
-    pub fn draw_hashmap<F>(&self, ident: &str, len: usize, mut items: F)
+    pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
     where
-        F: FnMut(usize),
+        K: SaveData + Eq + Hash + Default,
+        V: SaveData + Default,
     {
-        TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
-            if len != 0 {
-                for i in 0..len {
-                    TreeNode::new(&ImString::new(i.to_string())).build(self.imgui, || {
-                        items(i as usize);
+        let imgui = self.imgui;
+
+        TreeNode::new(&ImString::new(ident)).build(imgui, || {
+            if !list.is_empty() {
+                // Item
+                let mut remove = None;
+                for i in 0..list.len() {
+                    if imgui.small_button(&im_str!("remove##x-{}", i)) {
+                        remove = Some(i);
+                    }
+                    imgui.same_line();
+
+                    TreeNode::new(&ImString::new(i.to_string())).build(imgui, || {
+                        if let Some((key, value)) = list.get_index_mut(i) {
+                            key.draw_raw_ui(self, "##k");
+                            value.draw_raw_ui(self, "##v");
+                        }
                     });
                 }
+
+                // Remove
+                if let Some(i) = remove {
+                    list.shift_remove_index(i);
+                }
+
+                // Add
+                if imgui.button(&im_str!("add##add-{}", ident)) {
+                    // Ça ouvre automatiquement le tree node de l'élément ajouté
+                    TreeNode::new(&ImString::new(&list.len().to_string()))
+                        .opened(true, Condition::Always)
+                        .build(imgui, || {});
+
+                    // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
+                    list.entry(K::default()).or_default();
+                }
             } else {
-                self.imgui.text("Empty");
+                imgui.text("Empty");
             }
         });
     }

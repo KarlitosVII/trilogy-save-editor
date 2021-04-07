@@ -1,11 +1,8 @@
 extern crate proc_macro;
 
-use proc_macro::TokenStream;
+use proc_macro::{TokenStream};
 use quote::quote;
-use syn::{
-    self, DeriveInput, Fields, Ident, Variant, __private::Span, parse_macro_input,
-    punctuated::Punctuated, token::Comma,
-};
+use syn::{self, DeriveInput, Fields, Ident, Variant, __private::Span, parse_macro_input, punctuated::Punctuated, token::Comma};
 
 #[proc_macro_derive(SaveData)]
 pub fn save_data_derive(input: TokenStream) -> TokenStream {

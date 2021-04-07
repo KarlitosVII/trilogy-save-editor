@@ -1,13 +1,12 @@
 use anyhow::Result;
 use indexmap::IndexMap;
-use std::fmt::Debug;
 
 use crate::{
     save_data::{SaveCursor, SaveData},
     ui::Ui,
 };
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 pub(super) struct PlotTable {
     bool_variables: BitArray,
     int_variables: IndexMap<i32, i32>,
@@ -19,15 +18,14 @@ pub(super) struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 pub(super) struct Me1PlotTable {
     bool_variables: BitArray,
     int_variables: IndexMap<i32, i32>,
     float_variables: IndexMap<i32, f32>,
 }
 
-#[derive(Debug)]
-pub(super) struct BitArray {
+pub struct BitArray {
     variables: Vec<bool>,
 }
 impl SaveData for BitArray {
@@ -46,14 +44,11 @@ impl SaveData for BitArray {
     }
 
     fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
-        ui.draw_bitarray(ident, self.variables.len(), |i| {
-            let ident = i.to_string();
-            self.variables[i].draw_raw_ui(ui, &ident);
-        });
+        ui.draw_bitarray(ident, &mut self.variables);
     }
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,
@@ -61,12 +56,12 @@ pub(super) struct PlotQuest {
     history: Vec<i32>,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct PlotCodexPage {
     page: i32,
     is_new: bool,
