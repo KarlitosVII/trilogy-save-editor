@@ -50,8 +50,6 @@ impl SaveCursor {
     }
 }
 
-pub type Dummy<const LEN: usize> = [u8; LEN];
-
 pub trait SaveData
 where
     Self: Sized,
@@ -164,6 +162,8 @@ where
 }
 
 // Implémentation des dummy
+pub type Dummy<const LEN: usize> = [u8; LEN];
+
 impl<const LEN: usize> SaveData for Dummy<LEN> {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         let mut array = [0; LEN];

@@ -25,18 +25,18 @@ pub(super) struct Player {
 
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum Origin {
-    None = 0,
-    Spacer = 1,
-    Colony = 2,
-    Earthborn = 3,
+    None,
+    Spacer,
+    Colony,
+    Earthborn,
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum Notoriety {
-    None = 0,
-    Survivor = 1,
-    Warhero = 2,
-    Ruthless = 3,
+    None,
+    Survivor,
+    Warhero,
+    Ruthless,
 }
 
 #[derive(SaveData, Default)]

@@ -106,19 +106,19 @@ impl SaveData for Checksum {
 
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum Difficulty {
-    Narrative = 0,
-    Casual = 1,
-    Normal = 2,
-    Hardcore = 3,
-    Insanity = 4,
-    WhatIsBeyondInsanity = 5,
+    Narrative,
+    Casual,
+    Normal,
+    Hardcore,
+    Insanity,
+    WhatIsBeyondInsanity,
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum EndGameState {
-    NotFinished = 0,
-    OutInABlazeOfGlory = 1,
-    LivedToFightAgain = 2,
+    NotFinished,
+    OutInABlazeOfGlory,
+    LivedToFightAgain,
 }
 
 #[derive(SaveData)]
@@ -180,9 +180,9 @@ struct LevelTreasure {
 #[allow(clippy::enum_variant_names)]
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum AutoReplyModeOptions {
-    AllDecisions = 0,
-    MajorDecisions = 1,
-    NoDecisions = 2,
+    AllDecisions,
+    MajorDecisions,
+    NoDecisions,
 }
 
 #[derive(SaveData, Default)]
@@ -196,10 +196,10 @@ struct ObjectiveMarker {
 
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum ObjectiveMarkerIconType {
-    None = 0,
-    Attack = 1,
-    Supply = 2,
-    Alert = 3,
+    None,
+    Attack,
+    Supply,
+    Alert,
 }
 
 impl Default for ObjectiveMarkerIconType {

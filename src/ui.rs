@@ -6,6 +6,7 @@ use std::{
     hash::Hash,
     sync::atomic::{AtomicUsize, Ordering},
 };
+use wfd::DialogParams;
 
 use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame, save_data::SaveData};
 
@@ -88,7 +89,7 @@ impl<'a> Ui<'a> {
             // Main menu bar
             if let Some(menu_bar) = imgui.begin_menu_bar() {
                 if imgui.button(im_str!("Open")) {
-                    let _ = self.event_addr.send(MainEvent::OpenMassEffect3);
+                    self.open_save();
                 }
                 menu_bar.end();
             }
@@ -352,6 +353,19 @@ impl<'a> Ui<'a> {
             self.imgui.push_style_color(StyleColor::HeaderHovered, theme.hover_color),
             self.imgui.push_style_color(StyleColor::CheckMark, [1.0, 1.0, 1.0, 1.0]),
         ]
+    }
+
+    // Actions
+    fn open_save(&self) {
+        let result = wfd::open_dialog(DialogParams {
+            default_extension: "pcsav",
+            file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
+            ..Default::default()
+        });
+
+        if let Ok(result) = result {
+            let _ = self.event_addr.send(MainEvent::OpenSave(result.selected_file_path));
+        }
     }
 }
 
