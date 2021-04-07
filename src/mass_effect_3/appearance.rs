@@ -1,12 +1,14 @@
-use imgui::ImString;
-use std::fmt::Debug;
 use anyhow::Result;
+use imgui::ImString;
 
-use crate::{save_data::{SaveCursor, SaveData}, ui::Ui};
+use crate::{
+    save_data::{SaveCursor, SaveData},
+    ui::Ui,
+};
 
 use super::Vector;
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 pub(super) struct Appearance {
     combat_appearance: PlayerAppearanceType,
     casual_id: i32,
@@ -26,13 +28,13 @@ pub(super) struct Appearance {
     head_morph: Option<HeadMorph>,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Debug)]
+#[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum PlayerAppearanceType {
     Parts = 0,
     Full = 1,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData)]
 struct HeadMorph {
     hair_mesh: ImString,
     accessory_mesh: Vec<ImString>,
@@ -47,38 +49,36 @@ struct HeadMorph {
     texture_parameters: Vec<TextureParameter>,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct MorphFeature {
     feature: ImString,
     offset: f32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct OffsetBone {
     name: ImString,
     offset: Vector,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct ScalarParameter {
     name: ImString,
     value: f32,
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct VectorParameter {
     name: ImString,
     value: LinearColor,
 }
 
-#[derive(Debug)]
-struct LinearColor (
-    [f32; 4]
-);
+#[derive(Default)]
+struct LinearColor([f32; 4]);
 
 impl SaveData for LinearColor {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Ok(Self ([
+        Ok(Self([
             SaveData::deserialize(input)?,
             SaveData::deserialize(input)?,
             SaveData::deserialize(input)?,
@@ -91,7 +91,7 @@ impl SaveData for LinearColor {
     }
 }
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 struct TextureParameter {
     name: ImString,
     value: ImString,

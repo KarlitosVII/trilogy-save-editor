@@ -9,7 +9,7 @@ use indexmap::IndexMap;
 use lazy_static::lazy_static;
 use num_traits::FromPrimitive;
 use serde::Deserialize;
-use std::{any::type_name, fmt::Display, hash::Hash, mem::size_of, usize};
+use std::{any::type_name, hash::Hash, mem::size_of, usize};
 
 use crate::ui::Ui;
 
@@ -225,7 +225,7 @@ where
 
 impl<T> SaveData for Vec<T>
 where
-    T: SaveData,
+    T: SaveData + Default,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_array(input)
@@ -237,28 +237,20 @@ where
             return;
         }
 
-        ui.draw_vec(ident, self.len(), |i| {
-            let ident = i.to_string();
-            self[i].draw_raw_ui(ui, &ident);
-        });
+        ui.draw_vec(ident, self);
     }
 }
 
 impl<K, V> SaveData for IndexMap<K, V>
 where
-    K: SaveData + Eq + Hash + Display,
-    V: SaveData,
+    K: SaveData + Eq + Hash + Default,
+    V: SaveData + Default,
 {
     fn deserialize(input: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_indexmap(input)
     }
 
     fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
-        ui.draw_hashmap(ident, self.len(), |i| {
-            if let Some((key, value)) = self.get_index_mut(i) {
-                key.draw_raw_ui(ui, "##k");
-                value.draw_raw_ui(ui, "##v");
-            }
-        });
+        ui.draw_indexmap(ident, self);
     }
 }

@@ -2,7 +2,7 @@ use imgui::ImString;
 
 use super::player::{Power, Weapon, WeaponLoadout, WeaponMod};
 
-#[derive(SaveData, Debug)]
+#[derive(SaveData, Default)]
 pub(super) struct Henchman {
     tag: ImString,
     powers: Vec<Power>,
