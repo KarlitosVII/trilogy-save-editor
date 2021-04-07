@@ -52,13 +52,12 @@ fn panic_hook(info: &PanicInfo<'_>) {
 }
 
 mod console {
-    use bindings::Windows::Win32::SystemServices::{AllocConsole, AttachConsole};
+    use winapi::{shared::minwindef::FALSE, um::{consoleapi::AllocConsole, wincon::{ATTACH_PARENT_PROCESS, AttachConsole}}};
 
     #[allow(clippy::missing_safety_doc)]
     pub fn attach() {
         unsafe {
-            // u32::MAX = DWORD(-1) soit ATTACH_PARENT_PROCESS
-            if !AttachConsole(u32::MAX).as_bool() {
+            if AttachConsole(ATTACH_PARENT_PROCESS) == FALSE {
                 AllocConsole();
             }
         }

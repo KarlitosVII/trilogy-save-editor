@@ -12,8 +12,8 @@ lto = true
 # Macro
 save_data_derive = { path = "save_data_derive" }
 # Windows
-windows = "0.7"
-bindings = { path = "bindings", package = "windows_bindings" }
+winapi = { version = "0.3", features = ["consoleapi", "wincon"] }
+wfd = "0.1"
 # Std-like
 anyhow = "1.0"
 indexmap = { version = "1.6", features = ["std"], default-features = false }

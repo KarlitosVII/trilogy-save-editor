@@ -30,8 +30,8 @@ pub(super) struct Appearance {
 
 #[derive(FromPrimitive, ToPrimitive, SaveData)]
 enum PlayerAppearanceType {
-    Parts = 0,
-    Full = 1,
+    Parts,
+    Full,
 }
 
 #[derive(SaveData)]

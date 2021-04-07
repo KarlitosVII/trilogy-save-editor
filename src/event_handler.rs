@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Error;
 use flume::{Receiver, Sender};
 use tokio::{fs::File, io::AsyncReadExt};
@@ -9,17 +11,17 @@ use crate::{
 };
 
 pub enum MainEvent {
-    OpenMassEffect3,
+    OpenSave(PathBuf),
 }
 
 pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
     while let Ok(event) = rx.recv_async().await {
         let result = async {
             match event {
-                MainEvent::OpenMassEffect3 => {
+                MainEvent::OpenSave(path) => {
                     let mut input = Vec::new();
                     {
-                        let mut file = File::open("test/NewGamePlusSave.pcsav").await?;
+                        let mut file = File::open(path).await?;
                         file.read_to_end(&mut input).await?;
                     }
 
