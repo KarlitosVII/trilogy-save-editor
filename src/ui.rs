@@ -90,9 +90,9 @@ impl<'a> Ui<'a> {
         let _style = imgui.push_style_var(StyleVar::WindowRounding(0.0));
 
         // Window
-        if let Some(_token) = window.begin(imgui) {
+        if let Some(_t) = window.begin(imgui) {
             // Main menu bar
-            if let Some(_token) = imgui.begin_menu_bar() {
+            if let Some(_t) = imgui.begin_menu_bar() {
                 if imgui.button(im_str!("Open")) {
                     self.open_save().await;
                 }
@@ -105,7 +105,9 @@ impl<'a> Ui<'a> {
                     imgui.open_popup(im_str!("Error"));
                 }
 
-                PopupModal::new(im_str!("Error")).always_auto_resize(true).build(imgui, || {
+                if let Some(_t) =
+                    PopupModal::new(im_str!("Error")).always_auto_resize(true).begin_popup(imgui)
+                {
                     errors.iter().for_each(|error| {
                         imgui.text(error.to_string());
                     });
@@ -116,7 +118,7 @@ impl<'a> Ui<'a> {
                         errors.clear();
                         imgui.close_current_popup();
                     }
-                });
+                }
             }
 
             match save_game {
@@ -130,13 +132,13 @@ impl<'a> Ui<'a> {
         let imgui = self.imgui;
 
         // Tabs
-        TabBar::new(im_str!("main-tabs")).build(imgui, || {
-            TabItem::new(im_str!("Raw")).build(imgui, || {
-                ChildWindow::new("mass_effect_3").size([0.0, 0.0]).build(self.imgui, || {
+        if let Some(_t) = TabBar::new(im_str!("main-tabs")).begin(imgui) {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(imgui) {
+                if let Some(_t) = ChildWindow::new("mass_effect_3").size([0.0, 0.0]).begin(imgui) {
                     save_game.draw_raw_ui(self, "Mass Effect 3");
-                });
-            });
-        });
+                }
+            }
+        }
     }
 
     // Edit boxes
@@ -196,7 +198,9 @@ impl<'a> Ui<'a> {
     where
         F: FnOnce(),
     {
-        TreeNode::new(&ImString::new(ident)).build(self.imgui, fields);
+        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.imgui) {
+            fields();
+        }
     }
 
     pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
@@ -205,7 +209,7 @@ impl<'a> Ui<'a> {
     {
         let imgui = self.imgui;
 
-        TreeNode::new(&ImString::new(ident)).build(imgui, || {
+        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(imgui) {
             if !list.is_empty() {
                 // Item
                 let mut remove = None;
@@ -234,11 +238,11 @@ impl<'a> Ui<'a> {
             } else {
                 imgui.text("Empty");
             }
-        });
+        }
     }
 
     pub fn draw_bitarray(&self, ident: &str, list: &mut Vec<bool>) {
-        TreeNode::new(&ImString::new(ident)).build(self.imgui, || {
+        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.imgui) {
             if !list.is_empty() {
                 let mut clipper = ListClipper::new(list.len() as i32).begin(self.imgui);
                 while clipper.step() {
@@ -246,10 +250,8 @@ impl<'a> Ui<'a> {
                         list[i as usize].draw_raw_ui(self, &i.to_string());
                     }
                 }
-            } else {
-                self.imgui.text("Empty");
             }
-        });
+        }
     }
 
     pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
@@ -259,7 +261,7 @@ impl<'a> Ui<'a> {
     {
         let imgui = self.imgui;
 
-        TreeNode::new(&ImString::new(ident)).build(imgui, || {
+        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(imgui) {
             if !list.is_empty() {
                 // Item
                 let mut remove = None;
@@ -295,7 +297,7 @@ impl<'a> Ui<'a> {
             } else {
                 imgui.text("Empty");
             }
-        });
+        }
     }
 
     // Helpers
@@ -304,8 +306,9 @@ impl<'a> Ui<'a> {
         F: FnOnce(),
     {
         let _bg = self.bg_colors();
-        let _token = ChildWindow::new(id).size([0.0, 19.0]).begin(self.imgui);
-        inner();
+        if let Some(_t) = ChildWindow::new(id).size([0.0, 19.0]).begin(self.imgui) {
+            inner();
+        }
     }
 
     fn bg_colors(&self) -> ColorStackToken<'a> {
@@ -357,7 +360,8 @@ impl<'a> Ui<'a> {
         });
 
         if let Ok(result) = result {
-            let _ = self.event_addr.send_async(MainEvent::OpenSave(result.selected_file_path)).await;
+            let _ =
+                self.event_addr.send_async(MainEvent::OpenSave(result.selected_file_path)).await;
         }
     }
 }
