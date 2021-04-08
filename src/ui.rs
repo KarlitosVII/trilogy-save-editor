@@ -6,6 +6,7 @@ use std::{
     hash::Hash,
     sync::atomic::{AtomicUsize, Ordering},
 };
+use tokio::runtime::Handle;
 use wfd::DialogParams;
 
 use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame, save_data::SaveData};
@@ -31,17 +32,14 @@ enum SaveGame {
 }
 
 // UI
-pub fn run<F>(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, exit_fn: F)
-where
-    F: Fn() + 'static,
-{
+pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle) {
     let mut error_state = ErrorState::default();
     let mut save_game = SaveGame::None;
 
     // UI
     let system = support::init("Trilogy Save Editor", 1000.0, 700.0);
-    system.main_loop(
-        move |_, imgui| {
+    system.main_loop(move |_, imgui| {
+        handle.block_on(async {
             rx.try_iter().for_each(|ui_event| match ui_event {
                 UiEvent::MassEffect3(me3_save_game) => {
                     save_game = SaveGame::MassEffect3(me3_save_game)
@@ -53,10 +51,9 @@ where
             });
 
             let ui = Ui::new(imgui, &event_addr);
-            ui.draw(&mut error_state, &mut save_game);
-        },
-        exit_fn,
-    );
+            ui.draw(&mut error_state, &mut save_game).await;
+        });
+    });
 }
 
 pub struct Ui<'a> {
@@ -70,7 +67,7 @@ impl<'a> Ui<'a> {
         Self { imgui, event_addr: Sender::clone(event_addr), bg_count: AtomicUsize::new(0) }
     }
 
-    fn draw(&self, error_state: &mut ErrorState, save_game: &mut SaveGame) {
+    async fn draw(&self, error_state: &mut ErrorState, save_game: &mut SaveGame) {
         let imgui = self.imgui;
 
         // Main window
@@ -83,15 +80,22 @@ impl<'a> Ui<'a> {
             .menu_bar(true)
             .collapsible(false);
 
-        let mut colors = self.style_colors(save_game);
-        let style = imgui.push_style_var(StyleVar::WindowRounding(0.0));
-        window.build(imgui, || {
+        // Pop on drop
+        let _colors = self
+            .style_colors(match save_game {
+                SaveGame::None => Theme::None,
+                SaveGame::MassEffect3(_) => Theme::MassEffect3,
+            })
+            .await;
+        let _style = imgui.push_style_var(StyleVar::WindowRounding(0.0));
+
+        // Window
+        if let Some(_token) = window.begin(imgui) {
             // Main menu bar
-            if let Some(menu_bar) = imgui.begin_menu_bar() {
+            if let Some(_token) = imgui.begin_menu_bar() {
                 if imgui.button(im_str!("Open")) {
-                    self.open_save();
+                    self.open_save().await;
                 }
-                menu_bar.end();
             }
 
             // Error popup
@@ -117,18 +121,12 @@ impl<'a> Ui<'a> {
 
             match save_game {
                 SaveGame::None => imgui.text(im_str!("Rien ici")),
-                SaveGame::MassEffect3(save_game) => self.draw_mass_effect_3(save_game),
+                SaveGame::MassEffect3(save_game) => self.draw_mass_effect_3(save_game).await,
             };
-        });
-
-        // Style
-        for color in colors.drain(..) {
-            color.pop();
         }
-        style.pop();
     }
 
-    fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) {
+    async fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) {
         let imgui = self.imgui;
 
         // Tabs
@@ -152,9 +150,8 @@ impl<'a> Ui<'a> {
         let imgui = self.imgui;
 
         self.draw_colored_bg(ident, || {
-            let width = imgui.push_item_width(100.0);
+            let _width = imgui.push_item_width(100.0);
             imgui.checkbox(&ImString::new(ident), value);
-            width.pop(imgui);
         });
     }
 
@@ -162,9 +159,8 @@ impl<'a> Ui<'a> {
         let imgui = self.imgui;
 
         self.draw_colored_bg(ident, || {
-            let width = imgui.push_item_width(100.0);
+            let _width = imgui.push_item_width(100.0);
             InputInt::new(imgui, &ImString::new(ident), value).build();
-            width.pop(imgui);
         });
     }
 
@@ -172,9 +168,8 @@ impl<'a> Ui<'a> {
         let imgui = self.imgui;
 
         self.draw_colored_bg(ident, || {
-            let width = imgui.push_item_width(100.0);
+            let _width = imgui.push_item_width(100.0);
             InputFloat::new(imgui, &ImString::new(ident), value).build();
-            width.pop(imgui);
         });
     }
 
@@ -182,9 +177,8 @@ impl<'a> Ui<'a> {
         let imgui = self.imgui;
 
         self.draw_colored_bg(ident, || {
-            let width = imgui.push_item_width(200.0);
+            let _width = imgui.push_item_width(200.0);
             ComboBox::new(&ImString::new(ident)).build_simple_string(imgui, current_item, items);
-            width.pop(imgui);
         });
     }
 
@@ -192,9 +186,8 @@ impl<'a> Ui<'a> {
         let imgui = self.imgui;
 
         self.draw_colored_bg(ident, || {
-            let width = imgui.push_item_width(200.0);
+            let _width = imgui.push_item_width(200.0);
             ColorEdit::new(&ImString::new(ident), color).build(imgui);
-            width.pop(imgui);
         });
     }
 
@@ -310,12 +303,12 @@ impl<'a> Ui<'a> {
     where
         F: FnOnce(),
     {
-        let bg = self.bg_colors();
-        ChildWindow::new(id).size([0.0, 19.0]).build(self.imgui, inner);
-        bg.pop();
+        let _bg = self.bg_colors();
+        let _token = ChildWindow::new(id).size([0.0, 19.0]).begin(self.imgui);
+        inner();
     }
 
-    fn bg_colors(&self) -> ColorStackToken {
+    fn bg_colors(&self) -> ColorStackToken<'a> {
         let bg_dark = [0.1, 0.1, 0.1, 1.0];
         let bg_light = [0.15, 0.15, 0.15, 1.0];
 
@@ -326,9 +319,9 @@ impl<'a> Ui<'a> {
     }
 
     // Style
-    fn style_colors(&self, save_game: &SaveGame) -> Vec<ColorStackToken> {
-        let theme = match save_game {
-            SaveGame::None | SaveGame::MassEffect3(_) => Theme {
+    async fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'a>; 15] {
+        let theme = match game_theme {
+            Theme::None | Theme::MassEffect3 => ColorTheme {
                 bg_color: [0.40, 0.0, 0.0, 1.0],
                 color: [0.53, 0.0, 0.0, 1.0],
                 active_color: [0.68, 0.0, 0.0, 1.0],
@@ -336,7 +329,7 @@ impl<'a> Ui<'a> {
             },
         };
 
-        vec![
+        [
             self.imgui.push_style_color(StyleColor::TitleBgActive, theme.active_color),
             self.imgui.push_style_color(StyleColor::FrameBg, theme.bg_color),
             self.imgui.push_style_color(StyleColor::FrameBgActive, theme.active_color),
@@ -356,7 +349,7 @@ impl<'a> Ui<'a> {
     }
 
     // Actions
-    fn open_save(&self) {
+    async fn open_save(&self) {
         let result = wfd::open_dialog(DialogParams {
             default_extension: "pcsav",
             file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
@@ -364,12 +357,17 @@ impl<'a> Ui<'a> {
         });
 
         if let Ok(result) = result {
-            let _ = self.event_addr.send(MainEvent::OpenSave(result.selected_file_path));
+            let _ = self.event_addr.send_async(MainEvent::OpenSave(result.selected_file_path)).await;
         }
     }
 }
 
-struct Theme {
+enum Theme {
+    None,
+    MassEffect3,
+}
+
+struct ColorTheme {
     bg_color: [f32; 4],
     color: [f32; 4],
     active_color: [f32; 4],

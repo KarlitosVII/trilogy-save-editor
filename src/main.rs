@@ -6,8 +6,11 @@ extern crate num_derive;
 #[macro_use]
 extern crate save_data_derive;
 
-use anyhow::Result;
 use std::panic::{self, PanicInfo};
+use tokio::{
+    runtime::Handle,
+    task::{self, JoinError},
+};
 
 mod event_handler;
 mod mass_effect_3;
@@ -15,7 +18,7 @@ mod save_data;
 mod ui;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), JoinError> {
     #[cfg(debug_assertions)]
     console::attach();
 
@@ -31,11 +34,10 @@ async fn main() -> Result<()> {
         event_handler::event_loop(event_rx, ui_addr).await;
     });
 
-    ui::run(event_addr, ui_rx, || {
-        // Code de fin de programme
-    });
-    let _ = event_loop.await;
-    Ok(())
+    let handle = Handle::current();
+    task::spawn_blocking(move || ui::run(event_addr, ui_rx, handle)).await?;
+
+    event_loop.await
 }
 
 fn panic_hook(info: &PanicInfo<'_>) {
@@ -52,7 +54,13 @@ fn panic_hook(info: &PanicInfo<'_>) {
 }
 
 mod console {
-    use winapi::{shared::minwindef::FALSE, um::{consoleapi::AllocConsole, wincon::{ATTACH_PARENT_PROCESS, AttachConsole}}};
+    use winapi::{
+        shared::minwindef::FALSE,
+        um::{
+            consoleapi::AllocConsole,
+            wincon::{AttachConsole, ATTACH_PARENT_PROCESS},
+        },
+    };
 
     #[allow(clippy::missing_safety_doc)]
     pub fn attach() {
