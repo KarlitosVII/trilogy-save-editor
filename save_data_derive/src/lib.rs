@@ -36,6 +36,15 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         }
     });
 
+    let serialize_fields = fields.iter().map(|f| {
+        let field_name = &f.ident;
+        let field_type = &f.ty;
+
+        quote! {
+            <#field_type as crate::save_data::SaveData>::serialize(&self.#field_name, output)?;
+        }
+    });
+
     let draw_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_string = field_name.as_ref().unwrap().to_string();
@@ -51,6 +60,12 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
                 Ok(Self {
                     #(#deserialize_fields),*
                 })
+            }
+
+            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()>
+            {
+                #(#serialize_fields)*
+                Ok(())
             }
 
             fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &str) {
@@ -74,6 +89,15 @@ fn impl_save_data_enum(
             "deserialize_enum_from_u32"
         } else {
             "deserialize_enum_from_u8"
+        },
+        Span::call_site(),
+    );
+    
+    let serialize_enum_to_repr = Ident::new(
+        if name == "EndGameState" {
+            "serialize_enum_to_u32"
+        } else {
+            "serialize_enum_to_u8"
         },
         Span::call_site(),
     );
@@ -115,6 +139,11 @@ fn impl_save_data_enum(
         impl crate::save_data::SaveData for #name {
             fn deserialize(input: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 Self::#deserialize_enum_from_repr(input)
+            }
+
+            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()>
+            {
+                Self::#serialize_enum_to_repr(self, output)
             }
 
             fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &str) {

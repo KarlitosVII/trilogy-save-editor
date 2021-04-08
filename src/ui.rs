@@ -4,6 +4,7 @@ use imgui::{Ui as ImguiUi, *};
 use indexmap::IndexMap;
 use std::{
     hash::Hash,
+    path::PathBuf,
     sync::atomic::{AtomicUsize, Ordering},
 };
 use tokio::runtime::Handle;
@@ -95,6 +96,11 @@ impl<'a> Ui<'a> {
             if let Some(_t) = imgui.begin_menu_bar() {
                 if imgui.button(im_str!("Open")) {
                     self.open_save().await;
+                }
+                if imgui.button(im_str!("Save")) {
+                    if let SaveGame::MassEffect3(save_game) = save_game {
+                        self.save_save(save_game).await;
+                    }
                 }
             }
 
@@ -363,6 +369,24 @@ impl<'a> Ui<'a> {
             let _ =
                 self.event_addr.send_async(MainEvent::OpenSave(result.selected_file_path)).await;
         }
+    }
+
+    async fn save_save(&self, save_game: &Me3SaveGame) {
+        // let result = wfd::open_dialog(DialogParams {
+        //     default_extension: "pcsav",
+        //     file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
+        //     ..Default::default()
+        // });
+
+        // if let Ok(result) = result {
+        let _ = self
+            .event_addr
+            .send_async(MainEvent::SaveSave((
+                PathBuf::from("test/Serialized.pcsav"),
+                save_game.clone(),
+            )))
+            .await;
+        // }
     }
 }
 

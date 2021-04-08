@@ -8,7 +8,7 @@ use crate::{
 
 use super::Vector;
 
-#[derive(SaveData)]
+#[derive(SaveData, Clone)]
 pub(super) struct Appearance {
     combat_appearance: PlayerAppearanceType,
     casual_id: i32,
@@ -28,13 +28,13 @@ pub(super) struct Appearance {
     head_morph: Option<HeadMorph>,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
 enum PlayerAppearanceType {
     Parts,
     Full,
 }
 
-#[derive(SaveData)]
+#[derive(SaveData, Clone)]
 struct HeadMorph {
     hair_mesh: ImString,
     accessory_mesh: Vec<ImString>,
@@ -49,31 +49,31 @@ struct HeadMorph {
     texture_parameters: Vec<TextureParameter>,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct MorphFeature {
     feature: ImString,
     offset: f32,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct OffsetBone {
     name: ImString,
     offset: Vector,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct ScalarParameter {
     name: ImString,
     value: f32,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct VectorParameter {
     name: ImString,
     value: LinearColor,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct LinearColor([f32; 4]);
 
 impl SaveData for LinearColor {
@@ -86,12 +86,19 @@ impl SaveData for LinearColor {
         ]))
     }
 
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        for byte in self.0.iter() {
+            Self::serialize_to(byte, output)?;
+        }
+        Ok(())
+    }
+
     fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
         ui.draw_edit_color(ident, &mut self.0);
     }
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct TextureParameter {
     name: ImString,
     value: ImString,
