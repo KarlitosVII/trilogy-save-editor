@@ -21,7 +21,7 @@ use galaxy_map::*;
 
 mod appearance;
 
-#[derive(SaveData)]
+#[derive(SaveData, Clone)]
 pub struct Me3SaveGame {
     version: Version,
     debug_name: Vec<Dummy<1>>,
@@ -78,6 +78,7 @@ pub struct Me3SaveGame {
     checksum: Checksum,
 }
 
+#[derive(Clone)]
 struct Version(i32);
 
 impl SaveData for Version {
@@ -91,9 +92,14 @@ impl SaveData for Version {
         Ok(Self(version))
     }
 
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        Self::serialize_to(&self.0, output)
+    }
+
     fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
+#[derive(Clone)]
 struct Checksum(u32);
 
 impl SaveData for Checksum {
@@ -101,10 +107,15 @@ impl SaveData for Checksum {
         Ok(Self(Self::deserialize_from(input)?))
     }
 
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        // FIXME: Calculer le checksum
+        Self::serialize_to(&self.0, output)
+    }
+
     fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
 enum Difficulty {
     Narrative,
     Casual,
@@ -114,14 +125,14 @@ enum Difficulty {
     WhatIsBeyondInsanity,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
 enum EndGameState {
     NotFinished,
     OutInABlazeOfGlory,
     LivedToFightAgain,
 }
 
-#[derive(SaveData)]
+#[derive(SaveData, Clone)]
 struct SaveTimeStamp {
     seconds_since_midnight: i32,
     day: i32,
@@ -129,47 +140,47 @@ struct SaveTimeStamp {
     year: i32,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct Vector {
     x: f32,
     y: f32,
     z: f32,
 }
 
-#[derive(SaveData)]
+#[derive(SaveData, Clone)]
 struct Rotation {
     pitch: i32,
     yaw: i32,
     roll: i32,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct Level {
     name: ImString,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct StreamingRecord {
     name: ImString,
     is_active: bool,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct GawAsset {
     id: i32,
     strength: i32,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct DependentDlc {
     id: i32,
     name: ImString,
     canonical_name: ImString,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct LevelTreasure {
     level_name: ImString,
     credits: i32,
@@ -178,14 +189,14 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(FromPrimitive, ToPrimitive, SaveData)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
 enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
     NoDecisions,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 struct ObjectiveMarker {
     marker_owned_data: ImString,
     marker_offset: Vector,
@@ -194,7 +205,7 @@ struct ObjectiveMarker {
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData)]
+#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
 enum ObjectiveMarkerIconType {
     None,
     Attack,

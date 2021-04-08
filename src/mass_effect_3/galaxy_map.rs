@@ -1,10 +1,10 @@
-#[derive(SaveData)]
+#[derive(SaveData, Clone)]
 pub(super) struct GalaxyMap {
     planets: Vec<Planet>,
     systems: Vec<System>,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 pub(super) struct Planet {
     id: i32,
     visited: bool,
@@ -12,14 +12,14 @@ pub(super) struct Planet {
     show_as_scanned: bool,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 pub(super) struct System {
     id: i32,
     reaper_alert_level: f32,
     reaper_detected: bool,
 }
 
-#[derive(SaveData, Default)]
+#[derive(SaveData, Default, Clone)]
 pub(super) struct Vector2d {
     x: f32,
     y: f32,
