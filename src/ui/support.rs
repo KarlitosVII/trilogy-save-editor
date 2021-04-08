@@ -26,6 +26,7 @@ use glium::{
         self,
         event::{Event, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
+        platform::windows::EventLoopExtWindows,
         window::WindowBuilder,
     },
     Display, Surface,
@@ -62,7 +63,7 @@ pub struct System {
 }
 
 pub fn init(title: &str, width: f64, height: f64) -> System {
-    let event_loop = EventLoop::new();
+    let event_loop = EventLoop::new_any_thread();
     let context = glutin::ContextBuilder::new().with_vsync(true);
     let builder = WindowBuilder::new()
         .with_resizable(false)
@@ -100,10 +101,9 @@ pub fn init(title: &str, width: f64, height: f64) -> System {
 }
 
 impl System {
-    pub fn main_loop<F, G>(self, mut run_ui: F, exit_fn: G)
+    pub fn main_loop<F>(self, mut run_ui: F)
     where
         F: FnMut(&mut bool, &mut Ui) + 'static,
-        G: Fn() + 'static,
     {
         let System { event_loop, display, mut imgui, mut platform, mut renderer, .. } = self;
         let mut last_frame = Instant::now();
@@ -122,9 +122,9 @@ impl System {
                 gl_window.window().request_redraw();
             }
             Event::RedrawRequested(_) => {
+                let mut run = true;
                 let mut ui = imgui.frame();
 
-                let mut run = true;
                 run_ui(&mut run, &mut ui);
                 if !run {
                     *control_flow = ControlFlow::Exit;
@@ -141,7 +141,6 @@ impl System {
             Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
                 *control_flow = ControlFlow::Exit
             }
-            Event::LoopDestroyed => exit_fn(),
             event => {
                 let gl_window = display.gl_window();
                 platform.handle_event(imgui.io_mut(), gl_window.window(), &event);
