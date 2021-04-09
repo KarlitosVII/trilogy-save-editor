@@ -383,7 +383,7 @@ impl<'a> Ui<'a> {
             .event_addr
             .send_async(MainEvent::SaveSave((
                 PathBuf::from("test/Serialized.pcsav"),
-                save_game.clone(),
+                Box::new(save_game.clone()),
             )))
             .await;
         // }
