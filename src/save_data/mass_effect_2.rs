@@ -1,6 +1,9 @@
 use imgui::ImString;
+use anyhow::{bail, Result};
 
-use crate::save_data::Dummy;
+use crate::{save_data::{Dummy,}, ui::Ui};
+
+use super::{SaveCursor, SaveData, common::{Checksum, EndGameState, Level, Rotation, SaveTimeStamp, StreamingRecord, Vector}};
 
 mod player;
 use player::*;
@@ -13,8 +16,6 @@ use plot::*;
 
 mod galaxy_map;
 use galaxy_map::*;
-
-use super::common::{Checksum, EndGameState, Level, Rotation, SaveTimeStamp, StreamingRecord, Vector, Version};
 
 #[derive(SaveData, Clone)]
 pub struct Me2SaveGame {
@@ -41,6 +42,27 @@ pub struct Me2SaveGame {
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     checksum: Checksum,
+}
+
+#[derive(Clone)]
+pub struct Version(i32);
+
+impl SaveData for Version {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        let version = Self::deserialize_from(cursor)?;
+
+        if version != 29 {
+            bail!("Wrong save version, please use a save from the last version of the game")
+        }
+
+        Ok(Self(version))
+    }
+
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        Self::serialize_to(&self.0, output)
+    }
+
+    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]

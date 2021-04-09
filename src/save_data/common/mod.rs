@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::{Result};
 use imgui::ImString;
 
 use crate::{save_data::{SaveCursor, SaveData}, ui::Ui};
@@ -10,33 +10,11 @@ pub mod appearance;
 pub mod plot;
 
 #[derive(Clone)]
-pub struct Version(i32);
-
-impl SaveData for Version {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        let version = Self::deserialize_from(input)?;
-
-        // FIXME: Tester la version respective de chaque jeu au lieu de tous en même temps
-        if version != 59 && version != 29 {
-            bail!("Wrong save version, please use a save from the last version of the game")
-        }
-
-        Ok(Self(version))
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to(&self.0, output)
-    }
-
-    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
-}
-
-#[derive(Clone)]
 pub struct Checksum(u32);
 
 impl SaveData for Checksum {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Ok(Self(Self::deserialize_from(input)?))
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Ok(Self(Self::deserialize_from(cursor)?))
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
