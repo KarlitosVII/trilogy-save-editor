@@ -32,7 +32,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         let field_type = &f.ty;
 
         quote! {
-            #field_name: <#field_type as crate::save_data::SaveData>::deserialize(input)?
+            #field_name: <#field_type as crate::save_data::SaveData>::deserialize(cursor)?
         }
     });
 
@@ -56,7 +56,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let gen = quote! {
         impl crate::save_data::SaveData for #name {
-            fn deserialize(input: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
+            fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 Ok(Self {
                     #(#deserialize_fields),*
                 })
@@ -137,8 +137,8 @@ fn impl_save_data_enum(
 
     let gen = quote! {
         impl crate::save_data::SaveData for #name {
-            fn deserialize(input: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
-                Self::#deserialize_enum_from_repr(input)
+            fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
+                Self::#deserialize_enum_from_repr(cursor)
             }
 
             fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()>

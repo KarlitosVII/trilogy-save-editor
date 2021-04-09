@@ -59,7 +59,7 @@ pub trait SaveData
 where
     Self: Sized,
 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self>;
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
     fn draw_raw_ui(&mut self, ui: &Ui, ident: &str);
 
@@ -83,19 +83,19 @@ where
         Ok(())
     }
 
-    fn deserialize_from_bool(input: &mut SaveCursor) -> Result<bool> {
-        Ok(Self::deserialize_from::<i32>(input)? != 0)
+    fn deserialize_from_bool(cursor: &mut SaveCursor) -> Result<bool> {
+        Ok(Self::deserialize_from::<i32>(cursor)? != 0)
     }
 
     fn serialize_to_bool(input: bool, output: &mut Vec<u8>) -> Result<()> {
         Self::serialize_to::<i32>(&(input as i32), output)
     }
 
-    fn deserialize_enum_from_u8<E>(input: &mut SaveCursor) -> Result<E>
+    fn deserialize_enum_from_u8<E>(cursor: &mut SaveCursor) -> Result<E>
     where
         E: FromPrimitive,
     {
-        E::from_u8(Self::deserialize_from::<u8>(input)?).context("invalid enum representation")
+        E::from_u8(Self::deserialize_from::<u8>(cursor)?).context("invalid enum representation")
     }
 
     fn serialize_enum_to_u8<E>(input: &E, output: &mut Vec<u8>) -> Result<()>
@@ -105,11 +105,11 @@ where
         Self::serialize_to::<u8>(&E::to_u8(input).context("invalid enum representation")?, output)
     }
 
-    fn deserialize_enum_from_u32<E>(input: &mut SaveCursor) -> Result<E>
+    fn deserialize_enum_from_u32<E>(cursor: &mut SaveCursor) -> Result<E>
     where
         E: FromPrimitive,
     {
-        E::from_u32(Self::deserialize_from::<u32>(input)?).context("invalid enum representation")
+        E::from_u32(Self::deserialize_from::<u32>(cursor)?).context("invalid enum representation")
     }
 
     fn serialize_enum_to_u32<E>(input: &E, output: &mut Vec<u8>) -> Result<()>
@@ -120,8 +120,8 @@ where
     }
 
     // String
-    fn deserialize_from_string(input: &mut SaveCursor) -> Result<ImString> {
-        let len = Self::deserialize_from::<i32>(input)?;
+    fn deserialize_from_string(cursor: &mut SaveCursor) -> Result<ImString> {
+        let len = Self::deserialize_from::<i32>(cursor)?;
 
         if len == 0 {
             return Ok(ImString::default());
@@ -131,7 +131,7 @@ where
             // Unicode
             let string_len = (len.abs() * 2) as usize;
 
-            let bytes = input.read(string_len)?.to_owned();
+            let bytes = cursor.read(string_len)?.to_owned();
 
             let (decoded, _, had_errors) = UTF_16LE.decode(&bytes);
             if had_errors {
@@ -143,7 +143,7 @@ where
             // Ascii
             let string_len = len as usize;
 
-            let bytes = input.read(string_len)?.to_owned();
+            let bytes = cursor.read(string_len)?.to_owned();
 
             let (decoded, _, had_errors) = WINDOWS_1252.decode(&bytes);
             if had_errors {
@@ -194,18 +194,18 @@ where
     }
 
     // Array
-    fn deserialize_from_array<D>(input: &mut SaveCursor) -> Result<Vec<D>>
+    fn deserialize_from_array<D>(cursor: &mut SaveCursor) -> Result<Vec<D>>
     where
         D: SaveData,
     {
-        let len = Self::deserialize_from::<u32>(input)?;
+        let len = Self::deserialize_from::<u32>(cursor)?;
         let mut vec = Vec::new();
         if len == 0 {
             return Ok(vec);
         }
 
         for _ in 0..len {
-            vec.push(D::deserialize(input)?);
+            vec.push(D::deserialize(cursor)?);
         }
 
         Ok(vec)
@@ -227,19 +227,19 @@ where
     }
 
     // IndexMap
-    fn deserialize_from_indexmap<K, V>(input: &mut SaveCursor) -> Result<IndexMap<K, V>>
+    fn deserialize_from_indexmap<K, V>(cursor: &mut SaveCursor) -> Result<IndexMap<K, V>>
     where
         K: SaveData + Eq + Hash,
         V: SaveData,
     {
-        let len = Self::deserialize_from::<u32>(input)?;
+        let len = Self::deserialize_from::<u32>(cursor)?;
         let mut map = IndexMap::new();
         if len == 0 {
             return Ok(map);
         }
 
         for _ in 0..len {
-            map.insert(K::deserialize(input)?, V::deserialize(input)?);
+            map.insert(K::deserialize(cursor)?, V::deserialize(cursor)?);
         }
 
         Ok(map)
@@ -267,10 +267,10 @@ where
 pub type Dummy<const LEN: usize> = [u8; LEN];
 
 impl<const LEN: usize> SaveData for Dummy<LEN> {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let mut array = [0; LEN];
         for byte in array.iter_mut() {
-            *byte = Self::deserialize_from(input)?
+            *byte = Self::deserialize_from(cursor)?
         }
         Ok(array)
     }
@@ -287,8 +287,8 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
 
 // Implémentation des types std
 impl SaveData for i32 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(input)
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from(cursor)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
@@ -301,8 +301,8 @@ impl SaveData for i32 {
 }
 
 impl SaveData for f32 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(input)
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from(cursor)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
@@ -315,8 +315,8 @@ impl SaveData for f32 {
 }
 
 impl SaveData for bool {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_bool(input)
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from_bool(cursor)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
@@ -329,8 +329,8 @@ impl SaveData for bool {
 }
 
 impl SaveData for ImString {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_string(input)
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from_string(cursor)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
@@ -346,12 +346,12 @@ impl<T> SaveData for Option<T>
 where
     T: SaveData,
 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        input.rshift_position(4)?;
-        let is_some = Self::deserialize_from_bool(input)?;
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        cursor.rshift_position(4)?;
+        let is_some = Self::deserialize_from_bool(cursor)?;
 
         let inner = match is_some {
-            true => Some(T::deserialize(input)?),
+            true => Some(T::deserialize(cursor)?),
             false => None,
         };
 
@@ -380,8 +380,8 @@ impl<T> SaveData for Vec<T>
 where
     T: SaveData + Default,
 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_array(input)
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from_array(cursor)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
@@ -403,8 +403,8 @@ where
     K: SaveData + Eq + Hash + Default,
     V: SaveData + Default,
 {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_indexmap(input)
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from_indexmap(cursor)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {

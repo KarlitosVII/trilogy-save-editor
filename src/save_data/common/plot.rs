@@ -8,8 +8,8 @@ pub struct BitArray {
 }
 
 impl SaveData for BitArray {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
-        let num_bytes = Self::deserialize_from::<u32>(input)?;
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        let num_bytes = Self::deserialize_from::<u32>(cursor)?;
         let mut variables = Vec::new();
 
         let len = num_bytes * 32;
@@ -18,7 +18,7 @@ impl SaveData for BitArray {
             let bit = i % 32;
 
             if bit == 0 {
-                bits = Self::deserialize_from::<u32>(input)?;
+                bits = Self::deserialize_from::<u32>(cursor)?;
             }
             variables.push((bits & (1 << bit)) != 0);
         }

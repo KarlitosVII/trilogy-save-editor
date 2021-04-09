@@ -77,12 +77,12 @@ struct VectorParameter {
 struct LinearColor([f32; 4]);
 
 impl SaveData for LinearColor {
-    fn deserialize(input: &mut SaveCursor) -> Result<Self> {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(Self([
-            SaveData::deserialize(input)?,
-            SaveData::deserialize(input)?,
-            SaveData::deserialize(input)?,
-            SaveData::deserialize(input)?,
+            SaveData::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
         ]))
     }
 

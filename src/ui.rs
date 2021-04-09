@@ -9,7 +9,10 @@ use std::{
 use tokio::runtime::Handle;
 use wfd::DialogParams;
 
-use crate::{event_handler::MainEvent, save_data::{SaveData,mass_effect_3::Me3SaveGame}};
+use crate::{
+    event_handler::{MainEvent, SaveGame},
+    save_data::{mass_effect_2::Me2SaveGame, mass_effect_3::Me3SaveGame, SaveData},
+};
 
 mod support;
 
@@ -38,18 +41,13 @@ struct State {
 pub enum UiEvent {
     Error(Error),
     Notification(&'static str),
-    OpenMassEffect3(Box<Me3SaveGame>),
-}
-
-enum SaveGame {
-    None,
-    MassEffect3(Box<Me3SaveGame>),
+    OpenedSave(SaveGame),
 }
 
 // UI
 pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle) {
     let mut state = State::default();
-    let mut save_game = SaveGame::None;
+    let mut save_game = None;
 
     // UI
     let system = support::init("Trilogy Save Editor", 1000.0, 700.0);
@@ -66,8 +64,8 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle)
                         close_time: imgui.time() + NOTIFICATION_TIME,
                     })
                 }
-                UiEvent::OpenMassEffect3(me3_save_game) => {
-                    save_game = SaveGame::MassEffect3(me3_save_game)
+                UiEvent::OpenedSave(opened_save_game) => {
+                    save_game = Some(opened_save_game);
                 }
             });
 
@@ -88,7 +86,7 @@ impl<'a> Ui<'a> {
         Self { imgui, event_addr: Sender::clone(event_addr), bg_count: AtomicUsize::new(0) }
     }
 
-    async fn draw(&self, state: &mut State, save_game: &mut SaveGame) {
+    async fn draw(&self, state: &mut State, save_game: &mut Option<SaveGame>) {
         let imgui = self.imgui;
 
         // Main window
@@ -104,8 +102,10 @@ impl<'a> Ui<'a> {
         // Pop on drop
         let _colors = self
             .style_colors(match save_game {
-                SaveGame::None => Theme::None,
-                SaveGame::MassEffect3(_) => Theme::MassEffect3,
+                None => Theme::MassEffect3,
+                Some(SaveGame::MassEffect1) => Theme::MassEffect1,
+                Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
+                Some(SaveGame::MassEffect3(_)) => Theme::MassEffect3,
             })
             .await;
         let _style = imgui.push_style_var(StyleVar::WindowRounding(0.0));
@@ -126,7 +126,7 @@ impl<'a> Ui<'a> {
             {
                 let ErrorState { errors, is_opened } = &mut state.errors;
                 if *is_opened {
-                    imgui.open_popup(im_str!("Error"));
+                    imgui.open_popup(im_str!("Error###error"));
                 }
 
                 if let Some(_t) = PopupModal::new(im_str!("Error###error"))
@@ -150,8 +150,10 @@ impl<'a> Ui<'a> {
             self.draw_nofification_overlay(&mut state.notification);
 
             match save_game {
-                SaveGame::None => imgui.text(im_str!("Rien ici")),
-                SaveGame::MassEffect3(save_game) => self.draw_mass_effect_3(save_game).await,
+                None => imgui.text(im_str!("Rien ici")),
+                Some(SaveGame::MassEffect1) => todo!(),
+                Some(SaveGame::MassEffect2(save_game)) => self.draw_mass_effect_2(save_game).await,
+                Some(SaveGame::MassEffect3(save_game)) => self.draw_mass_effect_3(save_game).await,
             };
         }
     }
@@ -185,11 +187,24 @@ impl<'a> Ui<'a> {
         }
     }
 
+    async fn draw_mass_effect_2(&self, save_game: &mut Me2SaveGame) {
+        let imgui = self.imgui;
+
+        // Tabs
+        if let Some(_t) = TabBar::new(im_str!("me2-tabs")).begin(imgui) {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(imgui) {
+                if let Some(_t) = ChildWindow::new("mass_effect_2").size([0.0, 0.0]).begin(imgui) {
+                    save_game.draw_raw_ui(self, "Mass Effect 2");
+                }
+            }
+        }
+    }
+
     async fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) {
         let imgui = self.imgui;
 
         // Tabs
-        if let Some(_t) = TabBar::new(im_str!("main-tabs")).begin(imgui) {
+        if let Some(_t) = TabBar::new(im_str!("me3-tabs")).begin(imgui) {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(imgui) {
                 if let Some(_t) = ChildWindow::new("mass_effect_3").size([0.0, 0.0]).begin(imgui) {
                     save_game.draw_raw_ui(self, "Mass Effect 3");
@@ -381,7 +396,7 @@ impl<'a> Ui<'a> {
     // Style
     async fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'a>; 17] {
         let theme = match game_theme {
-            Theme::None | Theme::MassEffect3 => ColorTheme {
+            Theme::MassEffect1 | Theme::MassEffect2 | Theme::MassEffect3 => ColorTheme {
                 bg_color: [0.40, 0.0, 0.0, 1.0],
                 color: [0.53, 0.0, 0.0, 1.0],
                 active_color: [0.68, 0.0, 0.0, 1.0],
@@ -423,29 +438,32 @@ impl<'a> Ui<'a> {
         }
     }
 
-    async fn save_save(&self, save_game: &SaveGame) {
-        let (save_game, default_ext) = match save_game {
-            SaveGame::None => return,
-            SaveGame::MassEffect3(save_game) => (save_game, "pcsav"),
-        };
+    async fn save_save(&self, save_game: &Option<SaveGame>) {
+        if let Some(save_game) = save_game {
+            let default_ext = match save_game {
+                SaveGame::MassEffect1 => todo!(),
+                SaveGame::MassEffect2(_) | SaveGame::MassEffect3(_) => "pcsav",
+            };
 
-        let result = wfd::save_dialog(DialogParams {
-            default_extension: default_ext,
-            file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
-            ..Default::default()
-        });
+            let result = wfd::save_dialog(DialogParams {
+                default_extension: default_ext,
+                file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
+                ..Default::default()
+            });
 
-        if let Ok(result) = result {
-            let _ = self
-                .event_addr
-                .send_async(MainEvent::SaveSave((result.selected_file_path, save_game.clone())))
-                .await;
+            if let Ok(result) = result {
+                let _ = self
+                    .event_addr
+                    .send_async(MainEvent::SaveSave((result.selected_file_path, save_game.clone())))
+                    .await;
+            }
         }
     }
 }
 
 enum Theme {
-    None,
+    MassEffect1,
+    MassEffect2,
     MassEffect3,
 }
 
