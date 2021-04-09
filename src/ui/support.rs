@@ -66,7 +66,7 @@ pub fn init(title: &str, width: f64, height: f64) -> System {
     let event_loop = EventLoop::new_any_thread();
     let context = glutin::ContextBuilder::new().with_vsync(true);
     let builder = WindowBuilder::new()
-        .with_resizable(false)
+        .with_resizable(true)
         .with_title(title)
         .with_inner_size(glutin::dpi::LogicalSize::new(width, height));
     let display =

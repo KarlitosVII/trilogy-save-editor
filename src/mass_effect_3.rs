@@ -218,3 +218,32 @@ impl Default for ObjectiveMarkerIconType {
         ObjectiveMarkerIconType::None
     }
 }
+
+#[cfg(test)]
+mod test {
+    use tokio::{fs::File, io::AsyncReadExt};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_deserialize_serialize_me3() -> Result<()> {
+        let mut input = Vec::new();
+        {
+            let mut file = File::open("test/ME3Save.pcsav").await?;
+            file.read_to_end(&mut input).await?;
+        }
+
+        // Deserialize
+        let mut cursor = SaveCursor::new(input.clone());
+        let me3_save_game = Me3SaveGame::deserialize(&mut cursor)?;
+
+        // Serialize
+        let mut output = Vec::new();
+        Me3SaveGame::serialize(&me3_save_game, &mut output)?;
+
+        // Check serialized = input
+        assert_eq!(&output, &input);
+
+        Ok(())
+    }
+}
