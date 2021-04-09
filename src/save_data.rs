@@ -356,9 +356,12 @@ where
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        // FIXME: Ne pas sérialiser head_morph si has_head_morph = false
-        if let Some(input) = self {
-            T::serialize(input, output)?;
+        if output.len() >= 4
+            && BINCODE.deserialize::<i32>(&output[output.len() - 4..output.len()])? != 0
+        {
+            if let Some(input) = self {
+                T::serialize(input, output)?;
+            }
         }
         Ok(())
     }
