@@ -9,7 +9,7 @@ use crate::{
 use super::Vector;
 
 #[derive(SaveData, Clone)]
-pub(super) struct Appearance {
+pub struct Appearance {
     combat_appearance: PlayerAppearanceType,
     casual_id: i32,
     full_body_id: i32,

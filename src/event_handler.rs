@@ -8,8 +8,7 @@ use tokio::{
 };
 
 use crate::{
-    mass_effect_3::Me3SaveGame,
-    save_data::{SaveCursor, SaveData},
+    save_data::{mass_effect_3::Me3SaveGame, SaveCursor, SaveData},
     ui::UiEvent,
 };
 

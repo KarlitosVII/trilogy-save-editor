@@ -9,7 +9,7 @@ use std::{
 use tokio::runtime::Handle;
 use wfd::DialogParams;
 
-use crate::{event_handler::MainEvent, mass_effect_3::Me3SaveGame, save_data::SaveData};
+use crate::{event_handler::MainEvent, save_data::{SaveData,mass_effect_3::Me3SaveGame}};
 
 mod support;
 
@@ -129,8 +129,9 @@ impl<'a> Ui<'a> {
                     imgui.open_popup(im_str!("Error"));
                 }
 
-                if let Some(_t) =
-                    PopupModal::new(im_str!("Error###error")).always_auto_resize(true).begin_popup(imgui)
+                if let Some(_t) = PopupModal::new(im_str!("Error###error"))
+                    .always_auto_resize(true)
+                    .begin_popup(imgui)
                 {
                     errors.iter().for_each(|error| {
                         imgui.text(error.to_string());

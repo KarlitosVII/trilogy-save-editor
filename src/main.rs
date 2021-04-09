@@ -13,7 +13,6 @@ use tokio::{
 };
 
 mod event_handler;
-mod mass_effect_3;
 mod save_data;
 mod ui;
 

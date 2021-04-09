@@ -13,7 +13,10 @@ use std::{any::type_name, hash::Hash, mem::size_of, usize};
 
 use crate::ui::Ui;
 
-pub mod crc32;
+pub mod common;
+pub mod mass_effect_2;
+pub mod mass_effect_3;
+mod crc32;
 
 lazy_static! {
     pub static ref BINCODE: WithOtherTrailing<WithOtherIntEncoding<DefaultOptions, FixintEncoding>, AllowTrailing> =
