@@ -3,7 +3,7 @@ use imgui::ImString;
 use indexmap::IndexMap;
 
 use crate::{
-    save_data::{Dummy, SaveCursor, SaveData},
+    save_data::{crc32, Dummy, SaveCursor, SaveData},
     ui::Ui,
 };
 
@@ -108,8 +108,8 @@ impl SaveData for Checksum {
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        // FIXME: Calculer le checksum
-        Self::serialize_to(&self.0, output)
+        let checksum = crc32::compute(output);
+        Self::serialize_to(&checksum, output)
     }
 
     fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}

@@ -15,7 +15,7 @@ use crate::{
 
 pub enum MainEvent {
     OpenSave(PathBuf),
-    SaveSave((PathBuf, Me3SaveGame)),
+    SaveSave((PathBuf, Box<Me3SaveGame>)),
 }
 
 pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
@@ -43,14 +43,15 @@ async fn open_save(path: PathBuf, ui_addr: &Sender<UiEvent>) -> Result<()> {
         file.read_to_end(&mut input).await?;
     }
 
-    let mut input = SaveCursor::new(input);
-    let me3_save_game = Me3SaveGame::deserialize(&mut input)?;
+    let mut cursor = SaveCursor::new(input);
+    let me3_save_game = Me3SaveGame::deserialize(&mut cursor)?;
+
     let _ = ui_addr.send_async(UiEvent::MassEffect3(Box::new(me3_save_game))).await;
     Ok(())
 }
 
 async fn save_save(
-    path: PathBuf, me3_save_game: Me3SaveGame, ui_addr: &Sender<UiEvent>,
+    path: PathBuf, me3_save_game: Box<Me3SaveGame>, ui_addr: &Sender<UiEvent>,
 ) -> Result<()> {
     let mut output = Vec::new();
 
