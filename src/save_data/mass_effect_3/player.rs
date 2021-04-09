@@ -1,9 +1,9 @@
 use imgui::ImString;
 
-use super::appearance::Appearance;
+use crate::save_data::{Dummy, common::{appearance::Appearance, player::{ Notoriety, Origin, WeaponLoadout}}};
 
 #[derive(SaveData, Clone)]
-pub(super) struct Player {
+pub struct Player {
     is_female: bool,
     class_name: ImString,
     is_combat_pawn: bool,
@@ -21,28 +21,34 @@ pub(super) struct Player {
     mapped_power_3: ImString,
     appearance: Appearance,
     emissive_id: i32,
-}
-
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
-enum Origin {
-    None,
-    Spacer,
-    Colony,
-    Earthborn,
-}
-
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
-enum Notoriety {
-    None,
-    Survivor,
-    Warhero,
-    Ruthless,
+    powers: Vec<Power>,
+    gaw_assets: Vec<GawAsset>,
+    weapons: Vec<Weapon>,
+    weapons_mods: Vec<WeaponMod>,
+    weapons_loadout: WeaponLoadout,
+    primary_weapon: ImString,
+    secondary_weapon: ImString,
+    loadout_weapon_group: Vec<i32>,
+    hotkeys: Vec<Hotkey>,
+    current_health: f32,
+    credits: i32,
+    medigel: i32,
+    eezo: i32,
+    iridium: i32,
+    palladium: i32,
+    platinum: i32,
+    probes: i32,
+    current_fuel: f32,
+    grenades: i32,
+    face_code: ImString,
+    class_friendly_name: i32,
+    character_guid: Dummy<16>,
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct Power {
+pub struct Power {
     name: ImString,
-    current_rank: f32,
+    rank: f32,
     evolved_choice_0: i32,
     evolved_choice_1: i32,
     evolved_choice_2: i32,
@@ -54,7 +60,7 @@ pub(super) struct Power {
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct Weapon {
+pub struct Weapon {
     class_name: ImString,
     ammo_used_count: i32,
     ammo_total: i32,
@@ -65,23 +71,19 @@ pub(super) struct Weapon {
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct WeaponMod {
+pub struct WeaponMod {
     weapon_class_name: ImString,
     weapon_mod_class_names: Vec<ImString>,
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct WeaponLoadout {
-    assaul_rifle: ImString,
-    shotgun: ImString,
-    sniper_rifle: ImString,
-    submachine_gun: ImString,
-    pistol: ImString,
-    heavy_weapon: ImString,
+struct GawAsset {
+    id: i32,
+    strength: i32,
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct Hotkey {
+struct Hotkey {
     pawn_name: ImString,
     power_name: ImString,
 }

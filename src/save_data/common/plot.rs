@@ -1,29 +1,6 @@
 use anyhow::Result;
-use indexmap::IndexMap;
 
-use crate::{
-    save_data::{SaveCursor, SaveData},
-    ui::Ui,
-};
-
-#[derive(SaveData, Clone)]
-pub(super) struct PlotTable {
-    bool_variables: BitArray,
-    int_variables: IndexMap<i32, i32>,
-    float_variables: IndexMap<i32, f32>,
-    quest_progress_counter: i32,
-    quest_progress: Vec<PlotQuest>,
-    quest_ids: Vec<i32>,
-    codex_entries: Vec<PlotCodex>,
-    codex_ids: Vec<i32>,
-}
-
-#[derive(SaveData, Clone)]
-pub(super) struct Me1PlotTable {
-    bool_variables: BitArray,
-    int_variables: IndexMap<i32, i32>,
-    float_variables: IndexMap<i32, f32>,
-}
+use crate::{save_data::{SaveCursor, SaveData}, ui::Ui};
 
 #[derive(Clone)]
 pub struct BitArray {
@@ -75,20 +52,12 @@ impl SaveData for BitArray {
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct PlotQuest {
-    quest_counter: i32,
-    quest_updated: bool,
-    active_goal: i32,
-    history: Vec<i32>,
-}
-
-#[derive(SaveData, Default, Clone)]
-pub(super) struct PlotCodex {
+pub struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
 #[derive(SaveData, Default, Clone)]
-pub(super) struct PlotCodexPage {
+pub struct PlotCodexPage {
     page: i32,
     is_new: bool,
 }
