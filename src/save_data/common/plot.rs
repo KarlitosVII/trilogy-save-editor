@@ -1,4 +1,5 @@
 use anyhow::Result;
+use async_trait::async_trait;
 
 use crate::{
     gui::Gui,
@@ -10,6 +11,7 @@ pub struct BitArray {
     variables: Vec<bool>,
 }
 
+#[async_trait(?Send)]
 impl SaveData for BitArray {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let num_bytes = Self::deserialize_from::<u32>(cursor)?;
@@ -49,8 +51,8 @@ impl SaveData for BitArray {
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_bitarray(ident, &mut self.variables);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_bitarray(ident, &mut self.variables).await;
     }
 }
 

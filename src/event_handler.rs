@@ -72,6 +72,7 @@ async fn open_save(path: PathBuf, ui_addr: &Sender<UiEvent>) -> Result<()> {
         };
 
         let _ = ui_addr.send_async(UiEvent::OpenedSave(save_game)).await;
+        let _ = ui_addr.send_async(UiEvent::Notification("Opened")).await;
     }
     Ok(())
 }

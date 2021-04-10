@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use async_trait::async_trait;
 use imgui::ImString;
 
 use crate::{gui::Gui, save_data::Dummy};
@@ -50,6 +51,7 @@ pub struct Me2SaveGame {
 #[derive(Clone)]
 pub struct Version(i32);
 
+#[async_trait(?Send)]
 impl SaveData for Version {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let version = Self::deserialize_from(cursor)?;
@@ -65,7 +67,7 @@ impl SaveData for Version {
         Self::serialize_to(&self.0, output)
     }
 
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
