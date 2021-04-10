@@ -1,4 +1,5 @@
 use anyhow::Result;
+use async_trait::async_trait;
 use imgui::ImString;
 
 use crate::{
@@ -15,6 +16,7 @@ pub mod plot;
 #[derive(Clone)]
 pub struct Checksum(u32);
 
+#[async_trait(?Send)]
 impl SaveData for Checksum {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(Self(Self::deserialize_from(cursor)?))
@@ -25,7 +27,7 @@ impl SaveData for Checksum {
         Self::serialize_to(&checksum, output)
     }
 
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]

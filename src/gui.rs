@@ -3,6 +3,7 @@ use flume::{Receiver, Sender};
 use imgui::{Ui, *};
 use indexmap::IndexMap;
 use std::{
+    future::Future,
     hash::Hash,
     sync::atomic::{AtomicUsize, Ordering},
 };
@@ -147,7 +148,7 @@ impl<'a> Gui<'a> {
             }
 
             // Notification
-            self.draw_nofification_overlay(&mut state.notification);
+            self.draw_nofification_overlay(&mut state.notification).await;
 
             match save_game {
                 None => ui.text(im_str!("Rien ici")),
@@ -158,7 +159,7 @@ impl<'a> Gui<'a> {
         }
     }
 
-    fn draw_nofification_overlay(&self, notification: &mut Option<NotificationState>) {
+    async fn draw_nofification_overlay(&self, notification: &mut Option<NotificationState>) {
         if let Some(NotificationState { string, close_time }) = notification {
             let ui = self.ui;
             let time = ui.time();
@@ -194,7 +195,7 @@ impl<'a> Gui<'a> {
         if let Some(_t) = TabBar::new(im_str!("me2-tabs")).begin(ui) {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
                 if let Some(_t) = ChildWindow::new("mass_effect_2").size([0.0, 0.0]).begin(ui) {
-                    save_game.draw_raw_ui(self, "Mass Effect 2");
+                    save_game.draw_raw_ui(self, "Mass Effect 2").await;
                 }
             }
         }
@@ -207,20 +208,20 @@ impl<'a> Gui<'a> {
         if let Some(_t) = TabBar::new(im_str!("me3-tabs")).begin(ui) {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
                 if let Some(_t) = ChildWindow::new("mass_effect_3").size([0.0, 0.0]).begin(ui) {
-                    save_game.draw_raw_ui(self, "Mass Effect 3");
+                    save_game.draw_raw_ui(self, "Mass Effect 3").await;
                 }
             }
         }
     }
 
     // Edit boxes
-    pub fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
+    pub async fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
         self.draw_colored_bg(ident, || {
             self.ui.input_text(&ImString::new(ident), value).build();
         });
     }
 
-    pub fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
+    pub async fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
@@ -229,7 +230,7 @@ impl<'a> Gui<'a> {
         });
     }
 
-    pub fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
+    pub async fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
@@ -238,7 +239,7 @@ impl<'a> Gui<'a> {
         });
     }
 
-    pub fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
+    pub async fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
@@ -247,7 +248,7 @@ impl<'a> Gui<'a> {
         });
     }
 
-    pub fn draw_edit_enum(&self, ident: &str, current_item: &mut usize, items: &[&ImStr]) {
+    pub async fn draw_edit_enum(&self, ident: &str, current_item: &mut usize, items: &[&ImStr]) {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
@@ -256,7 +257,7 @@ impl<'a> Gui<'a> {
         });
     }
 
-    pub fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
+    pub async fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
@@ -266,16 +267,16 @@ impl<'a> Gui<'a> {
     }
 
     // View widgets
-    pub fn draw_struct<F>(&self, ident: &str, fields: F)
+    pub async fn draw_struct<F>(&self, ident: &str, fields: F)
     where
-        F: FnOnce(),
+        F: Future<Output = ()>,
     {
         if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.ui) {
-            fields();
+            fields.await;
         }
     }
 
-    pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
+    pub async fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
     where
         T: SaveData + Default,
     {
@@ -290,43 +291,43 @@ impl<'a> Gui<'a> {
                         remove = Some(i);
                     }
                     ui.same_line();
-                    item.draw_raw_ui(self, &i.to_string());
+                    item.draw_raw_ui(self, &i.to_string()).await;
                 }
 
                 // Remove
                 if let Some(i) = remove {
                     list.remove(i);
                 }
-
-                // Add
-                if ui.button(&im_str!("add##add-{}", ident)) {
-                    // Ça ouvre automatiquement le tree node de l'élément ajouté
-                    TreeNode::new(&ImString::new(&list.len().to_string()))
-                        .opened(true, Condition::Always)
-                        .build(ui, || {});
-
-                    list.push(T::default());
-                }
             } else {
                 ui.text("Empty");
+            }
+
+            // Add
+            if ui.button(&im_str!("add##add-{}", ident)) {
+                // Ça ouvre automatiquement le tree node de l'élément ajouté
+                TreeNode::new(&ImString::new(&list.len().to_string()))
+                    .opened(true, Condition::Always)
+                    .build(ui, || {});
+
+                list.push(T::default());
             }
         }
     }
 
-    pub fn draw_bitarray(&self, ident: &str, list: &mut Vec<bool>) {
+    pub async fn draw_bitarray(&self, ident: &str, list: &mut Vec<bool>) {
         if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.ui) {
             if !list.is_empty() {
                 let mut clipper = ListClipper::new(list.len() as i32).begin(self.ui);
                 while clipper.step() {
                     for i in clipper.display_start()..clipper.display_end() {
-                        list[i as usize].draw_raw_ui(self, &i.to_string());
+                        list[i as usize].draw_raw_ui(self, &i.to_string()).await;
                     }
                 }
             }
         }
     }
 
-    pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
+    pub async fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
     where
         K: SaveData + Eq + Hash + Default,
         V: SaveData + Default,
@@ -343,31 +344,31 @@ impl<'a> Gui<'a> {
                     }
                     ui.same_line();
 
-                    TreeNode::new(&ImString::new(i.to_string())).build(ui, || {
+                    if let Some(_t) = TreeNode::new(&ImString::new(i.to_string())).push(ui) {
                         if let Some((key, value)) = list.get_index_mut(i) {
-                            key.draw_raw_ui(self, "##k");
-                            value.draw_raw_ui(self, "##v");
+                            key.draw_raw_ui(self, "##k").await;
+                            value.draw_raw_ui(self, "##v").await;
                         }
-                    });
+                    }
                 }
 
                 // Remove
                 if let Some(i) = remove {
                     list.shift_remove_index(i);
                 }
-
-                // Add
-                if ui.button(&im_str!("add##add-{}", ident)) {
-                    // Ça ouvre automatiquement le tree node de l'élément ajouté
-                    TreeNode::new(&ImString::new(&list.len().to_string()))
-                        .opened(true, Condition::Always)
-                        .build(ui, || {});
-
-                    // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
-                    list.entry(K::default()).or_default();
-                }
             } else {
                 ui.text("Empty");
+            }
+
+            // Add
+            if ui.button(&im_str!("add##add-{}", ident)) {
+                // Ça ouvre automatiquement le tree node de l'élément ajouté
+                TreeNode::new(&ImString::new(&list.len().to_string()))
+                    .opened(true, Condition::Always)
+                    .build(ui, || {});
+
+                // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
+                list.entry(K::default()).or_default();
             }
         }
     }

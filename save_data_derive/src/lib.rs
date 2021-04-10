@@ -49,11 +49,12 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         let field_string = field_name.as_ref().unwrap().to_string();
 
         quote! {
-            self.#field_name.draw_raw_ui(gui, #field_string);
+            self.#field_name.draw_raw_ui(gui, #field_string).await;
         }
     });
 
     let gen = quote! {
+        #[async_trait::async_trait(?Send)]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 Ok(Self {
@@ -67,10 +68,10 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
                 Ok(())
             }
 
-            fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
-                gui.draw_struct(ident, || {
+            async fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
+                gui.draw_struct(ident, async {
                     #(#draw_fields)*
-                });
+                }).await;
             }
         }
     };
@@ -91,13 +92,9 @@ fn impl_save_data_enum(
         },
         Span::call_site(),
     );
-    
+
     let serialize_enum_to_repr = Ident::new(
-        if name == "EndGameState" {
-            "serialize_enum_to_u32"
-        } else {
-            "serialize_enum_to_u8"
-        },
+        if name == "EndGameState" { "serialize_enum_to_u32" } else { "serialize_enum_to_u8" },
         Span::call_site(),
     );
 
@@ -135,6 +132,7 @@ fn impl_save_data_enum(
     });
 
     let gen = quote! {
+        #[async_trait::async_trait(?Send)]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 Self::#deserialize_enum_from_repr(cursor)
@@ -145,7 +143,7 @@ fn impl_save_data_enum(
                 Self::#serialize_enum_to_repr(self, output)
             }
 
-            fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
+            async fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
                 #(#let_variants)*
 
                 let items = [#(#array_variants),*];
@@ -154,7 +152,7 @@ fn impl_save_data_enum(
                     #(#match_variants),*
                 };
 
-                gui.draw_edit_enum(ident, &mut edit_item, &items);
+                gui.draw_edit_enum(ident, &mut edit_item, &items).await;
 
                 if edit_item != current_item
                 {

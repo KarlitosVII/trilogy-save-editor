@@ -1,4 +1,5 @@
 use anyhow::{anyhow, bail, Context, Result};
+use async_trait::async_trait;
 use bincode::{
     config::{AllowTrailing, FixintEncoding, WithOtherIntEncoding, WithOtherTrailing},
     DefaultOptions, Options,
@@ -55,13 +56,12 @@ impl SaveCursor {
     }
 }
 
-pub trait SaveData
-where
-    Self: Sized,
+#[async_trait(?Send)]
+pub trait SaveData: Sized
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str);
 
     // Generic
     fn deserialize_from<'a, D>(input: &'a mut SaveCursor) -> Result<D>
@@ -266,6 +266,7 @@ where
 // Implémentation des dummy
 pub type Dummy<const LEN: usize> = [u8; LEN];
 
+#[async_trait(?Send)]
 impl<const LEN: usize> SaveData for Dummy<LEN> {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let mut array = [0; LEN];
@@ -282,10 +283,11 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 // Implémentation des types std
+#[async_trait(?Send)]
 impl SaveData for i32 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(cursor)
@@ -295,11 +297,12 @@ impl SaveData for i32 {
         Self::serialize_to(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_i32(ident, self);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_i32(ident, self).await;
     }
 }
 
+#[async_trait(?Send)]
 impl SaveData for f32 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(cursor)
@@ -309,11 +312,12 @@ impl SaveData for f32 {
         Self::serialize_to(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_f32(ident, self);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_f32(ident, self).await;
     }
 }
 
+#[async_trait(?Send)]
 impl SaveData for bool {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_bool(cursor)
@@ -323,11 +327,12 @@ impl SaveData for bool {
         Self::serialize_to_bool(*self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_bool(ident, self);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_bool(ident, self).await;
     }
 }
 
+#[async_trait(?Send)]
 impl SaveData for ImString {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from_string(cursor)
@@ -337,11 +342,12 @@ impl SaveData for ImString {
         Self::serialize_to_string(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_string(ident, self);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_string(ident, self).await;
     }
 }
 
+#[async_trait(?Send)]
 impl<T> SaveData for Option<T>
 where
     T: SaveData,
@@ -369,13 +375,14 @@ where
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         if let Some(inner) = self {
-            inner.draw_raw_ui(ui, ident);
+            inner.draw_raw_ui(ui, ident).await;
         }
     }
 }
 
+#[async_trait(?Send)]
 impl<T> SaveData for Vec<T>
 where
     T: SaveData + Default,
@@ -388,16 +395,17 @@ where
         Self::serialize_to_array(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         // Ignore Dummy
         if type_name::<T>().contains("[u8; ") {
             return;
         }
 
-        ui.draw_vec(ident, self);
+        ui.draw_vec(ident, self).await;
     }
 }
 
+#[async_trait(?Send)]
 impl<K, V> SaveData for IndexMap<K, V>
 where
     K: SaveData + Eq + Hash + Default,
@@ -411,7 +419,7 @@ where
         Self::serialize_to_indexmap(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_indexmap(ident, self);
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_indexmap(ident, self).await;
     }
 }
