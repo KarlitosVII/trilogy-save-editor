@@ -1,12 +1,15 @@
-use anyhow::{Result};
+use anyhow::Result;
 use imgui::ImString;
 
-use crate::{save_data::{SaveCursor, SaveData}, ui::Ui};
+use crate::{
+    gui::Gui,
+    save_data::{SaveCursor, SaveData},
+};
 
 use super::crc32;
 
-pub mod player;
 pub mod appearance;
+pub mod player;
 pub mod plot;
 
 #[derive(Clone)]
@@ -22,7 +25,7 @@ impl SaveData for Checksum {
         Self::serialize_to(&checksum, output)
     }
 
-    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]

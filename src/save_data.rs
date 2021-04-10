@@ -11,12 +11,12 @@ use num_traits::{FromPrimitive, ToPrimitive};
 use serde::{Deserialize, Serialize};
 use std::{any::type_name, hash::Hash, mem::size_of, usize};
 
-use crate::ui::Ui;
+use crate::gui::Gui;
 
 pub mod common;
+mod crc32;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
-mod crc32;
 
 lazy_static! {
     pub static ref BINCODE: WithOtherTrailing<WithOtherIntEncoding<DefaultOptions, FixintEncoding>, AllowTrailing> =
@@ -61,7 +61,7 @@ where
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str);
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str);
 
     // Generic
     fn deserialize_from<'a, D>(input: &'a mut SaveCursor) -> Result<D>
@@ -282,7 +282,7 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 // Implémentation des types std
@@ -295,7 +295,7 @@ impl SaveData for i32 {
         Self::serialize_to(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_edit_i32(ident, self);
     }
 }
@@ -309,7 +309,7 @@ impl SaveData for f32 {
         Self::serialize_to(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_edit_f32(ident, self);
     }
 }
@@ -323,7 +323,7 @@ impl SaveData for bool {
         Self::serialize_to_bool(*self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_edit_bool(ident, self);
     }
 }
@@ -337,7 +337,7 @@ impl SaveData for ImString {
         Self::serialize_to_string(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_edit_string(ident, self);
     }
 }
@@ -369,7 +369,7 @@ where
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         if let Some(inner) = self {
             inner.draw_raw_ui(ui, ident);
         }
@@ -388,7 +388,7 @@ where
         Self::serialize_to_array(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         // Ignore Dummy
         if type_name::<T>().contains("[u8; ") {
             return;
@@ -411,7 +411,7 @@ where
         Self::serialize_to_indexmap(self, output)
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_indexmap(ident, self);
     }
 }

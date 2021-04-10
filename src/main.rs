@@ -13,8 +13,8 @@ use tokio::{
 };
 
 mod event_handler;
+mod gui;
 mod save_data;
-mod ui;
 
 #[tokio::main]
 async fn main() -> Result<(), JoinError> {
@@ -34,7 +34,7 @@ async fn main() -> Result<(), JoinError> {
     });
 
     let handle = Handle::current();
-    task::spawn_blocking(move || ui::run(event_addr, ui_rx, handle)).await?;
+    task::spawn_blocking(move || gui::run(event_addr, ui_rx, handle)).await?;
 
     event_loop.await
 }
@@ -61,7 +61,6 @@ mod console {
         },
     };
 
-    #[allow(clippy::missing_safety_doc)]
     pub fn attach() {
         unsafe {
             if AttachConsole(ATTACH_PARENT_PROCESS) == FALSE {
