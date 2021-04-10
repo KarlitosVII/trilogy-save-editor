@@ -1,9 +1,12 @@
-use imgui::ImString;
 use anyhow::{bail, Result};
+use imgui::ImString;
 
-use crate::{save_data::{Dummy,}, ui::Ui};
+use crate::{gui::Gui, save_data::Dummy};
 
-use super::{SaveCursor, SaveData, common::{Checksum, EndGameState, Level, Rotation, SaveTimeStamp, StreamingRecord, Vector}};
+use super::{
+    common::{Checksum, EndGameState, Level, Rotation, SaveTimeStamp, StreamingRecord, Vector},
+    SaveCursor, SaveData,
+};
 
 mod player;
 use player::*;
@@ -62,7 +65,7 @@ impl SaveData for Version {
         Self::serialize_to(&self.0, output)
     }
 
-    fn draw_raw_ui(&mut self, _: &Ui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]

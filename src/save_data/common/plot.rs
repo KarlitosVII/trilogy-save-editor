@@ -1,6 +1,9 @@
 use anyhow::Result;
 
-use crate::{save_data::{SaveCursor, SaveData}, ui::Ui};
+use crate::{
+    gui::Gui,
+    save_data::{SaveCursor, SaveData},
+};
 
 #[derive(Clone)]
 pub struct BitArray {
@@ -46,7 +49,7 @@ impl SaveData for BitArray {
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_bitarray(ident, &mut self.variables);
     }
 }

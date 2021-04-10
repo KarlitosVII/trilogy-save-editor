@@ -11,12 +11,11 @@ use syn::{
 pub fn save_data_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
 
-    let result = match ast.data {
+    match ast.data {
         syn::Data::Struct(ref s) => impl_save_data_struct(&ast, &s.fields),
         syn::Data::Enum(ref e) => impl_save_data_enum(&ast, &e.variants),
         _ => panic!("union not supported"),
-    };
-    result.into()
+    }
 }
 
 fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream {
@@ -50,7 +49,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         let field_string = field_name.as_ref().unwrap().to_string();
 
         quote! {
-            self.#field_name.draw_raw_ui(ui, #field_string);
+            self.#field_name.draw_raw_ui(gui, #field_string);
         }
     });
 
@@ -68,8 +67,8 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
                 Ok(())
             }
 
-            fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &str) {
-                ui.draw_struct(ident, || {
+            fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
+                gui.draw_struct(ident, || {
                     #(#draw_fields)*
                 });
             }
@@ -146,7 +145,7 @@ fn impl_save_data_enum(
                 Self::#serialize_enum_to_repr(self, output)
             }
 
-            fn draw_raw_ui(&mut self, ui: &crate::ui::Ui, ident: &str) {
+            fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
                 #(#let_variants)*
 
                 let items = [#(#array_variants),*];
@@ -155,7 +154,7 @@ fn impl_save_data_enum(
                     #(#match_variants),*
                 };
 
-                ui.draw_edit_enum(ident, &mut edit_item, &items);
+                gui.draw_edit_enum(ident, &mut edit_item, &items);
 
                 if edit_item != current_item
                 {

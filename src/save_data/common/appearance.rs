@@ -2,8 +2,8 @@ use anyhow::Result;
 use imgui::ImString;
 
 use crate::{
+    gui::Gui,
     save_data::{SaveCursor, SaveData},
-    ui::Ui,
 };
 
 use super::Vector;
@@ -93,7 +93,7 @@ impl SaveData for LinearColor {
         Ok(())
     }
 
-    fn draw_raw_ui(&mut self, ui: &Ui, ident: &str) {
+    fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
         ui.draw_edit_color(ident, &mut self.0);
     }
 }

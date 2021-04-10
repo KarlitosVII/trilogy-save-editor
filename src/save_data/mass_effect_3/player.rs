@@ -1,6 +1,12 @@
 use imgui::ImString;
 
-use crate::save_data::{Dummy, common::{appearance::Appearance, player::{ Notoriety, Origin, WeaponLoadout}}};
+use crate::save_data::{
+    common::{
+        appearance::Appearance,
+        player::{Notoriety, Origin, WeaponLoadout},
+    },
+    Dummy,
+};
 
 #[derive(SaveData, Clone)]
 pub struct Player {

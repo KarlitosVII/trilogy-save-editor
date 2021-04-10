@@ -7,12 +7,12 @@ use tokio::{
 };
 
 use crate::{
+    gui::UiEvent,
     save_data::{
         mass_effect_2::{self, Me2SaveGame},
         mass_effect_3::Me3SaveGame,
         SaveCursor, SaveData,
     },
-    ui::UiEvent,
 };
 
 pub enum MainEvent {
@@ -57,7 +57,9 @@ async fn open_save(path: PathBuf, ui_addr: &Sender<UiEvent>) -> Result<()> {
     if let Some(ext) = path.extension() {
         let mut cursor = SaveCursor::new(input);
         let save_game = match ext.to_string_lossy().to_lowercase().as_str() {
-            "masseffectsave" => {bail!("Mass Effect 1 not implemented (yet)");},
+            "masseffectsave" => {
+                bail!("Mass Effect 1 not implemented (yet)");
+            }
             _ => {
                 let is_me2 = mass_effect_2::Version::deserialize(&mut cursor).is_ok();
                 cursor.rshift_position(4)?;
