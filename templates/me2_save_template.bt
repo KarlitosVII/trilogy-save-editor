@@ -1,0 +1,506 @@
+
+// Bool
+typedef struct {
+	uint value: 1;
+    uint : 31;
+} bool <read=read_bool>;
+
+string read_bool(bool &b) {
+    if(b.value == 1)
+        return "true";
+    else
+        return "false";
+}
+
+// String
+typedef struct {
+	int len <bgcolor=0x000077>;
+    SetBackColor(0x000044 + len);
+
+	// Détection utf8
+	if (len < 0) {
+		wchar_t chars[Abs(len)];
+	}
+	else {
+		char chars[len];
+	}
+} String <read=read_string>;
+
+string read_string(String &s) {
+    if(exists(s.chars))
+        return s.chars;
+    else
+        return "<empty>";
+}
+
+// Difficulty
+enum <byte> Difficulty {
+    Narrative,
+	Casual,
+	Normal,
+	Hardcore,
+	Insanity,
+};
+
+// EndGameState
+enum <int> EndGameState {
+	NotFinished,
+	OutInABlazeOfGlory,
+	LivedToFightAgain,
+};
+
+// Timestamp
+typedef struct {
+	int seconds_since_midnight;
+	int day;
+	int month;
+	int year;
+} SaveTimeStamp <read=read_timestamp>;
+
+string read_timestamp(SaveTimeStamp &t) {
+    string s;
+    SPrintf(s, "%is, %id, %im, %iy", t.seconds_since_midnight, t.day, t.month, t.year);
+    return s;
+}
+
+// Vector
+typedef struct {
+	float x;
+	float y;
+	float z;
+} Vector <read=read_vector>;
+
+string read_vector(Vector &v) {
+    string s;
+    SPrintf(s, "[%g, %g, %g]", v.x, v.y, v.z);
+    return s;
+}
+
+// Rotation
+typedef struct {
+	int pitch;
+	int yaw;
+	int roll;
+} Rotation <read=read_rotation>;
+
+string read_rotation(Rotation &r) {
+    string s;
+    SPrintf(s, "[%i, %i, %i]", r.pitch, r.yaw, r.roll);
+    return s;
+}
+
+// Level
+struct Level {
+	String name;
+	bool should_be_loaded;
+	bool should_be_visible;
+};
+
+// StreamigState
+struct StreamigState {
+	String name;
+	bool is_active;
+};
+
+// KismetBool
+struct KismetBool {
+	GUID guid;
+	bool value;
+};
+
+// Door
+struct Door {
+	GUID guid;
+	byte current_state;
+	byte old_state;
+};
+
+// Appearance
+enum <ubyte> PlayerAppearanceType {
+	Parts,
+	Full
+};
+
+struct MorphFeature {
+    String feature;
+	float offset;
+};
+
+struct OffsetBone {
+	String name;
+	Vector offset;
+};
+
+struct ScalarParameter {
+	String name;
+	float value;
+};
+
+typedef struct {
+	float r;
+	float g;
+	float b;
+	float a;
+} LinearColor <read=read_linear_color>;
+
+string read_linear_color(LinearColor &c) {
+    string s;
+    SPrintf(s, "r: %g, g: %g, b: %g, a: %g]", c.r, c.g, c.b, c.a);
+    return s;
+}
+
+
+struct VectorParameter {
+	String name;
+	LinearColor value;
+};
+
+struct TextureParameter {
+	String name;
+	String value;
+};
+
+struct HeadMorph {
+	String hair_mesh;
+    struct {
+        int len;
+        String mesh[len];
+    } accessory_mesh;
+    struct {
+        int len;
+        MorphFeature feature[len] <optimize=false>;
+    } morph_features;
+    struct {
+        int len;
+        OffsetBone bone[len] <optimize=false>;
+    } offset_bones;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod0_vertices;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod1_vertices;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod2_vertices;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod3_vertices;
+    struct {
+        int len;
+        ScalarParameter scalar[len] <optimize=false>;
+    } scalar_parameters;
+    struct {
+        int len;
+        VectorParameter vector[len] <optimize=false>;
+    } vector_parameters;
+    struct {
+        int len;
+        TextureParameter texture[len] <optimize=false>;
+    } texture_parameters;
+};
+
+struct Appearance {
+	PlayerAppearanceType combat_appearance;
+	int casual_id;
+	int full_body_id;
+	int torso_id;
+	int shoulder_id;
+	int arm_id;
+	int leg_id;
+	int specular_id;
+	int tint1_id;
+	int tint2_id;
+	int tint3_id;
+	int pattern_id;
+	int pattern_color_id;
+	int helmet_id;
+	bool has_head_morph;
+	if (has_head_morph.value == 1) {
+		HeadMorph head_morph;
+	}
+};
+
+// Player
+enum <byte> Origin {
+	None,
+	Spacer,
+	Colony,
+	Earthborn,
+};
+
+enum <byte> Notoriety {
+	NoneN,
+	Survivor,
+	Warhero,
+	Ruthless,
+};
+
+struct Power {
+	String name;
+	float current_rank;
+	String power_class_name;
+	int wheel_display_index;
+};
+
+struct Weapon {
+	String class_name;
+	int ammo_used_count;
+	int ammo_total;
+	bool current_weapon;
+	bool was_last_weapon;
+	String ammo_power_name;
+};
+
+struct WeaponLoadout {
+	String assaul_rifle;
+	String shotgun;
+	String sniper_rifle;
+	String submachine_gun;
+	String pistol;
+	String heavy_weapon;
+};
+
+struct Hotkey {
+	String pawn_name;
+	int power_id;
+};
+
+struct Player {
+	bool is_female;
+	String class_name;
+	int level;
+	float current_xp;
+	String first_name;
+	int last_name;
+    Origin origin;
+    Notoriety notoriety;
+	int talent_points;
+	String mapped_power_1;
+	String mapped_power_2;
+	String mapped_power_3;
+	Appearance appearance;
+    struct {
+        int len;
+        Power power[len] <optimize=false>;
+    } powers;
+    struct {
+        int len;
+        Weapon weapon[len] <optimize=false>;
+    } weapons;
+	WeaponLoadout weapon_loadout;
+    struct {
+        int len;
+        Hotkey hotkey[len] <optimize=false>;
+    } hotkeys;
+	int credits;
+	int medigel;
+	int eezo;
+	int iridium;
+	int palladium;
+	int platinum;
+	int probes;
+	float current_fuel;
+	String face_code;
+	int class_friendly_name;
+};
+
+// Squad
+struct Henchman {
+	String tag;
+    struct {
+        int len;
+        Power power[len] <optimize=false>;
+    } powers;
+	int character_level;
+	int talent_points;
+	WeaponLoadout weapon_loadout;
+	String mapped_power;
+};
+
+// Plot Table
+typedef struct {
+    uint b00: 1;
+    uint b01: 1;
+    uint b02: 1;
+    uint b03: 1;
+    uint b04: 1;
+    uint b05: 1;
+    uint b06: 1;
+    uint b07: 1;
+    uint b08: 1;
+    uint b09: 1;
+    uint b10: 1;
+    uint b11: 1;
+    uint b12: 1;
+    uint b13: 1;
+    uint b14: 1;
+    uint b15: 1;
+    uint b16: 1;
+    uint b17: 1;
+    uint b18: 1;
+    uint b19: 1;
+    uint b20: 1;
+    uint b21: 1;
+    uint b22: 1;
+    uint b23: 1;
+    uint b24: 1;
+    uint b25: 1;
+    uint b26: 1;
+    uint b27: 1;
+    uint b28: 1;
+    uint b29: 1;
+    uint b30: 1;
+    uint b31: 1;
+} BitField;
+
+struct BitArray {
+	uint len;
+    BitField bit_field[len];
+};
+
+struct PlotQuest {
+	int quest_counter;
+	bool quest_updated;
+    struct {
+        int len;
+        int history[len];
+    } histories;
+};
+
+struct PlotCodexPage {
+	int page;
+	bool is_new;
+};
+
+struct PlotCodex {
+	uint len;
+	PlotCodexPage page[len];
+};
+
+struct PlotTable {
+	BitArray bool_variables;
+    struct {
+        int len;
+        int pair[len];
+    } int_variables;
+    struct {
+        int len;
+        float pair[len];
+    } float_variables;
+	int quest_progress_counter;
+    struct {
+        int len;
+        PlotQuest quest[len] <optimize=false>;
+    } quest_progress;
+    struct {
+        int len;
+        int id[len];
+    } quest_ids;
+    struct {
+        int len;
+        PlotCodex entry[len] <optimize=false>;
+    } codex_entries;
+    struct {
+        int len;
+        int id[len];
+    } codex_ids;
+};
+
+struct Me1PlotTable {
+	BitArray bool_variables;
+    struct {
+        int len;
+        int pair[len];
+    } int_variables;
+    struct {
+        int len;
+        float pair[len];
+    } float_variables;
+};
+
+// GalaxyMap
+typedef struct {
+	float x;
+	float y;
+} Vector2d <read=read_vector2d>;
+
+string read_vector2d(Vector2d &v) {
+    string s;
+    SPrintf(s, "[%g, %g]", v.x, v.y);
+    return s;
+}
+
+struct Planet {
+	int id;
+	bool visited;
+    struct {
+        int len;
+        Vector2d probe[len];
+    } probes;
+};
+
+struct GalaxyMap {
+    struct {
+        int len;
+        Planet planet[len] <optimize=false>;
+    } planets;
+};
+
+// DependentDlc
+struct DependentDlc {
+	int id;
+	String name;
+};
+
+// SaveGame
+struct {
+	int version;
+	String debug_name;
+	float seconds_played;
+	int disc;
+	String base_level_name;
+    Difficulty difficulty;
+    EndGameState end_game_state;
+	SaveTimeStamp timestamp;
+	Vector location;
+    Rotation rotation;
+    int current_loading_tip;
+    struct {
+        int len;
+        Level level[len] <optimize=false>;
+    } levels;
+    struct {
+        int len;
+        StreamigState state[len] <optimize=false>;
+    } streaming_records;
+    struct {
+        int len;
+        KismetBool kismet[len] <optimize=false>;
+    } kismet_records;
+    struct {
+        int len;
+        Door door[len] <optimize=false>;
+    } doors;
+    struct {
+        int len;
+        GUID pawn[len];
+    } pawns;
+    Player player;
+    struct {
+        int len;
+        Henchman henchman[len] <optimize=false>;
+    } squad;
+    PlotTable plot;
+    Me1PlotTable me1_plot;
+    GalaxyMap galaxy_map;
+    struct {
+        int len;
+        DependentDlc dlc[len] <optimize=false>;
+    } dependent_dlcs;
+    uint checksum <format=hex>;
+} MassEffect2 <open=true>;
