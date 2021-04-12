@@ -12,7 +12,7 @@ lto = true
 # Macro
 save_data_derive = { path = "save_data_derive" }
 # Windows
-winapi = { version = "0.3", features = ["consoleapi", "wincon"] }
+winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-features = false }
 wfd = "0.1"
 # Std-like
 anyhow = "1.0"
@@ -33,12 +33,11 @@ tokio = { version = "1.0", features = [
 # Sync
 # parking_lot = "0.11"
 flume = { version = "0.10", features = ["async"], default-features = false }
-# Parallelism
-# rayon = "1.5"
 # Utils
 lazy_static = "1.4"
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"], default-features = false }
 bincode = "1.3"
+zip = { version = "0.5", features = ["deflate-miniz"], default-features = false }
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs" }

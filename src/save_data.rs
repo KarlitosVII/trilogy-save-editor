@@ -16,6 +16,7 @@ use crate::gui::Gui;
 
 pub mod common;
 mod crc32;
+pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
 
@@ -37,7 +38,7 @@ impl SaveCursor {
     pub fn read(&mut self, num_bytes: usize) -> Result<&[u8]> {
         let end = self.position + num_bytes;
         if self.bytes.len() < end {
-            bail!("Unexpected end of file");
+            bail!("Unexpected end of file, some data in your save are unexpected or your save is corrupted ?\nSave again and retry. If this error persists, please report a bug with your save attached.");
         }
 
         let slice = &self.bytes[self.position..end];
@@ -46,19 +47,18 @@ impl SaveCursor {
         Ok(slice)
     }
 
-    pub fn rshift_position(&mut self, shift: usize) -> Result<()> {
-        if self.position < shift {
-            panic!("Position can't be negative");
-        }
+    pub fn read_to_end(&mut self) -> Result<&[u8]> {
+        self.read(self.bytes.len() - self.position)
+    }
 
+    pub fn rshift_position(&mut self, shift: usize) -> Result<()> {
         self.position -= shift;
         Ok(())
     }
 }
 
 #[async_trait(?Send)]
-pub trait SaveData: Sized
-{
+pub trait SaveData: Sized {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
     async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str);
@@ -288,6 +288,19 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
 
 // Implémentation des types std
 #[async_trait(?Send)]
+impl SaveData for u32 {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Self::deserialize_from(cursor)
+    }
+
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        Self::serialize_to(self, output)
+    }
+
+    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+}
+
+#[async_trait(?Send)]
 impl SaveData for i32 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Self::deserialize_from(cursor)
@@ -365,9 +378,11 @@ where
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        if output.len() >= 4
-            && BINCODE.deserialize::<i32>(&output[output.len() - 4..output.len()])? != 0
-        {
+        debug_assert!(
+            output.len() >= 4,
+            "Une Option<T> doit toujours être précédée par un booléen"
+        );
+        if BINCODE.deserialize::<i32>(&output[output.len() - 4..output.len()])? != 0 {
             if let Some(input) = self {
                 T::serialize(input, output)?;
             }
