@@ -28,19 +28,17 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let deserialize_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
-        let field_type = &f.ty;
 
         quote! {
-            #field_name: <#field_type as crate::save_data::SaveData>::deserialize(cursor)?
+            #field_name: crate::save_data::SaveData::deserialize(cursor)?
         }
     });
 
     let serialize_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
-        let field_type = &f.ty;
 
         quote! {
-            <#field_type as crate::save_data::SaveData>::serialize(&self.#field_name, output)?;
+            crate::save_data::SaveData::serialize(&self.#field_name, output)?;
         }
     });
 

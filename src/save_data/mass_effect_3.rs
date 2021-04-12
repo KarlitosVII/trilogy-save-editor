@@ -25,9 +25,9 @@ use galaxy_map::*;
 #[derive(SaveData, Clone)]
 pub struct Me3SaveGame {
     version: Version,
-    debug_name: Vec<Dummy<1>>,
+    _debug_name: Vec<Dummy<1>>,
     seconds_played: f32,
-    disc: Dummy<4>,
+    _disc: Dummy<4>,
     base_level_name: ImString,
     base_level_name_display_override_as_read: ImString,
     difficulty: Difficulty,
@@ -35,13 +35,13 @@ pub struct Me3SaveGame {
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotation,
-    current_loading_tip: Dummy<4>,
+    _current_loading_tip: Dummy<4>,
     levels: Vec<Level>,
     streaming_records: Vec<StreamingRecord>,
-    kismet_records: Vec<Dummy<20>>,
-    doors: Vec<Dummy<18>>,
-    placeables: Vec<Dummy<18>>,
-    pawns: Vec<Dummy<16>>,
+    _kismet_records: Vec<Dummy<20>>,
+    _doors: Vec<Dummy<18>>,
+    _placeables: Vec<Dummy<18>>,
+    _pawns: Vec<Dummy<16>>,
     player: Player,
     squad: Vec<Henchman>,
     plot: PlotTable,
@@ -50,10 +50,10 @@ pub struct Me3SaveGame {
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
-    use_modules: Vec<Dummy<16>>,
+    _use_modules: Vec<Dummy<16>>,
     conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
-    saved_objective_text: Dummy<4>,
+    _saved_objective_text: Dummy<4>,
     checksum: Checksum,
 }
 
@@ -160,7 +160,7 @@ mod test {
         Me3SaveGame::serialize(&me3_save_game, &mut output)?;
 
         // Check serialized = input
-        assert_eq!(&output, &input);
+        assert_eq!(&input, &output);
 
         Ok(())
     }

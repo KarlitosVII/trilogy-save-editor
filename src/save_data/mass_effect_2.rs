@@ -24,21 +24,21 @@ use galaxy_map::*;
 #[derive(SaveData, Clone)]
 pub struct Me2SaveGame {
     version: Version,
-    debug_name: Vec<Dummy<1>>,
+    _debug_name: Vec<Dummy<1>>,
     seconds_played: f32,
-    disc: Dummy<4>,
+    _disc: Dummy<4>,
     base_level_name: ImString,
     difficulty: Difficulty,
     end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotation,
-    current_loading_tip: Dummy<4>,
+    _current_loading_tip: Dummy<4>,
     levels: Vec<Level>,
     streaming_records: Vec<StreamingRecord>,
-    kismet_records: Vec<Dummy<20>>,
-    doors: Vec<Dummy<18>>,
-    pawns: Vec<Dummy<16>>,
+    _kismet_records: Vec<Dummy<20>>,
+    _doors: Vec<Dummy<18>>,
+    _pawns: Vec<Dummy<16>>,
     player: Player,
     squad: Vec<Henchman>,
     plot: PlotTable,
@@ -150,7 +150,7 @@ mod test {
         Me2SaveGame::serialize(&me3_save_game, &mut output)?;
 
         // Check serialized = input
-        assert_eq!(&output, &input);
+        assert_eq!(&input, &output);
 
         Ok(())
     }

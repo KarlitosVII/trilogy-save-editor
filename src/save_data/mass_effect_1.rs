@@ -12,23 +12,23 @@ use self::player::*;
 
 #[derive(Clone)]
 pub struct Me1SaveGame {
-    begin: Dummy<8>,
+    _begin: Dummy<8>,
     zip_offset: u32,
-    no_mans_land: Vec<u8>,
+    _no_mans_land: Vec<u8>,
     player: Player,
-    state: State,
-    world_save_package: WorldSavePackage,
+    _state: State,
+    _world_save_package: WorldSavePackage,
 }
 
 #[async_trait(?Send)]
 impl SaveData for Me1SaveGame {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let begin: Dummy<8> = SaveData::deserialize(cursor)?;
+        let _begin: Dummy<8> = SaveData::deserialize(cursor)?;
         let zip_offset: u32 = SaveData::deserialize(cursor)?;
-        let no_mans_land = cursor.read(zip_offset as usize - 12)?.to_owned();
+        let _no_mans_land = cursor.read(zip_offset as usize - 12)?.to_owned();
 
-        let zip_data = cursor.read_to_end()?;
-        let mut zip = ZipArchive::new(Cursor::new(zip_data))?;
+        let zip_data = Cursor::new(cursor.read_to_end()?);
+        let mut zip = ZipArchive::new(zip_data)?;
 
         let player: Player = {
             let mut bytes = Vec::new();
@@ -37,30 +37,30 @@ impl SaveData for Me1SaveGame {
             SaveData::deserialize(&mut cursor)?
         };
 
-        let state: State = {
+        let _state: State = {
             let mut bytes = Vec::new();
             zip.by_name("state.sav")?.read_to_end(&mut bytes)?;
             let mut cursor = SaveCursor::new(bytes);
             SaveData::deserialize(&mut cursor)?
         };
 
-        let world_save_package: WorldSavePackage = {
+        let _world_save_package: WorldSavePackage = {
             let mut bytes = Vec::new();
             zip.by_name("WorldSavePackage.sav")?.read_to_end(&mut bytes)?;
             let mut cursor = SaveCursor::new(bytes);
             SaveData::deserialize(&mut cursor)?
         };
 
-        Ok(Self { begin, zip_offset, no_mans_land, player, state, world_save_package })
+        Ok(Self { _begin, zip_offset, _no_mans_land, player, _state, _world_save_package })
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let Me1SaveGame { begin, zip_offset, no_mans_land, player, state, world_save_package } =
-            &self;
+        let Me1SaveGame { _begin, zip_offset, _no_mans_land, player, _state, _world_save_package } =
+            self;
 
-        begin.serialize(output)?;
+        _begin.serialize(output)?;
         zip_offset.serialize(output)?;
-        output.extend(no_mans_land);
+        output.extend(_no_mans_land);
 
         let mut zip = Vec::new();
         {
@@ -74,19 +74,17 @@ impl SaveData for Me1SaveGame {
                 zipper.start_file("player.sav", options)?;
                 zipper.write_all(&player_data)?;
             }
-
             // State
             {
                 let mut state_data = Vec::new();
-                state.serialize(&mut state_data)?;
+                _state.serialize(&mut state_data)?;
                 zipper.start_file("state.sav", options)?;
                 zipper.write_all(&state_data)?;
             }
-
             // WorldSavePackage
             {
                 let mut world_save_package_data = Vec::new();
-                world_save_package.serialize(&mut world_save_package_data)?;
+                _world_save_package.serialize(&mut world_save_package_data)?;
                 zipper.start_file("WorldSavePackage.sav", options)?;
                 zipper.write_all(&world_save_package_data)?;
             }
@@ -113,7 +111,8 @@ macro_rules! zip_file_save_data {
             }
 
             fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-                Ok(output.extend(&self.data))
+                output.extend(&self.data);
+                Ok(())
             }
 
             async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
@@ -157,7 +156,7 @@ mod test {
         Me1SaveGame::serialize(&me1_save_game, &mut output_2)?;
 
         // Check 2nd serialize = first serialize
-        assert_eq!(&output_2, &output);
+        assert_eq!(&output, &output_2);
 
         Ok(())
     }
