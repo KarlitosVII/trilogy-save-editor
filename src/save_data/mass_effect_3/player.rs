@@ -48,7 +48,7 @@ pub struct Player {
     grenades: i32,
     face_code: ImString,
     class_friendly_name: i32,
-    character_guid: Dummy<16>,
+    _character_guid: Dummy<16>,
 }
 
 #[derive(SaveData, Default, Clone)]

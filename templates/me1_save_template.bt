@@ -45,26 +45,26 @@ string read_name(Name &n) {
 
 // Import
 struct Import {
-    int index_package_name;
+    uint index_package_name;
     FSkip(4);
-    int index_class_name;
+    uint index_class_name;
     FSkip(4);
-    int index_link;
-    int index_object_name;
+    uint index_link;
+    uint index_object_name;
     FSkip(4);
 };
 
 // Export
 struct Export {
-    int class_name_id;
+    uint class_name_id;
     FSkip(4);
-    int link_id;
-    int object_name_id;
-    int index_archtype_name;
+    uint link_id;
+    uint object_name_id;
+    uint index_archtype_name;
     FSkip(8);
-    int flag;
-    int data_size;
-    int data_offset;
+    uint flag;
+    uint data_size;
+    uint data_offset;
     FSkip(32);
 };
 
@@ -76,26 +76,26 @@ struct Data {
 // SaveGame
 struct {
     FSeek(0x8);
-	int offset <format=hex, bgcolor=0x00aa55>;
-    FSeek(offset);
+	int header_offset <format=hex, bgcolor=0x00aa55>;
+    FSeek(header_offset);
     struct {
         uint magic <format=hex>;
-        uint16 version;
-        uint16 licence_version;
-        int data_offset <format=hex>;
+        uint16 low_version;
+        uint16 high_version;
+        uint data_offset <format=hex>;
         String upx_name;
         uint flags <format=hex>;
-        int names_len;
-        int names_offset <format=hex>;
-        int exports_len;
-        int exports_offset <format=hex>;
-        int imports_len;
-        int imports_offset <format=hex>;
-        int no_mans_land_offset <format=hex>;
+        uint names_len;
+        uint names_offset <format=hex>;
+        uint exports_len;
+        uint exports_offset <format=hex>;
+        uint imports_len;
+        uint imports_offset <format=hex>;
+        uint no_mans_land_offset <format=hex>;
         FSkip(16);
-        int generations <format=hex>;
+        uint generations <format=hex>;
         FSkip(36 + generations * 12);
-        int compression;
+        uint compression;
     } header <bgcolor=0x8855ff>;
     struct {
         FSeek(header.names_offset);
@@ -109,12 +109,9 @@ struct {
         FSeek(header.exports_offset);
 	    Export export[header.exports_len] <optimize=false>;
     } exports <bgcolor=0xff8855>;
+    // No man's land
+    FSeek(header.data_offset);
     struct {
-        FSeek(header.no_mans_land_offset);
-        byte something[header.data_offset - header.no_mans_land_offset];
-    } no_mans_land <bgcolor=0x887766>;
-    struct {
-        FSeek(header.data_offset);
         local int i;
         for (i = 0; i < header.exports_len; i++) {
             FSeek(exports.export[i].data_offset);
