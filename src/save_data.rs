@@ -14,8 +14,8 @@ use std::{any::type_name, hash::Hash, mem::size_of, usize};
 
 use crate::gui::Gui;
 
-mod crc32;
 pub mod common;
+mod crc32;
 pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;

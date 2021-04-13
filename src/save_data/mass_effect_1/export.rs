@@ -89,7 +89,7 @@ macro_rules! serialize {
 
 #[derive(Clone)]
 enum Property {
-    ArrayProperty {
+    Array {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -98,7 +98,7 @@ enum Property {
         _osef3: Dummy<4>,
         array: Vec<ArrayType>,
     },
-    BoolProperty {
+    Bool {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -107,7 +107,7 @@ enum Property {
         _osef3: Dummy<4>,
         value: bool,
     },
-    ByteProperty {
+    Byte {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -116,7 +116,7 @@ enum Property {
         _osef3: Dummy<4>,
         value: u8,
     },
-    FloatProperty {
+    Float {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -125,7 +125,7 @@ enum Property {
         _osef3: Dummy<4>,
         value: f32,
     },
-    IntProperty {
+    Int {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -134,7 +134,7 @@ enum Property {
         _osef3: Dummy<4>,
         value: i32,
     },
-    NameProperty {
+    Name {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -144,7 +144,7 @@ enum Property {
         value_name_id: u32,
         _osef4: Dummy<4>,
     },
-    ObjectProperty {
+    Object {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -153,7 +153,7 @@ enum Property {
         _osef3: Dummy<4>,
         object_id: i32,
     },
-    StrProperty {
+    Str {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -162,7 +162,7 @@ enum Property {
         _osef3: Dummy<4>,
         string: ImString,
     },
-    StringRefProperty {
+    StringRef {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -171,7 +171,7 @@ enum Property {
         _osef3: Dummy<4>,
         value: i32,
     },
-    StructProperty {
+    Struct {
         name_id: u32,
         _osef1: Dummy<4>,
         type_id: u32,
@@ -243,20 +243,20 @@ impl Property {
                         }
                     }
                 }
-                Self::ArrayProperty { name_id, _osef1, type_id, _osef2, size, _osef3, array }
+                Self::Array { name_id, _osef1, type_id, _osef2, size, _osef3, array }
             }
             "BoolProperty" => {
                 let value = SaveData::deserialize(cursor)?;
-                Self::BoolProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                Self::Bool { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "ByteProperty" => {
                 if size == 1 {
                     let value = SaveData::deserialize(cursor)?;
-                    Self::ByteProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                    Self::Byte { name_id, _osef1, type_id, _osef2, size, _osef3, value }
                 } else {
                     let value_name_id = SaveData::deserialize(cursor)?;
                     let _osef4 = SaveData::deserialize(cursor)?;
-                    Self::NameProperty {
+                    Self::Name {
                         name_id,
                         _osef1,
                         type_id,
@@ -270,37 +270,28 @@ impl Property {
             }
             "FloatProperty" => {
                 let value = SaveData::deserialize(cursor)?;
-                Self::FloatProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                Self::Float { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "IntProperty" => {
                 let value = SaveData::deserialize(cursor)?;
-                Self::IntProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                Self::Int { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "NameProperty" => {
                 let value_name_id = SaveData::deserialize(cursor)?;
                 let _osef4 = SaveData::deserialize(cursor)?;
-                Self::NameProperty {
-                    name_id,
-                    _osef1,
-                    type_id,
-                    _osef2,
-                    size,
-                    _osef3,
-                    value_name_id,
-                    _osef4,
-                }
+                Self::Name { name_id, _osef1, type_id, _osef2, size, _osef3, value_name_id, _osef4 }
             }
             "ObjectProperty" => {
                 let object_id = SaveData::deserialize(cursor)?;
-                Self::ObjectProperty { name_id, _osef1, type_id, _osef2, size, _osef3, object_id }
+                Self::Object { name_id, _osef1, type_id, _osef2, size, _osef3, object_id }
             }
             "StrProperty" => {
                 let string = SaveData::deserialize(cursor)?;
-                Self::StrProperty { name_id, _osef1, type_id, _osef2, size, _osef3, string }
+                Self::Str { name_id, _osef1, type_id, _osef2, size, _osef3, string }
             }
             "StringRefProperty" => {
                 let value = SaveData::deserialize(cursor)?;
-                Self::StringRefProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                Self::StringRef { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "StructProperty" => {
                 let struct_name_id = SaveData::deserialize(cursor)?;
@@ -313,7 +304,7 @@ impl Property {
                     "Rotator" => StructType::rotator(cursor)?,
                     _ => StructType::properties(names, cursor)?,
                 };
-                Self::StructProperty {
+                Self::Struct {
                     name_id,
                     _osef1,
                     type_id,
@@ -337,26 +328,26 @@ impl Property {
     pub fn size(&self) -> Result<usize> {
         let mut size = 24;
         Ok(match self {
-            Property::ArrayProperty { array, .. } => {
+            Property::Array { array, .. } => {
                 size += 4;
                 for item in array {
                     size += item.size()?
                 }
                 size
             }
-            Property::BoolProperty { .. } => size + 4,
-            Property::ByteProperty { .. } => size + 1,
-            Property::FloatProperty { .. } => size + 4,
-            Property::IntProperty { .. } => size + 4,
-            Property::NameProperty { .. } => size + 8,
-            Property::ObjectProperty { .. } => size + 4,
-            Property::StrProperty { string, .. } => {
+            Property::Bool { .. } => size + 4,
+            Property::Byte { .. } => size + 1,
+            Property::Float { .. } => size + 4,
+            Property::Int { .. } => size + 4,
+            Property::Name { .. } => size + 8,
+            Property::Object { .. } => size + 4,
+            Property::Str { string, .. } => {
                 let mut bytes = Vec::new();
                 string.serialize(&mut bytes)?;
                 size + bytes.len()
             }
-            Property::StringRefProperty { .. } => size + 4,
-            Property::StructProperty { properties, .. } => size + properties.size()? + 8,
+            Property::StringRef { .. } => size + 4,
+            Property::Struct { properties, .. } => size + properties.size()? + 8,
             Property::None { .. } => 8,
         })
     }
@@ -370,7 +361,7 @@ impl SaveData for Property {
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
         match self {
-            Property::ArrayProperty { name_id, _osef1, type_id, _osef2, size, _osef3, array } => {
+            Property::Array { name_id, _osef1, type_id, _osef2, size, _osef3, array } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3);
 
                 let len = array.len() as u32;
@@ -380,19 +371,19 @@ impl SaveData for Property {
                     SaveData::serialize(item, output)?;
                 }
             }
-            Property::BoolProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
+            Property::Bool { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
             }
-            Property::ByteProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
+            Property::Byte { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
             }
-            Property::FloatProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
+            Property::Float { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
             }
-            Property::IntProperty { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
+            Property::Int { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
             }
-            Property::NameProperty {
+            Property::Name {
                 name_id,
                 _osef1,
                 type_id,
@@ -412,32 +403,16 @@ impl SaveData for Property {
                 value_name_id,
                 _osef4
             ),
-            Property::ObjectProperty {
-                name_id,
-                _osef1,
-                type_id,
-                _osef2,
-                size,
-                _osef3,
-                object_id,
-            } => {
+            Property::Object { name_id, _osef1, type_id, _osef2, size, _osef3, object_id } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, object_id)
             }
-            Property::StrProperty { name_id, _osef1, type_id, _osef2, size, _osef3, string } => {
+            Property::Str { name_id, _osef1, type_id, _osef2, size, _osef3, string } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, string)
             }
-            Property::StringRefProperty {
-                name_id,
-                _osef1,
-                type_id,
-                _osef2,
-                size,
-                _osef3,
-                value,
-            } => {
+            Property::StringRef { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
                 serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
             }
-            Property::StructProperty {
+            Property::Struct {
                 name_id,
                 _osef1,
                 type_id,

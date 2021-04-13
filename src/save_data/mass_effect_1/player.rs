@@ -1,7 +1,7 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use imgui::ImString;
-use std::{mem::size_of};
+use std::mem::size_of;
 
 use crate::{gui::Gui, save_data::Dummy};
 
@@ -186,7 +186,10 @@ struct Import {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use std::{fs::File,io::{Cursor, Read}};
+    use std::{
+        fs::File,
+        io::{Cursor, Read},
+    };
     use zip::ZipArchive;
 
     use crate::save_data::*;
