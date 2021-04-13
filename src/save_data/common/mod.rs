@@ -59,7 +59,7 @@ pub struct Vector2d {
 }
 
 #[derive(SaveData, Clone)]
-pub struct Rotation {
+pub struct Rotator {
     pitch: i32,
     yaw: i32,
     roll: i32,

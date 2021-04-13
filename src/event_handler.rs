@@ -63,7 +63,7 @@ async fn open_save(path: &Path, ui_addr: &Sender<UiEvent>) -> Result<()> {
             }
             _ => {
                 let is_me2 = mass_effect_2::Version::deserialize(&mut cursor).is_ok();
-                cursor.rshift_position(4)?;
+                cursor.rshift_position(4);
                 if is_me2 {
                     SaveGame::MassEffect2(Box::new(Me2SaveGame::deserialize(&mut cursor)?))
                 } else {

@@ -10,6 +10,8 @@ use super::{SaveCursor, SaveData};
 mod player;
 use self::player::*;
 
+mod export;
+
 #[derive(Clone)]
 pub struct Me1SaveGame {
     _begin: Dummy<8>,
@@ -17,7 +19,7 @@ pub struct Me1SaveGame {
     _no_mans_land: Vec<u8>,
     player: Player,
     _state: State,
-    _world_save_package: WorldSavePackage,
+    _world_save_package: Option<WorldSavePackage>,
 }
 
 #[async_trait(?Send)]
@@ -44,12 +46,17 @@ impl SaveData for Me1SaveGame {
             SaveData::deserialize(&mut cursor)?
         };
 
-        let _world_save_package: WorldSavePackage = {
-            let mut bytes = Vec::new();
-            zip.by_name("WorldSavePackage.sav")?.read_to_end(&mut bytes)?;
-            let mut cursor = SaveCursor::new(bytes);
-            SaveData::deserialize(&mut cursor)?
-        };
+        let _world_save_package: Option<WorldSavePackage> =
+            if zip.file_names().any(|f| f == "WorldSavePackage.sav") {
+                Some({
+                    let mut bytes = Vec::new();
+                    zip.by_name("WorldSavePackage.sav")?.read_to_end(&mut bytes)?;
+                    let mut cursor = SaveCursor::new(bytes);
+                    SaveData::deserialize(&mut cursor)?
+                })
+            } else {
+                None
+            };
 
         Ok(Self { _begin, zip_offset, _no_mans_land, player, _state, _world_save_package })
     }
@@ -82,7 +89,7 @@ impl SaveData for Me1SaveGame {
                 zipper.write_all(&state_data)?;
             }
             // WorldSavePackage
-            {
+            if let Some(_world_save_package) = _world_save_package {
                 let mut world_save_package_data = Vec::new();
                 _world_save_package.serialize(&mut world_save_package_data)?;
                 zipper.start_file("WorldSavePackage.sav", options)?;
@@ -125,39 +132,45 @@ zip_file_save_data!(WorldSavePackage);
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use tokio::{fs::File, io::AsyncReadExt};
+    use std::{fs::File, io::Read};
 
     use crate::save_data::*;
 
     use super::*;
 
-    #[tokio::test]
-    async fn test_deserialize_serialize() -> Result<()> {
-        let mut input = Vec::new();
-        {
-            let mut file = File::open("test/Clare00_AutoSave.MassEffectSave").await?;
-            file.read_to_end(&mut input).await?;
+    #[test]
+    fn dezip_deserialize_serialize_zip() -> Result<()> {
+        let files = [
+            "test/Clare00_AutoSave.MassEffectSave", // Avec WorldSavePackage.sav
+            "test/Char_01-60-3-2-2-26-6-2018-57-26.MassEffectSave", // Sans
+        ];
+
+        for file in &files {
+            let mut input = Vec::new();
+            {
+                let mut file = File::open(file)?;
+                file.read_to_end(&mut input)?;
+            }
+
+            // Deserialize
+            let mut cursor = SaveCursor::new(input);
+            let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
+
+            // Serialize
+            let mut output = Vec::new();
+            Me1SaveGame::serialize(&me1_save_game, &mut output)?;
+
+            // Deserialize (again)
+            let mut cursor = SaveCursor::new(output.clone());
+            let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
+
+            // Serialize (again)
+            let mut output_2 = Vec::new();
+            Me1SaveGame::serialize(&me1_save_game, &mut output_2)?;
+
+            // Check 2nd serialize = first serialize
+            assert_eq!(&output, &output_2);
         }
-
-        // Deserialize
-        let mut cursor = SaveCursor::new(input);
-        let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
-
-        // Serialize
-        let mut output = Vec::new();
-        Me1SaveGame::serialize(&me1_save_game, &mut output)?;
-
-        // Deserialize (again)
-        let mut cursor = SaveCursor::new(output.clone());
-        let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
-
-        // Serialize (again)
-        let mut output_2 = Vec::new();
-        Me1SaveGame::serialize(&me1_save_game, &mut output_2)?;
-
-        // Check 2nd serialize = first serialize
-        assert_eq!(&output, &output_2);
-
         Ok(())
     }
 }

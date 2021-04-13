@@ -75,7 +75,7 @@ struct VectorParameter {
 }
 
 #[derive(Default, Clone)]
-struct LinearColor([f32; 4]);
+pub struct LinearColor([f32; 4]);
 
 #[async_trait(?Send)]
 impl SaveData for LinearColor {
