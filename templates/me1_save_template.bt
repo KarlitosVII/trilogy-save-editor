@@ -45,24 +45,24 @@ string read_name(Name &n) {
 
 // Import
 struct Import {
-    uint index_package_name;
+    uint index_package;
     FSkip(4);
-    uint index_class_name;
+    uint index_class;
     FSkip(4);
     uint index_link;
-    uint index_object_name;
+    uint index_object;
     FSkip(4);
 };
 
 // Export
 struct Export {
-    uint class_name_id;
-    FSkip(4);
-    uint link_id;
-    uint object_name_id;
+    uint index_class_name;
+    uint index_class_parent;
+    uint index_link;
+    uint index_object;
+    uint index_value;
     uint index_archtype_name;
-    FSkip(8);
-    uint flag;
+    uint64 flag;
     uint data_size;
     uint data_offset;
     FSkip(32);
@@ -70,7 +70,20 @@ struct Export {
 
 // Data
 struct Data {
-    int begin;
+    FSkip(4);
+    uint name_index;
+    FSkip(4);
+    uint type_index;
+    FSkip(4);
+    uint size;
+
+    local int i = 0;
+    while (ReadInt64(FTell() + i) != 379) {
+        i++;
+    }
+    FSkip(i);
+    int none;
+    int end;
 };
 
 // SaveGame

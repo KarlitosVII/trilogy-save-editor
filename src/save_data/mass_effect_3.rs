@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 use crate::{gui::Gui, save_data::Dummy};
 
 use super::{
-    common::{Checksum, EndGameState, Level, Rotation, SaveTimeStamp, StreamingRecord, Vector},
+    common::{Checksum, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector},
     SaveCursor, SaveData,
 };
 
@@ -34,7 +34,7 @@ pub struct Me3SaveGame {
     end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
     location: Vector,
-    rotation: Rotation,
+    rotation: Rotator,
     _current_loading_tip: Dummy<4>,
     levels: Vec<Level>,
     streaming_records: Vec<StreamingRecord>,
@@ -137,18 +137,18 @@ impl Default for ObjectiveMarkerIconType {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use tokio::{fs::File, io::AsyncReadExt};
+    use std::{fs::File, io::Read};
 
     use crate::save_data::*;
 
     use super::*;
 
-    #[tokio::test]
-    async fn test_deserialize_serialize() -> Result<()> {
+    #[test]
+    fn deserialize_serialize() -> Result<()> {
         let mut input = Vec::new();
         {
-            let mut file = File::open("test/ME3Save.pcsav").await?;
-            file.read_to_end(&mut input).await?;
+            let mut file = File::open("test/ME3Save.pcsav")?;
+            file.read_to_end(&mut input)?;
         }
 
         // Deserialize

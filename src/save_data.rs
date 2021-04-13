@@ -14,8 +14,8 @@ use std::{any::type_name, hash::Hash, mem::size_of, usize};
 
 use crate::gui::Gui;
 
-pub mod common;
 mod crc32;
+pub mod common;
 pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
@@ -51,9 +51,8 @@ impl SaveCursor {
         self.read(self.bytes.len() - self.position)
     }
 
-    pub fn rshift_position(&mut self, shift: usize) -> Result<()> {
+    pub fn rshift_position(&mut self, shift: usize) {
         self.position -= shift;
-        Ok(())
     }
 }
 
@@ -181,7 +180,7 @@ pub trait SaveData: Sized {
             if had_errors {
                 bail!("WINDOWS_1252 encoding error");
             }
-            let mut encoded = encoded.to_vec();
+            let mut encoded = encoded.into_owned();
             encoded.push(0);
 
             let len = encoded.len() as i32;
@@ -200,14 +199,10 @@ pub trait SaveData: Sized {
     {
         let len = Self::deserialize_from::<u32>(cursor)?;
         let mut vec = Vec::new();
-        if len == 0 {
-            return Ok(vec);
-        }
 
         for _ in 0..len {
             vec.push(D::deserialize(cursor)?);
         }
-
         Ok(vec)
     }
 
@@ -215,14 +210,12 @@ pub trait SaveData: Sized {
     where
         D: SaveData,
     {
-        let mut bytes = Vec::new();
-        for item in input.iter() {
-            D::serialize(item, &mut bytes)?;
-        }
-
         let len = input.len() as u32;
         Self::serialize_to::<u32>(&len, output)?;
-        output.extend(bytes);
+
+        for item in input.iter() {
+            D::serialize(item, output)?;
+        }
         Ok(())
     }
 
@@ -234,14 +227,10 @@ pub trait SaveData: Sized {
     {
         let len = Self::deserialize_from::<u32>(cursor)?;
         let mut map = IndexMap::new();
-        if len == 0 {
-            return Ok(map);
-        }
 
         for _ in 0..len {
             map.insert(K::deserialize(cursor)?, V::deserialize(cursor)?);
         }
-
         Ok(map)
     }
 
@@ -250,15 +239,13 @@ pub trait SaveData: Sized {
         K: SaveData + Eq + Hash,
         V: SaveData,
     {
-        let mut bytes = Vec::new();
-        for (key, value) in input.iter() {
-            K::serialize(key, &mut bytes)?;
-            V::serialize(value, &mut bytes)?;
-        }
-
         let len = input.len() as u32;
         Self::serialize_to::<u32>(&len, output)?;
-        output.extend(bytes);
+
+        for (key, value) in input.iter() {
+            K::serialize(key, output)?;
+            V::serialize(value, output)?;
+        }
         Ok(())
     }
 }
@@ -287,18 +274,26 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
 }
 
 // Implémentation des types std
-#[async_trait(?Send)]
-impl SaveData for u32 {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(cursor)
-    }
+macro_rules! no_ui_save_data {
+    ($type:ty) => {
+        #[async_trait(?Send)]
+        impl SaveData for $type {
+            fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+                Self::deserialize_from(cursor)
+            }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to(self, output)
-    }
+            fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+                Self::serialize_to(self, output)
+            }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+            async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+        }
+    };
 }
+
+no_ui_save_data!(u8);
+no_ui_save_data!(u32);
+no_ui_save_data!(u64);
 
 #[async_trait(?Send)]
 impl SaveData for i32 {
@@ -366,7 +361,7 @@ where
     T: SaveData,
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        cursor.rshift_position(4)?;
+        cursor.rshift_position(4);
         let is_some = Self::deserialize_from_bool(cursor)?;
 
         let inner = match is_some {
@@ -378,10 +373,6 @@ where
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        debug_assert!(
-            output.len() >= 4,
-            "Une Option<T> doit toujours être précédée par un booléen"
-        );
         if BINCODE.deserialize::<i32>(&output[output.len() - 4..output.len()])? != 0 {
             if let Some(input) = self {
                 T::serialize(input, output)?;

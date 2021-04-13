@@ -1,15 +1,17 @@
-use std::mem::size_of;
-
 use anyhow::Result;
 use async_trait::async_trait;
 use imgui::ImString;
+use std::{mem::size_of};
 
 use crate::{gui::Gui, save_data::Dummy};
 
-use super::{SaveCursor, SaveData};
+use super::{
+    export::{Data, Export},
+    SaveCursor, SaveData,
+};
 
 #[derive(Clone)]
-pub(super) struct Player {
+pub struct Player {
     _begin: Dummy<8>,
     header_offset: u32,
     _no_mans_land1: Vec<u8>,
@@ -52,9 +54,10 @@ impl SaveData for Player {
 
         // Data
         let mut datas = Vec::new();
-        for export in &exports {
-            let mut cursor = SaveCursor::new(cursor.read((export.data_size) as usize)?.to_owned());
-            datas.push(SaveData::deserialize(&mut cursor)?);
+        for export in exports.iter() {
+            let data_bytes = cursor.read((export.data_size) as usize)?.to_owned();
+            let mut cursor = SaveCursor::new(data_bytes);
+            datas.push(Data::new(&names, &mut cursor)?);
         }
 
         Ok(Self {
@@ -87,7 +90,7 @@ impl SaveData for Player {
         let mut header = header.clone();
 
         header.imports_offset = header.name_offset;
-        for name in names {
+        for name in names.iter() {
             header.imports_offset += name.size()? as u32;
         }
 
@@ -102,7 +105,7 @@ impl SaveData for Player {
             let mut current_offset = header.data_offset;
             for (i, export) in exports.iter_mut().enumerate() {
                 export.data_offset = current_offset;
-                current_offset += datas[i].size() as u32;
+                current_offset += datas[i].size()? as u32;
             }
         }
 
@@ -112,7 +115,7 @@ impl SaveData for Player {
         output.extend(_no_mans_land1);
         header.serialize(output)?;
 
-        for name in names {
+        for name in names.iter() {
             name.serialize(output)?;
         }
 
@@ -141,7 +144,7 @@ struct Header {
     _magic: u32,
     _version: Dummy<4>, // low_version: u16, high_version: u16
     data_offset: u32,
-    _upx_name: ImString,
+    _upk_name: ImString,
     _flags: u32,
     name_len: u32,
     name_offset: u32,
@@ -151,13 +154,13 @@ struct Header {
     imports_offset: u32,
     no_mans_land_offset: u32,
     _osef1: Dummy<68>,
-    compression: u32,
+    _compression: u32,
     _osef2: Dummy<12>,
 }
 
 #[derive(SaveData, Clone)]
-struct Name {
-    name: ImString,
+pub struct Name {
+    pub name: ImString,
     osef: Dummy<8>,
 }
 
@@ -171,71 +174,31 @@ impl Name {
 
 #[derive(SaveData, Clone)]
 struct Import {
-    index_package_name: u32,
+    package_index: u32,
     _osef1: Dummy<4>,
-    index_class_name: u32,
+    class_index: u32,
     _osef2: Dummy<4>,
-    index_link: u32,
-    index_object_name: u32,
+    link_index: u32,
+    object_index: u32,
     _osef3: Dummy<4>,
-}
-
-#[derive(SaveData, Clone)]
-struct Export {
-    class_name_id: u32,
-    _osef1: Dummy<4>,
-    link_id: u32,
-    object_name_id: u32,
-    index_archtype_name: u32,
-    _osef2: Dummy<8>,
-    _flag: u32,
-    data_size: u32,
-    data_offset: u32,
-    _osef3: Dummy<32>,
-}
-
-#[derive(Clone)]
-pub(super) struct Data {
-    data: Vec<u8>,
-}
-
-impl Data {
-    fn size(&self) -> usize {
-        self.data.len()
-    }
-}
-
-#[async_trait(?Send)]
-impl SaveData for Data {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self { data: cursor.read_to_end()?.to_owned() })
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        output.extend(&self.data);
-        Ok(())
-    }
-
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use std::io::{Cursor, Read};
-    use tokio::{fs::File, io::AsyncReadExt};
+    use std::{fs::File,io::{Cursor, Read}};
     use zip::ZipArchive;
 
     use crate::save_data::*;
 
     use super::*;
 
-    #[tokio::test]
-    async fn test_deserialize_serialize() -> Result<()> {
+    #[test]
+    fn deserialize_serialize() -> Result<()> {
         let mut input = Vec::new();
         {
-            let mut file = File::open("test/Clare00_AutoSave.MassEffectSave").await?;
-            file.read_to_end(&mut input).await?;
+            let mut file = File::open("test/Clare00_AutoSave.MassEffectSave")?;
+            file.read_to_end(&mut input)?;
         }
 
         let player_data = {
@@ -259,8 +222,6 @@ mod test {
         // Serialize
         let mut output = Vec::new();
         Player::serialize(&player, &mut output)?;
-
-        // println!("output = {:x?}", output);
 
         // Check serialized = player_data
         let cmp = player_data.chunks(4).zip(output.chunks(4));
