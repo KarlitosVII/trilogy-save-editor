@@ -1,13 +1,12 @@
 use anyhow::*;
 use async_trait::async_trait;
+use crc::{CRC_32_BZIP2, Crc};
 use imgui::ImString;
 
 use crate::{
     gui::Gui,
     save_data::{SaveCursor, SaveData},
 };
-
-use super::crc32;
 
 pub mod appearance;
 pub mod player;
@@ -23,8 +22,8 @@ impl SaveData for Checksum {
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let checksum = crc32::compute(output);
-        Self::serialize_to(&checksum, output)
+        let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+        Self::serialize_to(&crc.checksum(output), output)
     }
 
     async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
