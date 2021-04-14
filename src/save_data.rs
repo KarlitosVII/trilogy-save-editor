@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::*;
 use async_trait::async_trait;
 use bincode::{
     config::{AllowTrailing, FixintEncoding, WithOtherIntEncoding, WithOtherTrailing},
@@ -37,9 +37,8 @@ impl SaveCursor {
 
     pub fn read(&mut self, num_bytes: usize) -> Result<&[u8]> {
         let end = self.position + num_bytes;
-        if self.bytes.len() < end {
-            bail!("Unexpected end of file, some data in your save are unexpected or your save is corrupted ?\nSave again and retry. If this error persists, please report a bug with your save attached.");
-        }
+
+        ensure!(end <= self.bytes.len(), "Unexpected end of file, some data in your save are unexpected or your save is corrupted ?\nSave again and retry. If this error persists, please report a bug with your save attached.");
 
         let slice = &self.bytes[self.position..end];
         self.position = end;
@@ -129,25 +128,19 @@ pub trait SaveData: Sized {
         let string = if len < 0 {
             // Unicode
             let string_len = (len.abs() * 2) as usize;
-
             let bytes = cursor.read(string_len)?.to_owned();
 
             let (decoded, _, had_errors) = UTF_16LE.decode(&bytes);
-            if had_errors {
-                bail!("UTF_16LE decoding error");
-            }
+            ensure!(!had_errors, "UTF_16LE decoding error");
 
             ImString::new(decoded)
         } else {
             // Ascii
             let string_len = len as usize;
-
             let bytes = cursor.read(string_len)?.to_owned();
 
             let (decoded, _, had_errors) = WINDOWS_1252.decode(&bytes);
-            if had_errors {
-                bail!("WINDOWS_1252 decoding error");
-            }
+            ensure!(!had_errors, "WINDOWS_1252 decoding error");
 
             ImString::new(decoded)
         };
@@ -177,9 +170,8 @@ pub trait SaveData: Sized {
         } else {
             // Ascii
             let (encoded, _, had_errors) = WINDOWS_1252.encode(&string);
-            if had_errors {
-                bail!("WINDOWS_1252 encoding error");
-            }
+            ensure!(!had_errors, "WINDOWS_1252 encoding error");
+
             let mut encoded = encoded.into_owned();
             encoded.push(0);
 

@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::*;
 use async_trait::async_trait;
 use imgui::ImString;
 use std::mem::size_of;
@@ -185,7 +185,7 @@ struct Import {
 
 #[cfg(test)]
 mod test {
-    use anyhow::Result;
+    use anyhow::*;
     use std::{
         fs::File,
         io::{Cursor, Read},

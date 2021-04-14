@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::*;
 use flume::{Receiver, Sender};
 use imgui::{Ui, *};
 use indexmap::IndexMap;
@@ -136,9 +136,9 @@ impl<'a> Gui<'a> {
                     .always_auto_resize(true)
                     .begin_popup(ui)
                 {
-                    errors.iter().for_each(|error| {
+                    for error in errors.iter() {
                         ui.text(error.to_string());
-                    });
+                    }
                     ui.separator();
 
                     if ui.button_with_size(im_str!("OK"), [70.0, 0.0]) {

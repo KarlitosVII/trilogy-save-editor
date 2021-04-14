@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::*;
 use async_trait::async_trait;
 use imgui::ImString;
 
@@ -56,9 +56,10 @@ impl SaveData for Version {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let version = Self::deserialize_from(cursor)?;
 
-        if version != 29 {
-            bail!("Wrong save version, please use a save from the last version of the game")
-        }
+        ensure!(
+            version == 29,
+            "Wrong save version, please use a save from the last version of the game"
+        );
 
         Ok(Self(version))
     }
@@ -126,7 +127,7 @@ impl Default for ObjectiveMarkerIconType {
 
 #[cfg(test)]
 mod test {
-    use anyhow::Result;
+    use anyhow::*;
     use std::{fs::File, io::Read};
 
     use crate::save_data::*;

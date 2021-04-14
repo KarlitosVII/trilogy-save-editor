@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::*;
 use async_trait::async_trait;
 use std::io::{Cursor, Read, Write};
 use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
@@ -131,7 +131,7 @@ zip_file_save_data!(WorldSavePackage);
 
 #[cfg(test)]
 mod test {
-    use anyhow::Result;
+    use anyhow::*;
     use std::{fs::File, io::Read};
 
     use crate::save_data::*;
