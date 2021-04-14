@@ -1,10 +1,10 @@
 use indexmap::IndexMap;
 
-use crate::save_data::common::plot::{BitArray, PlotCodex};
+use crate::save_data::common::plot::{BoolVec, PlotCodex};
 
 #[derive(SaveData, Clone)]
 pub struct PlotTable {
-    bool_variables: BitArray,
+    bool_variables: BoolVec,
     int_variables: IndexMap<i32, i32>,
     float_variables: IndexMap<i32, f32>,
     quest_progress_counter: i32,
@@ -16,7 +16,7 @@ pub struct PlotTable {
 
 #[derive(SaveData, Clone)]
 pub struct Me1PlotTable {
-    bool_variables: BitArray,
+    bool_variables: BoolVec,
     int_variables: IndexMap<i32, i32>,
     float_variables: IndexMap<i32, f32>,
 }

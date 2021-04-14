@@ -1,5 +1,6 @@
 #![cfg_attr(not(test), windows_subsystem = "windows")]
 #![cfg_attr(test, windows_subsystem = "console")]
+#![warn(clippy::all)]
 
 #[macro_use]
 extern crate num_derive;

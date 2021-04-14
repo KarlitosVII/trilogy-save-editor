@@ -16,6 +16,7 @@ winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-feature
 wfd = "0.1"
 # Std-like
 anyhow = "1.0"
+bitvec = { version = "0.22", features = ["std"], default-features = false }
 indexmap = { version = "1.6", features = ["std"], default-features = false }
 encoding_rs = { version = "0.8", default-features = false }
 num-traits = "0.2"

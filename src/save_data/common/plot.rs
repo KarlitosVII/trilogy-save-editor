@@ -1,58 +1,43 @@
 use anyhow::Result;
 use async_trait::async_trait;
+use bitvec::prelude::*;
 
 use crate::{
     gui::Gui,
     save_data::{SaveCursor, SaveData},
 };
 
-#[derive(Clone)]
-pub struct BitArray {
-    variables: Vec<bool>,
-}
+pub type BoolVec = BitVec<Lsb0, u32>;
+pub type BoolSlice = BitSlice<Lsb0, u32>;
 
 #[async_trait(?Send)]
-impl SaveData for BitArray {
+impl SaveData for BoolVec {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let num_bytes = Self::deserialize_from::<u32>(cursor)?;
-        let mut variables = Vec::new();
+        let len = Self::deserialize_from::<u32>(cursor)?;
+        let mut bitfields = Vec::new();
 
-        let len = num_bytes * 32;
-        let mut bits = 0;
-        for i in 0..len {
-            let bit = i % 32;
-
-            if bit == 0 {
-                bits = Self::deserialize_from::<u32>(cursor)?;
-            }
-            variables.push((bits & (1 << bit)) != 0);
+        for _ in 0..len {
+            bitfields.push(Self::deserialize_from::<u32>(cursor)?);
         }
 
-        Ok(Self { variables })
+        let variables = BoolVec::from_vec(bitfields);
+        Ok(variables)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let len = self.variables.len() as u32 / 32;
+        let bitfields = self.clone().into_vec();
+
+        let len = bitfields.len() as u32;
         Self::serialize_to::<u32>(&len, output)?;
 
-        let mut number = 0u32;
-        for (i, &var) in self.variables.iter().enumerate() {
-            let bit = i as u32 % 32;
-
-            if var {
-                number |= 1 << bit;
-            }
-
-            if bit == 31 {
-                Self::serialize_to::<u32>(&number, output)?;
-                number = 0;
-            }
+        for bitfield in &bitfields {
+            Self::serialize_to::<u32>(&bitfield, output)?;
         }
         Ok(())
     }
 
     async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_bitarray(ident, &mut self.variables).await;
+        ui.draw_boolvec(ident, self).await;
     }
 }
 

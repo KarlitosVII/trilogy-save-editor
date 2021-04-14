@@ -12,7 +12,9 @@ use wfd::DialogParams;
 
 use crate::{
     event_handler::{MainEvent, SaveGame},
-    save_data::{mass_effect_2::Me2SaveGame, mass_effect_3::Me3SaveGame, SaveData},
+    save_data::{
+        common::plot::BoolSlice, mass_effect_2::Me2SaveGame, mass_effect_3::Me3SaveGame, SaveData,
+    },
 };
 
 mod support;
@@ -314,13 +316,13 @@ impl<'a> Gui<'a> {
         }
     }
 
-    pub async fn draw_bitarray(&self, ident: &str, list: &mut Vec<bool>) {
+    pub async fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
         if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.ui) {
             if !list.is_empty() {
                 let mut clipper = ListClipper::new(list.len() as i32).begin(self.ui);
                 while clipper.step() {
                     for i in clipper.display_start()..clipper.display_end() {
-                        list[i as usize].draw_raw_ui(self, &i.to_string()).await;
+                        list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string()).await;
                     }
                 }
             }

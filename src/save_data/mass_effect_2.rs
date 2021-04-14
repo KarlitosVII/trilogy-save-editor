@@ -150,7 +150,12 @@ mod test {
         Me2SaveGame::serialize(&me3_save_game, &mut output)?;
 
         // Check serialized = input
-        assert_eq!(&input, &output);
+        let cmp = input.chunks(4).zip(output.chunks(4));
+        for (i, (a, b)) in cmp.enumerate() {
+            if a != b {
+                panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+            }
+        }
 
         Ok(())
     }
