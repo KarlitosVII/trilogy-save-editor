@@ -1,16 +1,9 @@
 use anyhow::*;
 use async_trait::async_trait;
-use bincode::{
-    config::{AllowTrailing, FixintEncoding, WithOtherIntEncoding, WithOtherTrailing},
-    DefaultOptions, Options,
-};
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
-use imgui::{ImStr, ImString};
+use imgui::ImString;
 use indexmap::IndexMap;
-use lazy_static::lazy_static;
-use num_traits::{FromPrimitive, ToPrimitive};
-use serde::{Deserialize, Serialize};
-use std::{any::type_name, hash::Hash, mem::size_of, usize};
+use std::{any::type_name, convert::TryInto, hash::Hash, mem::size_of, usize};
 
 use crate::gui::Gui;
 
@@ -19,16 +12,12 @@ pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
 
-lazy_static! {
-    pub static ref BINCODE: WithOtherTrailing<WithOtherIntEncoding<DefaultOptions, FixintEncoding>, AllowTrailing> =
-        bincode::DefaultOptions::new().with_fixint_encoding().allow_trailing_bytes();
-}
-
 pub struct SaveCursor {
     position: usize,
     bytes: Vec<u8>,
 }
 
+// Cursor
 impl SaveCursor {
     pub fn new(bytes: Vec<u8>) -> Self {
         Self { position: 0, bytes }
@@ -54,71 +43,109 @@ impl SaveCursor {
     }
 }
 
+// Save Data
 #[async_trait(?Send)]
 pub trait SaveData: Sized {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
     async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str);
+}
 
-    // Generic
-    fn deserialize_from<'a, D>(input: &'a mut SaveCursor) -> Result<D>
-    where
-        D: Deserialize<'a>,
-    {
-        let size = size_of::<D>();
-        let bytes = input.read(size)?;
+// Implémentation des dummy
+pub type Dummy<const LEN: usize> = [u8; LEN];
 
-        BINCODE.deserialize::<D>(bytes).map_err(|e| anyhow!(e))
+#[async_trait(?Send)]
+impl<const LEN: usize> SaveData for Dummy<LEN> {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        let bytes = cursor.read(LEN)?.try_into()?;
+        Ok(bytes)
     }
 
-    fn serialize_to<S>(input: &S, output: &mut Vec<u8>) -> Result<()>
-    where
-        S: Serialize,
-    {
-        let bytes = BINCODE.serialize::<S>(input)?;
-        output.extend(bytes);
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        output.extend(self);
         Ok(())
     }
 
-    fn deserialize_from_bool(cursor: &mut SaveCursor) -> Result<bool> {
-        Ok(Self::deserialize_from::<i32>(cursor)? != 0)
+    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+}
+
+// Implémentation des types std
+macro_rules! impl_deserialize {
+    ($type:ty) => {
+        fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+            const SIZE: usize = size_of::<$type>();
+            let bytes = cursor.read(SIZE)?;
+            Ok(<$type>::from_le_bytes(bytes.try_into()?))
+        }
+    };
+}
+
+macro_rules! impl_serialize {
+    ($type:ty) => {
+        fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+            let bytes = <$type>::to_le_bytes(*self);
+            output.extend(&bytes);
+            Ok(())
+        }
+    };
+}
+
+macro_rules! impl_save_data_no_ui {
+    ($type:ty) => {
+        #[async_trait(?Send)]
+        impl SaveData for $type {
+            impl_deserialize!($type);
+            impl_serialize!($type);
+
+            async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+        }
+    };
+}
+
+impl_save_data_no_ui!(u8);
+impl_save_data_no_ui!(u16);
+impl_save_data_no_ui!(u32);
+impl_save_data_no_ui!(u64);
+
+#[async_trait(?Send)]
+impl SaveData for i32 {
+    impl_deserialize!(i32);
+    impl_serialize!(i32);
+
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_i32(ident, self).await;
+    }
+}
+
+#[async_trait(?Send)]
+impl SaveData for f32 {
+    impl_deserialize!(f32);
+    impl_serialize!(f32);
+
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_f32(ident, self).await;
+    }
+}
+
+#[async_trait(?Send)]
+impl SaveData for bool {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Ok(<u32>::deserialize(cursor)? != 0)
     }
 
-    fn serialize_to_bool(input: bool, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to::<i32>(&(input as i32), output)
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        <u32>::serialize(&(*self as u32), output)
     }
 
-    fn deserialize_enum_from_u8<E>(cursor: &mut SaveCursor) -> Result<E>
-    where
-        E: FromPrimitive,
-    {
-        E::from_u8(Self::deserialize_from::<u8>(cursor)?).context("invalid enum representation")
+    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+        ui.draw_edit_bool(ident, self).await;
     }
+}
 
-    fn serialize_enum_to_u8<E>(input: &E, output: &mut Vec<u8>) -> Result<()>
-    where
-        E: ToPrimitive,
-    {
-        Self::serialize_to::<u8>(&E::to_u8(input).context("invalid enum representation")?, output)
-    }
-
-    fn deserialize_enum_from_u32<E>(cursor: &mut SaveCursor) -> Result<E>
-    where
-        E: FromPrimitive,
-    {
-        E::from_u32(Self::deserialize_from::<u32>(cursor)?).context("invalid enum representation")
-    }
-
-    fn serialize_enum_to_u32<E>(input: &E, output: &mut Vec<u8>) -> Result<()>
-    where
-        E: ToPrimitive,
-    {
-        Self::serialize_to::<u32>(&E::to_u32(input).context("invalid enum representation")?, output)
-    }
-
-    // String
-    fn deserialize_from_string(cursor: &mut SaveCursor) -> Result<ImString> {
-        let len = Self::deserialize_from::<i32>(cursor)?;
+#[async_trait(?Send)]
+impl SaveData for ImString {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        let len = <i32>::deserialize(cursor)?;
 
         if len == 0 {
             return Ok(ImString::default());
@@ -147,13 +174,13 @@ pub trait SaveData: Sized {
         Ok(string)
     }
 
-    fn serialize_to_string(input: &ImStr, output: &mut Vec<u8>) -> Result<()> {
-        if input.is_empty() {
-            Self::serialize_to::<u32>(&0, output)?;
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        if self.is_empty() {
+            <i32>::serialize(&0, output)?;
             return Ok(());
         }
 
-        let string = input.to_str();
+        let string = self.to_str();
         let (bytes, len) = if string.chars().any(|c| c as u32 > 0xff) {
             // Unicode
             let mut encoded: Vec<_> = string.encode_utf16().collect();
@@ -161,7 +188,7 @@ pub trait SaveData: Sized {
 
             let mut bytes = Vec::new();
             for doublebyte in encoded.iter() {
-                Self::serialize_to::<u16>(&doublebyte, &mut bytes)?;
+                <u16>::serialize(doublebyte, &mut bytes)?;
             }
 
             let len = bytes.len() as i32;
@@ -178,167 +205,9 @@ pub trait SaveData: Sized {
             (encoded, len)
         };
 
-        Self::serialize_to::<i32>(&len, output)?;
+        <i32>::serialize(&len, output)?;
         output.extend(bytes);
         Ok(())
-    }
-
-    // Array
-    fn deserialize_from_array<D>(cursor: &mut SaveCursor) -> Result<Vec<D>>
-    where
-        D: SaveData,
-    {
-        let len = Self::deserialize_from::<u32>(cursor)?;
-        let mut vec = Vec::new();
-
-        for _ in 0..len {
-            vec.push(D::deserialize(cursor)?);
-        }
-        Ok(vec)
-    }
-
-    fn serialize_to_array<D>(input: &[D], output: &mut Vec<u8>) -> Result<()>
-    where
-        D: SaveData,
-    {
-        let len = input.len() as u32;
-        Self::serialize_to::<u32>(&len, output)?;
-
-        for item in input.iter() {
-            D::serialize(item, output)?;
-        }
-        Ok(())
-    }
-
-    // IndexMap
-    fn deserialize_from_indexmap<K, V>(cursor: &mut SaveCursor) -> Result<IndexMap<K, V>>
-    where
-        K: SaveData + Eq + Hash,
-        V: SaveData,
-    {
-        let len = Self::deserialize_from::<u32>(cursor)?;
-        let mut map = IndexMap::new();
-
-        for _ in 0..len {
-            map.insert(K::deserialize(cursor)?, V::deserialize(cursor)?);
-        }
-        Ok(map)
-    }
-
-    fn serialize_to_indexmap<K, V>(input: &IndexMap<K, V>, output: &mut Vec<u8>) -> Result<()>
-    where
-        K: SaveData + Eq + Hash,
-        V: SaveData,
-    {
-        let len = input.len() as u32;
-        Self::serialize_to::<u32>(&len, output)?;
-
-        for (key, value) in input.iter() {
-            K::serialize(key, output)?;
-            V::serialize(value, output)?;
-        }
-        Ok(())
-    }
-}
-
-// Implémentation des dummy
-pub type Dummy<const LEN: usize> = [u8; LEN];
-
-#[async_trait(?Send)]
-impl<const LEN: usize> SaveData for Dummy<LEN> {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let mut array = [0; LEN];
-        for byte in array.iter_mut() {
-            *byte = Self::deserialize_from(cursor)?
-        }
-        Ok(array)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        for byte in self.iter() {
-            Self::serialize_to(byte, output)?;
-        }
-        Ok(())
-    }
-
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-}
-
-// Implémentation des types std
-macro_rules! no_ui_save_data {
-    ($type:ty) => {
-        #[async_trait(?Send)]
-        impl SaveData for $type {
-            fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-                Self::deserialize_from(cursor)
-            }
-
-            fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-                Self::serialize_to(self, output)
-            }
-
-            async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-        }
-    };
-}
-
-no_ui_save_data!(u8);
-no_ui_save_data!(u32);
-no_ui_save_data!(u64);
-
-#[async_trait(?Send)]
-impl SaveData for i32 {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(cursor)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to(self, output)
-    }
-
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_i32(ident, self).await;
-    }
-}
-
-#[async_trait(?Send)]
-impl SaveData for f32 {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from(cursor)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to(self, output)
-    }
-
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_f32(ident, self).await;
-    }
-}
-
-#[async_trait(?Send)]
-impl SaveData for bool {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_bool(cursor)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to_bool(*self, output)
-    }
-
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_bool(ident, self).await;
-    }
-}
-
-#[async_trait(?Send)]
-impl SaveData for ImString {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_string(cursor)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to_string(self, output)
     }
 
     async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
@@ -353,18 +222,18 @@ where
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         cursor.rshift_position(4);
-        let is_some = Self::deserialize_from_bool(cursor)?;
+        let is_some = <bool>::deserialize(cursor)?;
 
         let inner = match is_some {
             true => Some(T::deserialize(cursor)?),
             false => None,
         };
-
         Ok(inner)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        if BINCODE.deserialize::<i32>(&output[output.len() - 4..output.len()])? != 0 {
+        let bytes = &output[output.len() - 4..output.len()];
+        if <u32>::from_le_bytes(bytes.try_into()?) != 0 {
             if let Some(input) = self {
                 T::serialize(input, output)?;
             }
@@ -385,11 +254,23 @@ where
     T: SaveData + Default,
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_array(cursor)
+        let len = <u32>::deserialize(cursor)?;
+        let mut vec = Vec::new();
+
+        for _ in 0..len {
+            vec.push(T::deserialize(cursor)?);
+        }
+        Ok(vec)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to_array(self, output)
+        let len = self.len() as u32;
+        <u32>::serialize(&len, output)?;
+
+        for item in self.iter() {
+            T::serialize(item, output)?;
+        }
+        Ok(())
     }
 
     async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
@@ -409,11 +290,24 @@ where
     V: SaveData + Default,
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Self::deserialize_from_indexmap(cursor)
+        let len = <u32>::deserialize(cursor)?;
+        let mut map = IndexMap::new();
+
+        for _ in 0..len {
+            map.insert(K::deserialize(cursor)?, V::deserialize(cursor)?);
+        }
+        Ok(map)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to_indexmap(self, output)
+        let len = self.len() as u32;
+        <u32>::serialize(&len, output)?;
+
+        for (key, value) in self.iter() {
+            K::serialize(key, output)?;
+            V::serialize(value, output)?;
+        }
+        Ok(())
     }
 
     async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {

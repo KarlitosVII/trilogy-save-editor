@@ -63,7 +63,7 @@ pub struct Version(i32);
 #[async_trait(?Send)]
 impl SaveData for Version {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let version = Self::deserialize_from(cursor)?;
+        let version = <i32>::deserialize(cursor)?;
 
         ensure!(
             version == 59,
@@ -74,13 +74,13 @@ impl SaveData for Version {
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        Self::serialize_to(&self.0, output)
+        <i32>::serialize(&self.0, output)
     }
 
     async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
 enum Difficulty {
     Narrative,
     Casual,
@@ -105,7 +105,7 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
 enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
@@ -121,7 +121,7 @@ struct ObjectiveMarker {
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
 enum ObjectiveMarkerIconType {
     None,
     Attack,
@@ -138,7 +138,10 @@ impl Default for ObjectiveMarkerIconType {
 #[cfg(test)]
 mod test {
     use anyhow::*;
-    use std::{fs::File, io::Read};
+    use std::{
+        time::Instant,
+        {fs::File, io::Read},
+    };
 
     use crate::save_data::*;
 
@@ -152,13 +155,20 @@ mod test {
             file.read_to_end(&mut input)?;
         }
 
+        let now = Instant::now();
+
         // Deserialize
         let mut cursor = SaveCursor::new(input.clone());
         let me3_save_game = Me3SaveGame::deserialize(&mut cursor)?;
 
+        println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
+        let now = Instant::now();
+
         // Serialize
         let mut output = Vec::new();
         Me3SaveGame::serialize(&me3_save_game, &mut output)?;
+
+        println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
 
         // Check serialized = input
         let cmp = input.chunks(4).zip(output.chunks(4));

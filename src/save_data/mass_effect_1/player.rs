@@ -5,10 +5,7 @@ use std::mem::size_of;
 
 use crate::{gui::Gui, save_data::Dummy};
 
-use super::{
-    export::{Data, Export},
-    SaveCursor, SaveData,
-};
+use super::{data::Data, SaveCursor, SaveData};
 
 #[derive(Clone)]
 pub struct Player {
@@ -173,7 +170,7 @@ impl Name {
 }
 
 #[derive(SaveData, Clone)]
-struct Import {
+pub struct Import {
     package_index: u32,
     _osef1: Dummy<4>,
     class_index: u32,
@@ -181,6 +178,20 @@ struct Import {
     link_index: u32,
     object_index: u32,
     _osef3: Dummy<4>,
+}
+
+#[derive(SaveData, Clone)]
+pub struct Export {
+    class_id: u32,
+    class_parent_id: u32,
+    link_id: u32,
+    object_id: u32,
+    value_id: u32,
+    archtype_id: u32,
+    flag: u64,
+    pub data_size: u32,
+    pub data_offset: u32,
+    _osef: Dummy<32>,
 }
 
 #[cfg(test)]

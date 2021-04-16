@@ -9,6 +9,7 @@ use tokio::{
 use crate::{
     gui::UiEvent,
     save_data::{
+        mass_effect_1::Me1SaveGame,
         mass_effect_2::{self, Me2SaveGame},
         mass_effect_3::Me3SaveGame,
         SaveCursor, SaveData,
@@ -20,11 +21,9 @@ pub enum MainEvent {
     SaveSave((PathBuf, SaveGame)),
 }
 
-// TODO: virer annotation quand ME1 implémenté
-#[allow(dead_code)]
 #[derive(Clone)]
 pub enum SaveGame {
-    MassEffect1,
+    MassEffect1(Box<Me1SaveGame>),
     MassEffect2(Box<Me2SaveGame>),
     MassEffect3(Box<Me3SaveGame>),
 }
@@ -58,8 +57,7 @@ async fn open_save(path: &Path, ui_addr: &Sender<UiEvent>) -> Result<()> {
         let mut cursor = SaveCursor::new(input);
         let save_game = match ext.to_string_lossy().to_lowercase().as_str() {
             "masseffectsave" => {
-                bail!("Mass Effect 1 not implemented (yet)");
-                // TODO: spawn blocking
+                SaveGame::MassEffect1(Box::new(Me1SaveGame::deserialize(&mut cursor)?))
             }
             _ => {
                 let is_me2 = mass_effect_2::Version::deserialize(&mut cursor).is_ok();
@@ -82,7 +80,7 @@ async fn save_save(path: &Path, save_game: SaveGame, ui_addr: &Sender<UiEvent>) 
     let mut output = Vec::new();
 
     match save_game {
-        SaveGame::MassEffect1 => todo!(), // TODO: spawn blocking
+        SaveGame::MassEffect1(save_game) => Me1SaveGame::serialize(&save_game, &mut output)?,
         SaveGame::MassEffect2(save_game) => Me2SaveGame::serialize(&save_game, &mut output)?,
         SaveGame::MassEffect3(save_game) => Me3SaveGame::serialize(&save_game, &mut output)?,
     };

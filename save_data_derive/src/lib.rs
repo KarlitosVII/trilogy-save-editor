@@ -28,7 +28,6 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let deserialize_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
-
         quote! {
             #field_name: crate::save_data::SaveData::deserialize(cursor)?
         }
@@ -36,7 +35,6 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let serialize_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
-
         quote! {
             crate::save_data::SaveData::serialize(&self.#field_name, output)?;
         }
@@ -45,13 +43,13 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
     let draw_fields = fields.iter().map(|f| {
         let field_name = &f.ident;
         let field_string = field_name.as_ref().unwrap().to_string();
-
         quote! {
             self.#field_name.draw_raw_ui(gui, #field_string).await;
         }
     });
 
     let gen = quote! {
+        #[automatically_derived]
         #[async_trait::async_trait(?Send)]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
@@ -60,8 +58,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
                 })
             }
 
-            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()>
-            {
+            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()> {
                 #(#serialize_fields)*
                 Ok(())
             }
@@ -82,25 +79,27 @@ fn impl_save_data_enum(
     let name = &ast.ident;
 
     // Exception
-    let deserialize_enum_from_repr = Ident::new(
-        if name == "EndGameState" {
-            "deserialize_enum_from_u32"
-        } else {
-            "deserialize_enum_from_u8"
-        },
+    let repr = ast
+        .attrs
+        .iter()
+        .any(|attr| attr.path.segments.iter().any(|segment| segment.ident == "repr"));
+
+    let repr_type = Ident::new(
+        if repr { "u32" } else { "u8" },
         Span::call_site(),
     );
 
-    let serialize_enum_to_repr = Ident::new(
-        if name == "EndGameState" { "serialize_enum_to_u32" } else { "serialize_enum_to_u8" },
-        Span::call_site(),
-    );
+    let repr_variants = variants.iter().enumerate().map(|(i, v)| {
+        let variant = &v.ident;
+        quote! {
+            #i => #name::#variant
+        }
+    });
 
     // Variants
     let let_variants = variants.iter().enumerate().map(|(i, v)| {
         let variant_name = &v.ident.to_string();
         let var = Ident::new(&format!("variant_{}", i), Span::call_site());
-
         quote! {
             let #var = imgui::im_str!(#variant_name);
         }
@@ -115,30 +114,27 @@ fn impl_save_data_enum(
 
     let match_variants = variants.iter().enumerate().map(|(i, v)| {
         let variant = &v.ident;
-
         quote! {
             #name::#variant => (#i, #i)
         }
     });
 
-    let edit_variants = variants.iter().enumerate().map(|(i, v)| {
-        let variant = &v.ident;
-
-        quote! {
-            #i => #name::#variant
-        }
-    });
+    let edit_variants = repr_variants.clone();
 
     let gen = quote! {
+        #[automatically_derived]
         #[async_trait::async_trait(?Send)]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
-                Self::#deserialize_enum_from_repr(cursor)
+                let discriminant = <#repr_type>::deserialize(cursor)? as usize;
+                Ok(match discriminant {
+                    #(#repr_variants),*,
+                    _ => anyhow::bail!("invalid enum representation"),
+                })
             }
 
-            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()>
-            {
-                Self::#serialize_enum_to_repr(self, output)
+            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()> {
+                <#repr_type>::serialize(&(self.clone() as #repr_type), output)
             }
 
             async fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
@@ -152,8 +148,7 @@ fn impl_save_data_enum(
 
                 gui.draw_edit_enum(ident, &mut edit_item, &items).await;
 
-                if edit_item != current_item
-                {
+                if edit_item != current_item {
                     *self = match edit_item {
                         #(#edit_variants),*,
                         _ => unreachable!(),
