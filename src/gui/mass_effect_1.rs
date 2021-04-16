@@ -1,5 +1,5 @@
 use imgui::*;
-use std::{future::Future, pin::Pin};
+use std::{cmp::Ordering, future::Future, pin::Pin};
 
 use crate::save_data::{
     mass_effect_1::{data::*, player::*, *},
@@ -30,7 +30,9 @@ impl<'a> Gui<'a> {
                 if let Some(_t) = ChildWindow::new("mass_effect_1").size([0.0, 0.0]).begin(ui) {
                     if let Some(_t) = TreeNode::new(im_str!("Mass Effect 1")).push(ui) {
                         // Player
-                        self.draw_player(&mut save_game.player).await
+                        self.draw_player(&mut save_game.player).await;
+                        // State
+                        save_game.state.draw_raw_ui(self, "state.sav").await;
                     }
                 }
             }
@@ -41,14 +43,16 @@ impl<'a> Gui<'a> {
         let ui = self.ui;
         let Player { names, classes, objects, datas, .. } = player;
 
-        // Data
-        for (i, data) in datas.iter_mut().enumerate() {
-            let object_name = get_name(names, objects[i].object_name_id);
+        if let Some(_t) = TreeNode::new(im_str!("player.sav")).push(ui) {
+            // Data
+            for (i, data) in datas.iter_mut().enumerate() {
+                let object_name = get_name(names, objects[i].object_name_id);
 
-            // Properties
-            if let Some(_t) = TreeNode::new(&im_str!("{} {}", i, object_name)).push(ui) {
-                for (j, property) in data.properties.iter_mut().enumerate() {
-                    self.draw_property(names, classes, objects, j, property).await;
+                // Properties
+                if let Some(_t) = TreeNode::new(&im_str!("{} {}", i, object_name)).push(ui) {
+                    for (j, property) in data.properties.iter_mut().enumerate() {
+                        self.draw_property(names, classes, objects, j, property).await;
+                    }
                 }
             }
         }
@@ -101,14 +105,16 @@ impl<'a> Gui<'a> {
                     .await;
                 }
                 Property::Object { name_id, object_id, .. } => {
-                    let object_name = if *object_id < 0 {
-                        let class = get_class(classes, *object_id);
-                        get_name(names, class.class_name_id)
-                    } else if *object_id > 0 {
-                        let object = get_object(objects, *object_id);
-                        get_name(names, object.object_name_id)
-                    } else {
-                        &im_str!("Class")
+                    let object_name = match (*object_id).cmp(&0) {
+                        Ordering::Less => {
+                            let class = get_class(classes, *object_id);
+                            get_name(names, class.class_name_id)
+                        }
+                        Ordering::Greater => {
+                            let object = get_object(objects, *object_id);
+                            get_name(names, object.object_name_id)
+                        }
+                        Ordering::Equal => &im_str!("Class"),
                     };
                     self.draw_text(object_name, get_name(names, *name_id), ident).await;
                 }
@@ -168,7 +174,7 @@ impl<'a> Gui<'a> {
                             self.draw_text(object_name, &im_str!("{}", i), i).await;
                         }
                         ArrayType::Vector(vector) => {
-                            vector.draw_raw_ui(self, im_str!("{}##{}", i,i).to_str()).await
+                            vector.draw_raw_ui(self, im_str!("{}##{}", i, i).to_str()).await
                         }
                         ArrayType::String(string) => {
                             string.draw_raw_ui(self, im_str!("##{}", i).to_str()).await

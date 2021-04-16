@@ -22,8 +22,8 @@ pub struct Player {
 #[async_trait(?Send)]
 impl SaveData for Player {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let _begin: Dummy<8> = SaveData::deserialize(cursor)?;
-        let header_offset: u32 = SaveData::deserialize(cursor)?;
+        let _begin = SaveData::deserialize(cursor)?;
+        let header_offset = SaveData::deserialize(cursor)?;
         let _no_mans_land1 = cursor.read((header_offset - 12) as usize)?.to_owned();
         let header: Header = SaveData::deserialize(cursor)?;
 
