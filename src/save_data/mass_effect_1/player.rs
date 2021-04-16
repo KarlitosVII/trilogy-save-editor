@@ -1,7 +1,6 @@
 use anyhow::*;
 use async_trait::async_trait;
 use imgui::ImString;
-use std::mem::size_of;
 
 use crate::{gui::Gui, save_data::Dummy};
 
@@ -13,11 +12,11 @@ pub struct Player {
     header_offset: u32,
     _no_mans_land1: Vec<u8>,
     header: Header,
-    names: Vec<Name>,
-    imports: Vec<Import>,
-    exports: Vec<Export>,
+    pub names: Vec<Name>,
+    pub classes: Vec<Class>,
+    pub objects: Vec<Object>,
     _no_mans_land2: Vec<u8>,
-    datas: Vec<Data>,
+    pub datas: Vec<Data>,
 }
 
 #[async_trait(?Send)]
@@ -35,15 +34,15 @@ impl SaveData for Player {
         }
 
         // Imports
-        let mut imports = Vec::new();
-        for _ in 0..header.imports_len {
-            imports.push(SaveData::deserialize(cursor)?);
+        let mut classes = Vec::new();
+        for _ in 0..header.classes_len {
+            classes.push(SaveData::deserialize(cursor)?);
         }
 
-        // Exports
-        let mut exports: Vec<Export> = Vec::new();
-        for _ in 0..header.exports_len {
-            exports.push(SaveData::deserialize(cursor)?);
+        // Metadatas
+        let mut objects: Vec<Object> = Vec::new();
+        for _ in 0..header.objects_len {
+            objects.push(SaveData::deserialize(cursor)?);
         }
 
         let _no_mans_land2 =
@@ -51,8 +50,8 @@ impl SaveData for Player {
 
         // Data
         let mut datas = Vec::new();
-        for export in exports.iter() {
-            let data_bytes = cursor.read((export.data_size) as usize)?.to_owned();
+        for object in objects.iter() {
+            let data_bytes = cursor.read((object.data_size) as usize)?.to_owned();
             let mut cursor = SaveCursor::new(data_bytes);
             datas.push(Data::new(&names, &mut cursor)?);
         }
@@ -63,8 +62,8 @@ impl SaveData for Player {
             _no_mans_land1,
             header,
             names,
-            imports,
-            exports,
+            classes,
+            objects,
             _no_mans_land2,
             datas,
         })
@@ -77,8 +76,8 @@ impl SaveData for Player {
             _no_mans_land1,
             header,
             names,
-            imports,
-            exports,
+            classes,
+            objects,
             _no_mans_land2,
             datas,
         } = self;
@@ -86,22 +85,20 @@ impl SaveData for Player {
         // Calculs d'offsets
         let mut header = header.clone();
 
-        header.imports_offset = header.name_offset;
+        header.classes_offset = header.name_offset;
         for name in names.iter() {
-            header.imports_offset += name.size()? as u32;
+            header.classes_offset += name.size()? as u32;
         }
 
-        header.exports_offset =
-            header.imports_offset + (imports.len() * size_of::<Import>()) as u32;
-        header.no_mans_land_offset =
-            header.exports_offset + (exports.len() * size_of::<Export>()) as u32;
+        header.objects_offset = header.classes_offset + (classes.len() * 28) as u32;
+        header.no_mans_land_offset = header.objects_offset + (objects.len() * 72) as u32;
         header.data_offset = header.no_mans_land_offset + _no_mans_land2.len() as u32;
 
-        let mut exports = exports.clone();
+        let mut objects = objects.clone();
         {
             let mut current_offset = header.data_offset;
-            for (i, export) in exports.iter_mut().enumerate() {
-                export.data_offset = current_offset;
+            for (i, object) in objects.iter_mut().enumerate() {
+                object.data_offset = current_offset;
                 current_offset += datas[i].size()? as u32;
             }
         }
@@ -116,12 +113,12 @@ impl SaveData for Player {
             name.serialize(output)?;
         }
 
-        for import in imports {
-            import.serialize(output)?;
+        for class in classes {
+            class.serialize(output)?;
         }
 
-        for export in exports {
-            export.serialize(output)?;
+        for object in objects {
+            object.serialize(output)?;
         }
 
         output.extend(_no_mans_land2);
@@ -145,10 +142,10 @@ struct Header {
     _flags: u32,
     name_len: u32,
     name_offset: u32,
-    exports_len: u32,
-    exports_offset: u32,
-    imports_len: u32,
-    imports_offset: u32,
+    objects_len: u32,
+    objects_offset: u32,
+    classes_len: u32,
+    classes_offset: u32,
     no_mans_land_offset: u32,
     _osef1: Dummy<68>,
     _compression: u32,
@@ -157,35 +154,35 @@ struct Header {
 
 #[derive(SaveData, Clone)]
 pub struct Name {
-    pub name: ImString,
+    pub string: ImString,
     osef: Dummy<8>,
 }
 
 impl Name {
     fn size(&self) -> Result<usize> {
         let mut bytes = Vec::new();
-        self.name.serialize(&mut bytes)?;
+        self.string.serialize(&mut bytes)?;
         Ok(bytes.len() + 8)
     }
 }
 
 #[derive(SaveData, Clone)]
-pub struct Import {
-    package_index: u32,
+pub struct Class {
+    package_id: u32,
     _osef1: Dummy<4>,
-    class_index: u32,
+    base_name_id: u32,
     _osef2: Dummy<4>,
-    link_index: u32,
-    object_index: u32,
+    link_id: u32,
+    pub class_name_id: u32,
     _osef3: Dummy<4>,
 }
 
 #[derive(SaveData, Clone)]
-pub struct Export {
-    class_id: u32,
+pub struct Object {
+    pub class_id: i32,
     class_parent_id: u32,
     link_id: u32,
-    object_id: u32,
+    pub object_name_id: u32,
     value_id: u32,
     archtype_id: u32,
     flag: u64,
