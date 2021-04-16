@@ -1,7 +1,6 @@
 use anyhow::*;
 use async_trait::async_trait;
 use imgui::ImString;
-use std::mem::size_of;
 
 use crate::{
     gui::Gui,
@@ -16,7 +15,7 @@ use super::{player::Name, SaveCursor, SaveData};
 #[derive(Clone)]
 pub struct Data {
     _osef: Dummy<4>,
-    properties: Vec<Property>,
+    pub properties: Vec<Property>,
 }
 
 impl Data {
@@ -72,8 +71,12 @@ macro_rules! serialize {
     }};
 }
 
+fn get_name(names: &[Name], id: u32) -> String {
+    names[id as usize].string.to_string()
+}
+
 #[derive(Clone)]
-enum Property {
+pub enum Property {
     Array {
         name_id: u32,
         _osef1: Dummy<4>,
@@ -179,7 +182,7 @@ impl Property {
         let name_id = SaveData::deserialize(cursor)?;
         let _osef1 = SaveData::deserialize(cursor)?;
 
-        let name = Self::get_name(names, name_id);
+        let name = get_name(names, name_id);
         if name == "None" {
             return Ok(Self::None { name_id, _osef: _osef1 });
         }
@@ -191,7 +194,7 @@ impl Property {
         let size = SaveData::deserialize(cursor)?;
         let _osef3 = SaveData::deserialize(cursor)?;
 
-        let type_name = Self::get_name(names, type_id);
+        let type_name = get_name(names, type_id);
         let property = match type_name.as_str() {
             "ArrayProperty" => {
                 let len: u32 = SaveData::deserialize(cursor)?;
@@ -282,7 +285,7 @@ impl Property {
                 let struct_name_id = SaveData::deserialize(cursor)?;
                 let _osef4 = SaveData::deserialize(cursor)?;
 
-                let struct_name = Self::get_name(names, struct_name_id);
+                let struct_name = get_name(names, struct_name_id);
                 let properties = match struct_name.as_str() {
                     "LinearColor" => StructType::linear_color(cursor)?,
                     "Vector" => StructType::vector(cursor)?,
@@ -304,10 +307,6 @@ impl Property {
             _ => unimplemented!(),
         };
         Ok(property)
-    }
-
-    fn get_name(names: &[Name], id: u32) -> String {
-        names[id as usize].name.to_string()
     }
 
     pub fn size(&self) -> Result<usize> {
@@ -428,9 +427,9 @@ impl SaveData for Property {
 }
 
 #[derive(Clone)]
-enum ArrayType {
+pub enum ArrayType {
     Int(i32),
-    Object(u32),
+    Object(i32),
     Vector(Vector),
     String(ImString),
     Properties(Vec<Property>),
@@ -474,7 +473,7 @@ impl ArrayType {
         Ok(match self {
             ArrayType::Int(_) => 4,
             ArrayType::Object(_) => 4,
-            ArrayType::Vector(_) => size_of::<Vector>(),
+            ArrayType::Vector(_) => 12,
             ArrayType::String(string) => {
                 let mut bytes = Vec::new();
                 string.serialize(&mut bytes)?;
@@ -500,7 +499,7 @@ impl SaveData for ArrayType {
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
         match self {
             ArrayType::Int(value) => value.serialize(output)?,
-            ArrayType::Object(export_id) => export_id.serialize(output)?,
+            ArrayType::Object(metadata_id) => metadata_id.serialize(output)?,
             ArrayType::Vector(vector) => vector.serialize(output)?,
             ArrayType::String(string) => string.serialize(output)?,
             ArrayType::Properties(properties) => {
@@ -516,7 +515,7 @@ impl SaveData for ArrayType {
 }
 
 #[derive(Clone)]
-enum StructType {
+pub enum StructType {
     LinearColor(LinearColor),
     Vector(Vector),
     Rotator(Rotator),
@@ -555,9 +554,9 @@ impl StructType {
 
     fn size(&self) -> Result<usize> {
         Ok(match self {
-            StructType::LinearColor(_) => size_of::<LinearColor>(),
-            StructType::Vector(_) => size_of::<Vector>(),
-            StructType::Rotator(_) => size_of::<Rotator>(),
+            StructType::LinearColor(_) => 16,
+            StructType::Vector(_) => 12,
+            StructType::Rotator(_) => 12,
             StructType::Properties(properties) => {
                 let mut size = 0;
                 for property in properties {

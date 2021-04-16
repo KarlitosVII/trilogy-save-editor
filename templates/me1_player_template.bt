@@ -43,8 +43,8 @@ string read_name(Name &n) {
     return read_string(n.str);
 }
 
-// Import
-struct Import {
+// Class
+struct Class {
     uint index_package;
     FSkip(4);
     uint index_class;
@@ -54,9 +54,9 @@ struct Import {
     FSkip(4);
 };
 
-// Export
-struct Export {
-    uint index_class_name;
+// Object
+struct Object {
+    int index_class;
     uint index_class_parent;
     uint index_link;
     uint index_object;
@@ -100,10 +100,10 @@ struct {
         uint flags <format=hex>;
         uint names_len;
         uint names_offset <format=hex>;
-        uint exports_len;
-        uint exports_offset <format=hex>;
-        uint imports_len;
-        uint imports_offset <format=hex>;
+        uint objects_len;
+        uint objects_offset <format=hex>;
+        uint classes_len;
+        uint classes_offset <format=hex>;
         uint no_mans_land_offset <format=hex>;
         FSkip(16);
         uint generations <format=hex>;
@@ -115,19 +115,19 @@ struct {
 	    Name name[header.names_len] <optimize=false>;
     } names;
     struct {
-        FSeek(header.imports_offset);
-	    Import import[header.imports_len] <optimize=false>;
-    } imports <bgcolor=0x88ff55>;
+        FSeek(header.classes_offset);
+	    Class class[header.classes_len] <optimize=false>;
+    } classes <bgcolor=0x88ff55>;
     struct {
-        FSeek(header.exports_offset);
-	    Export export[header.exports_len] <optimize=false>;
-    } exports <bgcolor=0xff8855>;
+        FSeek(header.objects_offset);
+	    Object object[header.objects_len] <optimize=false>;
+    } objects <bgcolor=0xff8855>;
     // No man's land
     FSeek(header.data_offset);
     struct {
         local int i;
-        for (i = 0; i < header.exports_len; i++) {
-            FSeek(exports.export[i].data_offset);
+        for (i = 0; i < header.objects_len; i++) {
+            FSeek(objects.object[i].data_offset);
             Data data;
         }
     } datas <bgcolor=0x447799>;

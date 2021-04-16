@@ -18,7 +18,7 @@ use crate::{
 
 pub enum MainEvent {
     OpenSave(PathBuf),
-    SaveSave((PathBuf, SaveGame)),
+    SaveSave(PathBuf, SaveGame),
 }
 
 #[derive(Clone)]
@@ -31,13 +31,13 @@ pub enum SaveGame {
 pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
     while let Ok(event) = rx.recv_async().await {
         let result = async {
+            let ui_addr = Sender::clone(&ui_addr);
             match event {
-                MainEvent::OpenSave(path) => open_save(&path, &ui_addr).await?,
-                MainEvent::SaveSave((path, save_game)) => {
-                    save_save(&path, save_game, &ui_addr).await?
+                MainEvent::OpenSave(path) => tokio::spawn(open_save(path, ui_addr)).await?,
+                MainEvent::SaveSave(path, save_game) => {
+                    tokio::spawn(save_save(path, save_game, ui_addr)).await?
                 }
-            };
-            Ok::<_, Error>(())
+            }
         };
 
         if let Err(err) = result.await {
@@ -46,10 +46,10 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
     }
 }
 
-async fn open_save(path: &Path, ui_addr: &Sender<UiEvent>) -> Result<()> {
+async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = Vec::new();
     {
-        let mut file = File::open(path).await?;
+        let mut file = File::open(&path).await?;
         file.read_to_end(&mut input).await?;
     }
 
@@ -76,7 +76,7 @@ async fn open_save(path: &Path, ui_addr: &Sender<UiEvent>) -> Result<()> {
     Ok(())
 }
 
-async fn save_save(path: &Path, save_game: SaveGame, ui_addr: &Sender<UiEvent>) -> Result<()> {
+async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut output = Vec::new();
 
     match save_game {
@@ -86,14 +86,14 @@ async fn save_save(path: &Path, save_game: SaveGame, ui_addr: &Sender<UiEvent>) 
     };
 
     // if save exists
-    if fs::metadata(path).await.is_ok() {
+    if fs::metadata(&path).await.is_ok() {
         if let Some(ext) = path.extension() {
-            let to = Path::with_extension(path, ext.to_string_lossy().into_owned() + ".bak");
-            fs::rename(path, to).await?;
+            let to = Path::with_extension(&path, ext.to_string_lossy().into_owned() + ".bak");
+            fs::rename(&path, to).await?;
         }
     }
 
-    let mut file = File::create(path).await?;
+    let mut file = File::create(&path).await?;
     file.write_all(&output).await?;
 
     let _ = ui_addr.send_async(UiEvent::Notification("Saved")).await;

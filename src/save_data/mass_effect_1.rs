@@ -7,17 +7,17 @@ use crate::{gui::Gui, save_data::Dummy};
 
 use super::{SaveCursor, SaveData};
 
-mod player;
+pub mod player;
 use self::player::*;
 
-mod data;
+pub mod data;
 
 #[derive(Clone)]
 pub struct Me1SaveGame {
     _begin: Dummy<8>,
     zip_offset: u32,
     _no_mans_land: Vec<u8>,
-    player: Player,
+    pub player: Player,
     _state: State,
     _world_save_package: Option<WorldSavePackage>,
 }

@@ -219,8 +219,10 @@ impl<'a> Gui<'a> {
 
     // Edit boxes
     pub async fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
+        let ui = self.ui;
+
         self.draw_colored_bg(ident, || {
-            self.ui.input_text(&ImString::new(ident), value).build();
+            ui.input_text(&ImString::new(ident), value).build();
         });
     }
 
@@ -228,7 +230,7 @@ impl<'a> Gui<'a> {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(100.0);
+            let _width = ui.push_item_width(120.0);
             ui.checkbox(&ImString::new(ident), value);
         });
     }
@@ -237,7 +239,7 @@ impl<'a> Gui<'a> {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(100.0);
+            let _width = ui.push_item_width(120.0);
             InputInt::new(ui, &ImString::new(ident), value).build();
         });
     }
@@ -246,7 +248,7 @@ impl<'a> Gui<'a> {
         let ui = self.ui;
 
         self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(100.0);
+            let _width = ui.push_item_width(120.0);
             InputFloat::new(ui, &ImString::new(ident), value).build();
         });
     }
@@ -274,7 +276,10 @@ impl<'a> Gui<'a> {
     where
         F: Future<Output = ()>,
     {
-        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.ui) {
+        let label = if let Some(label) = ident.rsplit("##").next() { label } else { ident };
+        if let Some(_t) =
+            TreeNode::new(&ImString::new(ident)).label(&ImString::new(label)).push(self.ui)
+        {
             fields.await;
         }
     }
@@ -459,7 +464,7 @@ impl<'a> Gui<'a> {
             if let Ok(result) = result {
                 let _ = self
                     .event_addr
-                    .send_async(MainEvent::SaveSave((result.selected_file_path, save_game.clone())))
+                    .send_async(MainEvent::SaveSave(result.selected_file_path, save_game.clone()))
                     .await;
             }
         }
