@@ -17,6 +17,7 @@ use crate::{
     },
 };
 
+mod mass_effect_1;
 mod support;
 
 static NOTIFICATION_TIME: f64 = 1.5;
@@ -106,7 +107,7 @@ impl<'a> Gui<'a> {
         let _colors = self
             .style_colors(match save_game {
                 None => Theme::MassEffect3,
-                Some(SaveGame::MassEffect1) => Theme::MassEffect1,
+                Some(SaveGame::MassEffect1(_)) => Theme::MassEffect1,
                 Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
                 Some(SaveGame::MassEffect3(_)) => Theme::MassEffect3,
             })
@@ -154,7 +155,7 @@ impl<'a> Gui<'a> {
 
             match save_game {
                 None => ui.text(im_str!("Rien ici")),
-                Some(SaveGame::MassEffect1) => todo!(),
+                Some(SaveGame::MassEffect1(save_game)) => self.draw_mass_effect_1(save_game).await,
                 Some(SaveGame::MassEffect2(save_game)) => self.draw_mass_effect_2(save_game).await,
                 Some(SaveGame::MassEffect3(save_game)) => self.draw_mass_effect_3(save_game).await,
             };
@@ -445,7 +446,7 @@ impl<'a> Gui<'a> {
     async fn save_save(&self, save_game: &Option<SaveGame>) {
         if let Some(save_game) = save_game {
             let default_ext = match save_game {
-                SaveGame::MassEffect1 => todo!(),
+                SaveGame::MassEffect1(_) => "MassEffectSave",
                 SaveGame::MassEffect2(_) | SaveGame::MassEffect3(_) => "pcsav",
             };
 

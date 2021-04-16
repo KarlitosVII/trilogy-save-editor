@@ -1,6 +1,6 @@
 use anyhow::*;
 use async_trait::async_trait;
-use crc::{CRC_32_BZIP2, Crc};
+use crc::{Crc, CRC_32_BZIP2};
 use imgui::ImString;
 
 use crate::{
@@ -18,18 +18,19 @@ pub struct Checksum(u32);
 #[async_trait(?Send)]
 impl SaveData for Checksum {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self(Self::deserialize_from(cursor)?))
+        Ok(Self(<u32>::deserialize(cursor)?))
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);
-        Self::serialize_to(&crc.checksum(output), output)
+        <u32>::serialize(&crc.checksum(output), output)
     }
 
     async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
+#[repr(u32)]
 pub enum EndGameState {
     NotFinished,
     OutInABlazeOfGlory,

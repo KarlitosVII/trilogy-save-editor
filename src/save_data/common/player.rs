@@ -1,6 +1,6 @@
 use imgui::ImString;
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
 pub enum Origin {
     None,
     Spacer,
@@ -8,7 +8,7 @@ pub enum Origin {
     Earthborn,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
 pub enum Notoriety {
     None,
     Survivor,

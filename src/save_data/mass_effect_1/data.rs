@@ -1,8 +1,7 @@
-use std::mem::size_of;
-
 use anyhow::*;
 use async_trait::async_trait;
 use imgui::ImString;
+use std::mem::size_of;
 
 use crate::{
     gui::Gui,
@@ -13,20 +12,6 @@ use crate::{
 };
 
 use super::{player::Name, SaveCursor, SaveData};
-
-#[derive(SaveData, Clone)]
-pub struct Export {
-    class_id: u32,
-    class_parent_id: u32,
-    link_id: u32,
-    object_id: u32,
-    value_id: u32,
-    archtype_id: u32,
-    flag: u64,
-    pub data_size: u32,
-    pub data_offset: u32,
-    _osef: Dummy<32>,
-}
 
 #[derive(Clone)]
 pub struct Data {

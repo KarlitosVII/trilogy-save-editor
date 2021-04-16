@@ -10,7 +10,7 @@ use super::{SaveCursor, SaveData};
 mod player;
 use self::player::*;
 
-mod export;
+mod data;
 
 #[derive(Clone)]
 pub struct Me1SaveGame {
@@ -132,7 +132,10 @@ zip_file_save_data!(WorldSavePackage);
 #[cfg(test)]
 mod test {
     use anyhow::*;
-    use std::{fs::File, io::Read};
+    use std::{
+        time::Instant,
+        {fs::File, io::Read},
+    };
 
     use crate::save_data::*;
 
@@ -152,21 +155,34 @@ mod test {
                 file.read_to_end(&mut input)?;
             }
 
+            let now = Instant::now();
+
             // Deserialize
             let mut cursor = SaveCursor::new(input);
             let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
+
+            println!("Deserialize 1 : {:?}", Instant::now().saturating_duration_since(now));
+            let now = Instant::now();
 
             // Serialize
             let mut output = Vec::new();
             Me1SaveGame::serialize(&me1_save_game, &mut output)?;
 
+            println!("Serialize 1 : {:?}", Instant::now().saturating_duration_since(now));
+            let now = Instant::now();
+
             // Deserialize (again)
             let mut cursor = SaveCursor::new(output.clone());
             let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
 
+            println!("Deserialize 2 : {:?}", Instant::now().saturating_duration_since(now));
+            let now = Instant::now();
+
             // Serialize (again)
             let mut output_2 = Vec::new();
             Me1SaveGame::serialize(&me1_save_game, &mut output_2)?;
+
+            println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
 
             // Check 2nd serialize = first serialize
             assert_eq!(&output, &output_2);

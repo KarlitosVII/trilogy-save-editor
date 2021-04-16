@@ -13,11 +13,11 @@ pub type BoolSlice = BitSlice<Lsb0, u32>;
 #[async_trait(?Send)]
 impl SaveData for BoolVec {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let len = Self::deserialize_from::<u32>(cursor)?;
+        let len = <u32>::deserialize(cursor)?;
         let mut bitfields = Vec::new();
 
         for _ in 0..len {
-            bitfields.push(Self::deserialize_from::<u32>(cursor)?);
+            bitfields.push(<u32>::deserialize(cursor)?);
         }
 
         let variables = BoolVec::from_vec(bitfields);
@@ -28,10 +28,10 @@ impl SaveData for BoolVec {
         let bitfields = self.clone().into_vec();
 
         let len = bitfields.len() as u32;
-        Self::serialize_to::<u32>(&len, output)?;
+        <u32>::serialize(&len, output)?;
 
         for bitfield in &bitfields {
-            Self::serialize_to::<u32>(&bitfield, output)?;
+            <u32>::serialize(bitfield, output)?;
         }
         Ok(())
     }

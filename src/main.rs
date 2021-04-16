@@ -3,22 +3,17 @@
 #![warn(clippy::all)]
 
 #[macro_use]
-extern crate num_derive;
-#[macro_use]
 extern crate save_data_derive;
 
 use std::panic::{self, PanicInfo};
-use tokio::{
-    runtime::Handle,
-    task::{self, JoinError},
-};
+use tokio::{runtime::Handle, task};
 
 mod event_handler;
 mod gui;
 mod save_data;
 
 #[tokio::main]
-async fn main() -> Result<(), JoinError> {
+async fn main() {
     #[cfg(debug_assertions)]
     console::attach();
 
@@ -30,14 +25,13 @@ async fn main() -> Result<(), JoinError> {
     let (event_addr, event_rx) = flume::unbounded();
     let (ui_addr, ui_rx) = flume::unbounded();
 
-    let event_loop = tokio::spawn(async move {
-        event_handler::event_loop(event_rx, ui_addr).await;
-    });
+    let event_loop = event_handler::event_loop(event_rx, ui_addr);
 
     let handle = Handle::current();
-    task::spawn_blocking(move || gui::run(event_addr, ui_rx, handle)).await?;
+    let gui = task::spawn_blocking(move || gui::run(event_addr, ui_rx, handle));
 
-    event_loop.await
+    let (_, gui) = tokio::join!(event_loop, gui);
+    gui.expect("GUI panicked");
 }
 
 fn panic_hook(info: &PanicInfo<'_>) {

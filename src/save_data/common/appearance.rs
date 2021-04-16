@@ -29,7 +29,7 @@ pub struct Appearance {
     head_morph: Option<HeadMorph>,
 }
 
-#[derive(FromPrimitive, ToPrimitive, SaveData, Clone)]
+#[derive(SaveData, Clone)]
 enum PlayerAppearanceType {
     Parts,
     Full,
@@ -81,16 +81,16 @@ pub struct LinearColor([f32; 4]);
 impl SaveData for LinearColor {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(Self([
-            SaveData::deserialize(cursor)?,
-            SaveData::deserialize(cursor)?,
-            SaveData::deserialize(cursor)?,
-            SaveData::deserialize(cursor)?,
+            <f32>::deserialize(cursor)?,
+            <f32>::deserialize(cursor)?,
+            <f32>::deserialize(cursor)?,
+            <f32>::deserialize(cursor)?,
         ]))
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
         for byte in self.0.iter() {
-            Self::serialize_to(byte, output)?;
+            <f32>::serialize(byte, output)?;
         }
         Ok(())
     }
