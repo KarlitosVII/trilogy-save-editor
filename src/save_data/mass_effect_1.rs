@@ -10,6 +10,9 @@ use super::{SaveCursor, SaveData};
 pub mod player;
 use self::player::*;
 
+pub mod state;
+use self::state::*;
+
 pub mod data;
 
 #[derive(Clone)]
@@ -18,7 +21,7 @@ pub struct Me1SaveGame {
     zip_offset: u32,
     _no_mans_land: Vec<u8>,
     pub player: Player,
-    _state: State,
+    pub state: State,
     _world_save_package: Option<WorldSavePackage>,
 }
 
@@ -39,7 +42,7 @@ impl SaveData for Me1SaveGame {
             SaveData::deserialize(&mut cursor)?
         };
 
-        let _state: State = {
+        let state: State = {
             let mut bytes = Vec::new();
             zip.by_name("state.sav")?.read_to_end(&mut bytes)?;
             let mut cursor = SaveCursor::new(bytes);
@@ -58,11 +61,11 @@ impl SaveData for Me1SaveGame {
                 None
             };
 
-        Ok(Self { _begin, zip_offset, _no_mans_land, player, _state, _world_save_package })
+        Ok(Self { _begin, zip_offset, _no_mans_land, player, state, _world_save_package })
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let Me1SaveGame { _begin, zip_offset, _no_mans_land, player, _state, _world_save_package } =
+        let Me1SaveGame { _begin, zip_offset, _no_mans_land, player, state, _world_save_package } =
             self;
 
         _begin.serialize(output)?;
@@ -84,7 +87,7 @@ impl SaveData for Me1SaveGame {
             // State
             {
                 let mut state_data = Vec::new();
-                _state.serialize(&mut state_data)?;
+                state.serialize(&mut state_data)?;
                 zipper.start_file("state.sav", options)?;
                 zipper.write_all(&state_data)?;
             }
@@ -104,30 +107,24 @@ impl SaveData for Me1SaveGame {
     async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-macro_rules! zip_file_save_data {
-    ($type:ident) => {
-        #[derive(Clone)]
-        pub(super) struct $type {
-            data: Vec<u8>,
-        }
-
-        #[async_trait(?Send)]
-        impl SaveData for $type {
-            fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-                Ok(Self { data: cursor.read_to_end()?.to_owned() })
-            }
-
-            fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-                output.extend(&self.data);
-                Ok(())
-            }
-
-            async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-        }
-    };
+#[derive(Clone)]
+pub(super) struct WorldSavePackage {
+    data: Vec<u8>,
 }
-zip_file_save_data!(State);
-zip_file_save_data!(WorldSavePackage);
+
+#[async_trait(?Send)]
+impl SaveData for WorldSavePackage {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        Ok(Self { data: cursor.read_to_end()?.to_owned() })
+    }
+
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        output.extend(&self.data);
+        Ok(())
+    }
+
+    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+}
 
 #[cfg(test)]
 mod test {
@@ -185,7 +182,12 @@ mod test {
             println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
 
             // Check 2nd serialize = first serialize
-            assert_eq!(&output, &output_2);
+            let cmp = output.chunks(4).zip(output_2.chunks(4));
+            for (i, (a, b)) in cmp.enumerate() {
+                if a != b {
+                    panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+                }
+            }
         }
         Ok(())
     }

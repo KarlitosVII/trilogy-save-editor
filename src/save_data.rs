@@ -48,7 +48,7 @@ impl SaveCursor {
 pub trait SaveData: Sized {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str);
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str);
 }
 
 // Implémentation des dummy
