@@ -1,6 +1,7 @@
 use anyhow::*;
 use async_trait::async_trait;
 use imgui::ImString;
+use std::ops::{Deref, DerefMut};
 
 use crate::{
     gui::Gui,
@@ -15,7 +16,7 @@ use super::{player::Name, SaveCursor, SaveData};
 #[derive(Clone)]
 pub struct Data {
     _osef: Dummy<4>,
-    pub properties: Vec<Property>,
+    properties: Vec<Property>,
 }
 
 impl Data {
@@ -46,6 +47,20 @@ impl Data {
     }
 }
 
+impl Deref for Data {
+    type Target = Vec<Property>;
+
+    fn deref(&self) -> &Vec<Property> {
+        &self.properties
+    }
+}
+
+impl DerefMut for Data {
+    fn deref_mut(&mut self) -> &mut Vec<Property> {
+        &mut self.properties
+    }
+}
+
 #[async_trait(?Send)]
 impl SaveData for Data {
     fn deserialize(_: &mut SaveCursor) -> Result<Self> {
@@ -72,7 +87,7 @@ macro_rules! serialize {
 }
 
 fn get_name(names: &[Name], id: u32) -> String {
-    names[id as usize].string.to_string()
+    names[id as usize].to_string()
 }
 
 #[derive(Clone)]

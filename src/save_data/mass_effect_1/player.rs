@@ -1,6 +1,10 @@
 use anyhow::*;
 use async_trait::async_trait;
-use imgui::ImString;
+use imgui::{ImStr, ImString};
+use std::{
+    cell::RefCell,
+    ops::{Deref, DerefMut},
+};
 
 use crate::{gui::Gui, save_data::Dummy};
 
@@ -12,11 +16,29 @@ pub struct Player {
     header_offset: u32,
     _no_mans_land1: Vec<u8>,
     header: Header,
-    pub names: Vec<Name>,
-    pub classes: Vec<Class>,
+    names: Vec<Name>,
+    classes: Vec<Class>,
     pub objects: Vec<Object>,
     _no_mans_land2: Vec<u8>,
-    pub datas: Vec<Data>,
+    datas: Vec<RefCell<Data>>,
+}
+
+impl Player {
+    pub fn get_name(&self, id: u32) -> &ImStr {
+        &self.names[id as usize]
+    }
+
+    pub fn get_class(&self, id: i32) -> &Class {
+        &self.classes[id.abs() as usize - 1]
+    }
+
+    pub fn get_object(&self, id: i32) -> &Object {
+        &self.objects[id as usize - 1]
+    }
+
+    pub fn get_data(&self, i: i32) -> &RefCell<Data> {
+        &self.datas[i as usize - 1]
+    }
 }
 
 #[async_trait(?Send)]
@@ -53,7 +75,7 @@ impl SaveData for Player {
         for object in objects.iter() {
             let data_bytes = cursor.read((object.data_size) as usize)?.to_owned();
             let mut cursor = SaveCursor::new(data_bytes);
-            datas.push(Data::new(&names, &mut cursor)?);
+            datas.push(RefCell::new(Data::new(&names, &mut cursor)?));
         }
 
         Ok(Self {
@@ -99,7 +121,7 @@ impl SaveData for Player {
             let mut current_offset = header.data_offset;
             for (i, object) in objects.iter_mut().enumerate() {
                 object.data_offset = current_offset;
-                current_offset += datas[i].size()? as u32;
+                current_offset += datas[i].borrow().size()? as u32;
             }
         }
 
@@ -124,7 +146,7 @@ impl SaveData for Player {
         output.extend(_no_mans_land2);
 
         for data in datas {
-            data.serialize(output)?;
+            data.borrow().serialize(output)?;
         }
 
         Ok(())
@@ -154,8 +176,8 @@ struct Header {
 
 #[derive(SaveData, Clone)]
 pub struct Name {
-    pub string: ImString,
-    osef: Dummy<8>,
+    string: ImString,
+    _osef: Dummy<8>,
 }
 
 impl Name {
@@ -163,6 +185,20 @@ impl Name {
         let mut bytes = Vec::new();
         self.string.serialize(&mut bytes)?;
         Ok(bytes.len() + 8)
+    }
+}
+
+impl Deref for Name {
+    type Target = ImString;
+
+    fn deref(&self) -> &ImString {
+        &self.string
+    }
+}
+
+impl DerefMut for Name {
+    fn deref_mut(&mut self) -> &mut ImString {
+        &mut self.string
     }
 }
 

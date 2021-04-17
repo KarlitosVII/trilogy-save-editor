@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
 use imgui::ImString;
 use indexmap::IndexMap;
-use std::{any::type_name, convert::TryInto, hash::Hash, mem::size_of, usize};
+use std::{any::type_name, convert::TryInto, fmt::Display, hash::Hash, mem::size_of, usize};
 
 use crate::gui::Gui;
 
@@ -286,7 +286,7 @@ where
 #[async_trait(?Send)]
 impl<K, V> SaveData for IndexMap<K, V>
 where
-    K: SaveData + Eq + Hash + Default,
+    K: SaveData + Eq + Hash + Default + Display,
     V: SaveData + Default,
 {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
