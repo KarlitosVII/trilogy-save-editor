@@ -3,6 +3,7 @@ use flume::{Receiver, Sender};
 use imgui::{Ui, *};
 use indexmap::IndexMap;
 use std::{
+    fmt::Display,
     future::Future,
     hash::Hash,
     sync::atomic::{AtomicUsize, Ordering},
@@ -276,9 +277,9 @@ impl<'a> Gui<'a> {
     where
         F: Future<Output = ()>,
     {
-        let label = if let Some(label) = ident.rsplit("##").next() { label } else { ident };
+        let label = if let Some(label) = ident.split("##").next() { label } else { ident };
         if let Some(_t) =
-            TreeNode::new(&ImString::new(ident)).label(&ImString::new(label)).push(self.ui)
+            TreeNode::new(&im_str!("struct-{}", ident)).label(&ImString::new(label)).push(self.ui)
         {
             fields.await;
         }
@@ -290,12 +291,14 @@ impl<'a> Gui<'a> {
     {
         let ui = self.ui;
 
-        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(ui) {
+        if let Some(_t) =
+            TreeNode::new(&im_str!("vec-{}", ident)).label(&im_str!("{}", ident)).push(ui)
+        {
             if !list.is_empty() {
                 // Item
                 let mut remove = None;
                 for (i, item) in list.iter_mut().enumerate() {
-                    if ui.small_button(&im_str!("remove##x-{}", i)) {
+                    if ui.small_button(&im_str!("remove##remove-{}", i)) {
                         remove = Some(i);
                     }
                     ui.same_line();
@@ -307,13 +310,16 @@ impl<'a> Gui<'a> {
                     list.remove(i);
                 }
             } else {
-                ui.text("Empty");
+                self.draw_colored_bg("empty", || {
+                    ui.align_text_to_frame_padding();
+                    ui.text(" Empty");
+                });
             }
 
             // Add
             if ui.button(&im_str!("add##add-{}", ident)) {
                 // Ça ouvre automatiquement le tree node de l'élément ajouté
-                TreeNode::new(&ImString::new(&list.len().to_string()))
+                TreeNode::new(&im_str!("vec-{}", list.len()))
                     .opened(true, Condition::Always)
                     .build(ui, || {});
 
@@ -323,39 +329,52 @@ impl<'a> Gui<'a> {
     }
 
     pub async fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
-        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(self.ui) {
+        let ui = self.ui;
+        if let Some(_t) =
+            TreeNode::new(&im_str!("boolvec-{}", ident)).label(&im_str!("{}", ident)).push(ui)
+        {
             if !list.is_empty() {
-                let mut clipper = ListClipper::new(list.len() as i32).begin(self.ui);
+                let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
                 while clipper.step() {
                     for i in clipper.display_start()..clipper.display_end() {
                         list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string()).await;
                     }
                 }
+            } else {
+                self.draw_colored_bg("empty", || {
+                    ui.align_text_to_frame_padding();
+                    ui.text(" Empty");
+                });
             }
         }
     }
 
     pub async fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
     where
-        K: SaveData + Eq + Hash + Default,
+        K: SaveData + Eq + Hash + Default + Display,
         V: SaveData + Default,
     {
         let ui = self.ui;
 
-        if let Some(_t) = TreeNode::new(&ImString::new(ident)).push(ui) {
+        if let Some(_t) =
+            TreeNode::new(&im_str!("indexmap-{}", ident)).label(&im_str!("{}", ident)).push(ui)
+        {
             if !list.is_empty() {
                 // Item
                 let mut remove = None;
                 for i in 0..list.len() {
-                    if ui.small_button(&im_str!("remove##x-{}", i)) {
+                    if ui.small_button(&im_str!("remove##remove-{}", i)) {
                         remove = Some(i);
                     }
                     ui.same_line();
 
-                    if let Some(_t) = TreeNode::new(&ImString::new(i.to_string())).push(ui) {
-                        if let Some((key, value)) = list.get_index_mut(i) {
-                            key.draw_raw_ui(self, "##k").await;
-                            value.draw_raw_ui(self, "##v").await;
+                    if let Some((key, value)) = list.get_index_mut(i) {
+                        if let Some(_t) = TreeNode::new(&im_str!("entry-{}", i))
+                            .label(&ImString::new(key.to_string()))
+                            .push(ui)
+                        {
+                            key.draw_raw_ui(self, "id##key").await;
+                            value.draw_raw_ui(self, "value##value").await;
                         }
                     }
                 }
@@ -365,13 +384,16 @@ impl<'a> Gui<'a> {
                     list.shift_remove_index(i);
                 }
             } else {
-                ui.text("Empty");
+                self.draw_colored_bg("empty", || {
+                    ui.align_text_to_frame_padding();
+                    ui.text(" Empty");
+                });
             }
 
             // Add
             if ui.button(&im_str!("add##add-{}", ident)) {
                 // Ça ouvre automatiquement le tree node de l'élément ajouté
-                TreeNode::new(&ImString::new(&list.len().to_string()))
+                TreeNode::new(&im_str!("indexmap-{}", list.len()))
                     .opened(true, Condition::Always)
                     .build(ui, || {});
 

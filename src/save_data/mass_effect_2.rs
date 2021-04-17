@@ -24,7 +24,7 @@ use galaxy_map::*;
 #[derive(SaveData, Clone)]
 pub struct Me2SaveGame {
     version: Version,
-    _debug_name: Vec<Dummy<1>>,
+    debug_name: ImString,
     seconds_played: f32,
     _disc: Dummy<4>,
     base_level_name: ImString,
