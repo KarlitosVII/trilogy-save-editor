@@ -1,5 +1,6 @@
+use async_recursion::async_recursion;
 use imgui::*;
-use std::{cmp::Ordering, future::Future, pin::Pin};
+use std::{cmp::Ordering};
 
 use crate::save_data::{
     mass_effect_1::{data::*, player::*, *},
@@ -58,98 +59,93 @@ impl<'a> Gui<'a> {
         }
     }
 
-    fn draw_property(
-        &'a self, names: &'a [Name], classes: &'a [Class], objects: &'a [Object], ident: usize,
-        property: &'a mut Property,
-    ) -> Pin<Box<dyn Future<Output = ()> + 'a>> {
-        Box::pin(async move {
-            match property {
-                Property::Array { name_id, array, .. } => {
-                    self.draw_array_property(
-                        names,
-                        classes,
-                        objects,
-                        ident,
-                        get_name(names, *name_id),
-                        array,
-                    )
-                    .await
-                }
-                Property::Bool { name_id, value, .. } => {
-                    self.draw_edit_bool(
-                        im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
-                        value,
-                    )
-                    .await
-                }
-                Property::Float { name_id, value, .. } => {
-                    self.draw_edit_f32(
-                        im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
-                        value,
-                    )
-                    .await
-                }
-                Property::Int { name_id, value, .. } => {
-                    self.draw_edit_i32(
-                        im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
-                        value,
-                    )
-                    .await
-                }
-                Property::Name { name_id, value_name_id, .. } => {
-                    self.draw_text(
-                        get_name(names, *value_name_id),
-                        get_name(names, *name_id),
-                        ident,
-                    )
-                    .await;
-                }
-                Property::Object { name_id, object_id, .. } => {
-                    let object_name = match (*object_id).cmp(&0) {
-                        Ordering::Less => {
-                            let class = get_class(classes, *object_id);
-                            get_name(names, class.class_name_id)
-                        }
-                        Ordering::Greater => {
-                            let object = get_object(objects, *object_id);
-                            get_name(names, object.object_name_id)
-                        }
-                        Ordering::Equal => &im_str!("Class"),
-                    };
-                    self.draw_text(object_name, get_name(names, *name_id), ident).await;
-                }
-                Property::Str { name_id, string, .. } => {
-                    self.draw_edit_string(
-                        im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
-                        string,
-                    )
-                    .await
-                }
-                Property::StringRef { name_id, value, .. } => {
-                    self.draw_edit_i32(
-                        im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
-                        value,
-                    )
-                    .await;
-                }
-                Property::Struct { name_id, struct_name_id, properties, .. } => {
-                    self.draw_struct_property(
-                        names,
-                        classes,
-                        objects,
-                        ident,
-                        &im_str!(
-                            "{} : {}",
-                            get_name(names, *name_id),
-                            get_name(names, *struct_name_id)
-                        ),
-                        properties,
-                    )
-                    .await
-                }
-                _ => {}
+    #[async_recursion(?Send)]
+    async fn draw_property(
+        &self, names: &[Name], classes: &[Class], objects: &[Object], ident: usize,
+        property: &mut Property,
+    ) {
+        match property {
+            Property::Array { name_id, array, .. } => {
+                self.draw_array_property(
+                    names,
+                    classes,
+                    objects,
+                    ident,
+                    get_name(names, *name_id),
+                    array,
+                )
+                .await
             }
-        })
+            Property::Bool { name_id, value, .. } => {
+                self.draw_edit_bool(
+                    im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
+                    value,
+                )
+                .await
+            }
+            Property::Float { name_id, value, .. } => {
+                self.draw_edit_f32(
+                    im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
+                    value,
+                )
+                .await
+            }
+            Property::Int { name_id, value, .. } => {
+                self.draw_edit_i32(
+                    im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
+                    value,
+                )
+                .await
+            }
+            Property::Name { name_id, value_name_id, .. } => {
+                self.draw_text(get_name(names, *value_name_id), get_name(names, *name_id), ident)
+                    .await;
+            }
+            Property::Object { name_id, object_id, .. } => {
+                let object_name = match (*object_id).cmp(&0) {
+                    Ordering::Less => {
+                        let class = get_class(classes, *object_id);
+                        get_name(names, class.class_name_id)
+                    }
+                    Ordering::Greater => {
+                        let object = get_object(objects, *object_id);
+                        get_name(names, object.object_name_id)
+                    }
+                    Ordering::Equal => &im_str!("Class"),
+                };
+                self.draw_text(object_name, get_name(names, *name_id), ident).await;
+            }
+            Property::Str { name_id, string, .. } => {
+                self.draw_edit_string(
+                    im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
+                    string,
+                )
+                .await
+            }
+            Property::StringRef { name_id, value, .. } => {
+                self.draw_edit_i32(
+                    im_str!("{}##{}", get_name(names, *name_id), ident).to_str(),
+                    value,
+                )
+                .await;
+            }
+            Property::Struct { name_id, struct_name_id, properties, .. } => {
+                self.draw_struct_property(
+                    names,
+                    classes,
+                    objects,
+                    ident,
+                    &im_str!(
+                        "{} : {}",
+                        get_name(names, *name_id),
+                        get_name(names, *struct_name_id)
+                    ),
+                    properties,
+                )
+                .await
+            }
+            _ => {}
+        }
     }
 
     async fn draw_array_property(
