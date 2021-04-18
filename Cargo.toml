@@ -34,6 +34,9 @@ async-recursion = "0.3"
 # Sync
 # parking_lot = "0.11"
 flume = { version = "0.10", features = ["async"], default-features = false }
+# Parsing
+serde = { version = "1.0", features = ["derive"], default-features = false }
+ron = { version = "0.6", features = ["indexmap"], default-features = false }
 # Utils
 crc = "2.0.0-rc.1"
 zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }

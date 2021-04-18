@@ -5,7 +5,10 @@ use imgui::ImString;
 use crate::{gui::Gui, save_data::Dummy};
 
 use super::{
-    common::{Checksum, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector},
+    common::{
+        plot::Me1PlotTable, Checksum, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord,
+        Vector,
+    },
     SaveCursor, SaveData,
 };
 
