@@ -4,7 +4,7 @@ use imgui::ImString;
 
 use crate::{
     gui::Gui,
-    save_data::{mass_effect_2::plot::Me1PlotTable, Dummy},
+    save_data::{common::plot::Me1PlotTable, Dummy},
 };
 
 use super::{SaveCursor, SaveData};
@@ -14,7 +14,7 @@ pub struct State {
     _begin: Dummy<12>,
     base_level_name: ImString,
     _osef1: Dummy<24>,
-    plot: Me1PlotTable,
+    pub plot: Me1PlotTable,
     _osef2: Vec<u8>,
 }
 

@@ -196,11 +196,9 @@ impl<'a> Gui<'a> {
         let ui = self.ui;
 
         // Tabs
-        if let Some(_t) = TabBar::new(im_str!("me2-tabs")).begin(ui) {
+        if let Some(_t) = TabBar::new(im_str!("mass_effect_2")).begin(ui) {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-                if let Some(_t) = ChildWindow::new("mass_effect_2").size([0.0, 0.0]).begin(ui) {
-                    save_game.draw_raw_ui(self, "Mass Effect 2").await;
-                }
+                save_game.draw_raw_ui(self, "Mass Effect 2").await;
             }
         }
     }
@@ -209,11 +207,9 @@ impl<'a> Gui<'a> {
         let ui = self.ui;
 
         // Tabs
-        if let Some(_t) = TabBar::new(im_str!("me3-tabs")).begin(ui) {
+        if let Some(_t) = TabBar::new(im_str!("mass_effect_3")).begin(ui) {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-                if let Some(_t) = ChildWindow::new("mass_effect_3").size([0.0, 0.0]).begin(ui) {
-                    save_game.draw_raw_ui(self, "Mass Effect 3").await;
-                }
+                save_game.draw_raw_ui(self, "Mass Effect 3").await;
             }
         }
     }
@@ -430,9 +426,9 @@ impl<'a> Gui<'a> {
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
                 bg_color: [0.09, 0.27, 0.72, 1.0],
-                color: [0.18, 0.34, 0.72, 1.0],
-                active_color: [0.20, 0.35, 0.72, 1.0],
-                hover_color: [0.20, 0.40, 0.72, 1.0],
+                color: [0.14, 0.32, 0.72, 1.0],
+                active_color: [0.24, 0.42, 0.80, 1.0],
+                hover_color: [0.24, 0.42, 1.0, 1.0],
             },
             Theme::MassEffect2 => ColorTheme {
                 bg_color: [0.59, 0.29, 0.06, 1.0],

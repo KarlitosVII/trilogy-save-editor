@@ -1,6 +1,8 @@
 use anyhow::*;
 use async_trait::async_trait;
 use bitvec::prelude::*;
+use indexmap::IndexMap;
+use serde::Deserialize;
 
 use crate::{
     gui::Gui,
@@ -13,11 +15,11 @@ pub type BoolSlice = BitSlice<Lsb0, u32>;
 #[async_trait(?Send)]
 impl SaveData for BoolVec {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let len = <u32>::deserialize(cursor)?;
+        let len = SaveData::deserialize(cursor)?;
         let mut bitfields = Vec::new();
 
         for _ in 0..len {
-            bitfields.push(<u32>::deserialize(cursor)?);
+            bitfields.push(SaveData::deserialize(cursor)?);
         }
 
         let variables = BoolVec::from_vec(bitfields);
@@ -41,6 +43,13 @@ impl SaveData for BoolVec {
     }
 }
 
+#[derive(SaveData, Clone)]
+pub struct Me1PlotTable {
+    pub bool_variables: BoolVec,
+    pub int_variables: Vec<i32>,
+    pub float_variables: Vec<f32>,
+}
+
 #[derive(SaveData, Default, Clone)]
 pub struct PlotCodex {
     pages: Vec<PlotCodexPage>,
@@ -50,4 +59,10 @@ pub struct PlotCodex {
 pub struct PlotCodexPage {
     page: i32,
     is_new: bool,
+}
+
+#[derive(Deserialize)]
+pub struct KnownPlot {
+    pub booleans: IndexMap<usize, String>,
+    pub ints: IndexMap<usize, String>,
 }

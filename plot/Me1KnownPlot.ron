@@ -1,0 +1,136 @@
+Me1KnownPlot(
+    player_squad: {
+        "Player": KnownPlot(
+            booleans: {
+                7156: "Shepard is rich",
+            },
+            ints: {
+                1: "Origin",
+                2: "Notoriety",
+                46: "Renegade points",
+                47: "Paragon points",
+            },
+        ),
+        "Squad": KnownPlot(
+            booleans: {
+                3941: "Garrus recruited",
+                3942: "Wrex recruited",
+                4596: "Gave Tali a copy of the data found in UNC: Geth Incursions",
+            },
+            ints: {
+                37: "Garrus pushed toward C-Sec progress (paragon)",
+                38: "Garrus pushed toward Spectres progress (renegade)",
+            },
+        ),
+        "Romance": KnownPlot(
+            booleans: {
+                6528: "Romanced someone",
+                4281: "Romancing Ashley",
+                3960: "Romancing Kaidan",
+                4169: "Romancing Liara",
+            },
+            ints: {
+                17: "Romance progress with Ashley",
+                15: "Romance progress with Kaidan",
+                16: "Romance progress with Liara",
+            },
+        ),
+    },
+    missions: {
+        "Citadel": KnownPlot(
+            booleans: {
+                3979: "[Harkin] Talked to him",
+                3872: "[Doctor Michel] Persuaded blackmailer",
+                3873: "[Doctor Michel] Killed blackmailer",
+                7270: "[Expose Saren] Released Fist",
+                4731: "[The Fan] Met Conrad Verner",
+                4913: "[The Fan] Intimidated him",
+                4914: "[The Fan] Charmed him",
+                4915: "[The Fan] Got him killed",
+                4766: "[The Fourth Estate] Refused interview (looked bad)",
+                4767: "[The Fourth Estate] Excused themself (looked good)",
+                4768: "[The Fourth Estate] Punched her",
+                5853: "[Asari Consort] Completed quest",
+                4032: "[Asari Consort] Received Trinket",
+                7015: "[Asari Consort] Used Trinket on Eletania",
+                6922: "[Scan the Keepers] Accepted quest",
+                3880: "[Scan the Keepers] Killed Chorban",
+                3881: "[Scan the Keepers] Scared off Chorban",
+                4820: "[Homecoming] Returned body",
+                4847: "[Old Friends (Earthborn)] Met Finch",
+                4855: "[Old Friends (Earthborn)] Killed Finch",
+                4861: "[I Remember Me (Colonist)] Talked Talitha down",
+                4862: "[I Remember Me (Colonist)] Bait and switch",
+                4926: "[Old, Unhappy, Far-Off Things (Spacer)] Spoke to Mom",
+                7164: "Got Elkoss Combine license",
+                4948: "RP105a_Expose_Quest_Completed_Gave_Info ?",
+                3001: "[End] Saved the Council",
+                3002: "[End] Abandoned the Council",
+                5434: "[End] Chose Udina",
+                5435: "[End] Chose Anderson",
+            },
+            ints: {
+                39: "[Scan the Keepers] Number of keepers scanned",
+            },
+        ),
+        "Feros": KnownPlot(
+            booleans: {
+                2490: "Intimidated Ethan Jeong",
+                2491: "Convinced Ethan Jeong",
+                2514: "Too many colonists killed",
+                3798: "Killed Shiala",
+                4133: "Released Shiala",
+                6252: "[Outcome] Good Plus",
+                6253: "[Outcome] Good",
+                6254: "[Outcome] Renegade",
+                6380: "[Outcome] Fail",
+            },
+            ints: {},
+        ),
+        "Noveria": KnownPlot(
+            booleans: {
+                2687: "Gave evidence to Lorik Qui'in",
+                2690: "Gave evidence to Gianna Parasini",
+                2713: "Betrayed Gianna Parasini",
+                3860: "Talked to Han Olar",
+                2587: "Rachni Queen released",
+            },
+            ints: {},
+        ),
+        "Virmire": KnownPlot(
+            booleans: {
+                3827: "Rescued Ashley",
+                3828: "Rescued Kaidan",
+                3029: "Wrex killed by Shepard",
+                3028: "Wrex killed by Ashley",
+                5543: "Wrex killed by Ashley, without permission",
+                4464: "[Assisting Kirrahe's Team] Geth flyers disabled",
+                4459: "[Assisting Kirrahe's Team] Geth flyers reported",
+                6058: "Killed Rana Thanoptis",
+            },
+            ints: {},
+        ),
+        "UNC": KnownPlot(
+            booleans: {
+                4608: "[Hades' Dogs] Found files",
+                4621: "[Asari Diplomacy] Met Nassana",
+                6848: "[Asari Diplomacy] Killed sister",
+                4883: "[Hostage] Chairman Burns died",
+                4885: "[Hostage] Killed biotics",
+                4886: "[Hostage] Biotics surrendered",
+                5014: "[Hostile Takeover] Accepted money",
+                5015: "[Hostile Takeover] Persuaded criminal to disband gang",
+                5038: "[Dead Scientists] Convinced Corporal Toombs",
+                5039: "[Dead Scientists] Killed scientist",
+                5885: "[Cerberus] Obtained quest",
+            },
+            ints: {},
+        ),
+        "DLC": KnownPlot(
+            booleans: {
+                7317: "[Bring Down the Sky] Humans rescued",
+            },
+            ints: {},
+        ),
+    },
+)

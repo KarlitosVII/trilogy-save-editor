@@ -12,13 +12,6 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[derive(SaveData, Clone)]
-pub struct Me1PlotTable {
-    bool_variables: BoolVec,
-    int_variables: Vec<i32>,
-    float_variables: Vec<f32>,
-}
-
 #[derive(SaveData, Default, Clone)]
 pub struct PlotQuest {
     quest_counter: i32,
