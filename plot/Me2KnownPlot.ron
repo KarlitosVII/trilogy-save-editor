@@ -1,0 +1,788 @@
+Me2KnownPlot(
+    player: KnownPlot(
+        booleans: {
+            2279: "[General] Played Mass Effect 1",
+            1456: "[General] Played Mass Effect 2",
+            5979: "[General] Cosmetic Surgery unlocked",
+            5978: "[General] Cosmetic Surgery applied",
+            6022: "[Other] Ignore Grinder Achievements",
+            5616: "[Other] Changed difficulty (Failed Insanity playthrough)",
+        },
+        ints: {
+            2: "Paragon points",
+            3: "Renegade points",
+        },
+    ),
+    crew: {
+        "Garrus": KnownPlot(
+            booleans: {
+                38: "Garrus recruited",
+                183: "Garrus is loyal",
+                6252: "Unlocked Garrus alternate appearance",
+                200: "Garrus died in Suicide Mission",
+                212: "Garrus is selectable",
+                26: "Garrus is in Squad",
+                224: "Garrus is specialized",
+            },
+            ints: {
+                318: "Garrus appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Grunt": KnownPlot(
+            booleans: {
+                42: "Grunt recruited",
+                189: "Grunt is loyal",
+                6256: "Unlocked Grunt alternate appearance",
+                204: "Grunt died in Suicide Mission",
+                216: "Grunt is selectable",
+                30: "Grunt is in Squad",
+                228: "Grunt is specialized",
+            },
+            ints: {
+                322: "Grunt appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Jack": KnownPlot(
+            booleans: {
+                35: "Jack recruited",
+                179: "Jack is loyal",
+                6249: "Unlocked Jack alternate appearance",
+                197: "Jack died in Suicide Mission",
+                209: "Jack is selectable",
+                23: "Jack is in Squad",
+                221: "Jack is specialized",
+            },
+            ints: {
+                314: "Jack appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Jacob": KnownPlot(
+            booleans: {
+                34: "Jacob recruited",
+                178: "Jacob is loyal",
+                6248: "Unlocked Jacob alternate appearance",
+                196: "Jacob died in Suicide Mission",
+                208: "Jacob is selectable",
+                22: "Jacob is in Squad",
+                220: "Jacob is specialized",
+            },
+            ints: {
+                313: "Jacob appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Kasumi": KnownPlot(
+            booleans: {
+                37: "Kasumi recruited",
+                182: "Kasumi is loyal",
+                6251: "Unlocked Kasumi alternate appearance",
+                199: "Kasumi died in Suicide Mission",
+                211: "Kasumi is selectable",
+                26: "Kasumi is in Squad",
+                223: "Kasumi is specialized",
+            },
+            ints: {
+                317: "Kasumi appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Legion": KnownPlot(
+            booleans: {
+                36: "Legion recruited",
+                180: "Legion is loyal",
+                6250: "Unlocked Legion alternate appearance",
+                198: "Legion died in Suicide Mission",
+                210: "Legion is selectable",
+                24: "Legion is in Squad",
+                222: "Legion is specialized",
+            },
+            ints: {
+                315: "Legion appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Miranda": KnownPlot(
+            booleans: {
+                33: "Miranda recruited",
+                177: "Miranda is loyal",
+                6247: "Unlocked Miranda alternate appearance",
+                195: "Miranda died in Suicide Mission",
+                207: "Miranda is selectable",
+                21: "Miranda is in Squad",
+                219: "Miranda is specialized",
+            },
+            ints: {
+                312: "Miranda appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Mordin": KnownPlot(
+            booleans: {
+                41: "Mordin recruited",
+                188: "Mordin is loyal",
+                6255: "Unlocked Mordin alternate appearance",
+                203: "Mordin died in Suicide Mission",
+                215: "Mordin is selectable",
+                29: "Mordin is in Squad",
+                227: "Mordin is specialized",
+            },
+            ints: {
+                321: "Mordin appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Samara": KnownPlot(
+            booleans: {
+                43: "Samara recruited",
+                191: "Samara is loyal",
+                6257: "Unlocked Samara alternate appearance",
+                205: "Samara died in Suicide Mission",
+                217: "Samara is selectable",
+                31: "Samara is in Squad",
+                229: "Samara is specialized",
+            },
+            ints: {
+                323: "Samara appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Tali": KnownPlot(
+            booleans: {
+                40: "Tali recruited",
+                186: "Tali is loyal",
+                6254: "Unlocked Tali alternate appearance",
+                202: "Tali died in Suicide Mission",
+                214: "Tali is selectable",
+                28: "Tali is in Squad",
+                226: "Tali is specialized",
+            },
+            ints: {
+                320: "Tali appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Thane": KnownPlot(
+            booleans: {
+                39: "Thane recruited",
+                185: "Thane is loyal",
+                6253: "Unlocked Thane alternate appearance",
+                201: "Thane died in Suicide Mission",
+                213: "Thane is selectable",
+                27: "Thane is in Squad",
+                225: "Thane is specialized",
+            },
+            ints: {
+                319: "Thane appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Zaeed": KnownPlot(
+            booleans: {
+                44: "Zaeed recruited",
+                192: "Zaeed is loyal",
+                6258: "Unlocked Zaeed alternate appearance",
+                206: "Zaeed died in Suicide Mission",
+                218: "Zaeed is selectable",
+                32: "Zaeed is in Squad",
+                230: "Zaeed is specialized",
+            },
+            ints: {
+                324: "Zaeed appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+            },
+        ),
+        "Crew": KnownPlot(
+            booleans: {
+                3351: "All Crew Survived",
+                3515: "Mess Sgt. Rupert Gardner died",
+                3629: "Kelly Chambers died",
+                3630: "Dr. Karin Chakwas died",
+                3631: "Kenneth Donnelly died",
+                3632: "Gabriella Daniels died",
+                3349: "Had casualties",
+            },
+            ints: {
+                166: "Number of missions after crew abducted (1-3 => half crew dead / 4 => all crew dead)",
+            },
+        ),
+    },
+    romance: {
+        "Jack": KnownPlot(
+            booleans: {
+                5208: "Romanced Jack",
+                3270: "Broke up with Jack",
+            },
+            ints: {
+                213: "Jack progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Jacob": KnownPlot(
+            booleans: {
+                3892: "Romanced Jacob",
+                3472: "Broke up with Jacob",
+            },
+            ints: {
+                267: "Jacob progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Garrus": KnownPlot(
+            booleans: {
+                5207: "Romanced Garrus",
+                3660: "Broke up with Garrus",
+            },
+            ints: {
+                270: "Garrus progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Miranda": KnownPlot(
+            booleans: {
+                5209: "Romanced Miranda",
+                3304: "Broke up with Miranda",
+            },
+            ints: {
+                266: "Miranda progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Samara": KnownPlot(
+            booleans: {
+                5751: "Encouraged romance",
+            },
+            ints: {
+                275: "Samara progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Tali": KnownPlot(
+            booleans: {
+                3926: "Romanced Tali",
+                3307: "Broke up with Tali",
+            },
+            ints: {
+                272: "Tali progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Thane": KnownPlot(
+            booleans: {
+                5206: "Romanced Thane",
+                3310: "Broke up with Thane",
+            },
+            ints: {
+                271: "Thane progress (1-4 = friends, 5 = romance, 6 = broke up)",
+            },
+        ),
+        "Liara": KnownPlot(
+            booleans: {
+                6929: "Discussed relationship (Hagalaz)",
+                6931: "Toured Normandy",
+                6941: "Recalls Normandy tour (broken)",
+                6999: "Rejected romance (Hagalaz)",
+                6927: "Rekindled (Hagalaz)",
+                7333: "Full Romance (rekindled in cabin)",
+            },
+            ints: {},
+        ),
+        "Kelly Chambers": KnownPlot(
+            booleans: {
+                3817: "Had dinner",
+                6286: "Invited Kelly to cabin",
+                6287: "Danced for Shepard",
+            },
+            ints: {
+                197: "Kelly progress (0-1 = friend, 2 = flirty)",
+            },
+        ),
+    },
+    missions: {
+        "Normandy": KnownPlot(
+            booleans: {
+                1585: "Amicably settled the Tali-Legion conflict",
+                3872: "Listened to Mordin singing",
+            },
+            ints: {},
+        ),
+        "Freedom's Progress": KnownPlot(
+            booleans: {
+                2375: "Sent Veetor'Nara to Cerberus",
+            },
+            ints: {},
+        ),
+        "Citadel": KnownPlot(
+            booleans: {
+                4424: "Punched Khalisa Bint Sinan al-Jilani",
+                2168: "[The Council] Declined reinstatement as Spectre",
+                2169: "[The Council] Accepted reinstatement as Spectre",
+            },
+            ints: {},
+        ),
+        "Illium": KnownPlot(
+            booleans: {
+                3213: "Met Matriarch Aethyta on Illium",
+                3117: "[Blue Rose] Encouraged relationship",
+                3139: "[Conrad Verner] Completed quest",
+                3132: "[Conrad Verner] Shot him in the foot",
+            },
+            ints: {},
+        ),
+        "Reaper IFF": KnownPlot(
+            booleans: {
+                1256: "IFF acquired from Collector ship",
+                1247: "Legion rescued and activated",
+            },
+            ints: {},
+        ),
+        "Collector Base": KnownPlot(
+            booleans: {
+                236: "[The Normandy Attacked] Squadmate died in engine room",
+                2884: "[Infiltration] Tali hacked the vents during suicide mission",
+                2851: "[The Long Walk] Jack performed biotic bubble during Suicide Mission",
+                4388: "[The Long Walk] Shepard called the Collector base an abomination",
+                4390: "[The Long Walk] Used the Collector base to study Reapers",
+                1831: "[The Long Walk] Collector Base destroyed",
+                1832: "[The Long Walk] Collector Base saved",
+            },
+            ints: {},
+        ),
+        "DLCs": KnownPlot(
+            booleans: {
+                7447: "[Genesis] Played",
+                6815: "[Lair of the Shadow Broker] Completed mission",
+                7035: "[Lair of the Shadow Broker] Helped Liara defeat Shadow Broker",
+                7051: "[Lair of the Shadow Broker] Shepard killed Shadow Broker",
+                7151: "[Lair of the Shadow Broker] Visited Liara after defeating Broker",
+                6512: "[Project Overlord] Completed mission",
+                6561: "[Project Overlord] David sent to Grissom Academy",
+                6562: "[Project Overlord] David given to Cerberus",
+                7451: "[Arrival] Completed mission",
+            },
+            ints: {},
+        ),
+    },
+    loyalty_missions: {
+        "Jack": KnownPlot(
+            booleans: {
+                1498: "[Subject Zero] Talked about Pragia",
+            },
+            ints: {},
+        ),
+        "Jacob": KnownPlot(
+            booleans: {
+                1497: "[The Gift of Greatness] Completed mission",
+                360: "[The Gift of Greatness] Dad marooned",
+                361: "[The Gift of Greatness] Dad arrested",
+                362: "[The Gift of Greatness] Dad suicide",
+            },
+            ints: {},
+        ),
+        "Kasumi": KnownPlot(
+            booleans: {
+                6637: "[Stealing Memory] Destroyed graybox",
+                6638: "[Stealing Memory] Kept graybox",
+            },
+            ints: {},
+        ),
+        "Legion": KnownPlot(
+            booleans: {
+                1499: "[A House Divided] Legion talked about windows being structral weaknesses",
+                757: "[A House Divided] Heretics destroyed",
+                759: "[A House Divided] Heretics rewritten",
+            },
+            ints: {},
+        ),
+        "Miranda": KnownPlot(
+            booleans: {
+                1288: "[The Prodigal] Saved Oriana",
+            },
+            ints: {},
+        ),
+        "Mordin": KnownPlot(
+            booleans: {
+                1504: "[Old Blood] Shepard knows about Maelon's experiments",
+                2050: "[Old Blood] Maelon killed",
+                2678: "[Old Blood] Maelon saved",
+                2676: "[Old Blood] Kept Maelon's data",
+                2677: "[Old Blood] Destroyed Maelon's data",
+            },
+            ints: {},
+        ),
+        "Samara": KnownPlot(
+            booleans: {
+                1506: "[The Ardat-Yakshi] Killed Morinth",
+                5224: "[The Ardat-Yakshi] Danced with Waera to attract Morinth (changes Shepard's dance style)",
+                1664: "[The Ardat-Yakshi] Killed Samara to recruit Morinth",
+            },
+            ints: {},
+        ),
+        "Thane": KnownPlot(
+            booleans: {
+                3426: "[Sins of the Father] Thane reunited with Kolyat",
+            },
+            ints: {},
+        ),
+        "Tali": KnownPlot(
+            booleans: {
+                668: "[Treason] Legion was part of Tali's loyalty mission",
+                1503: "[Treason] Spoke to Admiral Shala'Raan",
+                2933: "[Treason] Revealed father's war crimes (unloyal)",
+                2934: "[Treason] Tali exiled",
+                2935: "[Treason] Tali found not guilty",
+                2936: "[Treason] Tali cleared of charges",
+            },
+            ints: {},
+        ),
+        "Zaeed": KnownPlot(
+            booleans: {
+                6423: "[The Price of Revenge] Saved the trapped workers and Vido got away",
+            },
+            ints: {},
+        ),
+    },
+    research_upgrades: {
+        "Assault Rifle": KnownPlot(
+            booleans: {
+                6038: "Damage discovered",
+                6051: "Damage unlocked",
+                4771: "Accuracy discovered",
+                5134: "Accuracy unlocked",
+                4770: "Penetration discovered",
+                5133: "Penetration unlocked",
+            },
+            ints: {
+                68: "Damage upgrades",
+                451: "Accuracy upgrade",
+                453: "Penetration upgrade",
+            },
+        ),
+        "SMG": KnownPlot(
+            booleans: {
+                6040: "Damage discovered",
+                6052: "Damage unlocked",
+                4988: "Shield Piercing discovered",
+                5135: "Shield Piercing unlocked",
+                4990: "Extra Rounds discovered",
+                5136: "Extra Rounds unlocked",
+            },
+            ints: {
+                426: "Damage upgrades",
+                456: "Shield Piercing upgrade",
+                457: "Extra Rounds upgrade",
+            },
+        ),
+        "Heavy Pistol": KnownPlot(
+            booleans: {
+                6044: "Damage discovered",
+                6056: "Damage unlocked",
+                4995: "Penetration discovered",
+                5139: "Penetration unlocked",
+                4996: "Critical discovered",
+                5140: "Critical unlocked",
+            },
+            ints: {
+                69: "Damage upgrades",
+                462: "Penetration upgrade",
+                463: "Critical upgrade",
+            },
+        ),
+        "Shotgun": KnownPlot(
+            booleans: {
+                6049: "Damage discovered",
+                6061: "Damage unlocked",
+                5001: "Shield Piercing discovered",
+                5152: "Shield Piercing unlocked",
+                5002: "Extra Rounds discovered",
+                5153: "Extra Rounds unlocked",
+            },
+            ints: {
+                71: "Damage upgrades",
+                470: "Shield Piercing upgrade",
+                471: "Extra Rounds upgrade",
+            },
+        ),
+        "Sniper Rifle": KnownPlot(
+            booleans: {
+                6050: "Damage discovered",
+                6062: "Damage unlocked",
+                5003: "Penetration discovered",
+                5148: "Penetration unlocked",
+                5004: "Headshot Damage discovered",
+                5149: "Headshot Damage unlocked",
+            },
+            ints: {
+                72: "Damage upgrades",
+                474: "Penetration upgrade",
+                475: "Headshot Damage upgrade",
+            },
+        ),
+        "Heavy Weapon": KnownPlot(
+            booleans: {
+                6043: "Ammo discovered",
+                6055: "Ammo unlocked",
+            },
+            ints: {
+                428: "Ammo upgrades",
+            },
+        ),
+        "Weapons": KnownPlot(
+            booleans: {
+                4993: "ML-77 Missile Launcher discovered",
+                5137: "ML-77 Missile Launcher unlocked",
+                4994: "M-622 Avalanche discovered",
+                5138: "M-622 Avalanche unlocked",
+                5291: "M-920 Cain discovered",
+                5290: "M-920 Cain unlocked",
+            },
+            ints: {
+                152: "M-15 Vindicator (set 1 to unlock)",
+                124: "M-9 Tempest (set 1 to unlock)",
+                88: "M-27 Scimitar (set 1 to unlock)",
+                149: "M-6 Carniflex (set 1 to unlock)",
+                177: "M-97 Viper (set 1 to unlock)",
+                495: "Geth Pulse Rifle (set 1 to unlock)",
+                438: "M-76 Revenant (set 2 to unlock)",
+                439: "M-300 Claymore (set 2 to unlock)",
+                440: "M-98 Widow (set 2 to unlock)",
+                151: "M-100 Grenade Launcher (set 1 to unlock)",
+                123: "Collector Particle Beam (set 1 to unlock)",
+                460: "ML-77 Missile Launcher (set 1 to unlock)",
+                461: "M-622 Avalanch (set 1 to unlock)",
+                496: "M-920 Cain (set 1 to unlock)",
+            },
+        ),
+        "Medi-Gel": KnownPlot(
+            booleans: {
+                6046: "Capacity discovered",
+                6058: "Capacity unlocked",
+                4997: "Trauma Module discovered",
+                5141: "Trauma Module unlocked",
+                4998: "Emergency Shielding discovered",
+                5142: "Emergency Shielding unlocked",
+            },
+            ints: {
+                67: "Capacity upgrades",
+                464: "Trauma Module upgrade",
+                465: "Emergency Shielding upgrade",
+            },
+        ),
+        "Shield": KnownPlot(
+            booleans: {
+                6048: "Damage Protection discovered",
+                6060: "Damage Protection unlocked",
+                5008: "Hard Shields discovered",
+                5147: "Hard Shields unlocked",
+                5007: "Redundant Field Generator discovered",
+                5146: "Redundant Field Generator unlocked",
+            },
+            ints: {
+                434: "Damage Protection upgrades",
+                469: "Hard Shields upgrade",
+                468: "Redundant Field Generator upgrade",
+                448: "Calcified Endoskeleton (can't be normally obtained, set 1 to unlock)",
+                433: "Quarian Shield Capacitor (can't be normally obtained, set 1 to unlock)",
+            },
+        ),
+        "Biotic": KnownPlot(
+            booleans: {
+                6041: "Damage discovered",
+                6053: "Damage unlocked",
+                4992: "Cooldown discovered",
+                5155: "Cooldown unlocked",
+                4991: "Duration discovered",
+                5154: "Duration unlocked",
+            },
+            ints: {
+                103: "Damage upgrades",
+                459: "Cooldown upgrade",
+                458: "Duration upgrade",
+            },
+        ),
+        "Tech": KnownPlot(
+            booleans: {
+                6039: "Damage discovered",
+                6063: "Damage unlocked",
+                5006: "Cooldowns discovered",
+                5151: "Cooldowns unlocked",
+                5005: "Duration discovered",
+                5150: "Duration unlocked",
+            },
+            ints: {
+                75: "Damage upgrades",
+                473: "Cooldowns upgrade",
+                472: "Duration upgrade",
+            },
+        ),
+        "Power": KnownPlot(
+            booleans: {
+                5459: "Advanced Training discovered",
+                5458: "Retrain discovered",
+            },
+            ints: {},
+        ),
+        "Shepard": KnownPlot(
+            booleans: {
+                6141: "Med-Bay upgrade discovered (Dermal Regeneration)",
+                6144: "Med-Bay upgrade unlocked (Dermal Regeneration)",
+                6047: "Heavy Skin Weave discovered",
+                6059: "Heavy Skin Weave unlocked",
+                4999: "Heavy Bone Weave discovered",
+                5144: "Heavy Bone Weave unlocked",
+                5000: "Heavy Muscle Weave discovered",
+                5145: "Heavy Muscle Weave unlocked",
+            },
+            ints: {
+                147: "Assault Rifle Training",
+                150: "Shotgun Training",
+                148: "Sniper Rifle Training",
+                652: "Med-Bay upgrade (Dermal Regeneration) purchased",
+                73: "Heavy Skin Weave upgrades",
+                466: "Heavy Bone Weave upgrade",
+                467: "Heavy Muscle Weave upgrade",
+            },
+        ),
+        "Squadmate": KnownPlot(
+            booleans: {
+                6042: "[Grunt] Krogan Vitality discovered",
+                6054: "[Grunt] Krogan Vitality unlocked",
+                1190: "[Grunt] Krogan Shotgun discovered",
+                5638: "[Grunt] Krogan Shotgun unlocked",
+                1181: "[Jack] Subject Zero Biotic Boost discovered",
+                5639: "[Jack] Subject Zero Biotic Boost unlocked",
+                6045: "[Legion] Geth Shield Strength discovered",
+                6057: "[Legion] Geth Shield Strength unlocked",
+                1184: "[Legion] Legion's Sniper Rifle discovered",
+                5640: "[Legion] Legion's Sniper Rifle unlocked",
+                4480: "[Mordin] Mordin's Omni-tool discovered",
+                5641: "[Mordin] Mordin's Omni-tool unlocked",
+            },
+            ints: {
+                101: "[Grunt] Krogan Vitality upgrades",
+                427: "[Grunt] Krogan Shotgun upgrades",
+                429: "[Jack] Subject Zero Biotic Boost upgrade",
+                121: "[Legion] Geth Shield Strength upgrades",
+                116: "[Legion] Legion's Sniper Rifle upgrades",
+                432: "[Mordin] Mordin's Omni-tool upgrade",
+            },
+        ),
+        "Ship": KnownPlot(
+            booleans: {
+                1183: "Heavy Ship Armor discovered",
+                5642: "Heavy Ship Armor unlocked",
+                1186: "Extended Fuel Cells discovered",
+                5644: "Extended Fuel Cells unlocked",
+                1182: "Thanix Cannon discovered",
+                5645: "Thanix Cannon unlocked",
+                1195: "Modular Probe Bay discovered",
+                5646: "Modular Probe Bay unlocked",
+                1188: "Advanced Mineral Scanner discovered",
+                5647: "Advanced Mineral Scanner unlocked",
+                1192: "Multicore Shielding discovered",
+                5648: "Multicore Shielding unlocked",
+            },
+            ints: {
+                114: "Heavy Ship Armor purchased",
+                435: "Extended Fuel Cells purchased",
+                117: "Thanix Cannon purchased",
+                111: "Modular Probe Bay purchased",
+                436: "Advanced Mineral Scanner purchased",
+                110: "Multicore Shielding purchased",
+            },
+        ),
+    },
+    rewards: KnownPlot(
+        booleans: {
+            5794: "Prologue: Awakening",
+            5795: "Freedom's Progress",
+            5796: "Priority: Horizon",
+            5797: "Disabled Collector Vessel",
+            5816: "Reaper IFF",
+            5798: "Stop the Collectors: Omega 4 Relay",
+            5799: "Collector Base: Tartarus Debris Field",
+            5800: "Collector Base: Infiltration",
+            5801: "Collector Base: The Long Walk",
+            5812: "Dossier: The Warlord",
+            5813: "Dossier: Archangel",
+            5814: "Dossier: The Professor",
+            5815: "Dossier: The Convict",
+            5817: "Dossier: Tali",
+            5818: "Dossier: The Assassin",
+            5819: "Dossier: The Justicar",
+            5802: "Jacob: The Gift of Greatness",
+            5803: "Legion: A House Divided",
+            5804: "Thane: Sins of the Father",
+            5805: "Jack: Subject Zero",
+            5806: "Grunt: Rite of Passage",
+            5807: "Mordin: Old Blood",
+            5808: "Samara: The Ardat-Yakshi",
+            5809: "Tali: Treason",
+            5810: "Miranda: The Prodigal",
+            5811: "Garrus: Eye for an Eye",
+            5823: "N7 Archeological Dig Site",
+            5824: "N7 MSV Strontium Mule",
+            5825: "N7 Blue Suns Base",
+            5826: "N7 Anomalous Weather Detected",
+            5827: "N7 Blood Pack Comm Relay",
+            5828: "N7 Wrecked Merchant Freighter",
+            5829: "N7 Blood Pack Base",
+            5830: "N7 Hahne-Kedar Facility",
+            5832: "N7 Abandoned Research Station",
+            5833: "N7 MSV Estevanico",
+            5834: "N7 Captured Mining Facility",
+            5835: "N7 Eclipse Smuggling Depot",
+            5836: "N7 Quarian Crash Site",
+            5837: "N7 Mining the Canyon",
+            5838: "N7 Imminent Ship Crash",
+            5839: "N7 Lost Operative",
+            5840: "N7 Endangered Research Station",
+            5841: "N7 Javelin Missles Launched",
+            5843: "N7 Abandoned Mine",
+            5820: "Project Firewalker: Volcano Station",
+            5821: "Project Firewalker: Prothean Site",
+            5822: "Project Firewalker: Survey Sites Located",
+            5842: "Project Firewalker: Rosalie Lost",
+            5831: "Project Firewalker: Geth Incursions",
+            5845: "Normandy: Special Ingredients",
+            5846: "Normandy: Serrice Ice Brandy",
+            5847: "Normandy: FBA Couplings",
+            5844: "Astrosmash",
+            5848: "Liara: Systems Hacking",
+            5849: "Liara: The Observer",
+            5850: "Blue Rose of Illium",
+            5851: "Conrad Verner",
+            5852: "Medical Scans",
+            5853: "Gianna Parasini",
+            5854: "Indentured Service",
+            5855: "Lost Locket Found",
+            5856: "Salarian Family Data",
+            5857: "Stolen Goods Found",
+            5858: "Packages for Ish",
+            5859: "omgoracle",
+            5860: "omgsun",
+            5861: "Batarian Bartender",
+            5862: "Aria: Datapad Recovered",
+            5863: "Helped Nassasna's workers",
+            5864: "Killing Pyjacks",
+            5865: "Combustion Manifold",
+            5866: "Krogan Sushi",
+            5867: "Crime in Progress",
+            5868: "Spoke to Khalisah",
+            5869: "False Positives/Found Forged ID",
+            5870: "Reported Elnora to Detective Anaya",
+            5871: "Smuggling Evidence",
+            5873: "Helped injured Batarian when recruiting Mordin",
+            5874: "pradaniel",
+            5875: "Missing Scout",
+        },
+        ints: {},
+    ),
+    captains_cabin: KnownPlot(
+        booleans: {
+            3321: "[Other] Space Hamster",
+            3322: "[Fish] Illium Skald Fish",
+            3323: "[Fish] Thessian Sunfish",
+            3324: "[Fish] Prejek Paddle Fish",
+            3326: "[Model] Normandy SR",
+            3328: "[Model] Destiny Ascension",
+            3329: "[Model] Sovereign",
+            3330: "[Model] Turian Cruiser",
+            3331: "[Model] Alliance Cruiser",
+            3332: "[Model] Flotilla Vessel",
+            3334: "[Model] UT-47 Kodiak Drop Shuttle",
+            3337: "[Model] Athabasca Class Freighter",
+            3338: "[Model] Geth Ship",
+            7200: "[Model] Shadow Broker Base",
+        },
+        ints: {
+            485: "Illium Skald Fish state (0 = alive, 3 = dead)",
+            486: "Thessian Sunfish state (0 = alive, 3 = dead)",
+            487: "Prejek Paddle Fish state (0 = alive, 3 = dead)",
+        },
+    ),
+)

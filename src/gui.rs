@@ -13,12 +13,11 @@ use wfd::DialogParams;
 
 use crate::{
     event_handler::{MainEvent, SaveGame},
-    save_data::{
-        common::plot::BoolSlice, mass_effect_2::Me2SaveGame, mass_effect_3::Me3SaveGame, SaveData,
-    },
+    save_data::{common::plot::BoolSlice, mass_effect_3::Me3SaveGame, SaveData},
 };
 
 mod mass_effect_1;
+mod mass_effect_2;
 mod support;
 
 static NOTIFICATION_TIME: f64 = 1.5;
@@ -192,17 +191,6 @@ impl<'a> Gui<'a> {
         }
     }
 
-    async fn draw_mass_effect_2(&self, save_game: &mut Me2SaveGame) {
-        let ui = self.ui;
-
-        // Tabs
-        if let Some(_t) = TabBar::new(im_str!("mass_effect_2")).begin(ui) {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-                save_game.draw_raw_ui(self, "Mass Effect 2").await;
-            }
-        }
-    }
-
     async fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) {
         let ui = self.ui;
 
@@ -292,19 +280,19 @@ impl<'a> Gui<'a> {
         {
             if !list.is_empty() {
                 // Item
-                let mut remove = None;
+                // let mut remove = None;
                 for (i, item) in list.iter_mut().enumerate() {
-                    if ui.small_button(&im_str!("remove##remove-{}", i)) {
-                        remove = Some(i);
-                    }
-                    ui.same_line();
+                    // if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                    //     remove = Some(i);
+                    // }
+                    // ui.same_line();
                     item.draw_raw_ui(self, &i.to_string()).await;
                 }
 
                 // Remove
-                if let Some(i) = remove {
-                    list.remove(i);
-                }
+                // if let Some(i) = remove {
+                //     list.remove(i);
+                // }
             } else {
                 self.draw_colored_bg("empty", || {
                     ui.align_text_to_frame_padding();
@@ -313,14 +301,14 @@ impl<'a> Gui<'a> {
             }
 
             // Add
-            if ui.button(&im_str!("add##add-{}", ident)) {
-                // Ça ouvre automatiquement le tree node de l'élément ajouté
-                TreeNode::new(&im_str!("vec-{}", list.len()))
-                    .opened(true, Condition::Always)
-                    .build(ui, || {});
+            // if ui.button(&im_str!("add##add-{}", ident)) {
+            //     // Ça ouvre automatiquement le tree node de l'élément ajouté
+            //     TreeNode::new(&im_str!("vec-{}", list.len()))
+            //         .opened(true, Condition::Always)
+            //         .build(ui, || {});
 
-                list.push(T::default());
-            }
+            //     list.push(T::default());
+            // }
         }
     }
 
