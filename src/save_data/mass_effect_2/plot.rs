@@ -2,9 +2,9 @@ use crate::save_data::common::plot::{BoolVec, PlotCodex};
 
 #[derive(SaveData, Clone)]
 pub struct PlotTable {
-    bool_variables: BoolVec,
-    int_variables: Vec<i32>,
-    float_variables: Vec<f32>,
+    pub bool_variables: BoolVec,
+    pub int_variables: Vec<i32>,
+    pub float_variables: Vec<f32>,
     quest_progress_counter: i32,
     quest_progress: Vec<PlotQuest>,
     quest_ids: Vec<i32>,

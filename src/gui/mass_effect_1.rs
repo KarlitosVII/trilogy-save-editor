@@ -8,7 +8,7 @@ use crate::save_data::{
     SaveData,
 };
 
-use super::Gui;
+use super::*;
 
 impl<'a> Gui<'a> {
     pub async fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame) {
@@ -23,24 +23,7 @@ impl<'a> Gui<'a> {
             // Plot
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
                 let me1_plot_table = &mut save_game.state.plot;
-                if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
-                    if let Some(_t) = TabItem::new(im_str!("Player / Squad")).begin(ui) {
-                        for (category_name, known_plot) in &me1_known_plot.player_squad {
-                            if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui)
-                            {
-                                self.draw_known_plot(me1_plot_table, known_plot).await;
-                            }
-                        }
-                    }
-                    if let Some(_t) = TabItem::new(im_str!("Missions")).begin(ui) {
-                        for (category_name, known_plot) in &me1_known_plot.missions {
-                            if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui)
-                            {
-                                self.draw_known_plot(me1_plot_table, known_plot).await;
-                            }
-                        }
-                    }
-                }
+                self.draw_me1_plot(me1_plot_table, &me1_known_plot).await;
             }
             // Raw
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
@@ -54,7 +37,30 @@ impl<'a> Gui<'a> {
         }
     }
 
-    async fn draw_known_plot(&self, me1_plot_table: &mut Me1PlotTable, known_plot: &KnownPlot) {
+    pub async fn draw_me1_plot(
+        &self, me1_plot_table: &mut Me1PlotTable, me1_known_plot: &Me1KnownPlot,
+    ) {
+        let ui = self.ui;
+
+        if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
+            if let Some(_t) = TabItem::new(im_str!("Player / Crew")).begin(ui) {
+                for (category_name, known_plot) in &me1_known_plot.player_crew {
+                    if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
+                        self.draw_me1_known_plot(me1_plot_table, known_plot).await;
+                    }
+                }
+            }
+            if let Some(_t) = TabItem::new(im_str!("Missions")).begin(ui) {
+                for (category_name, known_plot) in &me1_known_plot.missions {
+                    if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
+                        self.draw_me1_known_plot(me1_plot_table, known_plot).await;
+                    }
+                }
+            }
+        }
+    }
+
+    async fn draw_me1_known_plot(&self, me1_plot_table: &mut Me1PlotTable, known_plot: &KnownPlot) {
         // Booleans
         for (plot_id, plot_desc) in &known_plot.booleans {
             let plot = me1_plot_table.bool_variables.get_mut(*plot_id);

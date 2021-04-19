@@ -21,6 +21,8 @@ use squad::*;
 pub mod plot;
 use plot::*;
 
+pub mod known_plot;
+
 mod galaxy_map;
 use galaxy_map::*;
 
@@ -44,8 +46,8 @@ pub struct Me2SaveGame {
     _pawns: Vec<Dummy<16>>,
     player: Player,
     squad: Vec<Henchman>,
-    plot: PlotTable,
-    me1_plot: Me1PlotTable,
+    pub plot: PlotTable,
+    pub me1_plot: Me1PlotTable,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     checksum: Checksum,
@@ -152,14 +154,14 @@ mod test {
 
         // Deserialize
         let mut cursor = SaveCursor::new(input.clone());
-        let me3_save_game = Me2SaveGame::deserialize(&mut cursor)?;
+        let me2_save_game = Me2SaveGame::deserialize(&mut cursor)?;
 
         println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
         let now = Instant::now();
 
         // Serialize
         let mut output = Vec::new();
-        Me2SaveGame::serialize(&me3_save_game, &mut output)?;
+        Me2SaveGame::serialize(&me2_save_game, &mut output)?;
 
         println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
 
