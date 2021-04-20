@@ -193,7 +193,7 @@ Me2KnownPlot(
                 3349: "Had casualties",
             },
             ints: {
-                166: "Number of missions after crew abducted (1-3 => half crew dead / 4 => all crew dead)",
+                166: "Number of missions after crew abducted (1-3 = half crew dead / 4 = all crew dead)",
             },
         ),
     },
@@ -322,7 +322,7 @@ Me2KnownPlot(
         ),
         "Collector Base": KnownPlot(
             booleans: {
-                236: "[The Normandy Attacked] Squadmate died in engine room",
+                // 236: "[The Normandy Attacked] Squadmate died in engine room",
                 2884: "[Infiltration] Tali hacked the vents during suicide mission",
                 2851: "[The Long Walk] Jack performed biotic bubble during Suicide Mission",
                 4388: "[The Long Walk] Shepard called the Collector base an abomination",

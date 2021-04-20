@@ -18,7 +18,7 @@ pub enum Notoriety {
 
 #[derive(SaveData, Default, Clone)]
 pub struct WeaponLoadout {
-    assaul_rifle: ImString,
+    assault_rifle: ImString,
     shotgun: ImString,
     sniper_rifle: ImString,
     submachine_gun: ImString,

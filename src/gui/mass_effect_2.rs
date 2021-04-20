@@ -9,7 +9,7 @@ use crate::save_data::{
 
 use super::*;
 
-impl<'a> Gui<'a> {
+impl<'ui> Gui<'ui> {
     pub async fn draw_mass_effect_2(&self, save_game: &mut Me2SaveGame) {
         let ui = self.ui;
 
@@ -38,6 +38,7 @@ impl<'a> Gui<'a> {
             }
             // Raw
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+                self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 2").await;
             }
         }
@@ -47,66 +48,73 @@ impl<'a> Gui<'a> {
         &self, me2_plot_table: &mut PlotTable, me2_known_plot: &Me2KnownPlot,
     ) {
         let ui = self.ui;
+        let Me2KnownPlot {
+            player,
+            crew,
+            romance,
+            missions,
+            loyalty_missions,
+            research_upgrades,
+            rewards,
+            captains_cabin,
+        } = me2_known_plot;
 
         // Player
         if let Some(_t) = TabItem::new(im_str!("Player")).begin(ui) {
-            self.draw_me2_known_plot(me2_plot_table, &me2_known_plot.player).await;
+            if let Some(_t) = self.begin_table(&im_str!("plot-table"), 1) {
+                self.draw_me2_known_plot(me2_plot_table, player).await;
+            }
         }
-        // Crew
-        if let Some(_t) = TabItem::new(im_str!("Crew")).begin(ui) {
-            for (category_name, known_plot) in &me2_known_plot.crew {
-                if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                    self.draw_me2_known_plot(me2_plot_table, known_plot).await;
+
+        let categories = [
+            (im_str!("Crew"), crew),
+            (im_str!("Romance"), romance),
+            (im_str!("Missions"), missions),
+            (im_str!("Loyalty missions"), loyalty_missions),
+            (im_str!("Research / Upgrades"), research_upgrades),
+        ];
+
+        for (title, plot_map) in &categories {
+            if let Some(_t) = TabItem::new(title).begin(ui) {
+                if let Some(_t) = self.begin_table(&im_str!("plot-table"), 1) {
+                    for (category_name, known_plot) in plot_map.iter() {
+                        self.table_next_row();
+                        self.table_next_column();
+                        if let Some(_t) = self.push_tree_node(category_name) {
+                            self.draw_me2_known_plot(me2_plot_table, known_plot).await;
+                        }
+                    }
                 }
             }
         }
-        // Romance
-        if let Some(_t) = TabItem::new(im_str!("Romance")).begin(ui) {
-            for (category_name, known_plot) in &me2_known_plot.romance {
-                if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                    self.draw_me2_known_plot(me2_plot_table, known_plot).await;
-                }
-            }
-        }
-        // Missions
-        if let Some(_t) = TabItem::new(im_str!("Missions")).begin(ui) {
-            for (category_name, known_plot) in &me2_known_plot.missions {
-                if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                    self.draw_me2_known_plot(me2_plot_table, known_plot).await;
-                }
-            }
-        }
-        // Loyalty missions
-        if let Some(_t) = TabItem::new(im_str!("Loyalty missions")).begin(ui) {
-            for (category_name, known_plot) in &me2_known_plot.loyalty_missions {
-                if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                    self.draw_me2_known_plot(me2_plot_table, known_plot).await;
-                }
-            }
-        }
-        // Research
-        if let Some(_t) = TabItem::new(im_str!("Research / Upgrades")).begin(ui) {
-            for (category_name, known_plot) in &me2_known_plot.research_upgrades {
-                if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                    self.draw_me2_known_plot(me2_plot_table, known_plot).await;
-                }
-            }
-        }
+
         // Rewards
         if let Some(_t) = TabItem::new(im_str!("Rewards")).begin(ui) {
-            self.draw_me2_known_plot(me2_plot_table, &me2_known_plot.rewards).await;
+            if let Some(_t) = self.begin_table(&im_str!("plot-table"), 1) {
+                self.draw_me2_known_plot(me2_plot_table, rewards).await;
+            }
         }
         // Captain's cabin
         if let Some(_t) = TabItem::new(im_str!("Captain's cabin")).begin(ui) {
-            self.draw_me2_known_plot(me2_plot_table, &me2_known_plot.captains_cabin).await;
+            if let Some(_t) = self.begin_table(&im_str!("plot-table"), 1) {
+                self.draw_me2_known_plot(me2_plot_table, captains_cabin).await;
+            }
         }
     }
 
     async fn draw_me2_known_plot(&self, me2_plot_table: &mut PlotTable, known_plot: &KnownPlot) {
+        let KnownPlot { booleans, ints } = known_plot;
+
+        if booleans.is_empty() && ints.is_empty() {
+            return;
+        }
+
         // Booleans
         for (plot_id, plot_desc) in &known_plot.booleans {
             let plot = me2_plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
+                self.table_next_row();
+                self.table_next_column();
                 plot.draw_raw_ui(self, plot_desc).await;
             }
         }
@@ -114,6 +122,8 @@ impl<'a> Gui<'a> {
         for (plot_id, plot_desc) in &known_plot.ints {
             let plot = me2_plot_table.int_variables.get_mut(*plot_id);
             if let Some(plot) = plot {
+                self.table_next_row();
+                self.table_next_column();
                 plot.draw_raw_ui(self, plot_desc).await;
             }
         }
