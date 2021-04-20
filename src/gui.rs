@@ -2,12 +2,7 @@ use anyhow::*;
 use flume::{Receiver, Sender};
 use imgui::{Ui, *};
 use indexmap::IndexMap;
-use std::{
-    fmt::Display,
-    future::Future,
-    hash::Hash,
-    sync::atomic::{AtomicUsize, Ordering},
-};
+use std::{fmt::Display, future::Future, hash::Hash};
 use tokio::runtime::Handle;
 use wfd::DialogParams;
 
@@ -19,6 +14,7 @@ use crate::{
 mod mass_effect_1;
 mod mass_effect_2;
 mod support;
+mod widget_utils;
 
 static NOTIFICATION_TIME: f64 = 1.5;
 
@@ -79,15 +75,14 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle)
     });
 }
 
-pub struct Gui<'a> {
-    ui: &'a Ui<'a>,
+pub struct Gui<'ui> {
+    ui: &'ui Ui<'ui>,
     event_addr: Sender<MainEvent>,
-    bg_count: AtomicUsize,
 }
 
-impl<'a> Gui<'a> {
-    fn new(ui: &'a Ui<'a>, event_addr: &Sender<MainEvent>) -> Self {
-        Self { ui, event_addr: Sender::clone(event_addr), bg_count: AtomicUsize::new(0) }
+impl<'ui> Gui<'ui> {
+    fn new(ui: &'ui Ui<'ui>, event_addr: &Sender<MainEvent>) -> Self {
+        Self { ui, event_addr: Sender::clone(event_addr) }
     }
 
     async fn draw(&self, state: &mut State, save_game: &mut Option<SaveGame>) {
@@ -101,6 +96,7 @@ impl<'a> Gui<'a> {
             .resizable(false)
             .movable(false)
             .menu_bar(true)
+            .bring_to_front_on_focus(false)
             .collapsible(false);
 
         // Pop on drop
@@ -197,6 +193,7 @@ impl<'a> Gui<'a> {
         // Tabs
         if let Some(_t) = TabBar::new(im_str!("mass_effect_3")).begin(ui) {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+                self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 3").await;
             }
         }
@@ -206,66 +203,58 @@ impl<'a> Gui<'a> {
     pub async fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
         let ui = self.ui;
 
-        self.draw_colored_bg(ident, || {
-            ui.input_text(&ImString::new(ident), value).build();
-        });
+        let _width = ui.push_item_width(ui.window_content_region_width() * 2.0 / 3.0);
+        ui.input_text(&ImString::new(ident), value).build();
     }
 
     pub async fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
         let ui = self.ui;
 
-        self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(120.0);
-            ui.checkbox(&ImString::new(ident), value);
-        });
+        let _width = ui.push_item_width(120.0);
+        ui.checkbox(&ImString::new(ident), value);
     }
 
     pub async fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
         let ui = self.ui;
 
-        self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(120.0);
-            InputInt::new(ui, &ImString::new(ident), value).build();
-        });
+        let _width = ui.push_item_width(120.0);
+        InputInt::new(ui, &ImString::new(ident), value).build();
     }
 
     pub async fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
         let ui = self.ui;
 
-        self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(120.0);
-            InputFloat::new(ui, &ImString::new(ident), value).build();
-        });
+        let _width = ui.push_item_width(120.0);
+        InputFloat::new(ui, &ImString::new(ident), value).build();
     }
 
     pub async fn draw_edit_enum(&self, ident: &str, current_item: &mut usize, items: &[&ImStr]) {
         let ui = self.ui;
 
-        self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(200.0);
-            ComboBox::new(&ImString::new(ident)).build_simple_string(ui, current_item, items);
-        });
+        let _width = ui.push_item_width(200.0);
+        ComboBox::new(&ImString::new(ident)).build_simple_string(ui, current_item, items);
     }
 
     pub async fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
         let ui = self.ui;
 
-        self.draw_colored_bg(ident, || {
-            let _width = ui.push_item_width(200.0);
-            ColorEdit::new(&ImString::new(ident), color).build(ui);
-        });
+        let _width = ui.push_item_width(200.0);
+        ColorEdit::new(&ImString::new(ident), color).build(ui);
     }
 
     // View widgets
-    pub async fn draw_struct<F>(&self, ident: &str, fields: F)
+    pub async fn draw_struct<F, const LEN: usize>(&self, ident: &str, mut fields: [F; LEN])
     where
-        F: Future<Output = ()>,
+        F: Future<Output = ()> + Unpin,
     {
-        let label = if let Some(label) = ident.split("##").next() { label } else { ident };
-        if let Some(_t) =
-            TreeNode::new(&im_str!("struct-{}", ident)).label(&ImString::new(label)).push(self.ui)
-        {
-            fields.await;
+        if let Some(_t) = self.push_tree_node(ident) {
+            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
+                for field in &mut fields {
+                    self.table_next_row();
+                    self.table_next_column();
+                    field.await;
+                }
+            }
         }
     }
 
@@ -275,60 +264,65 @@ impl<'a> Gui<'a> {
     {
         let ui = self.ui;
 
-        if let Some(_t) =
-            TreeNode::new(&im_str!("vec-{}", ident)).label(&im_str!("{}", ident)).push(ui)
-        {
-            if !list.is_empty() {
-                // Item
-                // let mut remove = None;
-                for (i, item) in list.iter_mut().enumerate() {
-                    // if ui.small_button(&im_str!("remove##remove-{}", i)) {
-                    //     remove = Some(i);
+        if let Some(_t) = self.push_tree_node(ident) {
+            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
+                if !list.is_empty() {
+                    // Item
+                    // let mut remove = None;
+                    for (i, item) in list.iter_mut().enumerate() {
+                        self.table_next_row();
+                        self.table_next_column();
+                        // if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                        //     remove = Some(i);
+                        // }
+                        // ui.same_line();
+                        item.draw_raw_ui(self, &i.to_string()).await;
+                    }
+
+                    // Remove
+                    // if let Some(i) = remove {
+                    //     list.remove(i);
                     // }
-                    // ui.same_line();
-                    item.draw_raw_ui(self, &i.to_string()).await;
+                } else {
+                    self.table_next_row();
+                    self.table_next_column();
+                    ui.text("Empty");
                 }
 
-                // Remove
-                // if let Some(i) = remove {
-                //     list.remove(i);
+                // Add
+                // if ui.button(&im_str!("add##add-{}", ident)) {
+                //     // Ça ouvre automatiquement le tree node de l'élément ajouté
+                //     TreeNode::new(&im_str!("tree-node-{}", list.len()))
+                //         .opened(true, Condition::Always)
+                //         .build(ui, || {});
+
+                //     list.push(T::default());
                 // }
-            } else {
-                self.draw_colored_bg("empty", || {
-                    ui.align_text_to_frame_padding();
-                    ui.text(" Empty");
-                });
             }
-
-            // Add
-            // if ui.button(&im_str!("add##add-{}", ident)) {
-            //     // Ça ouvre automatiquement le tree node de l'élément ajouté
-            //     TreeNode::new(&im_str!("vec-{}", list.len()))
-            //         .opened(true, Condition::Always)
-            //         .build(ui, || {});
-
-            //     list.push(T::default());
-            // }
         }
     }
 
     pub async fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
         let ui = self.ui;
-        if let Some(_t) =
-            TreeNode::new(&im_str!("boolvec-{}", ident)).label(&im_str!("{}", ident)).push(ui)
-        {
-            if !list.is_empty() {
-                let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
-                while clipper.step() {
-                    for i in clipper.display_start()..clipper.display_end() {
-                        list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string()).await;
+        if let Some(_t) = self.push_tree_node(ident) {
+            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
+                if !list.is_empty() {
+                    let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
+                    while clipper.step() {
+                        for i in clipper.display_start()..clipper.display_end() {
+                            self.table_next_row();
+                            self.table_next_column();
+                            list.get_mut(i as usize)
+                                .unwrap()
+                                .draw_raw_ui(self, &i.to_string())
+                                .await;
+                        }
                     }
+                } else {
+                    self.table_next_row();
+                    self.table_next_column();
+                    ui.text("Empty");
                 }
-            } else {
-                self.draw_colored_bg("empty", || {
-                    ui.align_text_to_frame_padding();
-                    ui.text(" Empty");
-                });
             }
         }
     }
@@ -340,76 +334,62 @@ impl<'a> Gui<'a> {
     {
         let ui = self.ui;
 
-        if let Some(_t) =
-            TreeNode::new(&im_str!("indexmap-{}", ident)).label(&im_str!("{}", ident)).push(ui)
-        {
-            if !list.is_empty() {
-                // Item
-                let mut remove = None;
-                for i in 0..list.len() {
-                    if ui.small_button(&im_str!("remove##remove-{}", i)) {
-                        remove = Some(i);
-                    }
-                    ui.same_line();
+        if let Some(_t) = self.push_tree_node(ident) {
+            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
+                if !list.is_empty() {
+                    // Item
+                    let mut remove = None;
+                    for i in 0..list.len() {
+                        self.table_next_row();
+                        self.table_next_column();
+                        ui.align_text_to_frame_padding();
+                        if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                            remove = Some(i);
+                        }
+                        ui.same_line();
 
-                    if let Some((key, value)) = list.get_index_mut(i) {
-                        if let Some(_t) = TreeNode::new(&im_str!("entry-{}", i))
-                            .label(&ImString::new(key.to_string()))
-                            .push(ui)
-                        {
-                            key.draw_raw_ui(self, "id##key").await;
-                            value.draw_raw_ui(self, "value##value").await;
+                        if let Some((key, value)) = list.get_index_mut(i) {
+                            if let Some(_t) =
+                                self.push_tree_node(&format!("{}##{}", key.to_string(), i))
+                            {
+                                if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1) {
+                                    self.table_next_row();
+                                    self.table_next_column();
+                                    key.draw_raw_ui(self, "id##key").await;
+                                    self.table_next_row();
+                                    self.table_next_column();
+                                    value.draw_raw_ui(self, "value##value").await;
+                                }
+                            }
                         }
                     }
+
+                    // Remove
+                    if let Some(i) = remove {
+                        list.shift_remove_index(i);
+                    }
+                } else {
+                    self.table_next_row();
+                    self.table_next_column();
+                    ui.text("Empty");
                 }
 
-                // Remove
-                if let Some(i) = remove {
-                    list.shift_remove_index(i);
+                // Add
+                if ui.button(&im_str!("add##add-{}", ident)) {
+                    // Ça ouvre automatiquement le tree node de l'élément ajouté
+                    // TreeNode::new(&im_str!("tree-node-{}", list.len()))
+                    //     .opened(true, Condition::Always)
+                    //     .build(ui, || {});
+
+                    // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
+                    list.entry(K::default()).or_default();
                 }
-            } else {
-                self.draw_colored_bg("empty", || {
-                    ui.align_text_to_frame_padding();
-                    ui.text(" Empty");
-                });
-            }
-
-            // Add
-            if ui.button(&im_str!("add##add-{}", ident)) {
-                // Ça ouvre automatiquement le tree node de l'élément ajouté
-                TreeNode::new(&im_str!("indexmap-{}", list.len()))
-                    .opened(true, Condition::Always)
-                    .build(ui, || {});
-
-                // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
-                list.entry(K::default()).or_default();
             }
         }
-    }
-
-    // Helpers
-    fn draw_colored_bg<F>(&self, id: &str, inner: F)
-    where
-        F: FnOnce(),
-    {
-        let _bg = self.bg_colors();
-        if let Some(_t) = ChildWindow::new(id).size([0.0, 19.0]).begin(self.ui) {
-            inner();
-        }
-    }
-
-    fn bg_colors(&self) -> ColorStackToken<'a> {
-        let bg_dark = [0.1, 0.1, 0.1, 1.0];
-        let bg_light = [0.15, 0.15, 0.15, 1.0];
-
-        let bgs = [bg_dark, bg_light];
-
-        let bg_count = self.bg_count.fetch_add(1, Ordering::AcqRel);
-        self.ui.push_style_color(StyleColor::ChildBg, bgs[bg_count % bgs.len()])
     }
 
     // Style
-    async fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'a>; 17] {
+    async fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 20] {
         let ui = self.ui;
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
@@ -433,7 +413,7 @@ impl<'a> Gui<'a> {
         };
 
         [
-            ui.push_style_color(StyleColor::WindowBg, [0.0, 0.0, 0.0, 1.0]),
+            ui.push_style_color(StyleColor::WindowBg, [0.05, 0.05, 0.05, 1.0]),
             ui.push_style_color(StyleColor::TitleBgActive, theme.active_color),
             ui.push_style_color(StyleColor::FrameBg, theme.bg_color),
             ui.push_style_color(StyleColor::FrameBgActive, theme.active_color),
@@ -450,6 +430,9 @@ impl<'a> Gui<'a> {
             ui.push_style_color(StyleColor::HeaderHovered, theme.hover_color),
             ui.push_style_color(StyleColor::CheckMark, [1.0, 1.0, 1.0, 1.0]),
             ui.push_style_color(StyleColor::PlotHistogram, [1.0, 1.0, 1.0, 1.0]),
+            ui.push_style_color(StyleColor::TableRowBg, [0.07, 0.07, 0.07, 1.0]),
+            ui.push_style_color(StyleColor::TableRowBgAlt, [0.1, 0.1, 0.1, 1.0]),
+            ui.push_style_color(StyleColor::TableBorderStrong, [0.2, 0.2, 0.2, 1.0]),
         ]
     }
 

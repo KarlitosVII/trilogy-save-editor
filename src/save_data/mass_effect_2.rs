@@ -28,8 +28,8 @@ use galaxy_map::*;
 
 #[derive(SaveData, Clone)]
 pub struct Me2SaveGame {
-    version: Version,
-    debug_name: ImString,
+    _version: Version,
+    _debug_name: ImString,
     seconds_played: f32,
     _disc: Dummy<4>,
     base_level_name: ImString,
@@ -50,7 +50,7 @@ pub struct Me2SaveGame {
     pub me1_plot: Me1PlotTable,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
-    checksum: Checksum,
+    _checksum: Checksum,
 }
 
 #[derive(Clone)]

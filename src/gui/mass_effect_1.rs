@@ -10,7 +10,7 @@ use crate::save_data::{
 
 use super::*;
 
-impl<'a> Gui<'a> {
+impl<'ui> Gui<'ui> {
     pub async fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame) {
         let ui = self.ui;
 
@@ -27,7 +27,8 @@ impl<'a> Gui<'a> {
             }
             // Raw
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-                if let Some(_t) = TreeNode::new(im_str!("Mass Effect 1")).push(ui) {
+                self.set_next_item_open(true);
+                if let Some(_t) = self.push_tree_node("Mass Effect 1") {
                     // Player
                     self.draw_raw_player(&save_game.player).await;
                     // State
@@ -41,19 +42,22 @@ impl<'a> Gui<'a> {
         &self, me1_plot_table: &mut Me1PlotTable, me1_known_plot: &Me1KnownPlot,
     ) {
         let ui = self.ui;
+        let Me1KnownPlot { player_crew, missions } = me1_known_plot;
 
         if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
-            if let Some(_t) = TabItem::new(im_str!("Player / Crew")).begin(ui) {
-                for (category_name, known_plot) in &me1_known_plot.player_crew {
-                    if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                        self.draw_me1_known_plot(me1_plot_table, known_plot).await;
-                    }
-                }
-            }
-            if let Some(_t) = TabItem::new(im_str!("Missions")).begin(ui) {
-                for (category_name, known_plot) in &me1_known_plot.missions {
-                    if let Some(_t) = TreeNode::new(&ImString::new(category_name)).push(ui) {
-                        self.draw_me1_known_plot(me1_plot_table, known_plot).await;
+            let categories =
+                [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
+
+            for (title, plot_map) in &categories {
+                if let Some(_t) = TabItem::new(title).begin(ui) {
+                    if let Some(_t) = self.begin_table(&im_str!("plot-table"), 1) {
+                        for (category_name, known_plot) in plot_map.iter() {
+                            self.table_next_row();
+                            self.table_next_column();
+                            if let Some(_t) = self.push_tree_node(category_name) {
+                                self.draw_me1_known_plot(me1_plot_table, known_plot).await;
+                            }
+                        }
                     }
                 }
             }
@@ -61,17 +65,27 @@ impl<'a> Gui<'a> {
     }
 
     async fn draw_me1_known_plot(&self, me1_plot_table: &mut Me1PlotTable, known_plot: &KnownPlot) {
+        let KnownPlot { booleans, ints } = known_plot;
+
+        if booleans.is_empty() && ints.is_empty() {
+            return;
+        }
+
         // Booleans
-        for (plot_id, plot_desc) in &known_plot.booleans {
+        for (plot_id, plot_desc) in booleans {
             let plot = me1_plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
+                self.table_next_row();
+                self.table_next_column();
                 plot.draw_raw_ui(self, plot_desc).await;
             }
         }
         // Integers
-        for (plot_id, plot_desc) in &known_plot.ints {
+        for (plot_id, plot_desc) in ints {
             let plot = me1_plot_table.int_variables.get_mut(*plot_id);
             if let Some(plot) = plot {
+                self.table_next_row();
+                self.table_next_column();
                 plot.draw_raw_ui(self, plot_desc).await;
             }
         }
@@ -101,12 +115,12 @@ impl<'a> Gui<'a> {
             Option::None => object_name.to_owned(),
         };
 
-        if let Some(_t) =
-            TreeNode::new(&im_str!("object-{}", ident)).label(&property_name).push(self.ui)
-        {
-            let mut data = player.get_data(object_id).borrow_mut();
-            for (i, property) in data.iter_mut().enumerate() {
-                self.draw_property(player, i, property).await;
+        if let Some(_t) = self.push_tree_node(&format!("{}##{}", property_name, ident)) {
+            if let Some(_t) = self.begin_table(&im_str!("object-table"), 1) {
+                let mut data = player.get_data(object_id).borrow_mut();
+                for (i, property) in data.iter_mut().enumerate() {
+                    self.draw_property(player, i, property).await;
+                }
             }
         }
     }
@@ -114,8 +128,21 @@ impl<'a> Gui<'a> {
     #[async_recursion(?Send)]
     async fn draw_property(&self, player: &Player, ident: usize, property: &mut Property) {
         match property {
+            Property::Byte { .. } | Property::None { .. } => return,
+            _ => {
+                self.table_next_row();
+                self.table_next_column();
+            }
+        }
+
+        match property {
             Property::Array { name_id, array, .. } => {
-                self.draw_array_property(player, ident, player.get_name(*name_id), array).await
+                self.draw_array_property(
+                    player,
+                    &format!("{}##{}", player.get_name(*name_id), ident),
+                    array,
+                )
+                .await
             }
             Property::Bool { name_id, value, .. } => {
                 self.draw_edit_bool(
@@ -139,12 +166,8 @@ impl<'a> Gui<'a> {
                 .await
             }
             Property::Name { name_id, value_name_id, .. } => {
-                self.draw_text(
-                    player.get_name(*value_name_id),
-                    Some(player.get_name(*name_id)),
-                    ident,
-                )
-                .await;
+                self.draw_text(player.get_name(*value_name_id), Some(player.get_name(*name_id)))
+                    .await;
             }
             Property::Object { name_id, object_id, .. } => {
                 match (*object_id).cmp(&0) {
@@ -157,12 +180,11 @@ impl<'a> Gui<'a> {
                         // Class
                         let class = player.get_class(*object_id);
                         let class_name = player.get_name(class.class_name_id);
-                        self.draw_text(class_name, Some(player.get_name(*name_id)), ident).await;
+                        self.draw_text(class_name, Some(player.get_name(*name_id))).await;
                     }
                     Ordering::Equal => {
                         // Null => Nom de classe par défaut
-                        self.draw_text(&im_str!("Class"), Some(player.get_name(*name_id)), ident)
-                            .await
+                        self.draw_text(&im_str!("Class"), Some(player.get_name(*name_id))).await
                     }
                 };
             }
@@ -193,56 +215,55 @@ impl<'a> Gui<'a> {
                 )
                 .await
             }
-            _ => {}
+            Property::Byte { .. } | Property::None { .. } => unreachable!(),
         }
     }
 
-    async fn draw_array_property(
-        &self, player: &Player, ident: usize, label: &ImStr, array: &mut [ArrayType],
-    ) {
+    async fn draw_array_property(&self, player: &Player, ident: &str, array: &mut [ArrayType]) {
         let ui = self.ui;
-        if let Some(_t) = TreeNode::new(&im_str!("property-{}", ident))
-            .label(&im_str!("Array : {}", label))
-            .push(ui)
-        {
-            if !array.is_empty() {
-                for (i, property) in array.iter_mut().enumerate() {
-                    match property {
-                        ArrayType::Int(int) => {
-                            int.draw_raw_ui(self, im_str!("{}##int-{}", i, i).to_str()).await
-                        }
-                        ArrayType::Object(object_id) => {
-                            if *object_id != 0 {
-                                // Object
-                                self.draw_object(player, i, None, *object_id).await;
-                            } else {
-                                // Null
-                                self.draw_text(&im_str!("Null"), None, i).await;
+        if let Some(_t) = self.push_tree_node(ident) {
+            if let Some(_t) = self.begin_table(&im_str!("array-table"), 1) {
+                if !array.is_empty() {
+                    for (i, property) in array.iter_mut().enumerate() {
+                        self.table_next_row();
+                        self.table_next_column();
+                        match property {
+                            ArrayType::Int(int) => {
+                                int.draw_raw_ui(self, im_str!("{}##int-{}", i, i).to_str()).await
                             }
-                        }
-                        ArrayType::Vector(vector) => {
-                            vector.draw_raw_ui(self, im_str!("{}##vector-{}", i, i).to_str()).await
-                        }
-                        ArrayType::String(string) => {
-                            string.draw_raw_ui(self, im_str!("##string-{}", i).to_str()).await
-                        }
-                        ArrayType::Properties(properties) => {
-                            if let Some(_t) = TreeNode::new(&im_str!("array-properties-{}", i))
-                                .label(&im_str!("{}", i))
-                                .push(ui)
-                            {
-                                for (j, property) in properties.iter_mut().enumerate() {
-                                    self.draw_property(player, j, property).await;
+                            ArrayType::Object(object_id) => {
+                                if *object_id != 0 {
+                                    // Object
+                                    self.draw_object(player, i, None, *object_id).await;
+                                } else {
+                                    // Null
+                                    self.draw_text(&im_str!("Null"), None).await;
+                                }
+                            }
+                            ArrayType::Vector(vector) => {
+                                vector
+                                    .draw_raw_ui(self, im_str!("{}##vector-{}", i, i).to_str())
+                                    .await
+                            }
+                            ArrayType::String(string) => {
+                                string.draw_raw_ui(self, im_str!("##string-{}", i).to_str()).await
+                            }
+                            ArrayType::Properties(properties) => {
+                                if let Some(_t) = self.push_tree_node(&i.to_string()) {
+                                    if let Some(_t) =
+                                        self.begin_table(&im_str!("array-properties-table"), 1)
+                                    {
+                                        for (j, property) in properties.iter_mut().enumerate() {
+                                            self.draw_property(player, j, property).await;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            } else {
-                self.draw_colored_bg("empty", || {
-                    ui.align_text_to_frame_padding();
+                } else {
                     ui.text(" Empty");
-                });
+                }
             }
         }
     }
@@ -252,37 +273,33 @@ impl<'a> Gui<'a> {
     ) {
         match struct_property {
             StructType::LinearColor(color) => {
-                color.draw_raw_ui(self, im_str!("{}##linear-color-{}", label, ident).to_str()).await
+                color.draw_raw_ui(self, &format!("{}##linear-color-{}", label, ident)).await
             }
             StructType::Vector(vector) => {
-                vector.draw_raw_ui(self, im_str!("{}##vector-{}", label, ident).to_str()).await
+                vector.draw_raw_ui(self, &format!("{}##vector-{}", label, ident)).await
             }
             StructType::Rotator(rotator) => {
-                rotator.draw_raw_ui(self, im_str!("{}##rotator-{}", label, ident).to_str()).await
+                rotator.draw_raw_ui(self, &format!("{}##rotator-{}", label, ident)).await
             }
             StructType::Properties(properties) => {
-                if let Some(_t) = TreeNode::new(&im_str!("struct-properties-{}", ident))
-                    .label(label)
-                    .push(self.ui)
-                {
-                    for (i, property) in properties.iter_mut().enumerate() {
-                        self.draw_property(player, i, property).await;
+                if let Some(_t) = self.push_tree_node(&format!("{}##{}", label, ident)) {
+                    if let Some(_t) = self.begin_table(&im_str!("struct-properties-table"), 1) {
+                        for (i, property) in properties.iter_mut().enumerate() {
+                            self.draw_property(player, i, property).await;
+                        }
                     }
                 }
             }
         }
     }
 
-    async fn draw_text(&self, text: &ImStr, label: Option<&ImStr>, ident: usize) {
+    async fn draw_text(&self, text: &ImStr, label: Option<&ImStr>) {
         let ui = self.ui;
-        self.draw_colored_bg(im_str!("##text-{}", ident).to_str(), || {
-            ui.align_text_to_frame_padding();
-            ui.text(im_str!(" {}", text));
+        ui.text(text);
 
-            if let Some(label) = label {
-                ui.same_line_with_pos(ui.window_content_region_width() * 2.0 / 3.0 - 11.0);
-                ui.text(label);
-            }
-        });
+        if let Some(label) = label {
+            ui.same_line_with_pos(ui.window_content_region_width() * 2.0 / 3.0 - 11.0);
+            ui.text(label);
+        }
     }
 }

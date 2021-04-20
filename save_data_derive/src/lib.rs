@@ -40,11 +40,15 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         }
     });
 
-    let draw_fields = fields.iter().map(|f| {
-        let field_name = &f.ident;
-        let field_string = field_name.as_ref().unwrap().to_string();
-        quote! {
-            self.#field_name.draw_raw_ui(gui, #field_string).await;
+    let draw_fields = fields.iter().filter_map(|f| {
+        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
+            None
+        } else {
+            let field_name = &f.ident;
+            let field_string = field_name.as_ref().unwrap().to_string();
+            Some(quote! {
+                self.#field_name.draw_raw_ui(gui, #field_string)
+            })
         }
     });
 
@@ -64,9 +68,8 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
             }
 
             async fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
-                gui.draw_struct(ident, async {
-                    #(#draw_fields)*
-                }).await;
+                let fields = [#(#draw_fields),*];
+                gui.draw_struct(ident, fields).await;
             }
         }
     };
@@ -84,10 +87,7 @@ fn impl_save_data_enum(
         .iter()
         .any(|attr| attr.path.segments.iter().any(|segment| segment.ident == "repr"));
 
-    let repr_type = Ident::new(
-        if repr { "u32" } else { "u8" },
-        Span::call_site(),
-    );
+    let repr_type = Ident::new(if repr { "u32" } else { "u8" }, Span::call_site());
 
     let repr_variants = variants.iter().enumerate().map(|(i, v)| {
         let variant = &v.ident;

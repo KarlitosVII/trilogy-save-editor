@@ -24,8 +24,8 @@ use galaxy_map::*;
 
 #[derive(SaveData, Clone)]
 pub struct Me3SaveGame {
-    version: Version,
-    debug_name: ImString,
+    _version: Version,
+    _debug_name: ImString,
     seconds_played: f32,
     _disc: Dummy<4>,
     base_level_name: ImString,
@@ -54,7 +54,7 @@ pub struct Me3SaveGame {
     conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
     _saved_objective_text: Dummy<4>,
-    checksum: Checksum,
+    _checksum: Checksum,
 }
 
 #[derive(Clone)]
