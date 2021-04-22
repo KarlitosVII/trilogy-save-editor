@@ -10,7 +10,7 @@ use super::{
     SaveCursor, SaveData,
 };
 
-mod player;
+pub mod player;
 use player::*;
 
 mod squad;
@@ -32,8 +32,8 @@ pub struct Me3SaveGame {
     _disc: Dummy<4>,
     base_level_name: ImString,
     base_level_name_display_override_as_read: ImString,
-    difficulty: Difficulty,
-    end_game_state: EndGameState,
+    pub difficulty: Difficulty,
+    pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotator,
@@ -44,7 +44,7 @@ pub struct Me3SaveGame {
     _doors: Vec<Dummy<18>>,
     _placeables: Vec<Dummy<18>>,
     _pawns: Vec<Dummy<16>>,
-    player: Player,
+    pub player: Player,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     me1_plot: Me1PlotTable,
@@ -53,7 +53,7 @@ pub struct Me3SaveGame {
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
     _use_modules: Vec<Dummy<16>>,
-    conversation_mode: AutoReplyModeOptions,
+    pub conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
     _saved_objective_text: Dummy<4>,
     _checksum: Checksum,
@@ -83,7 +83,7 @@ impl SaveData for Version {
 }
 
 #[derive(SaveData, Clone)]
-enum Difficulty {
+pub enum Difficulty {
     Narrative,
     Casual,
     Normal,
@@ -108,7 +108,7 @@ struct LevelTreasure {
 
 #[allow(clippy::enum_variant_names)]
 #[derive(SaveData, Clone)]
-enum AutoReplyModeOptions {
+pub enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
     NoDecisions,
