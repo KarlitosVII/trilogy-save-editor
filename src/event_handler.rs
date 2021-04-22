@@ -45,7 +45,7 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
 
                     let (me1_result, me2_result, me3_result) =
                         tokio::join!(me1_handle, me2_handle, me3_handle);
-                        
+
                     me1_result?.context("Failed to parse Me1KnownPlot.ron")?;
                     me2_result?.context("Failed to parse Me2KnownPlot.ron")?;
                     me3_result?.context("Failed to parse Me3KnownPlot.ron")
@@ -120,8 +120,7 @@ async fn load_me1_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
         file.read_to_string(&mut input).await?;
     }
 
-    let me1_known_plot: Me1KnownPlot =
-        ron::from_str(&input)?;
+    let me1_known_plot: Me1KnownPlot = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe1KnownPlot(me1_known_plot)).await;
     Ok(())
@@ -134,8 +133,7 @@ async fn load_me2_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
         file.read_to_string(&mut input).await?;
     }
 
-    let me2_known_plot: Me2KnownPlot =
-        ron::from_str(&input)?;
+    let me2_known_plot: Me2KnownPlot = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe2KnownPlot(me2_known_plot)).await;
     Ok(())
@@ -148,8 +146,7 @@ async fn load_me3_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
         file.read_to_string(&mut input).await?;
     }
 
-    let me3_known_plot: Me3KnownPlot =
-        ron::from_str(&input)?;
+    let me3_known_plot: Me3KnownPlot = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe3KnownPlot(me3_known_plot)).await;
     Ok(())
