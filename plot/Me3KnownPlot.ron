@@ -390,8 +390,8 @@ Me3KnownPlot(
         ),
         "Arrae: Ex-Cerberus Scientists": PlotCategory(
             booleans: {
-                19412: "Jacob is present",
-                20742: "Jacob is absent",
+                // 19412: "Jacob is present",
+                // 20742: "Jacob is absent",
                 18261: "Talked with Brynn",
                 18090: "Shepard disapproves of Jacob protecting scientists",
                 18187: "Shepard approves of Jacob protecting scientists",
@@ -643,7 +643,7 @@ Me3KnownPlot(
                 "SFXGameContent.SFXWeapon_AssaultRifle_Reckoning": "Chakram Launcher",
                 "SFXGameContent.SFXWeapon_AssaultRifle_Collector": "Collector Assault Rifle",
                 "SFXGameContent.SFXWeapon_AssaultRifle_Geth": "Geth Pulse Rifle",
-                "SFXGameContentDLC_CON_MP5.SFXWeapon_AssaultRifle_Spitfire": "Geth Spitfire (Multiplayer DLC)",
+                // "SFXGameContentDLC_CON_MP5.SFXWeapon_AssaultRifle_Spitfire": "Geth Spitfire (Multiplayer DLC)",
                 "SFXGameContentDLC_EXP_Pack003.SFXWeapon_AssaultRifle_Lancer": "M-7 Lancer",
                 "SFXGameContent.SFXWeapon_AssaultRifle_Avenger": "M-8 Avenger",
                 "SFXGameContent.SFXWeapon_AssaultRifle_Vindicator": "M-15 Vindicator",
@@ -764,7 +764,7 @@ Me3KnownPlot(
             },
             variables: {
                 "SFXGameContentDLC_CON_GUN01.SFXWeapon_SMG_Bloodpack": "Blood Pack Punisher",
-                "SFXGameContentDLC_CON_MP4.SFXWeapon_SMG_Collector": "Collector SMG",
+                // "SFXGameContentDLC_CON_MP4.SFXWeapon_SMG_Collector": "Collector SMG (Multiplayer DLC)",
                 "SFXGameContentDLC_CON_GUN01.SFXWeapon_SMG_Geth_GUN01": "Geth Plasma SMG",
                 "SFXGameContent.SFXWeapon_SMG_Shuriken": "M-4 Shuriken",
                 "SFXGameContent.SFXWeapon_SMG_Tempest": "M-9 Tempest",
@@ -799,7 +799,7 @@ Me3KnownPlot(
             },
             variables: {
                 "SFXGameContent.SFXWeapon_SniperRifle_BlackWidow": "Black Widow",
-                "SFXGameContentDLC_CON_MP4.SFXWeapon_SniperRifle_Collector": "Collector Sniper Rifle",
+                // "SFXGameContentDLC_CON_MP4.SFXWeapon_SniperRifle_Collector": "Collector Sniper Rifle (Multiplayer DLC)",
                 "SFXGameContent.SFXWeapon_SniperRifle_Javelin": "Javelin",
                 "SFXGameContentDLC_CON_GUN02.SFXWeapon_Sniperrifle_Batarian_GUN02": "Kishock Harpoon Gun",
                 "SFXGameContentDLC_CON_GUN01.SFXWeapon_SniperRifle_Turian_GUN01": "Krysae Sniper Rifle",

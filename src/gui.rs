@@ -209,7 +209,7 @@ impl<'ui> Gui<'ui> {
 
             let _style = ui.push_style_color(StyleColor::WindowBg, [0.0, 0.0, 0.0, 0.3]);
             let window = Window::new(im_str!("###notification"))
-                .position([ui.io().display_size[0] / 2.0, 50.0], Condition::Always)
+                .position([ui.io().display_size[0] / 2.0, 5.0], Condition::Always)
                 .title_bar(false)
                 .resizable(false)
                 .movable(false)
