@@ -8,11 +8,15 @@ use wfd::DialogParams;
 
 use crate::{
     event_handler::{MainEvent, SaveGame},
-    save_data::{common::plot::BoolSlice, mass_effect_3::Me3SaveGame, SaveData},
+    save_data::{
+        common::plot::BoolSlice, mass_effect_1::known_plot::Me1KnownPlot,
+        mass_effect_2::known_plot::Me2KnownPlot, mass_effect_3::known_plot::Me3KnownPlot, SaveData,
+    },
 };
 
 mod mass_effect_1;
 mod mass_effect_2;
+mod mass_effect_3;
 mod support;
 mod widget_utils;
 
@@ -32,9 +36,18 @@ struct NotificationState {
 }
 
 #[derive(Default)]
+pub struct KnownPlotsState {
+    me1: Option<Me1KnownPlot>,
+    me2: Option<Me2KnownPlot>,
+    me3: Option<Me3KnownPlot>,
+}
+
+#[derive(Default)]
 struct State {
+    save_game: Option<SaveGame>,
     errors: ErrorState,
     notification: Option<NotificationState>,
+    known_plots: KnownPlotsState,
 }
 
 // Events
@@ -42,12 +55,16 @@ pub enum UiEvent {
     Error(Error),
     Notification(&'static str),
     OpenedSave(SaveGame),
+    LoadedMe1KnownPlot(Me1KnownPlot),
+    LoadedMe2KnownPlot(Me2KnownPlot),
+    LoadedMe3KnownPlot(Me3KnownPlot),
 }
 
 // UI
 pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle) {
     let mut state = State::default();
-    let mut save_game = None;
+
+    let _ = event_addr.send(MainEvent::LoadKnownPlots);
 
     // UI
     let system = support::init("Trilogy Save Editor", 1000.0, 700.0);
@@ -65,12 +82,21 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle)
                     })
                 }
                 UiEvent::OpenedSave(opened_save_game) => {
-                    save_game = Some(opened_save_game);
+                    state.save_game = Some(opened_save_game);
+                }
+                UiEvent::LoadedMe1KnownPlot(me1_known_plot) => {
+                    state.known_plots.me1 = Some(me1_known_plot)
+                }
+                UiEvent::LoadedMe2KnownPlot(me2_known_plot) => {
+                    state.known_plots.me2 = Some(me2_known_plot)
+                }
+                UiEvent::LoadedMe3KnownPlot(me3_known_plot) => {
+                    state.known_plots.me3 = Some(me3_known_plot)
                 }
             });
 
             let ui = Gui::new(ui, &event_addr);
-            ui.draw(&mut state, &mut save_game).await;
+            ui.draw(&mut state).await;
         });
     });
 }
@@ -85,7 +111,7 @@ impl<'ui> Gui<'ui> {
         Self { ui, event_addr: Sender::clone(event_addr) }
     }
 
-    async fn draw(&self, state: &mut State, save_game: &mut Option<SaveGame>) {
+    async fn draw(&self, state: &mut State) {
         let ui = self.ui;
 
         // Main window
@@ -101,7 +127,7 @@ impl<'ui> Gui<'ui> {
 
         // Pop on drop
         let _colors = self
-            .style_colors(match save_game {
+            .style_colors(match state.save_game {
                 None => Theme::MassEffect3,
                 Some(SaveGame::MassEffect1(_)) => Theme::MassEffect1,
                 Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
@@ -118,43 +144,61 @@ impl<'ui> Gui<'ui> {
                     self.open_save().await;
                 }
                 if ui.button(im_str!("Save")) {
-                    self.save_save(save_game).await;
+                    self.save_save(&state.save_game).await;
                 }
             }
 
             // Error popup
-            {
-                let ErrorState { errors, is_opened } = &mut state.errors;
-                if *is_opened {
-                    ui.open_popup(im_str!("Error###error"));
-                }
-
-                if let Some(_t) = PopupModal::new(im_str!("Error###error"))
-                    .always_auto_resize(true)
-                    .begin_popup(ui)
-                {
-                    for error in errors.iter() {
-                        ui.text(error.to_string());
-                    }
-                    ui.separator();
-
-                    if ui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
-                        *is_opened = false;
-                        errors.clear();
-                        ui.close_current_popup();
-                    }
-                }
-            }
+            self.draw_errors(&mut state.errors).await;
 
             // Notification
             self.draw_nofification_overlay(&mut state.notification).await;
 
-            match save_game {
+            // Game
+            match &mut state.save_game {
                 None => ui.text(im_str!("Rien ici")),
-                Some(SaveGame::MassEffect1(save_game)) => self.draw_mass_effect_1(save_game).await,
-                Some(SaveGame::MassEffect2(save_game)) => self.draw_mass_effect_2(save_game).await,
-                Some(SaveGame::MassEffect3(save_game)) => self.draw_mass_effect_3(save_game).await,
+                Some(SaveGame::MassEffect1(save_game)) => {
+                    self.draw_mass_effect_1(save_game, &state.known_plots).await
+                }
+                Some(SaveGame::MassEffect2(save_game)) => {
+                    self.draw_mass_effect_2(save_game, &state.known_plots).await
+                }
+                Some(SaveGame::MassEffect3(save_game)) => {
+                    self.draw_mass_effect_3(save_game, &state.known_plots).await
+                }
             };
+        }
+    }
+
+    async fn draw_errors(&self, errors: &mut ErrorState) {
+        let ui = self.ui;
+
+        let ErrorState { errors, is_opened } = errors;
+        if *is_opened {
+            ui.open_popup(im_str!("Error###error"));
+        }
+
+        if let Some(_t) =
+            PopupModal::new(im_str!("Error###error")).always_auto_resize(true).begin_popup(ui)
+        {
+            for error in errors.iter() {
+                ui.text(error.to_string());
+
+                let chain = error.chain().skip(1);
+                if chain.len() != 0 {
+                    ui.separator();
+                    for error in chain {
+                        ui.text(error.to_string());
+                    }
+                }
+                ui.separator();
+            }
+
+            if ui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
+                *is_opened = false;
+                errors.clear();
+                ui.close_current_popup();
+            }
         }
     }
 
@@ -187,23 +231,11 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) {
-        let ui = self.ui;
-
-        // Tabs
-        if let Some(_t) = TabBar::new(im_str!("mass_effect_3")).begin(ui) {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-                self.set_next_item_open(true);
-                save_game.draw_raw_ui(self, "Mass Effect 3").await;
-            }
-        }
-    }
-
     // Edit boxes
     pub async fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(ui.window_content_region_width() * 2.0 / 3.0);
+        let _width = ui.push_item_width(500.0);
         ui.input_text(&ImString::new(ident), value).build();
     }
 

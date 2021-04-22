@@ -19,6 +19,8 @@ use squad::*;
 pub mod plot;
 use plot::*;
 
+pub mod known_plot;
+
 mod galaxy_map;
 use galaxy_map::*;
 
@@ -44,9 +46,9 @@ pub struct Me3SaveGame {
     _pawns: Vec<Dummy<16>>,
     player: Player,
     squad: Vec<Henchman>,
-    plot: PlotTable,
+    pub plot: PlotTable,
     me1_plot: Me1PlotTable,
-    player_variables: IndexMap<ImString, i32>,
+    pub player_variables: IndexMap<ImString, i32>,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,

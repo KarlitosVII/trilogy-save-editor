@@ -51,7 +51,7 @@ pub struct PlotCodexPage {
 }
 
 #[derive(Deserialize)]
-pub struct KnownPlot {
+pub struct PlotCategory {
     pub booleans: IndexMap<usize, String>,
     pub ints: IndexMap<usize, String>,
 }

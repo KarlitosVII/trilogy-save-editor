@@ -1,6 +1,6 @@
 Me1KnownPlot(
     player_crew: {
-        "Player": KnownPlot(
+        "Player": PlotCategory(
             booleans: {
                 7156: "Shepard is rich",
             },
@@ -11,7 +11,7 @@ Me1KnownPlot(
                 47: "Paragon points",
             },
         ),
-        "Crew": KnownPlot(
+        "Crew": PlotCategory(
             booleans: {
                 3939: "Kaidan recruited",
                 4509: "Sided against Vrynnus while speaking to Kaiden",
@@ -30,7 +30,7 @@ Me1KnownPlot(
                 38: "Garrus pushed toward Spectres progress (renegade)",
             },
         ),
-        "Romance": KnownPlot(
+        "Romance": PlotCategory(
             booleans: {
                 6528: "Romanced somebody",
                 4281: "Romancing Ashley",
@@ -45,7 +45,7 @@ Me1KnownPlot(
         ),
     },
     missions: {
-        "Citadel": KnownPlot(
+        "Citadel": PlotCategory(
             booleans: {
                 3979: "[Harkin] Talked to him",
                 3980: "[Barla Von] Met him",
@@ -82,7 +82,7 @@ Me1KnownPlot(
                 39: "[Scan the Keepers] Number of keepers scanned",
             },
         ),
-        "Feros": KnownPlot(
+        "Feros": PlotCategory(
             booleans: {
                 2490: "Intimidated Ethan Jeong",
                 2491: "Convinced Ethan Jeong",
@@ -100,7 +100,7 @@ Me1KnownPlot(
             },
             ints: {},
         ),
-        "Noveria": KnownPlot(
+        "Noveria": PlotCategory(
             booleans: {
                 2687: "Gave evidence to Lorik Qui'in",
                 2690: "Gave evidence to Gianna Parasini",
@@ -111,7 +111,7 @@ Me1KnownPlot(
             },
             ints: {},
         ),
-        "Virmire": KnownPlot(
+        "Virmire": PlotCategory(
             booleans: {
                 3827: "Rescued Ashley",
                 3828: "Rescued Kaidan",
@@ -124,7 +124,7 @@ Me1KnownPlot(
             },
             ints: {},
         ),
-        "End": KnownPlot(
+        "End": PlotCategory(
             booleans: {
                 3001: "Saved the Council",
                 3002: "Abandoned the Council",
@@ -133,7 +133,7 @@ Me1KnownPlot(
             },
             ints: {},
         ),
-        "UNC": KnownPlot(
+        "UNC": PlotCategory(
             booleans: {
                 4608: "[Hades' Dogs] Found Cerberus files",
                 4682: "[Rogue VI] Completed assignment",
@@ -155,7 +155,7 @@ Me1KnownPlot(
                 54: "[Asari Writings] Writings found",
             },
         ),
-        "DLC": KnownPlot(
+        "DLC": PlotCategory(
             booleans: {
                 7291: "[Bring Down the Sky] Completed assignment",
                 5361: "[Bring Down the Sky] Rescued Humans 1",

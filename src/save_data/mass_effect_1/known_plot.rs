@@ -1,12 +1,12 @@
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::save_data::common::plot::KnownPlot;
+use crate::save_data::common::plot::PlotCategory;
 
 #[derive(Deserialize)]
 pub struct Me1KnownPlot {
-    pub player_crew: IndexMap<String, KnownPlot>,
-    pub missions: IndexMap<String, KnownPlot>,
+    pub player_crew: IndexMap<String, PlotCategory>,
+    pub missions: IndexMap<String, PlotCategory>,
 }
 
 #[cfg(test)]

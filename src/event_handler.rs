@@ -9,9 +9,9 @@ use tokio::{
 use crate::{
     gui::UiEvent,
     save_data::{
-        mass_effect_1::Me1SaveGame,
-        mass_effect_2::{self, Me2SaveGame},
-        mass_effect_3::Me3SaveGame,
+        mass_effect_1::{known_plot::Me1KnownPlot, Me1SaveGame},
+        mass_effect_2::{self, known_plot::Me2KnownPlot, Me2SaveGame},
+        mass_effect_3::{known_plot::Me3KnownPlot, Me3SaveGame},
         SaveCursor, SaveData,
     },
 };
@@ -19,6 +19,7 @@ use crate::{
 pub enum MainEvent {
     OpenSave(PathBuf),
     SaveSave(PathBuf, SaveGame),
+    LoadKnownPlots,
 }
 
 #[derive(Clone)]
@@ -36,6 +37,18 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
                 MainEvent::OpenSave(path) => tokio::spawn(open_save(path, ui_addr)).await?,
                 MainEvent::SaveSave(path, save_game) => {
                     tokio::spawn(save_save(path, save_game, ui_addr)).await?
+                }
+                MainEvent::LoadKnownPlots => {
+                    let me1_handle = tokio::spawn(load_me1_known_plot(Sender::clone(&ui_addr)));
+                    let me2_handle = tokio::spawn(load_me2_known_plot(Sender::clone(&ui_addr)));
+                    let me3_handle = tokio::spawn(load_me3_known_plot(ui_addr));
+
+                    let (me1_result, me2_result, me3_result) =
+                        tokio::join!(me1_handle, me2_handle, me3_handle);
+                        
+                    me1_result?.context("Failed to parse Me1KnownPlot.ron")?;
+                    me2_result?.context("Failed to parse Me2KnownPlot.ron")?;
+                    me3_result?.context("Failed to parse Me3KnownPlot.ron")
                 }
             }
         };
@@ -85,7 +98,7 @@ async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>)
         SaveGame::MassEffect3(save_game) => Me3SaveGame::serialize(&save_game, &mut output)?,
     };
 
-    // if save exists
+    // Backup si fichier existe
     if fs::metadata(&path).await.is_ok() {
         if let Some(ext) = path.extension() {
             let to = Path::with_extension(&path, ext.to_string_lossy().into_owned() + ".bak");
@@ -97,5 +110,47 @@ async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>)
     file.write_all(&output).await?;
 
     let _ = ui_addr.send_async(UiEvent::Notification("Saved")).await;
+    Ok(())
+}
+
+async fn load_me1_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
+    let mut input = String::new();
+    {
+        let mut file = File::open("plot/Me1KnownPlot.ron").await?;
+        file.read_to_string(&mut input).await?;
+    }
+
+    let me1_known_plot: Me1KnownPlot =
+        ron::from_str(&input)?;
+
+    let _ = ui_addr.send_async(UiEvent::LoadedMe1KnownPlot(me1_known_plot)).await;
+    Ok(())
+}
+
+async fn load_me2_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
+    let mut input = String::new();
+    {
+        let mut file = File::open("plot/Me2KnownPlot.ron").await?;
+        file.read_to_string(&mut input).await?;
+    }
+
+    let me2_known_plot: Me2KnownPlot =
+        ron::from_str(&input)?;
+
+    let _ = ui_addr.send_async(UiEvent::LoadedMe2KnownPlot(me2_known_plot)).await;
+    Ok(())
+}
+
+async fn load_me3_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
+    let mut input = String::new();
+    {
+        let mut file = File::open("plot/Me3KnownPlot.ron").await?;
+        file.read_to_string(&mut input).await?;
+    }
+
+    let me3_known_plot: Me3KnownPlot =
+        ron::from_str(&input)?;
+
+    let _ = ui_addr.send_async(UiEvent::LoadedMe3KnownPlot(me3_known_plot)).await;
     Ok(())
 }

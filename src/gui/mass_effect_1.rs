@@ -11,19 +11,18 @@ use crate::save_data::{
 use super::*;
 
 impl<'ui> Gui<'ui> {
-    pub async fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame) {
+    pub async fn draw_mass_effect_1(
+        &self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState,
+    ) {
         let ui = self.ui;
-
-        // TODO: Change ça
-        let string = include_str!("../../plot/Me1KnownPlot.ron");
-        let me1_known_plot: Me1KnownPlot = ron::from_str(&string).unwrap();
 
         // Tabs
         if let Some(_t) = TabBar::new(im_str!("mass_effect_1")).begin(ui) {
             // Plot
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-                let me1_plot_table = &mut save_game.state.plot;
-                self.draw_me1_plot(me1_plot_table, &me1_known_plot).await;
+                if let Some(me1_known_plot) = &known_plots.me1 {
+                    self.draw_me1_known_plot(&mut save_game.state.plot, me1_known_plot).await;
+                }
             }
             // Raw
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
@@ -38,7 +37,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    pub async fn draw_me1_plot(
+    pub async fn draw_me1_known_plot(
         &self, me1_plot_table: &mut Me1PlotTable, me1_known_plot: &Me1KnownPlot,
     ) {
         let ui = self.ui;
@@ -55,7 +54,7 @@ impl<'ui> Gui<'ui> {
                             self.table_next_row();
                             self.table_next_column();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me1_known_plot(me1_plot_table, known_plot).await;
+                                self.draw_me1_plot_category(me1_plot_table, known_plot).await;
                             }
                         }
                     }
@@ -64,8 +63,10 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_me1_known_plot(&self, me1_plot_table: &mut Me1PlotTable, known_plot: &KnownPlot) {
-        let KnownPlot { booleans, ints } = known_plot;
+    async fn draw_me1_plot_category(
+        &self, plot_table: &mut Me1PlotTable, known_plot: &PlotCategory,
+    ) {
+        let PlotCategory { booleans, ints } = known_plot;
 
         if booleans.is_empty() && ints.is_empty() {
             return;
@@ -73,7 +74,7 @@ impl<'ui> Gui<'ui> {
 
         // Booleans
         for (plot_id, plot_desc) in booleans {
-            let plot = me1_plot_table.bool_variables.get_mut(*plot_id);
+            let plot = plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
                 self.table_next_row();
                 self.table_next_column();
@@ -82,7 +83,7 @@ impl<'ui> Gui<'ui> {
         }
         // Integers
         for (plot_id, plot_desc) in ints {
-            let plot = me1_plot_table.int_variables.get_mut(*plot_id);
+            let plot = plot_table.int_variables.get_mut(*plot_id);
             if let Some(plot) = plot {
                 self.table_next_row();
                 self.table_next_column();
@@ -298,7 +299,7 @@ impl<'ui> Gui<'ui> {
         ui.text(text);
 
         if let Some(label) = label {
-            ui.same_line_with_pos(ui.window_content_region_width() * 2.0 / 3.0 - 11.0);
+            ui.same_line_with_pos(500.0);
             ui.text(label);
         }
     }
