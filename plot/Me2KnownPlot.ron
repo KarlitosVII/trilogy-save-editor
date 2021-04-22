@@ -67,7 +67,7 @@ Me2KnownPlot(
                 220: "Jacob is specialized",
             },
             ints: {
-                313: "Jacob appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+                313: "Jacob appearance (0 = Default, 1 = Alternate)",
             },
         ),
         "Kasumi": PlotCategory(
@@ -81,7 +81,7 @@ Me2KnownPlot(
                 223: "Kasumi is specialized",
             },
             ints: {
-                317: "Kasumi appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+                317: "Kasumi appearance (0 = Default, 1 = Alternate)",
             },
         ),
         "Legion": PlotCategory(
@@ -95,7 +95,7 @@ Me2KnownPlot(
                 222: "Legion is specialized",
             },
             ints: {
-                315: "Legion appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+                315: "Legion appearance (0 = Default, 1 = Alternate)",
             },
         ),
         "Miranda": PlotCategory(
@@ -123,7 +123,7 @@ Me2KnownPlot(
                 227: "Mordin is specialized",
             },
             ints: {
-                321: "Mordin appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+                321: "Mordin appearance (0 = Default, 1 = Alternate)",
             },
         ),
         "Samara": PlotCategory(
@@ -137,7 +137,7 @@ Me2KnownPlot(
                 229: "Samara is specialized",
             },
             ints: {
-                323: "Samara appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+                323: "Samara appearance (0 = Default, 1 = Alternate)",
             },
         ),
         "Tali": PlotCategory(
@@ -179,7 +179,7 @@ Me2KnownPlot(
                 230: "Zaeed is specialized",
             },
             ints: {
-                324: "Zaeed appearance (0 = Default, 1 = Alternate, 2 = DLC)",
+                324: "Zaeed appearance (0 = Default, 1 = Alternate)",
             },
         ),
         "Crew": PlotCategory(

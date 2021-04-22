@@ -26,7 +26,7 @@ pub struct Appearance {
     pattern_color_id: i32,
     helmet_id: i32,
     has_head_morph: bool,
-    head_morph: Option<HeadMorph>,
+    head_morph: Option<HeadMorph>, // FIXME: Interdire de save si has_head_morph = true et head_morph = None
 }
 
 #[derive(SaveData, Clone)]

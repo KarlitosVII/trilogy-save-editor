@@ -146,9 +146,7 @@ fn impl_save_data_enum(
                     #(#match_variants),*
                 };
 
-                gui.draw_edit_enum(ident, &mut edit_item, &items).await;
-
-                if edit_item != current_item {
+                if gui.draw_edit_enum(ident, &mut edit_item, &items).await {
                     *self = match edit_item {
                         #(#edit_variants),*,
                         _ => unreachable!(),

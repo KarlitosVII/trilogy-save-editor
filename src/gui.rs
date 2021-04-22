@@ -14,11 +14,11 @@ use crate::{
     },
 };
 
+mod imgui_utils;
 mod mass_effect_1;
 mod mass_effect_2;
 mod mass_effect_3;
 mod support;
-mod widget_utils;
 
 static NOTIFICATION_TIME: f64 = 1.5;
 
@@ -231,47 +231,67 @@ impl<'ui> Gui<'ui> {
         }
     }
 
+    async fn draw_help_marker(&self, desc: &str) {
+        let ui = self.ui;
+
+        ui.text_disabled(im_str!("(?)"));
+        if ui.is_item_hovered() {
+            let _t = ui.begin_tooltip();
+            ui.text(desc);
+        }
+    }
+
     // Edit boxes
     pub async fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(500.0);
-        ui.input_text(&ImString::new(ident), value).build();
+        // let width = ui.push_item_width(500.0);
+        ui.input_text(&ImString::new(ident), value).resize_buffer(true).build();
+        // width.pop(ui);
     }
 
     pub async fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(120.0);
+        let width = ui.push_item_width(120.0);
         ui.checkbox(&ImString::new(ident), value);
+        width.pop(ui);
     }
 
     pub async fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(120.0);
+        let width = ui.push_item_width(120.0);
         InputInt::new(ui, &ImString::new(ident), value).build();
+        width.pop(ui);
     }
 
     pub async fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(120.0);
+        let width = ui.push_item_width(120.0);
         InputFloat::new(ui, &ImString::new(ident), value).build();
+        width.pop(ui);
     }
 
-    pub async fn draw_edit_enum(&self, ident: &str, current_item: &mut usize, items: &[&ImStr]) {
+    pub async fn draw_edit_enum(
+        &self, ident: &str, current_item: &mut usize, items: &[&ImStr],
+    ) -> bool {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(200.0);
-        ComboBox::new(&ImString::new(ident)).build_simple_string(ui, current_item, items);
+        let width = ui.push_item_width(200.0);
+        let edited =
+            ComboBox::new(&ImString::new(ident)).build_simple_string(ui, current_item, items);
+        width.pop(ui);
+        edited
     }
 
     pub async fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
         let ui = self.ui;
 
-        let _width = ui.push_item_width(200.0);
+        let width = ui.push_item_width(200.0);
         ColorEdit::new(&ImString::new(ident), color).build(ui);
+        width.pop(ui);
     }
 
     // View widgets
@@ -283,7 +303,6 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
                 for field in &mut fields {
                     self.table_next_row();
-                    self.table_next_column();
                     field.await;
                 }
             }
@@ -296,66 +315,75 @@ impl<'ui> Gui<'ui> {
     {
         let ui = self.ui;
 
-        if let Some(_t) = self.push_tree_node(ident) {
-            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
-                if !list.is_empty() {
-                    // Item
-                    // let mut remove = None;
-                    for (i, item) in list.iter_mut().enumerate() {
-                        self.table_next_row();
-                        self.table_next_column();
-                        // if ui.small_button(&im_str!("remove##remove-{}", i)) {
-                        //     remove = Some(i);
-                        // }
-                        // ui.same_line();
-                        item.draw_raw_ui(self, &i.to_string()).await;
-                    }
+        // Tree node
+        let _t = match self.push_tree_node(ident) {
+            Some(t) => t,
+            None => return,
+        };
 
-                    // Remove
-                    // if let Some(i) = remove {
-                    //     list.remove(i);
-                    // }
-                } else {
-                    self.table_next_row();
-                    self.table_next_column();
-                    ui.text("Empty");
+        // Table
+        let _t = match self.begin_table(&ImString::new(ident), 1) {
+            Some(t) => t,
+            None => return,
+        };
+
+        if !list.is_empty() {
+            // Item
+            let mut remove = None;
+            for (i, item) in list.iter_mut().enumerate() {
+                self.table_next_row();
+                if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                    remove = Some(i);
                 }
-
-                // Add
-                // if ui.button(&im_str!("add##add-{}", ident)) {
-                //     // Ça ouvre automatiquement le tree node de l'élément ajouté
-                //     TreeNode::new(&im_str!("tree-node-{}", list.len()))
-                //         .opened(true, Condition::Always)
-                //         .build(ui, || {});
-
-                //     list.push(T::default());
-                // }
+                ui.same_line();
+                item.draw_raw_ui(self, &i.to_string()).await;
             }
+
+            // Remove
+            if let Some(i) = remove {
+                list.remove(i);
+            }
+        } else {
+            self.table_next_row();
+            ui.text("Empty");
+        }
+
+        // Add
+        if ui.button(&im_str!("add##add-{}", ident)) {
+            // Ça ouvre automatiquement le tree node de l'élément ajouté
+            // TreeNode::new(&im_str!("tree-node-{}", list.len()))
+            //     .opened(true, Condition::Always)
+            //     .build(ui, || {});
+
+            list.push(T::default());
         }
     }
 
     pub async fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
         let ui = self.ui;
-        if let Some(_t) = self.push_tree_node(ident) {
-            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
-                if !list.is_empty() {
-                    let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
-                    while clipper.step() {
-                        for i in clipper.display_start()..clipper.display_end() {
-                            self.table_next_row();
-                            self.table_next_column();
-                            list.get_mut(i as usize)
-                                .unwrap()
-                                .draw_raw_ui(self, &i.to_string())
-                                .await;
-                        }
-                    }
-                } else {
+        // Tree node
+        let _t = match self.push_tree_node(ident) {
+            Some(t) => t,
+            None => return,
+        };
+
+        // Table
+        let _t = match self.begin_table(&ImString::new(ident), 1) {
+            Some(t) => t,
+            None => return,
+        };
+
+        if !list.is_empty() {
+            let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
+            while clipper.step() {
+                for i in clipper.display_start()..clipper.display_end() {
                     self.table_next_row();
-                    self.table_next_column();
-                    ui.text("Empty");
+                    list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string()).await;
                 }
             }
+        } else {
+            self.table_next_row();
+            ui.text("Empty");
         }
     }
 
@@ -366,57 +394,59 @@ impl<'ui> Gui<'ui> {
     {
         let ui = self.ui;
 
-        if let Some(_t) = self.push_tree_node(ident) {
-            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
-                if !list.is_empty() {
-                    // Item
-                    let mut remove = None;
-                    for i in 0..list.len() {
-                        self.table_next_row();
-                        self.table_next_column();
-                        ui.align_text_to_frame_padding();
-                        if ui.small_button(&im_str!("remove##remove-{}", i)) {
-                            remove = Some(i);
-                        }
-                        ui.same_line();
+        // Tree node
+        let _t = match self.push_tree_node(ident) {
+            Some(t) => t,
+            None => return,
+        };
 
-                        if let Some((key, value)) = list.get_index_mut(i) {
-                            if let Some(_t) =
-                                self.push_tree_node(&format!("{}##{}", key.to_string(), i))
-                            {
-                                if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1) {
-                                    self.table_next_row();
-                                    self.table_next_column();
-                                    key.draw_raw_ui(self, "id##key").await;
-                                    self.table_next_row();
-                                    self.table_next_column();
-                                    value.draw_raw_ui(self, "value##value").await;
-                                }
-                            }
-                        }
-                    }
+        // Table
+        let _t = match self.begin_table(&ImString::new(ident), 1) {
+            Some(t) => t,
+            None => return,
+        };
 
-                    // Remove
-                    if let Some(i) = remove {
-                        list.shift_remove_index(i);
-                    }
-                } else {
-                    self.table_next_row();
-                    self.table_next_column();
-                    ui.text("Empty");
+        if !list.is_empty() {
+            // Item
+            let mut remove = None;
+            for i in 0..list.len() {
+                self.table_next_row();
+                ui.align_text_to_frame_padding();
+                if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                    remove = Some(i);
                 }
+                ui.same_line();
 
-                // Add
-                if ui.button(&im_str!("add##add-{}", ident)) {
-                    // Ça ouvre automatiquement le tree node de l'élément ajouté
-                    // TreeNode::new(&im_str!("tree-node-{}", list.len()))
-                    //     .opened(true, Condition::Always)
-                    //     .build(ui, || {});
-
-                    // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
-                    list.entry(K::default()).or_default();
+                if let Some((key, value)) = list.get_index_mut(i) {
+                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", key.to_string(), i)) {
+                        if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1) {
+                            self.table_next_row();
+                            key.draw_raw_ui(self, "id##key").await;
+                            self.table_next_row();
+                            value.draw_raw_ui(self, "value##value").await;
+                        }
+                    }
                 }
             }
+
+            // Remove
+            if let Some(i) = remove {
+                list.shift_remove_index(i);
+            }
+        } else {
+            self.table_next_row();
+            ui.text("Empty");
+        }
+
+        // Add
+        if ui.button(&im_str!("add##add-{}", ident)) {
+            // Ça ouvre automatiquement le tree node de l'élément ajouté
+            // TreeNode::new(im_str!("tree-node-{}", list.len()))
+            //     .opened(true, Condition::Always)
+            //     .build(ui, || {});
+
+            // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
+            list.entry(K::default()).or_default();
         }
     }
 
