@@ -457,10 +457,10 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
-                bg_color: [0.09, 0.27, 0.72, 1.0],
-                color: [0.14, 0.32, 0.72, 1.0],
-                active_color: [0.24, 0.42, 0.80, 1.0],
-                hover_color: [0.24, 0.42, 1.0, 1.0],
+                bg_color: [0.11, 0.32, 0.43, 1.0],
+                color: [0.16, 0.42, 0.58, 1.0],
+                active_color: [0.28, 0.55, 0.67, 1.0],
+                hover_color: [0.83, 0.43, 0.17, 1.0],
             },
             Theme::MassEffect2 => ColorTheme {
                 bg_color: [0.59, 0.29, 0.06, 1.0],
@@ -496,7 +496,7 @@ impl<'ui> Gui<'ui> {
             ui.push_style_color(StyleColor::PlotHistogram, [1.0, 1.0, 1.0, 1.0]),
             ui.push_style_color(StyleColor::TableRowBg, [0.07, 0.07, 0.07, 1.0]),
             ui.push_style_color(StyleColor::TableRowBgAlt, [0.1, 0.1, 0.1, 1.0]),
-            ui.push_style_color(StyleColor::TableBorderStrong, [0.2, 0.2, 0.2, 1.0]),
+            ui.push_style_color(StyleColor::TableBorderStrong, [0.20, 0.20, 0.20, 1.0]),
         ]
     }
 
