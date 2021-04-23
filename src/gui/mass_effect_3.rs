@@ -1,3 +1,4 @@
+use if_chain::if_chain;
 use imgui::*;
 
 use crate::save_data::{
@@ -18,23 +19,34 @@ impl<'ui> Gui<'ui> {
     ) {
         let ui = self.ui;
 
-        // Tabs
-        if let Some(_t) = TabBar::new(im_str!("mass_effect_3")).begin(ui) {
-            // General
-            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
+        // Tab bar
+        let _t = match TabBar::new(im_str!("mass_effect_3")).begin(ui) {
+            Some(t) => t,
+            None => return,
+        };
+
+        // General
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
                 self.draw_me3_general(save_game).await;
             }
-            // Plot
-            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-                self.draw_me3_known_plot(
-                    &mut save_game.plot,
-                    &mut save_game.player_variables,
-                    known_plots,
-                )
-                .await;
-            }
-            // Raw
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+        }
+        // Plot
+        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+            self.draw_me3_known_plot(
+                &mut save_game.plot,
+                &mut save_game.player_variables,
+                known_plots,
+            )
+            .await;
+        }
+        // Raw
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
                 self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 3").await;
             }
@@ -106,7 +118,7 @@ impl<'ui> Gui<'ui> {
                     width.pop(ui);
 
                     ui.same_line();
-                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Reapers will be the least of your worries...").await;
+                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Reapers will be the least of your worries...\nAlso consider changing your gender and Loco / Lola plots.").await;
                 }
 
                 self.table_next_row();
@@ -323,8 +335,11 @@ impl<'ui> Gui<'ui> {
         };
 
         // Mass Effect 3
-        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me3_plot_category(plot_table, general).await;
             }
         }
@@ -339,31 +354,43 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if let Some(_t) = TabItem::new(title).begin(ui) {
-                for (category_name, known_plot) in plot_map.iter() {
-                    if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                        self.table_next_row();
-                        if let Some(_t) = self.push_tree_node(category_name) {
-                            self.draw_me3_plot_category(plot_table, known_plot).await;
+            if_chain! {
+                if let Some(_t) = TabItem::new(title).begin(ui);
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+                then {
+                    for (category_name, known_plot) in plot_map.iter() {
+                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
+                            self.table_next_row();
+                            if let Some(_t) = self.push_tree_node(category_name) {
+                                self.draw_me3_plot_category(plot_table, known_plot).await;
+                            }
                         }
                     }
                 }
             }
         }
 
-        if let Some(_t) = TabItem::new(im_str!("Intel")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Intel")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me3_plot_category(plot_table, intel).await;
             }
         }
 
         // Weapons / Powers
-        if let Some(_t) = TabItem::new(im_str!("Weapons / Powers")).begin(ui) {
-            for (category_name, known_plot) in weapons_powers {
-                if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                    self.table_next_row();
-                    if let Some(_t) = self.push_tree_node(category_name) {
-                        self.draw_me3_plot_variable(plot_table, player_variables, known_plot).await;
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Weapons / Powers")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                for (category_name, known_plot) in weapons_powers {
+                    if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
+                        self.table_next_row();
+                        if let Some(_t) = self.push_tree_node(category_name) {
+                            self.draw_me3_plot_variable(plot_table, player_variables, known_plot)
+                                .await;
+                        }
                     }
                 }
             }
@@ -410,8 +437,11 @@ impl<'ui> Gui<'ui> {
         };
 
         // Player
-        if let Some(_t) = TabItem::new(im_str!("Player")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Player")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me3_plot_category(me3_plot_table, player).await;
             }
         }
@@ -425,12 +455,16 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if let Some(_t) = TabItem::new(title).begin(ui) {
-                for (category_name, known_plot) in plot_map.iter() {
-                    if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                        self.table_next_row();
-                        if let Some(_t) = self.push_tree_node(category_name) {
-                            self.draw_me3_plot_category(me3_plot_table, known_plot).await;
+            if_chain! {
+                if let Some(_t) = TabItem::new(title).begin(ui);
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+                then {
+                    for (category_name, known_plot) in plot_map.iter() {
+                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
+                            self.table_next_row();
+                            if let Some(_t) = self.push_tree_node(category_name) {
+                                self.draw_me3_plot_category(me3_plot_table, known_plot).await;
+                            }
                         }
                     }
                 }
@@ -438,14 +472,21 @@ impl<'ui> Gui<'ui> {
         }
 
         // Rewards
-        if let Some(_t) = TabItem::new(im_str!("Rewards")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Rewards")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me3_plot_category(me3_plot_table, rewards).await;
             }
         }
+
         // Captain's cabin
-        if let Some(_t) = TabItem::new(im_str!("Captain's cabin")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Captain's cabin")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me3_plot_category(me3_plot_table, captains_cabin).await;
             }
         }
@@ -466,12 +507,16 @@ impl<'ui> Gui<'ui> {
         let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
 
         for (title, plot_map) in &categories {
-            if let Some(_t) = TabItem::new(title).begin(ui) {
-                for (category_name, known_plot) in plot_map.iter() {
-                    if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                        self.table_next_row();
-                        if let Some(_t) = self.push_tree_node(category_name) {
-                            self.draw_me3_plot_category(me1_plot_table, known_plot).await;
+            if_chain! {
+                if let Some(_t) = TabItem::new(title).begin(ui);
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+                then {
+                    for (category_name, known_plot) in plot_map.iter() {
+                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
+                            self.table_next_row();
+                            if let Some(_t) = self.push_tree_node(category_name) {
+                                self.draw_me3_plot_category(me1_plot_table, known_plot).await;
+                            }
                         }
                     }
                 }

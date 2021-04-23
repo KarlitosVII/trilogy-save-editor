@@ -95,8 +95,8 @@ impl SaveData for LinearColor {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_color(ident, &mut self.0).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_color(ident, &mut self.0).await;
     }
 }
 

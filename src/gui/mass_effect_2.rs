@@ -1,3 +1,4 @@
+use if_chain::if_chain;
 use imgui::*;
 
 use crate::save_data::{
@@ -20,26 +21,33 @@ impl<'ui> Gui<'ui> {
         };
 
         // Plot
-        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
+            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
+            then {
                 // Mass Effect 2
                 self.draw_me2_known_plot(&mut save_game.plot, &known_plots).await;
                 // Mass Effect 1
                 {
                     let _colors = self.style_colors(Theme::MassEffect1).await;
-                    if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui) {
-                        if let Some(me1_known_plot) = &known_plots.me1 {
-                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot)
-                                .await;
+                    if_chain! {
+                        if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
+                        if let Some(me1_known_plot) = &known_plots.me1;
+                        then {
+                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot).await;
                         }
                     }
                 }
             }
         }
         // Raw
-        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-            self.set_next_item_open(true);
-            save_game.draw_raw_ui(self, "Mass Effect 2").await;
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.set_next_item_open(true);
+                save_game.draw_raw_ui(self, "Mass Effect 2").await;
+            }
         }
     }
 
@@ -64,8 +72,11 @@ impl<'ui> Gui<'ui> {
         } = me2_known_plot;
 
         // Player
-        if let Some(_t) = TabItem::new(im_str!("Player")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Player")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me2_plot_category(me2_plot_table, player).await;
             }
         }
@@ -79,12 +90,16 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if let Some(_t) = TabItem::new(title).begin(ui) {
-                for (category_name, known_plot) in plot_map.iter() {
-                    if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                        self.table_next_row();
-                        if let Some(_t) = self.push_tree_node(category_name) {
-                            self.draw_me2_plot_category(me2_plot_table, known_plot).await;
+            if_chain! {
+                if let Some(_t) = TabItem::new(title).begin(ui);
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+                then {
+                    for (category_name, known_plot) in plot_map.iter() {
+                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
+                            self.table_next_row();
+                            if let Some(_t) = self.push_tree_node(category_name) {
+                                self.draw_me2_plot_category(me2_plot_table, known_plot).await;
+                            }
                         }
                     }
                 }
@@ -92,14 +107,20 @@ impl<'ui> Gui<'ui> {
         }
 
         // Rewards
-        if let Some(_t) = TabItem::new(im_str!("Rewards")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Rewards")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me2_plot_category(me2_plot_table, rewards).await;
             }
         }
         // Captain's cabin
-        if let Some(_t) = TabItem::new(im_str!("Captain's cabin")).begin(ui) {
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Captain's cabin")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
+            then {
                 self.draw_me2_plot_category(me2_plot_table, captains_cabin).await;
             }
         }
