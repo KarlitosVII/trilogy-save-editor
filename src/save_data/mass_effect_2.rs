@@ -12,7 +12,7 @@ use super::{
     SaveCursor, SaveData,
 };
 
-mod player;
+pub mod player;
 use player::*;
 
 mod squad;
@@ -33,8 +33,8 @@ pub struct Me2SaveGame {
     seconds_played: f32,
     _disc: Dummy<4>,
     base_level_name: ImString,
-    difficulty: Difficulty,
-    end_game_state: EndGameState,
+    pub difficulty: Difficulty,
+    pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotator,
@@ -44,7 +44,7 @@ pub struct Me2SaveGame {
     _kismet_records: Vec<Dummy<20>>,
     _doors: Vec<Dummy<18>>,
     _pawns: Vec<Dummy<16>>,
-    player: Player,
+    pub player: Player,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     pub me1_plot: Me1PlotTable,
@@ -77,7 +77,7 @@ impl SaveData for Version {
 }
 
 #[derive(SaveData, Clone)]
-enum Difficulty {
+pub enum Difficulty {
     Casual,
     Normal,
     Veteran,

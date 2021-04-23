@@ -55,7 +55,8 @@ impl<'ui> Gui<'ui> {
 
     async fn draw_me3_general(&self, save_game: &mut Me3SaveGame) {
         let ui = self.ui;
-        let Me3SaveGame { difficulty, end_game_state, conversation_mode, player, .. } = save_game;
+        let Me3SaveGame { difficulty, end_game_state, conversation_mode, player, plot, .. } =
+            save_game;
         let Player {
             is_female,
             class_name,
@@ -68,6 +69,7 @@ impl<'ui> Gui<'ui> {
             powers,
             credits,
             medigel,
+            current_fuel,
             grenades,
             face_code,
             ..
@@ -79,20 +81,6 @@ impl<'ui> Gui<'ui> {
             None => return,
         };
         self.table_next_row();
-
-        // General
-        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
-            self.table_next_row();
-            self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("General") {
-                self.table_next_row();
-                difficulty.draw_raw_ui(self, "Difficulty").await;
-                self.table_next_row();
-                conversation_mode.draw_raw_ui(self, "Conversation Mode").await;
-                self.table_next_row();
-                end_game_state.draw_raw_ui(self, "End Game State").await;
-            }
-        }
 
         // Role Play
         if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
@@ -134,6 +122,33 @@ impl<'ui> Gui<'ui> {
             }
         }
 
+        // Morality
+        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Morality") {
+                if let Some(paragon) = plot.int_variables.get_mut(&10159) {
+                    self.table_next_row();
+                    paragon.draw_raw_ui(self, "Paragon").await;
+                }
+
+                if let Some(renegade) = plot.int_variables.get_mut(&10160) {
+                    self.table_next_row();
+                    renegade.draw_raw_ui(self, "Renegade").await;
+                }
+
+                if let Some(reputation) = plot.int_variables.get_mut(&10297) {
+                    self.table_next_row();
+                    reputation.draw_raw_ui(self, "Reputation").await;
+                }
+
+                if let Some(reputation_points) = plot.int_variables.get_mut(&10380) {
+                    self.table_next_row();
+                    reputation_points.draw_raw_ui(self, "Reputation Points").await;
+                }
+            }
+        }
+
         // Gameplay
         if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
             self.table_next_row();
@@ -159,13 +174,81 @@ impl<'ui> Gui<'ui> {
 
                 self.table_next_row();
                 grenades.draw_raw_ui(self, "Grenades").await;
+
+                self.table_next_row();
+                current_fuel.draw_raw_ui(self, "Current Fuel").await;
             }
         }
 
         // 2ème colonne
         self.table_next_column();
+
+        // General
+        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("General") {
+                self.table_next_row();
+                difficulty.draw_raw_ui(self, "Difficulty").await;
+                self.table_next_row();
+                conversation_mode.draw_raw_ui(self, "Conversation Mode").await;
+                self.table_next_row();
+                end_game_state.draw_raw_ui(self, "End Game State").await;
+            }
+        }
+
+        // Bonus Powers
         self.set_next_item_open(true);
         self.draw_me3_bonus_powers(powers).await;
+    }
+
+    async fn draw_me3_class(&self, class_name: &mut ImString) {
+        let ui = self.ui;
+        const CLASS_LIST: [(&ImStr, &ImStr); 12] = [
+            (im_str!("SFXGame.SFXPawn_PlayerAdept"), im_str!("Adept")),
+            (im_str!("SFXGame.SFXPawn_PlayerAdeptNonCombat"), im_str!("Adept (out of combat)")),
+            (im_str!("SFXGame.SFXPawn_PlayerEngineer"), im_str!("Engineer")),
+            (
+                im_str!("SFXGame.SFXPawn_PlayerEngineerNonCombat"),
+                im_str!("Engineer (out of combat)"),
+            ),
+            (im_str!("SFXGame.SFXPawn_PlayerInfiltrator"), im_str!("Infiltrator")),
+            (
+                im_str!("SFXGame.SFXPawn_PlayerInfiltratorNonCombat"),
+                im_str!("Infiltrator (out of combat)"),
+            ),
+            (im_str!("SFXGame.SFXPawn_PlayerSentinel"), im_str!("Sentinel")),
+            (
+                im_str!("SFXGame.SFXPawn_PlayerSentinelNonCombat"),
+                im_str!("Sentinel (out of combat)"),
+            ),
+            (im_str!("SFXGame.SFXPawn_PlayerSoldier"), im_str!("Soldier")),
+            (im_str!("SFXGame.SFXPawn_PlayerSoldierNonCombat"), im_str!("Soldier (out of combat)")),
+            (im_str!("SFXGame.SFXPawn_PlayerVanguard"), im_str!("Vanguard")),
+            (
+                im_str!("SFXGame.SFXPawn_PlayerVanguardNonCombat"),
+                im_str!("Vanguard (out of combat)"),
+            ),
+        ];
+
+        if let Some(mut class_id) = CLASS_LIST.iter().enumerate().find_map(|(i, &name)| {
+            if unicase::eq(name.0, class_name) {
+                Some(i)
+            } else {
+                None
+            }
+        }) {
+            let width = ui.push_item_width(200.0);
+            if ComboBox::new(im_str!("Class")).build_simple(
+                self.ui,
+                &mut class_id,
+                &CLASS_LIST,
+                &|&(_, name)| name.into(),
+            ) {
+                *class_name = CLASS_LIST[class_id].0.to_owned();
+            }
+            width.pop(ui);
+        }
     }
 
     async fn draw_me3_bonus_powers(&self, powers: &mut Vec<Power>) {
@@ -237,7 +320,7 @@ impl<'ui> Gui<'ui> {
 
         for &(power_class_name, power_name) in &POWER_LIST {
             let mut selected = powers
-                .iter_mut()
+                .iter()
                 .any(|power| unicase::eq(power.power_class_name.as_ref(), power_class_name));
 
             self.table_next_row();
@@ -253,55 +336,6 @@ impl<'ui> Gui<'ui> {
                     powers.remove(i);
                 }
             }
-        }
-    }
-
-    async fn draw_me3_class(&self, class_name: &mut ImString) {
-        let ui = self.ui;
-        const CLASS_LIST: [(&ImStr, &ImStr); 12] = [
-            (im_str!("SFXGame.SFXPawn_PlayerAdept"), im_str!("Adept")),
-            (im_str!("SFXGame.SFXPawn_PlayerAdeptNonCombat"), im_str!("Adept (out of combat)")),
-            (im_str!("SFXGame.SFXPawn_PlayerEngineer"), im_str!("Engineer")),
-            (
-                im_str!("SFXGame.SFXPawn_PlayerEngineerNonCombat"),
-                im_str!("Engineer (out of combat)"),
-            ),
-            (im_str!("SFXGame.SFXPawn_PlayerInfiltrator"), im_str!("Infiltrator")),
-            (
-                im_str!("SFXGame.SFXPawn_PlayerInfiltratorNonCombat"),
-                im_str!("Infiltrator (out of combat)"),
-            ),
-            (im_str!("SFXGame.SFXPawn_PlayerSentinel"), im_str!("Sentinel")),
-            (
-                im_str!("SFXGame.SFXPawn_PlayerSentinelNonCombat"),
-                im_str!("Sentinel (out of combat)"),
-            ),
-            (im_str!("SFXGame.SFXPawn_PlayerSoldier"), im_str!("Soldier")),
-            (im_str!("SFXGame.SFXPawn_PlayerSoldierNonCombat"), im_str!("Soldier (out of combat)")),
-            (im_str!("SFXGame.SFXPawn_PlayerVanguard"), im_str!("Vanguard")),
-            (
-                im_str!("SFXGame.SFXPawn_PlayerVanguardNonCombat"),
-                im_str!("Vanguard (out of combat)"),
-            ),
-        ];
-
-        if let Some(mut class_id) = CLASS_LIST.iter().enumerate().find_map(|(i, &name)| {
-            if unicase::eq(name.0, class_name) {
-                Some(i)
-            } else {
-                None
-            }
-        }) {
-            let width = ui.push_item_width(200.0);
-            if ComboBox::new(im_str!("Class")).build_simple(
-                self.ui,
-                &mut class_id,
-                &CLASS_LIST,
-                &|&(_, name)| name.into(),
-            ) {
-                *class_name = CLASS_LIST[class_id].0.to_owned();
-            }
-            width.pop(ui);
         }
     }
 
@@ -398,7 +432,7 @@ impl<'ui> Gui<'ui> {
 
         // Mass Effect 2
         let me2_known_plot = match &known_plots.me2 {
-            Some(me2_known_plot) => me2_known_plot,
+            Some(me2) => me2,
             None => return,
         };
 
