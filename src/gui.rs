@@ -463,10 +463,10 @@ impl<'ui> Gui<'ui> {
                 hover_color: [0.83, 0.43, 0.17, 1.0],
             },
             Theme::MassEffect2 => ColorTheme {
-                bg_color: [0.59, 0.29, 0.06, 1.0],
-                color: [0.69, 0.35, 0.11, 1.0],
-                active_color: [0.78, 0.37, 0.11, 1.0],
-                hover_color: [0.85, 0.40, 0.14, 1.0],
+                bg_color: [0.64, 0.32, 0.12, 1.0],
+                color: [0.70, 0.37, 0.16, 1.0],
+                active_color: [0.85, 0.49, 0.25, 1.0],
+                hover_color: [0.22, 0.52, 0.23, 1.0],
             },
             Theme::MassEffect3 => ColorTheme {
                 bg_color: [0.40, 0.0, 0.0, 1.0],
