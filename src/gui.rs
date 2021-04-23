@@ -471,8 +471,8 @@ impl<'ui> Gui<'ui> {
             Theme::MassEffect3 => ColorTheme {
                 bg_color: [0.40, 0.0, 0.0, 1.0],
                 color: [0.53, 0.0, 0.0, 1.0],
-                active_color: [0.68, 0.0, 0.0, 1.0],
-                hover_color: [0.86, 0.0, 0.0, 1.0],
+                active_color: [0.70, 0.0, 0.0, 1.0],
+                hover_color: [0.02, 0.28, 0.43, 1.0],
             },
         };
 
