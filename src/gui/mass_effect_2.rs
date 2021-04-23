@@ -299,8 +299,8 @@ impl<'ui> Gui<'ui> {
                 im_str!("SFXGameContentDLC_HEN_VT.SFXPower_ZaeedUnique_Player"),
                 im_str!("Inferno Grenade"),
             ),
-            (im_str!("[Kasumi placeholder]"), im_str!("[Kasumi placeholder]")),
-            (im_str!("[Liara placeholder]"), im_str!("[Liara placeholder]")),
+            (im_str!("SFXGameContentKasumi.SFXPower_KasumiUnique_Player"), im_str!("Flashbang Grenade")),
+            (im_str!("SFXGameContentLiara.SFXPower_StasisNew"), im_str!("Stasis")),
         ];
 
         for &(power_class_name, power_name) in &POWER_LIST {
