@@ -3,7 +3,11 @@ use imgui::*;
 
 use crate::save_data::{
     common::plot::PlotCategory,
-    mass_effect_2::{plot::PlotTable, Me2SaveGame},
+    mass_effect_2::{
+        player::{Player, Power},
+        plot::PlotTable,
+        Me2SaveGame,
+    },
 };
 
 use super::*;
@@ -20,6 +24,14 @@ impl<'ui> Gui<'ui> {
             None => return,
         };
 
+        // General
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.draw_me2_general(save_game).await;
+            }
+        }
         // Plot
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
@@ -47,6 +59,267 @@ impl<'ui> Gui<'ui> {
             then {
                 self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 2").await;
+            }
+        }
+    }
+
+    async fn draw_me2_general(&self, save_game: &mut Me2SaveGame) {
+        let ui = self.ui;
+        let Me2SaveGame { difficulty, end_game_state, player, plot, .. } = save_game;
+        let Player {
+            is_female,
+            class_name,
+            level,
+            current_xp,
+            first_name,
+            origin,
+            notoriety,
+            talent_points,
+            powers,
+            credits,
+            medigel,
+            eezo,
+            iridium,
+            palladium,
+            platinum,
+            probes,
+            current_fuel,
+            face_code,
+            ..
+        } = player;
+
+        // 1ère colonne
+        let _t = match self.begin_columns(2) {
+            Some(t) => t,
+            None => return,
+        };
+        self.table_next_row();
+
+        // Role Play
+        if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Role-Play") {
+                self.table_next_row();
+                ui.input_text(im_str!("Name"), first_name).resize_buffer(true).build();
+
+                // Gender
+                self.table_next_row();
+                let mut gender = *is_female as usize;
+                const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
+                {
+                    let width = ui.push_item_width(200.0);
+                    if ComboBox::new(im_str!("Gender")).build_simple_string(
+                        ui,
+                        &mut gender,
+                        &GENDER_LIST,
+                    ) {
+                        *is_female = gender != 0;
+                    }
+                    width.pop(ui);
+
+                    ui.same_line();
+                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries...").await;
+                }
+
+                self.table_next_row();
+                origin.draw_raw_ui(self, "Origin").await;
+
+                self.table_next_row();
+                notoriety.draw_raw_ui(self, "Notoriety").await;
+
+                self.table_next_row();
+                face_code.draw_raw_ui(self, "Identity Code").await;
+                ui.same_line();
+                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !").await;
+            }
+        }
+
+        // Morality
+        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Morality") {
+                if let Some(paragon) = plot.int_variables.get_mut(2) {
+                    self.table_next_row();
+                    paragon.draw_raw_ui(self, "Paragon").await;
+                }
+
+                if let Some(renegade) = plot.int_variables.get_mut(3) {
+                    self.table_next_row();
+                    renegade.draw_raw_ui(self, "Renegade").await;
+                }
+            }
+        }
+
+        // Gameplay
+        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Gameplay") {
+                self.table_next_row();
+                self.draw_me2_class(class_name).await;
+
+                self.table_next_row();
+                level.draw_raw_ui(self, "Level").await;
+
+                self.table_next_row();
+                current_xp.draw_raw_ui(self, "Current XP").await;
+
+                self.table_next_row();
+                talent_points.draw_raw_ui(self, "Talent Points").await;
+
+                self.table_next_row();
+                credits.draw_raw_ui(self, "Credits").await;
+
+                self.table_next_row();
+                medigel.draw_raw_ui(self, "Medi-gel").await;
+            }
+        }
+
+        // Ressources
+        if let Some(_t) = self.begin_table(im_str!("ressources-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Ressources") {
+                self.table_next_row();
+                eezo.draw_raw_ui(self, "Eezo").await;
+
+                self.table_next_row();
+                iridium.draw_raw_ui(self, "Iridium").await;
+
+                self.table_next_row();
+                palladium.draw_raw_ui(self, "Palladium").await;
+
+                self.table_next_row();
+                platinum.draw_raw_ui(self, "Platinum").await;
+
+                self.table_next_row();
+                probes.draw_raw_ui(self, "Probes").await;
+
+                self.table_next_row();
+                current_fuel.draw_raw_ui(self, "Current Fuel").await;
+            }
+        }
+
+        // 2ème colonne
+        self.table_next_column();
+
+        // General
+        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("General") {
+                self.table_next_row();
+                difficulty.draw_raw_ui(self, "Difficulty").await;
+                self.table_next_row();
+                end_game_state.draw_raw_ui(self, "End Game State").await;
+            }
+        }
+
+        // Bonus Powers
+        self.set_next_item_open(true);
+        self.draw_me2_bonus_powers(powers).await;
+    }
+
+    async fn draw_me2_class(&self, class_name: &mut ImString) {
+        let ui = self.ui;
+        const CLASS_LIST: [(&ImStr, &ImStr); 6] = [
+            (im_str!("SFXGame.SFXPawn_PlayerAdept"), im_str!("Adept")),
+            (im_str!("SFXGame.SFXPawn_PlayerEngineer"), im_str!("Engineer")),
+            (im_str!("SFXGame.SFXPawn_PlayerInfiltrator"), im_str!("Infiltrator")),
+            (im_str!("SFXGame.SFXPawn_PlayerSentinel"), im_str!("Sentinel")),
+            (im_str!("SFXGame.SFXPawn_PlayerSoldier"), im_str!("Soldier")),
+            (im_str!("SFXGame.SFXPawn_PlayerVanguard"), im_str!("Vanguard")),
+        ];
+
+        if let Some(mut class_id) = CLASS_LIST.iter().enumerate().find_map(|(i, &name)| {
+            if unicase::eq(name.0, class_name) {
+                Some(i)
+            } else {
+                None
+            }
+        }) {
+            let width = ui.push_item_width(200.0);
+            if ComboBox::new(im_str!("Class")).build_simple(
+                self.ui,
+                &mut class_id,
+                &CLASS_LIST,
+                &|&(_, name)| name.into(),
+            ) {
+                *class_name = CLASS_LIST[class_id].0.to_owned();
+            }
+            width.pop(ui);
+        }
+    }
+
+    async fn draw_me2_bonus_powers(&self, powers: &mut Vec<Power>) {
+        let ui = self.ui;
+
+        // Table
+        let _t = match self.begin_table(im_str!("gameplay-table"), 1) {
+            Some(t) => t,
+            None => return,
+        };
+
+        // Tree node
+        self.table_next_row();
+        let _t = match self.push_tree_node("Bonus Powers") {
+            Some(t) => t,
+            None => return,
+        };
+        ui.same_line();
+        self.draw_help_marker("You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend.").await;
+
+        const POWER_LIST: [(&ImStr, &ImStr); 14] = [
+            (im_str!("SFXGameContent_Powers.SFXPower_Crush_Player"), im_str!("Slam")),
+            (im_str!("SFXGameContent_Powers.SFXPower_Barrier_Player"), im_str!("Barrier")),
+            (im_str!("SFXGameContent_Powers.SFXPower_WarpAmmo_Player"), im_str!("Warp Ammo")),
+            (
+                im_str!("SFXGameContent_Powers.SFXPower_Fortification_Player"),
+                im_str!("Fortification"),
+            ),
+            (
+                im_str!("SFXGameContent_Powers.SFXPower_ArmorPiercingAmmo_Player"),
+                im_str!("Armor Piercing Ammo"),
+            ),
+            (im_str!("SFXGameContent_Powers.SFXPower_NeuralShock_Player"), im_str!("Neural Shock")),
+            (im_str!("SFXGameContent_Powers.SFXPower_ShieldJack_Player"), im_str!("Energy Drain")),
+            (im_str!("SFXGameContent_Powers.SFXPower_Reave_Player"), im_str!("Reave")),
+            (im_str!("SFXGameContent_Powers.SFXPower_Dominate_Player"), im_str!("Dominate")),
+            (
+                im_str!("SFXGameContent_Powers.SFXPower_AntiOrganicAmmo_Player"),
+                im_str!("Shredder Ammo"),
+            ),
+            (
+                im_str!("SFXGameContent_Powers.SFXPower_GethShieldBoost_Player"),
+                im_str!("Geth Shield Boost"),
+            ),
+            (
+                im_str!("SFXGameContentDLC_HEN_VT.SFXPower_ZaeedUnique_Player"),
+                im_str!("Inferno Grenade"),
+            ),
+            (im_str!("[Kasumi placeholder]"), im_str!("[Kasumi placeholder]")),
+            (im_str!("[Liara placeholder]"), im_str!("[Liara placeholder]")),
+        ];
+
+        for &(power_class_name, power_name) in &POWER_LIST {
+            let mut selected = powers
+                .iter()
+                .any(|power| unicase::eq(power.power_class_name.as_ref(), power_class_name));
+
+            self.table_next_row();
+            ui.align_text_to_frame_padding();
+            if Selectable::new(power_name).build_with_ref(ui, &mut selected) {
+                if selected {
+                    let mut power = Power::default();
+                    power.power_class_name = power_class_name.to_owned();
+                    powers.push(power);
+                } else if let Some((i, _)) = powers.iter().enumerate().find(|(_, power)| {
+                    unicase::eq(power.power_class_name.as_ref(), power_class_name)
+                }) {
+                    powers.remove(i);
+                }
             }
         }
     }

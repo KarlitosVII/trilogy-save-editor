@@ -40,13 +40,13 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
+                // Player
                 self.set_next_item_open(true);
-                if let Some(_t) = self.push_tree_node("Mass Effect 1") {
-                    // Player
-                    self.draw_raw_player(&save_game.player).await;
-                    // State
-                    save_game.state.draw_raw_ui(self, "State").await;
-                }
+                self.draw_raw_player(&save_game.player).await;
+                // State
+                self.set_next_item_open(true);
+                save_game.state.draw_raw_ui(self, "State").await;
+
             }
         }
     }

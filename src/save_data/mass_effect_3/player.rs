@@ -44,7 +44,7 @@ pub struct Player {
     palladium: i32,
     platinum: i32,
     probes: i32,
-    current_fuel: f32,
+    pub current_fuel: f32,
     pub grenades: i32,
     pub face_code: ImString,
     class_friendly_name: i32,
