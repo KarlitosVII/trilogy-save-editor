@@ -11,13 +11,22 @@ impl<'ui> Gui<'ui> {
     }
 
     pub fn push_tree_node(&self, ident: &str) -> Option<TreeNodeToken> {
-        let label = if let Some(label) = ident.split("##").next() { label } else { ident };
+        let mut rsplit = ident.rsplit("##");
+        let ident = rsplit.next().unwrap();
+        let label = rsplit.next();
+
+        const FLAGS: TreeNodeFlags = TreeNodeFlags::SPAN_AVAIL_WIDTH;
 
         self.ui.align_text_to_frame_padding();
-        TreeNode::new(&ImString::new(ident))
-            .label(&ImString::new(label))
-            .flags(TreeNodeFlags::SPAN_AVAIL_WIDTH)
-            .push(self.ui)
+        match label {
+            Some(label) => TreeNode::new(&ImString::new(ident))
+                .label(&ImString::new(label))
+                .flags(FLAGS)
+                .push(self.ui),
+            None => TreeNode::new(&ImString::new(ident))
+                .flags(FLAGS)
+                .push(self.ui),
+        }
     }
 
     pub fn begin_table(&self, ident: &ImStr, column: i32) -> Option<TableToken> {

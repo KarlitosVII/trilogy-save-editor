@@ -309,56 +309,6 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    pub async fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
-    where
-        T: SaveData + Default,
-    {
-        let ui = self.ui;
-
-        // Tree node
-        let _t = match self.push_tree_node(ident) {
-            Some(t) => t,
-            None => return,
-        };
-
-        // Table
-        let _t = match self.begin_table(&ImString::new(ident), 1) {
-            Some(t) => t,
-            None => return,
-        };
-
-        if !list.is_empty() {
-            // Item
-            let mut remove = None;
-            for (i, item) in list.iter_mut().enumerate() {
-                self.table_next_row();
-                if ui.small_button(&im_str!("remove##remove-{}", i)) {
-                    remove = Some(i);
-                }
-                ui.same_line();
-                item.draw_raw_ui(self, &i.to_string()).await;
-            }
-
-            // Remove
-            if let Some(i) = remove {
-                list.remove(i);
-            }
-        } else {
-            self.table_next_row();
-            ui.text("Empty");
-        }
-
-        // Add
-        if ui.button(&im_str!("add##add-{}", ident)) {
-            // Ça ouvre automatiquement le tree node de l'élément ajouté
-            // TreeNode::new(&im_str!("tree-node-{}", list.len()))
-            //     .opened(true, Condition::Always)
-            //     .build(ui, || {});
-
-            list.push(T::default());
-        }
-    }
-
     pub async fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
         let ui = self.ui;
         // Tree node
@@ -384,6 +334,57 @@ impl<'ui> Gui<'ui> {
         } else {
             self.table_next_row();
             ui.text("Empty");
+        }
+    }
+
+    pub async fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
+    where
+        T: SaveData + Default,
+    {
+        let ui = self.ui;
+
+        // Tree node
+        let _t = match self.push_tree_node(ident) {
+            Some(t) => t,
+            None => return,
+        };
+
+        // Table
+        let _t = match self.begin_table(&ImString::new(ident), 1) {
+            Some(t) => t,
+            None => return,
+        };
+
+        if !list.is_empty() {
+            // Item
+            let mut remove = None;
+            for (i, item) in list.iter_mut().enumerate() {
+                self.table_next_row();
+                ui.align_text_to_frame_padding();
+                if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                    remove = Some(i);
+                }
+                ui.same_line();
+                item.draw_raw_ui(self, &i.to_string()).await;
+            }
+
+            // Remove
+            if let Some(i) = remove {
+                list.remove(i);
+            }
+        } else {
+            self.table_next_row();
+            ui.text("Empty");
+        }
+
+        // Add
+        if ui.button(im_str!("add")) {
+            // Ça ouvre automatiquement le tree node de l'élément ajouté
+            TreeNode::new(&im_str!("{}", list.len()))
+                .opened(true, Condition::Always)
+                .build(ui, || {});
+
+            list.push(T::default());
         }
     }
 
@@ -439,14 +440,15 @@ impl<'ui> Gui<'ui> {
         }
 
         // Add
-        if ui.button(&im_str!("add##add-{}", ident)) {
+        if ui.button(im_str!("add")) {
             // Ça ouvre automatiquement le tree node de l'élément ajouté
-            // TreeNode::new(im_str!("tree-node-{}", list.len()))
-            //     .opened(true, Condition::Always)
-            //     .build(ui, || {});
+            let new_k = K::default();
+            TreeNode::new(&im_str!("{}##{}", new_k, list.len()))
+                .opened(true, Condition::Always)
+                .build(ui, || {});
 
             // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
-            list.entry(K::default()).or_default();
+            list.entry(new_k).or_default();
         }
     }
 

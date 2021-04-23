@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
 use imgui::ImString;
 use indexmap::IndexMap;
-use std::{any::type_name, convert::TryInto, fmt::Display, hash::Hash, mem::size_of, usize};
+use std::{convert::TryInto, fmt::Display, hash::Hash, mem::size_of, usize};
 
 use crate::gui::Gui;
 
@@ -112,8 +112,8 @@ impl SaveData for i32 {
     impl_deserialize!(i32);
     impl_serialize!(i32);
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_i32(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_i32(ident, self).await;
     }
 }
 
@@ -122,8 +122,8 @@ impl SaveData for f32 {
     impl_deserialize!(f32);
     impl_serialize!(f32);
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_f32(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_f32(ident, self).await;
     }
 }
 
@@ -137,8 +137,8 @@ impl SaveData for bool {
         <u32>::serialize(&(*self as u32), output)
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_bool(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_bool(ident, self).await;
     }
 }
 
@@ -210,8 +210,8 @@ impl SaveData for ImString {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_edit_string(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_string(ident, self).await;
     }
 }
 
@@ -241,9 +241,9 @@ where
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         if let Some(inner) = self {
-            inner.draw_raw_ui(ui, ident).await;
+            inner.draw_raw_ui(gui, ident).await;
         }
     }
 }
@@ -273,13 +273,8 @@ where
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        // Ignore Dummy
-        if type_name::<T>().contains("[u8; ") {
-            return;
-        }
-
-        ui.draw_vec(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_vec(ident, self).await;
     }
 }
 
@@ -310,7 +305,7 @@ where
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_indexmap(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_indexmap(ident, self).await;
     }
 }

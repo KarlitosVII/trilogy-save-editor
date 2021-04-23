@@ -47,7 +47,7 @@ pub struct Me3SaveGame {
     pub player: Player,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
-    me1_plot: Me1PlotTable,
+    _me1_plot: Me1PlotTable,
     pub player_variables: IndexMap<ImString, i32>,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,

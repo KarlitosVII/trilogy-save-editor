@@ -27,8 +27,8 @@ impl SaveData for BoolVec {
         SaveData::serialize(&bitfields, output)
     }
 
-    async fn draw_raw_ui(&mut self, ui: &Gui, ident: &str) {
-        ui.draw_boolvec(ident, self).await;
+    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_boolvec(ident, self).await;
     }
 }
 
