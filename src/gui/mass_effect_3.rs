@@ -419,8 +419,7 @@ impl<'ui> Gui<'ui> {
                     if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                         self.table_next_row();
                         if let Some(_t) = self.push_tree_node(category_name) {
-                            self.draw_me3_plot_variable(plot_table, player_variables, known_plot)
-                                ;
+                            self.draw_me3_plot_variable(plot_table, player_variables, known_plot);
                         }
                     }
                 }
@@ -594,7 +593,7 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc);
+                plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
             }
         }
         // Variables
@@ -608,7 +607,7 @@ impl<'ui> Gui<'ui> {
             };
 
             self.table_next_row();
-            value.draw_raw_ui(self, variable_desc);
+            value.draw_raw_ui(self, &format!("{}##var-{}", variable_desc, variable_desc));
         }
     }
 }
