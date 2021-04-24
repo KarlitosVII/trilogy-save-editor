@@ -555,6 +555,7 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {
+        let ui = self.ui;
         let PlotCategory { booleans, ints } = known_plot;
 
         if booleans.is_empty() && ints.is_empty() {
@@ -562,19 +563,27 @@ impl<'ui> Gui<'ui> {
         }
 
         // Booleans
-        for (plot_id, plot_desc) in booleans {
-            let plot = plot_table.bool_variables.get_mut(*plot_id);
-            if let Some(mut plot) = plot {
-                self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc);
+        let mut clipper = ListClipper::new(booleans.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
+                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                if let Some(mut plot) = plot {
+                    self.table_next_row();
+                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
+                }
             }
         }
         // Integers
-        for (plot_id, plot_desc) in ints {
-            let plot = plot_table.int_variables.entry(*plot_id as i32).or_default();
+        let mut clipper = ListClipper::new(ints.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
+                let plot = plot_table.int_variables.entry(*plot_id as i32).or_default();
 
-            self.table_next_row();
-            plot.draw_raw_ui(self, plot_desc);
+                self.table_next_row();
+                plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
+            }
         }
     }
 
@@ -582,6 +591,7 @@ impl<'ui> Gui<'ui> {
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImString, i32>,
         known_plot: &PlotVariable,
     ) {
+        let ui = self.ui;
         let PlotVariable { booleans, variables } = known_plot;
 
         if booleans.is_empty() && player_variables.is_empty() {
@@ -589,25 +599,34 @@ impl<'ui> Gui<'ui> {
         }
 
         // Booleans
-        for (plot_id, plot_desc) in booleans {
-            let plot = plot_table.bool_variables.get_mut(*plot_id);
-            if let Some(mut plot) = plot {
-                self.table_next_row();
-                plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
+        let mut clipper = ListClipper::new(booleans.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
+                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                if let Some(mut plot) = plot {
+                    self.table_next_row();
+                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
+                }
             }
         }
         // Variables
-        for (variable_id, variable_desc) in variables {
-            let variable =
-                player_variables.iter_mut().find(|(key, _)| unicase::eq(key.to_str(), variable_id));
+        let mut clipper = ListClipper::new(variables.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (variable_id, variable_desc) = variables.get_index(i as usize).unwrap();
+                let variable = player_variables
+                    .iter_mut()
+                    .find(|(key, _)| unicase::eq(key.to_str(), variable_id));
 
-            let value = match variable {
-                Some((_, value)) => value,
-                None => player_variables.entry(ImString::new(variable_id)).or_default(),
-            };
+                let value = match variable {
+                    Some((_, value)) => value,
+                    None => player_variables.entry(ImString::new(variable_id)).or_default(),
+                };
 
-            self.table_next_row();
-            value.draw_raw_ui(self, &format!("{}##var-{}", variable_desc, variable_desc));
+                self.table_next_row();
+                value.draw_raw_ui(self, &format!("{}##var-{}", variable_desc, variable_desc));
+            }
         }
     }
 }

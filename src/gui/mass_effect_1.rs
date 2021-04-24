@@ -81,6 +81,7 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me1_plot_category(&self, plot_table: &mut Me1PlotTable, known_plot: &PlotCategory) {
+        let ui = self.ui;
         let PlotCategory { booleans, ints } = known_plot;
 
         if booleans.is_empty() && ints.is_empty() {
@@ -88,19 +89,28 @@ impl<'ui> Gui<'ui> {
         }
 
         // Booleans
-        for (plot_id, plot_desc) in booleans {
-            let plot = plot_table.bool_variables.get_mut(*plot_id);
-            if let Some(mut plot) = plot {
-                self.table_next_row();
-                plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
+        let mut clipper = ListClipper::new(booleans.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
+                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                if let Some(mut plot) = plot {
+                    self.table_next_row();
+                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
+                }
             }
         }
+
         // Integers
-        for (plot_id, plot_desc) in ints {
-            let plot = plot_table.int_variables.get_mut(*plot_id);
-            if let Some(plot) = plot {
-                self.table_next_row();
-                plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
+        let mut clipper = ListClipper::new(ints.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
+                let plot = plot_table.int_variables.get_mut(*plot_id);
+                if let Some(plot) = plot {
+                    self.table_next_row();
+                    plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
+                }
             }
         }
     }
