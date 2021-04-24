@@ -13,9 +13,7 @@ use crate::save_data::{
 use super::*;
 
 impl<'ui> Gui<'ui> {
-    pub async fn draw_mass_effect_2(
-        &self, save_game: &mut Me2SaveGame, known_plots: &KnownPlotsState,
-    ) {
+    pub fn draw_mass_effect_2(&self, save_game: &mut Me2SaveGame, known_plots: &KnownPlotsState) {
         let ui = self.ui;
 
         // Tab bar
@@ -29,7 +27,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
-                self.draw_me2_general(save_game).await;
+                self.draw_me2_general(save_game);
             }
         }
         // Plot
@@ -38,15 +36,15 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
                 // Mass Effect 2
-                self.draw_me2_known_plot(&mut save_game.plot, &known_plots).await;
+                self.draw_me2_known_plot(&mut save_game.plot, &known_plots);
                 // Mass Effect 1
                 {
-                    let _colors = self.style_colors(Theme::MassEffect1).await;
+                    let _colors = self.style_colors(Theme::MassEffect1);
                     if_chain! {
                         if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
                         if let Some(me1_known_plot) = &known_plots.me1;
                         then {
-                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot).await;
+                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot);
                         }
                     }
                 }
@@ -58,12 +56,12 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
                 self.set_next_item_open(true);
-                save_game.draw_raw_ui(self, "Mass Effect 2").await;
+                save_game.draw_raw_ui(self, "Mass Effect 2");
             }
         }
     }
 
-    async fn draw_me2_general(&self, save_game: &mut Me2SaveGame) {
+    fn draw_me2_general(&self, save_game: &mut Me2SaveGame) {
         let ui = self.ui;
         let Me2SaveGame { difficulty, end_game_state, player, plot, .. } = save_game;
         let Player {
@@ -119,19 +117,19 @@ impl<'ui> Gui<'ui> {
                     width.pop(ui);
 
                     ui.same_line();
-                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries...").await;
+                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries...");
                 }
 
                 self.table_next_row();
-                origin.draw_raw_ui(self, "Origin").await;
+                origin.draw_raw_ui(self, "Origin");
 
                 self.table_next_row();
-                notoriety.draw_raw_ui(self, "Notoriety").await;
+                notoriety.draw_raw_ui(self, "Notoriety");
 
                 self.table_next_row();
-                face_code.draw_raw_ui(self, "Identity Code").await;
+                face_code.draw_raw_ui(self, "Identity Code");
                 ui.same_line();
-                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !").await;
+                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
             }
         }
 
@@ -142,12 +140,12 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = self.push_tree_node("Morality") {
                 if let Some(paragon) = plot.int_variables.get_mut(2) {
                     self.table_next_row();
-                    paragon.draw_raw_ui(self, "Paragon").await;
+                    paragon.draw_raw_ui(self, "Paragon");
                 }
 
                 if let Some(renegade) = plot.int_variables.get_mut(3) {
                     self.table_next_row();
-                    renegade.draw_raw_ui(self, "Renegade").await;
+                    renegade.draw_raw_ui(self, "Renegade");
                 }
             }
         }
@@ -158,22 +156,22 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node("Gameplay") {
                 self.table_next_row();
-                self.draw_me2_class(class_name).await;
+                self.draw_me2_class(class_name);
 
                 self.table_next_row();
-                level.draw_raw_ui(self, "Level").await;
+                level.draw_raw_ui(self, "Level");
 
                 self.table_next_row();
-                current_xp.draw_raw_ui(self, "Current XP").await;
+                current_xp.draw_raw_ui(self, "Current XP");
 
                 self.table_next_row();
-                talent_points.draw_raw_ui(self, "Talent Points").await;
+                talent_points.draw_raw_ui(self, "Talent Points");
 
                 self.table_next_row();
-                credits.draw_raw_ui(self, "Credits").await;
+                credits.draw_raw_ui(self, "Credits");
 
                 self.table_next_row();
-                medigel.draw_raw_ui(self, "Medi-gel").await;
+                medigel.draw_raw_ui(self, "Medi-gel");
             }
         }
 
@@ -183,22 +181,22 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node("Ressources") {
                 self.table_next_row();
-                eezo.draw_raw_ui(self, "Eezo").await;
+                eezo.draw_raw_ui(self, "Eezo");
 
                 self.table_next_row();
-                iridium.draw_raw_ui(self, "Iridium").await;
+                iridium.draw_raw_ui(self, "Iridium");
 
                 self.table_next_row();
-                palladium.draw_raw_ui(self, "Palladium").await;
+                palladium.draw_raw_ui(self, "Palladium");
 
                 self.table_next_row();
-                platinum.draw_raw_ui(self, "Platinum").await;
+                platinum.draw_raw_ui(self, "Platinum");
 
                 self.table_next_row();
-                probes.draw_raw_ui(self, "Probes").await;
+                probes.draw_raw_ui(self, "Probes");
 
                 self.table_next_row();
-                current_fuel.draw_raw_ui(self, "Current Fuel").await;
+                current_fuel.draw_raw_ui(self, "Current Fuel");
             }
         }
 
@@ -211,18 +209,18 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node("General") {
                 self.table_next_row();
-                difficulty.draw_raw_ui(self, "Difficulty").await;
+                difficulty.draw_raw_ui(self, "Difficulty");
                 self.table_next_row();
-                end_game_state.draw_raw_ui(self, "End Game State").await;
+                end_game_state.draw_raw_ui(self, "End Game State");
             }
         }
 
         // Bonus Powers
         self.set_next_item_open(true);
-        self.draw_me2_bonus_powers(powers).await;
+        self.draw_me2_bonus_powers(powers);
     }
 
-    async fn draw_me2_class(&self, class_name: &mut ImString) {
+    fn draw_me2_class(&self, class_name: &mut ImString) {
         let ui = self.ui;
         const CLASS_LIST: [(&ImStr, &ImStr); 6] = [
             (im_str!("SFXGame.SFXPawn_PlayerAdept"), im_str!("Adept")),
@@ -253,7 +251,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_me2_bonus_powers(&self, powers: &mut Vec<Power>) {
+    fn draw_me2_bonus_powers(&self, powers: &mut Vec<Power>) {
         let ui = self.ui;
 
         // Table
@@ -269,7 +267,7 @@ impl<'ui> Gui<'ui> {
             None => return,
         };
         ui.same_line();
-        self.draw_help_marker("You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend.").await;
+        self.draw_help_marker("You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend.");
 
         const POWER_LIST: [(&ImStr, &ImStr); 14] = [
             (im_str!("SFXGameContent_Powers.SFXPower_Crush_Player"), im_str!("Slam")),
@@ -299,7 +297,10 @@ impl<'ui> Gui<'ui> {
                 im_str!("SFXGameContentDLC_HEN_VT.SFXPower_ZaeedUnique_Player"),
                 im_str!("Inferno Grenade"),
             ),
-            (im_str!("SFXGameContentKasumi.SFXPower_KasumiUnique_Player"), im_str!("Flashbang Grenade")),
+            (
+                im_str!("SFXGameContentKasumi.SFXPower_KasumiUnique_Player"),
+                im_str!("Flashbang Grenade"),
+            ),
             (im_str!("SFXGameContentLiara.SFXPower_StasisNew"), im_str!("Stasis")),
         ];
 
@@ -324,9 +325,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_me2_known_plot(
-        &self, me2_plot_table: &mut PlotTable, known_plots: &KnownPlotsState,
-    ) {
+    fn draw_me2_known_plot(&self, me2_plot_table: &mut PlotTable, known_plots: &KnownPlotsState) {
         let ui = self.ui;
         let me2_known_plot = match &known_plots.me2 {
             Some(me2) => me2,
@@ -350,7 +349,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
             then {
-                self.draw_me2_plot_category(me2_plot_table, player).await;
+                self.draw_me2_plot_category(me2_plot_table, player);
             }
         }
 
@@ -371,7 +370,7 @@ impl<'ui> Gui<'ui> {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me2_plot_category(me2_plot_table, known_plot).await;
+                                self.draw_me2_plot_category(me2_plot_table, known_plot);
                             }
                         }
                     }
@@ -385,7 +384,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
             then {
-                self.draw_me2_plot_category(me2_plot_table, rewards).await;
+                self.draw_me2_plot_category(me2_plot_table, rewards);
             }
         }
         // Captain's cabin
@@ -394,12 +393,12 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
             then {
-                self.draw_me2_plot_category(me2_plot_table, captains_cabin).await;
+                self.draw_me2_plot_category(me2_plot_table, captains_cabin);
             }
         }
     }
 
-    async fn draw_me2_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {
+    fn draw_me2_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {
         let PlotCategory { booleans, ints } = known_plot;
 
         if booleans.is_empty() && ints.is_empty() {
@@ -411,7 +410,7 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc).await;
+                plot.draw_raw_ui(self, plot_desc);
             }
         }
         // Integers
@@ -419,7 +418,7 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.int_variables.get_mut(*plot_id);
             if let Some(plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc).await;
+                plot.draw_raw_ui(self, plot_desc);
             }
         }
     }

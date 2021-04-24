@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use imgui::ImString;
 
 use crate::{
@@ -18,7 +17,6 @@ pub struct State {
     _osef2: Vec<u8>,
 }
 
-#[async_trait(?Send)]
 impl SaveData for State {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let _begin = SaveData::deserialize(cursor)?;
@@ -41,8 +39,8 @@ impl SaveData for State {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        self.plot.draw_raw_ui(gui, ident).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        self.plot.draw_raw_ui(gui, ident);
     }
 }
 

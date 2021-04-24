@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use imgui::ImString;
 use indexmap::IndexMap;
 
@@ -62,7 +61,6 @@ pub struct Me3SaveGame {
 #[derive(Clone)]
 pub struct Version(i32);
 
-#[async_trait(?Send)]
 impl SaveData for Version {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let version = <i32>::deserialize(cursor)?;
@@ -79,7 +77,7 @@ impl SaveData for Version {
         <i32>::serialize(&self.0, output)
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(SaveData, Clone)]

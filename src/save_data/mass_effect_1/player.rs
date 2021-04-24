@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use imgui::{ImStr, ImString};
 use std::{
     cell::RefCell,
@@ -41,7 +40,6 @@ impl Player {
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for Player {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let _begin = SaveData::deserialize(cursor)?;
@@ -152,7 +150,7 @@ impl SaveData for Player {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(SaveData, Clone)]

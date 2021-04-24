@@ -23,9 +23,7 @@ impl<'ui> Gui<'ui> {
                 .label(&ImString::new(label))
                 .flags(FLAGS)
                 .push(self.ui),
-            None => TreeNode::new(&ImString::new(ident))
-                .flags(FLAGS)
-                .push(self.ui),
+            None => TreeNode::new(&ImString::new(ident)).flags(FLAGS).push(self.ui),
         }
     }
 

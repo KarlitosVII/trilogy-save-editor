@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use std::io::{Cursor, Read, Write};
 use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
@@ -26,7 +25,6 @@ pub struct Me1SaveGame {
     _world_save_package: Option<WorldSavePackage>,
 }
 
-#[async_trait(?Send)]
 impl SaveData for Me1SaveGame {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let _begin: Dummy<8> = SaveData::deserialize(cursor)?;
@@ -105,7 +103,7 @@ impl SaveData for Me1SaveGame {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(Clone)]
@@ -113,7 +111,6 @@ pub(super) struct WorldSavePackage {
     data: Vec<u8>,
 }
 
-#[async_trait(?Send)]
 impl SaveData for WorldSavePackage {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(Self { data: cursor.read_to_end()?.to_owned() })
@@ -124,7 +121,7 @@ impl SaveData for WorldSavePackage {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[cfg(test)]

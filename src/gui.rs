@@ -1,9 +1,9 @@
 use anyhow::*;
 use flume::{Receiver, Sender};
+use if_chain::if_chain;
 use imgui::{Ui, *};
 use indexmap::IndexMap;
-use std::{fmt::Display, future::Future, hash::Hash};
-use tokio::runtime::Handle;
+use std::{fmt::Display, hash::Hash};
 use wfd::DialogParams;
 
 use crate::{
@@ -14,11 +14,11 @@ use crate::{
     },
 };
 
+mod backend;
 mod imgui_utils;
 mod mass_effect_1;
 mod mass_effect_2;
 mod mass_effect_3;
-mod support;
 
 static NOTIFICATION_TIME: f64 = 1.5;
 
@@ -61,43 +61,41 @@ pub enum UiEvent {
 }
 
 // UI
-pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, handle: Handle) {
+pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
     let mut state = State::default();
 
     let _ = event_addr.send(MainEvent::LoadKnownPlots);
 
     // UI
-    let system = support::init("Trilogy Save Editor", 1000.0, 700.0);
+    let system = backend::init("Trilogy Save Editor", 1000.0, 700.0);
     system.main_loop(move |_, ui| {
-        handle.block_on(async {
-            rx.try_iter().for_each(|ui_event| match ui_event {
-                UiEvent::Error(err) => {
-                    state.errors.errors.push(err);
-                    state.errors.is_opened = true;
-                }
-                UiEvent::Notification(string) => {
-                    state.notification = Some(NotificationState {
-                        string: ImString::new(string),
-                        close_time: ui.time() + NOTIFICATION_TIME,
-                    })
-                }
-                UiEvent::OpenedSave(opened_save_game) => {
-                    state.save_game = Some(opened_save_game);
-                }
-                UiEvent::LoadedMe1KnownPlot(me1_known_plot) => {
-                    state.known_plots.me1 = Some(me1_known_plot)
-                }
-                UiEvent::LoadedMe2KnownPlot(me2_known_plot) => {
-                    state.known_plots.me2 = Some(me2_known_plot)
-                }
-                UiEvent::LoadedMe3KnownPlot(me3_known_plot) => {
-                    state.known_plots.me3 = Some(me3_known_plot)
-                }
-            });
-
-            let ui = Gui::new(ui, &event_addr);
-            ui.draw(&mut state).await;
+        rx.try_iter().for_each(|ui_event| match ui_event {
+            UiEvent::Error(err) => {
+                state.errors.errors.push(err);
+                state.errors.is_opened = true;
+            }
+            UiEvent::Notification(string) => {
+                state.notification = Some(NotificationState {
+                    string: ImString::new(string),
+                    close_time: ui.time() + NOTIFICATION_TIME,
+                })
+            }
+            UiEvent::OpenedSave(opened_save_game) => {
+                state.save_game = Some(opened_save_game);
+            }
+            UiEvent::LoadedMe1KnownPlot(me1_known_plot) => {
+                state.known_plots.me1 = Some(me1_known_plot)
+            }
+            UiEvent::LoadedMe2KnownPlot(me2_known_plot) => {
+                state.known_plots.me2 = Some(me2_known_plot)
+            }
+            UiEvent::LoadedMe3KnownPlot(me3_known_plot) => {
+                state.known_plots.me3 = Some(me3_known_plot)
+            }
         });
+
+        let ui = Gui::new(ui, &event_addr);
+        ui.draw(&mut state);
     });
 }
 
@@ -111,7 +109,7 @@ impl<'ui> Gui<'ui> {
         Self { ui, event_addr: Sender::clone(event_addr) }
     }
 
-    async fn draw(&self, state: &mut State) {
+    fn draw(&self, state: &mut State) {
         let ui = self.ui;
 
         // Main window
@@ -126,14 +124,12 @@ impl<'ui> Gui<'ui> {
             .collapsible(false);
 
         // Pop on drop
-        let _colors = self
-            .style_colors(match state.save_game {
-                None => Theme::MassEffect3,
-                Some(SaveGame::MassEffect1(_)) => Theme::MassEffect1,
-                Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
-                Some(SaveGame::MassEffect3(_)) => Theme::MassEffect3,
-            })
-            .await;
+        let _colors = self.style_colors(match state.save_game {
+            None => Theme::MassEffect3,
+            Some(SaveGame::MassEffect1(_)) => Theme::MassEffect1,
+            Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
+            Some(SaveGame::MassEffect3(_)) => Theme::MassEffect3,
+        });
         let _style = ui.push_style_var(StyleVar::WindowRounding(0.0));
 
         // Window
@@ -141,36 +137,36 @@ impl<'ui> Gui<'ui> {
             // Main menu bar
             if let Some(_t) = ui.begin_menu_bar() {
                 if ui.button(im_str!("Open")) {
-                    self.open_save().await;
+                    self.open_save();
                 }
                 if ui.button(im_str!("Save")) {
-                    self.save_save(&state.save_game).await;
+                    self.save_save(&state.save_game);
                 }
             }
 
             // Error popup
-            self.draw_errors(&mut state.errors).await;
+            self.draw_errors(&mut state.errors);
 
             // Notification
-            self.draw_nofification_overlay(&mut state.notification).await;
+            self.draw_nofification_overlay(&mut state.notification);
 
             // Game
             match &mut state.save_game {
                 None => ui.text(im_str!("Rien ici")),
                 Some(SaveGame::MassEffect1(save_game)) => {
-                    self.draw_mass_effect_1(save_game, &state.known_plots).await
+                    self.draw_mass_effect_1(save_game, &state.known_plots)
                 }
                 Some(SaveGame::MassEffect2(save_game)) => {
-                    self.draw_mass_effect_2(save_game, &state.known_plots).await
+                    self.draw_mass_effect_2(save_game, &state.known_plots)
                 }
                 Some(SaveGame::MassEffect3(save_game)) => {
-                    self.draw_mass_effect_3(save_game, &state.known_plots).await
+                    self.draw_mass_effect_3(save_game, &state.known_plots)
                 }
             };
         }
     }
 
-    async fn draw_errors(&self, errors: &mut ErrorState) {
+    fn draw_errors(&self, errors: &mut ErrorState) {
         let ui = self.ui;
 
         let ErrorState { errors, is_opened } = errors;
@@ -202,7 +198,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_nofification_overlay(&self, notification: &mut Option<NotificationState>) {
+    fn draw_nofification_overlay(&self, notification: &mut Option<NotificationState>) {
         if let Some(NotificationState { string, close_time }) = notification {
             let ui = self.ui;
             let time = ui.time();
@@ -231,7 +227,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_help_marker(&self, desc: &str) {
+    fn draw_help_marker(&self, desc: &str) {
         let ui = self.ui;
 
         ui.text_disabled(im_str!("(?)"));
@@ -242,7 +238,7 @@ impl<'ui> Gui<'ui> {
     }
 
     // Edit boxes
-    pub async fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
+    pub fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
         let ui = self.ui;
 
         // let width = ui.push_item_width(500.0);
@@ -250,7 +246,7 @@ impl<'ui> Gui<'ui> {
         // width.pop(ui);
     }
 
-    pub async fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
+    pub fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
         let ui = self.ui;
 
         let width = ui.push_item_width(120.0);
@@ -258,7 +254,7 @@ impl<'ui> Gui<'ui> {
         width.pop(ui);
     }
 
-    pub async fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
+    pub fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
         let ui = self.ui;
 
         let width = ui.push_item_width(120.0);
@@ -266,7 +262,7 @@ impl<'ui> Gui<'ui> {
         width.pop(ui);
     }
 
-    pub async fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
+    pub fn draw_edit_f32(&self, ident: &str, value: &mut f32) {
         let ui = self.ui;
 
         let width = ui.push_item_width(120.0);
@@ -274,9 +270,7 @@ impl<'ui> Gui<'ui> {
         width.pop(ui);
     }
 
-    pub async fn draw_edit_enum(
-        &self, ident: &str, current_item: &mut usize, items: &[&ImStr],
-    ) -> bool {
+    pub fn draw_edit_enum(&self, ident: &str, current_item: &mut usize, items: &[&ImStr]) -> bool {
         let ui = self.ui;
 
         let width = ui.push_item_width(200.0);
@@ -286,7 +280,7 @@ impl<'ui> Gui<'ui> {
         edited
     }
 
-    pub async fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
+    pub fn draw_edit_color(&self, ident: &str, color: &mut [f32; 4]) {
         let ui = self.ui;
 
         let width = ui.push_item_width(200.0);
@@ -295,21 +289,18 @@ impl<'ui> Gui<'ui> {
     }
 
     // View widgets
-    pub async fn draw_struct<F, const LEN: usize>(&self, ident: &str, mut fields: [F; LEN])
-    where
-        F: Future<Output = ()> + Unpin,
-    {
+    pub fn draw_struct(&self, ident: &str, fields: &mut [&mut dyn FnMut()]) {
         if let Some(_t) = self.push_tree_node(ident) {
             if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
-                for field in &mut fields {
+                for field in fields {
                     self.table_next_row();
-                    field.await;
+                    field();
                 }
             }
         }
     }
 
-    pub async fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
+    pub fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
         let ui = self.ui;
         // Tree node
         let _t = match self.push_tree_node(ident) {
@@ -328,7 +319,7 @@ impl<'ui> Gui<'ui> {
             while clipper.step() {
                 for i in clipper.display_start()..clipper.display_end() {
                     self.table_next_row();
-                    list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string()).await;
+                    list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string());
                 }
             }
         } else {
@@ -337,7 +328,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    pub async fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
+    pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
     where
         T: SaveData + Default,
     {
@@ -365,7 +356,7 @@ impl<'ui> Gui<'ui> {
                     remove = Some(i);
                 }
                 ui.same_line();
-                item.draw_raw_ui(self, &i.to_string()).await;
+                item.draw_raw_ui(self, &i.to_string());
             }
 
             // Remove
@@ -388,7 +379,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    pub async fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
+    pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
     where
         K: SaveData + Eq + Hash + Default + Display,
         V: SaveData + Default,
@@ -418,14 +409,15 @@ impl<'ui> Gui<'ui> {
                 }
                 ui.same_line();
 
-                if let Some((key, value)) = list.get_index_mut(i) {
-                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", key.to_string(), i)) {
-                        if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1) {
-                            self.table_next_row();
-                            key.draw_raw_ui(self, "id##key").await;
-                            self.table_next_row();
-                            value.draw_raw_ui(self, "value##value").await;
-                        }
+                if_chain! {
+                    if let Some((key, value)) = list.get_index_mut(i);
+                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", key.to_string(), i));
+                    if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1);
+                    then {
+                        self.table_next_row();
+                        key.draw_raw_ui(self, "id##key");
+                        self.table_next_row();
+                        value.draw_raw_ui(self, "value##value");
                     }
                 }
             }
@@ -453,7 +445,7 @@ impl<'ui> Gui<'ui> {
     }
 
     // Style
-    async fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 20] {
+    fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 20] {
         let ui = self.ui;
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
@@ -501,19 +493,18 @@ impl<'ui> Gui<'ui> {
     }
 
     // Actions
-    async fn open_save(&self) {
+    fn open_save(&self) {
         let result = wfd::open_dialog(DialogParams {
             file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
             ..Default::default()
         });
 
         if let Ok(result) = result {
-            let _ =
-                self.event_addr.send_async(MainEvent::OpenSave(result.selected_file_path)).await;
+            let _ = self.event_addr.send(MainEvent::OpenSave(result.selected_file_path));
         }
     }
 
-    async fn save_save(&self, save_game: &Option<SaveGame>) {
+    fn save_save(&self, save_game: &Option<SaveGame>) {
         if let Some(save_game) = save_game {
             let default_ext = match save_game {
                 SaveGame::MassEffect1(_) => "MassEffectSave",
@@ -529,8 +520,7 @@ impl<'ui> Gui<'ui> {
             if let Ok(result) = result {
                 let _ = self
                     .event_addr
-                    .send_async(MainEvent::SaveSave(result.selected_file_path, save_game.clone()))
-                    .await;
+                    .send(MainEvent::SaveSave(result.selected_file_path, save_game.clone()));
             }
         }
     }

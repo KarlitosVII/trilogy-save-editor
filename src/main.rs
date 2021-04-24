@@ -6,7 +6,7 @@
 extern crate save_data_derive;
 
 use std::panic::{self, PanicInfo};
-use tokio::{runtime::Handle, task};
+use tokio::task;
 
 mod event_handler;
 mod gui;
@@ -27,8 +27,7 @@ async fn main() {
 
     let event_loop = event_handler::event_loop(event_rx, ui_addr);
 
-    let handle = Handle::current();
-    let gui = task::spawn_blocking(move || gui::run(event_addr, ui_rx, handle));
+    let gui = task::spawn_blocking(move || gui::run(event_addr, ui_rx));
 
     let (_, gui) = tokio::join!(event_loop, gui);
     gui.expect("GUI panicked");
