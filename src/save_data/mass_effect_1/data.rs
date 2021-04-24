@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use imgui::ImString;
 use std::ops::{Deref, DerefMut};
 
@@ -61,7 +60,6 @@ impl DerefMut for Data {
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for Data {
     fn deserialize(_: &mut SaveCursor) -> Result<Self> {
         unreachable!()
@@ -75,7 +73,7 @@ impl SaveData for Data {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 macro_rules! serialize {
@@ -352,7 +350,6 @@ impl Property {
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for Property {
     fn deserialize(_: &mut SaveCursor) -> Result<Self> {
         unreachable!()
@@ -438,7 +435,7 @@ impl SaveData for Property {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(Clone)]
@@ -505,7 +502,6 @@ impl ArrayType {
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for ArrayType {
     fn deserialize(_: &mut SaveCursor) -> Result<Self> {
         unreachable!()
@@ -526,7 +522,7 @@ impl SaveData for ArrayType {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[derive(Clone)]
@@ -583,7 +579,6 @@ impl StructType {
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for StructType {
     fn deserialize(_: &mut SaveCursor) -> Result<Self> {
         unreachable!()
@@ -603,5 +598,5 @@ impl SaveData for StructType {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }

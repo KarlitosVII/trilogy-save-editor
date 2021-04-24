@@ -1,4 +1,3 @@
-use async_recursion::async_recursion;
 use if_chain::if_chain;
 use imgui::*;
 use std::cmp::Ordering;
@@ -16,9 +15,7 @@ use crate::save_data::{
 use super::*;
 
 impl<'ui> Gui<'ui> {
-    pub async fn draw_mass_effect_1(
-        &self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState,
-    ) {
+    pub fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState) {
         let ui = self.ui;
 
         // Tab bar
@@ -32,7 +29,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(me1_known_plot) = &known_plots.me1;
             then {
-                self.draw_me1_known_plot(&mut save_game.state.plot, me1_known_plot).await;
+                self.draw_me1_known_plot(&mut save_game.state.plot, me1_known_plot);
             }
         }
         // Raw
@@ -42,16 +39,16 @@ impl<'ui> Gui<'ui> {
             then {
                 // Player
                 self.set_next_item_open(true);
-                self.draw_raw_player(&save_game.player).await;
+                self.draw_raw_player(&save_game.player);
                 // State
                 self.set_next_item_open(true);
-                save_game.state.draw_raw_ui(self, "State").await;
+                save_game.state.draw_raw_ui(self, "State");
 
             }
         }
     }
 
-    pub async fn draw_me1_known_plot(
+    pub fn draw_me1_known_plot(
         &self, me1_plot_table: &mut Me1PlotTable, me1_known_plot: &Me1KnownPlot,
     ) {
         let ui = self.ui;
@@ -74,7 +71,7 @@ impl<'ui> Gui<'ui> {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me1_plot_category(me1_plot_table, known_plot).await;
+                                self.draw_me1_plot_category(me1_plot_table, known_plot);
                             }
                         }
                     }
@@ -83,9 +80,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_me1_plot_category(
-        &self, plot_table: &mut Me1PlotTable, known_plot: &PlotCategory,
-    ) {
+    fn draw_me1_plot_category(&self, plot_table: &mut Me1PlotTable, known_plot: &PlotCategory) {
         let PlotCategory { booleans, ints } = known_plot;
 
         if booleans.is_empty() && ints.is_empty() {
@@ -97,7 +92,7 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc).await;
+                plot.draw_raw_ui(self, plot_desc);
             }
         }
         // Integers
@@ -105,25 +100,25 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.int_variables.get_mut(*plot_id);
             if let Some(plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc).await;
+                plot.draw_raw_ui(self, plot_desc);
             }
         }
     }
 
-    async fn draw_raw_player(&self, player: &Player) {
+    fn draw_raw_player(&self, player: &Player) {
         for (i, _) in player.objects.iter().enumerate() {
             let object_id = i as i32 + 1;
             let object = player.get_object(object_id);
             let object_name = player.get_name(object.object_name_id);
 
             match object_name.to_str() {
-                "CurrentGame" => self.draw_object(player, i, None, object_id).await,
+                "CurrentGame" => self.draw_object(player, i, None, object_id),
                 _ => continue,
             }
         }
     }
 
-    async fn draw_object(
+    fn draw_object(
         &self, player: &Player, ident: usize, property_name: Option<&ImStr>, object_id: i32,
     ) {
         let object = player.get_object(object_id);
@@ -140,14 +135,13 @@ impl<'ui> Gui<'ui> {
             then {
                 let mut data = player.get_data(object_id).borrow_mut();
                 for (i, property) in data.iter_mut().enumerate() {
-                    self.draw_property(player, i, property).await;
+                    self.draw_property(player, i, property);
                 }
             }
         }
     }
 
-    #[async_recursion(?Send)]
-    async fn draw_property(&self, player: &Player, ident: usize, property: &mut Property) {
+    fn draw_property(&self, player: &Player, ident: usize, property: &mut Property) {
         match property {
             Property::Byte { .. } | Property::None { .. } => return,
             _ => {
@@ -156,74 +150,55 @@ impl<'ui> Gui<'ui> {
         }
 
         match property {
-            Property::Array { name_id, array, .. } => {
-                self.draw_array_property(
-                    player,
-                    &format!("{}##{}", player.get_name(*name_id), ident),
-                    array,
-                )
-                .await
-            }
-            Property::Bool { name_id, value, .. } => {
-                self.draw_edit_bool(
-                    im_str!("{}##bool-{}", player.get_name(*name_id), ident).to_str(),
-                    value,
-                )
-                .await
-            }
-            Property::Float { name_id, value, .. } => {
-                self.draw_edit_f32(
-                    im_str!("{}##f32-{}", player.get_name(*name_id), ident).to_str(),
-                    value,
-                )
-                .await
-            }
-            Property::Int { name_id, value, .. } => {
-                self.draw_edit_i32(
-                    im_str!("{}##i32-{}", player.get_name(*name_id), ident).to_str(),
-                    value,
-                )
-                .await
-            }
+            Property::Array { name_id, array, .. } => self.draw_array_property(
+                player,
+                &format!("{}##{}", player.get_name(*name_id), ident),
+                array,
+            ),
+            Property::Bool { name_id, value, .. } => self.draw_edit_bool(
+                im_str!("{}##bool-{}", player.get_name(*name_id), ident).to_str(),
+                value,
+            ),
+            Property::Float { name_id, value, .. } => self.draw_edit_f32(
+                im_str!("{}##f32-{}", player.get_name(*name_id), ident).to_str(),
+                value,
+            ),
+            Property::Int { name_id, value, .. } => self.draw_edit_i32(
+                im_str!("{}##i32-{}", player.get_name(*name_id), ident).to_str(),
+                value,
+            ),
             Property::Name { name_id, value_name_id, .. } => {
-                self.draw_text(player.get_name(*value_name_id), Some(player.get_name(*name_id)))
-                    .await;
+                self.draw_text(player.get_name(*value_name_id), Some(player.get_name(*name_id)));
             }
             Property::Object { name_id, object_id, .. } => {
                 match (*object_id).cmp(&0) {
                     Ordering::Greater => {
                         // Object
                         let property_name = player.get_name(*name_id);
-                        self.draw_object(player, ident, Some(property_name), *object_id).await;
+                        self.draw_object(player, ident, Some(property_name), *object_id);
                     }
                     Ordering::Less => {
                         // Class
                         let class = player.get_class(*object_id);
                         let class_name = player.get_name(class.class_name_id);
-                        self.draw_text(class_name, Some(player.get_name(*name_id))).await;
+                        self.draw_text(class_name, Some(player.get_name(*name_id)));
                     }
                     Ordering::Equal => {
                         // Null => Nom de classe par défaut
-                        self.draw_text(im_str!("Class"), Some(player.get_name(*name_id))).await
+                        self.draw_text(im_str!("Class"), Some(player.get_name(*name_id)))
                     }
-                };
+                }
             }
-            Property::Str { name_id, string, .. } => {
-                self.draw_edit_string(
-                    im_str!("{}##string-{}", player.get_name(*name_id), ident).to_str(),
-                    string,
-                )
-                .await
-            }
-            Property::StringRef { name_id, value, .. } => {
-                self.draw_edit_i32(
-                    im_str!("{}##string-ref-{}", player.get_name(*name_id), ident).to_str(),
-                    value,
-                )
-                .await;
-            }
-            Property::Struct { name_id, struct_name_id, properties, .. } => {
-                self.draw_struct_property(
+            Property::Str { name_id, string, .. } => self.draw_edit_string(
+                im_str!("{}##string-{}", player.get_name(*name_id), ident).to_str(),
+                string,
+            ),
+            Property::StringRef { name_id, value, .. } => self.draw_edit_i32(
+                im_str!("{}##string-ref-{}", player.get_name(*name_id), ident).to_str(),
+                value,
+            ),
+            Property::Struct { name_id, struct_name_id, properties, .. } => self
+                .draw_struct_property(
                     player,
                     ident,
                     &im_str!(
@@ -232,14 +207,12 @@ impl<'ui> Gui<'ui> {
                         player.get_name(*name_id),
                     ),
                     properties,
-                )
-                .await
-            }
+                ),
             Property::Byte { .. } | Property::None { .. } => unreachable!(),
         }
     }
 
-    async fn draw_array_property(&self, player: &Player, ident: &str, array: &mut [ArrayType]) {
+    fn draw_array_property(&self, player: &Player, ident: &str, array: &mut [ArrayType]) {
         let ui = self.ui;
 
         // Tree node
@@ -263,23 +236,21 @@ impl<'ui> Gui<'ui> {
         for (i, property) in array.iter_mut().enumerate() {
             self.table_next_row();
             match property {
-                ArrayType::Int(int) => {
-                    int.draw_raw_ui(self, im_str!("{}##int-{}", i, i).to_str()).await
-                }
+                ArrayType::Int(int) => int.draw_raw_ui(self, im_str!("{}##int-{}", i, i).to_str()),
                 ArrayType::Object(object_id) => {
                     if *object_id != 0 {
                         // Object
-                        self.draw_object(player, i, None, *object_id).await;
+                        self.draw_object(player, i, None, *object_id);
                     } else {
                         // Null
-                        self.draw_text(im_str!("Null"), None).await;
+                        self.draw_text(im_str!("Null"), None);
                     }
                 }
                 ArrayType::Vector(vector) => {
-                    vector.draw_raw_ui(self, im_str!("{}##vector-{}", i, i).to_str()).await
+                    vector.draw_raw_ui(self, im_str!("{}##vector-{}", i, i).to_str())
                 }
                 ArrayType::String(string) => {
-                    string.draw_raw_ui(self, im_str!("##string-{}", i).to_str()).await
+                    string.draw_raw_ui(self, im_str!("##string-{}", i).to_str())
                 }
                 ArrayType::Properties(properties) => {
                     if_chain! {
@@ -287,7 +258,7 @@ impl<'ui> Gui<'ui> {
                         if let Some(_t) = self.begin_table(im_str!("array-properties-table"), 1);
                         then {
                             for (j, property) in properties.iter_mut().enumerate() {
-                                self.draw_property(player, j, property).await;
+                                self.draw_property(player, j, property);
                             }
                         }
                     }
@@ -296,18 +267,18 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_struct_property(
+    fn draw_struct_property(
         &self, player: &Player, ident: usize, label: &ImStr, struct_property: &mut StructType,
     ) {
         match struct_property {
             StructType::LinearColor(color) => {
-                color.draw_raw_ui(self, &format!("{}##linear-color-{}", label, ident)).await
+                color.draw_raw_ui(self, &format!("{}##linear-color-{}", label, ident))
             }
             StructType::Vector(vector) => {
-                vector.draw_raw_ui(self, &format!("{}##vector-{}", label, ident)).await
+                vector.draw_raw_ui(self, &format!("{}##vector-{}", label, ident))
             }
             StructType::Rotator(rotator) => {
-                rotator.draw_raw_ui(self, &format!("{}##rotator-{}", label, ident)).await
+                rotator.draw_raw_ui(self, &format!("{}##rotator-{}", label, ident))
             }
             StructType::Properties(properties) => {
                 if_chain! {
@@ -315,7 +286,7 @@ impl<'ui> Gui<'ui> {
                     if let Some(_t) = self.begin_table(im_str!("struct-properties-table"), 1);
                     then {
                         for (i, property) in properties.iter_mut().enumerate() {
-                            self.draw_property(player, i, property).await;
+                            self.draw_property(player, i, property);
                         }
                     }
                 }
@@ -323,7 +294,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    async fn draw_text(&self, text: &ImStr, label: Option<&ImStr>) {
+    fn draw_text(&self, text: &ImStr, label: Option<&ImStr>) {
         let ui = self.ui;
         ui.text(text);
 

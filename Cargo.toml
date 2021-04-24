@@ -29,8 +29,6 @@ tokio = { version = "1.0", features = [
     "fs",
     "io-util",
 ], default-features = false }
-async-trait = "0.1"
-async-recursion = "0.3"
 # Sync
 # parking_lot = "0.11"
 flume = { version = "0.10", features = ["async"], default-features = false }

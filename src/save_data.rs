@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
 use imgui::ImString;
 use indexmap::IndexMap;
@@ -44,17 +43,15 @@ impl SaveCursor {
 }
 
 // Save Data
-#[async_trait(?Send)]
 pub trait SaveData: Sized {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self>;
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()>;
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str);
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str);
 }
 
 // Implémentation des dummy
 pub type Dummy<const LEN: usize> = [u8; LEN];
 
-#[async_trait(?Send)]
 impl<const LEN: usize> SaveData for Dummy<LEN> {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let bytes = cursor.read(LEN)?.try_into()?;
@@ -66,7 +63,7 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 // Implémentation des types std
@@ -92,12 +89,11 @@ macro_rules! impl_serialize {
 
 macro_rules! impl_save_data_no_ui {
     ($type:ty) => {
-        #[async_trait(?Send)]
         impl SaveData for $type {
             impl_deserialize!($type);
             impl_serialize!($type);
 
-            async fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+            fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
         }
     };
 }
@@ -107,27 +103,24 @@ impl_save_data_no_ui!(u16);
 impl_save_data_no_ui!(u32);
 impl_save_data_no_ui!(u64);
 
-#[async_trait(?Send)]
 impl SaveData for i32 {
     impl_deserialize!(i32);
     impl_serialize!(i32);
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_i32(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_i32(ident, self);
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for f32 {
     impl_deserialize!(f32);
     impl_serialize!(f32);
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_f32(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_f32(ident, self);
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for bool {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(<u32>::deserialize(cursor)? != 0)
@@ -137,12 +130,11 @@ impl SaveData for bool {
         <u32>::serialize(&(*self as u32), output)
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_bool(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_bool(ident, self);
     }
 }
 
-#[async_trait(?Send)]
 impl SaveData for ImString {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let len = <i32>::deserialize(cursor)?;
@@ -210,12 +202,11 @@ impl SaveData for ImString {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_string(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_string(ident, self);
     }
 }
 
-#[async_trait(?Send)]
 impl<T> SaveData for Option<T>
 where
     T: SaveData,
@@ -241,14 +232,13 @@ where
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         if let Some(inner) = self {
-            inner.draw_raw_ui(gui, ident).await;
+            inner.draw_raw_ui(gui, ident);
         }
     }
 }
 
-#[async_trait(?Send)]
 impl<T> SaveData for Vec<T>
 where
     T: SaveData + Default,
@@ -273,12 +263,11 @@ where
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_vec(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_vec(ident, self);
     }
 }
 
-#[async_trait(?Send)]
 impl<K, V> SaveData for IndexMap<K, V>
 where
     K: SaveData + Eq + Hash + Default + Display,
@@ -305,7 +294,7 @@ where
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_indexmap(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_indexmap(ident, self);
     }
 }

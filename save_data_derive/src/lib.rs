@@ -40,6 +40,17 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         }
     });
 
+    let let_fields = fields.iter().filter_map(|f| {
+        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
+            None
+        } else {
+            let field_name = &f.ident;
+            Some(quote! {
+                let #field_name = &mut self.#field_name;
+            })
+        }
+    });
+
     let draw_fields = fields.iter().filter_map(|f| {
         if f.ident.as_ref().unwrap().to_string().starts_with('_') {
             None
@@ -47,14 +58,13 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
             let field_name = &f.ident;
             let field_string = field_name.as_ref().unwrap().to_string();
             Some(quote! {
-                self.#field_name.draw_raw_ui(gui, #field_string)
+                (&mut || { #field_name.draw_raw_ui(gui, #field_string); }) as &mut dyn FnMut()
             })
         }
     });
 
     let gen = quote! {
         #[automatically_derived]
-        #[async_trait::async_trait(?Send)]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 Ok(Self {
@@ -67,9 +77,11 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
                 Ok(())
             }
 
-            async fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
-                let fields = [#(#draw_fields),*];
-                gui.draw_struct(ident, fields).await;
+            fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
+                #(#let_fields)*
+
+                let mut fields = [#(#draw_fields),*];
+                gui.draw_struct(ident, &mut fields);
             }
         }
     };
@@ -123,7 +135,6 @@ fn impl_save_data_enum(
 
     let gen = quote! {
         #[automatically_derived]
-        #[async_trait::async_trait(?Send)]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
                 let discriminant = <#repr_type>::deserialize(cursor)? as usize;
@@ -137,7 +148,7 @@ fn impl_save_data_enum(
                 <#repr_type>::serialize(&(self.clone() as #repr_type), output)
             }
 
-            async fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
+            fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
                 #(#let_variants)*
 
                 let items = [#(#array_variants),*];
@@ -146,7 +157,7 @@ fn impl_save_data_enum(
                     #(#match_variants),*
                 };
 
-                if gui.draw_edit_enum(ident, &mut edit_item, &items).await {
+                if gui.draw_edit_enum(ident, &mut edit_item, &items) {
                     *self = match edit_item {
                         #(#edit_variants),*,
                         _ => unreachable!(),

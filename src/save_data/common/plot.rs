@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use bitvec::prelude::*;
 use indexmap::IndexMap;
 use serde::Deserialize;
@@ -12,7 +11,6 @@ use crate::{
 pub type BoolVec = BitVec<Lsb0, u32>;
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
-#[async_trait(?Send)]
 impl SaveData for BoolVec {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let bitfields: Vec<u32> = SaveData::deserialize(cursor)?;
@@ -27,8 +25,8 @@ impl SaveData for BoolVec {
         SaveData::serialize(&bitfields, output)
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_boolvec(ident, self).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_boolvec(ident, self);
     }
 }
 

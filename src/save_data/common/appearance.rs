@@ -1,5 +1,4 @@
 use anyhow::*;
-use async_trait::async_trait;
 use imgui::ImString;
 
 use crate::{
@@ -77,7 +76,6 @@ struct VectorParameter {
 #[derive(Default, Clone)]
 pub struct LinearColor([f32; 4]);
 
-#[async_trait(?Send)]
 impl SaveData for LinearColor {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(Self([
@@ -95,8 +93,8 @@ impl SaveData for LinearColor {
         Ok(())
     }
 
-    async fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_color(ident, &mut self.0).await;
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_edit_color(ident, &mut self.0);
     }
 }
 
