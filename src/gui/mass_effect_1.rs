@@ -92,7 +92,7 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.bool_variables.get_mut(*plot_id);
             if let Some(mut plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc);
+                plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
             }
         }
         // Integers
@@ -100,7 +100,7 @@ impl<'ui> Gui<'ui> {
             let plot = plot_table.int_variables.get_mut(*plot_id);
             if let Some(plot) = plot {
                 self.table_next_row();
-                plot.draw_raw_ui(self, plot_desc);
+                plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
             }
         }
     }
