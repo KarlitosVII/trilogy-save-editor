@@ -109,7 +109,7 @@ impl<'ui> Gui<'ui> {
         Self { ui, event_addr: Sender::clone(event_addr) }
     }
 
-    fn draw(&self, state: &mut State) {
+    fn draw(&self, state: &mut State) -> Option<()> {
         let ui = self.ui;
 
         // Main window
@@ -154,16 +154,17 @@ impl<'ui> Gui<'ui> {
             match &mut state.save_game {
                 None => ui.text(im_str!("Rien ici")),
                 Some(SaveGame::MassEffect1(save_game)) => {
-                    self.draw_mass_effect_1(save_game, &state.known_plots)
+                    self.draw_mass_effect_1(save_game, &state.known_plots)?
                 }
                 Some(SaveGame::MassEffect2(save_game)) => {
-                    self.draw_mass_effect_2(save_game, &state.known_plots)
+                    self.draw_mass_effect_2(save_game, &state.known_plots)?
                 }
                 Some(SaveGame::MassEffect3(save_game)) => {
-                    self.draw_mass_effect_3(save_game, &state.known_plots)
+                    self.draw_mass_effect_3(save_game, &state.known_plots)?
                 }
             };
         }
+        Some(())
     }
 
     fn draw_errors(&self, errors: &mut ErrorState) {

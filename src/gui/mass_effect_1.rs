@@ -1,11 +1,11 @@
 use if_chain::if_chain;
 use imgui::*;
-use std::cmp::Ordering;
+use std::{cell::RefMut, cmp::Ordering};
 
 use crate::save_data::{
     common::plot::{Me1PlotTable, PlotCategory},
     mass_effect_1::{
-        data::{ArrayType, Property, StructType},
+        data::{ArrayType, Data, Property, StructType},
         player::Player,
         Me1SaveGame,
     },
@@ -15,15 +15,22 @@ use crate::save_data::{
 use super::*;
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState) {
+    pub fn draw_mass_effect_1(
+        &self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("mass_effect_1")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("mass_effect_1")).begin(ui)?;
 
+        // General
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.draw_me1_general(save_game);
+            }
+        }
         // Plot
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
@@ -46,19 +53,341 @@ impl<'ui> Gui<'ui> {
 
             }
         }
+
+        Some(())
+    }
+
+    fn draw_me1_general(&self, save_game: &mut Me1SaveGame) -> Option<()> {
+        let ui = self.ui;
+        let player = &mut save_game.player;
+        let plot = &mut save_game.state.plot;
+
+        // Current Game
+        let mut current_game = player.objects.iter().enumerate().find_map(|(i, object)| {
+            match player.get_name(object.object_name_id).to_str() {
+                "CurrentGame" => Some(player.get_data(i as i32 + 1).borrow_mut()),
+                _ => None,
+            }
+        })?;
+
+        // m_Player
+        let mut m_player =
+            Self::me1_find_object_property(player, &current_game.properties, "m_Player")?;
+
+        // m_Squad
+        let mut m_squad = Self::me1_find_object_property(player, &m_player.properties, "m_Squad")?;
+
+        // m_GameOptions
+        let m_game_options =
+            Self::me1_find_struct_property(player, &mut current_game.properties, "m_GameOptions")?;
+
+        // m_Inventory
+        let mut m_inventory =
+            Self::me1_find_object_property(player, &m_squad.properties, "m_Inventory")?;
+
+        // 1ère colonne
+        let _t = self.begin_columns(2)?;
+        self.table_next_row();
+
+        // Role Play
+        if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Role-Play") {
+                // Name
+                if let Some(name) =
+                    Self::me1_find_str_property(player, &mut m_player.properties, "m_FirstName")
+                {
+                    self.table_next_row();
+                    name.draw_raw_ui(self, "Name");
+                }
+
+                // Gender
+                if let Some(gender) =
+                    Self::me1_find_name_property(player, &m_player.properties, "m_Gender")
+                {
+                    self.table_next_row();
+                    ui.text(gender.to_str().trim_start_matches("BIO_ATTRIBUTE_PAWN_GENDER_"));
+                    ui.same_line_with_pos(145.0);
+                    ui.text("Gender");
+                }
+
+                // Origin
+                if let Some(origin) =
+                    Self::me1_find_name_property(player, &m_player.properties, "m_BackgroundOrigin")
+                {
+                    self.table_next_row();
+                    ui.text(
+                        origin
+                            .to_str()
+                            .trim_start_matches("BIO_PLAYER_CHARACTER_BACKGROUND_ORIGIN_"),
+                    );
+                    ui.same_line_with_pos(145.0);
+                    ui.text("Origin");
+                }
+
+                // Notoriety
+                if let Some(notoriety) = Self::me1_find_name_property(
+                    player,
+                    &m_player.properties,
+                    "m_BackgroundNotoriety",
+                ) {
+                    self.table_next_row();
+                    ui.text(
+                        notoriety
+                            .to_str()
+                            .trim_start_matches("BIO_PLAYER_CHARACTER_BACKGROUND_NOTORIETY_"),
+                    );
+                    ui.same_line_with_pos(145.0);
+                    ui.text("Notoriety");
+                }
+            }
+        }
+
+        // Morality
+        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Morality") {
+                if let Some(paragon) = plot.int_variables.get_mut(47) {
+                    self.table_next_row();
+                    paragon.draw_raw_ui(self, "Paragon");
+                }
+
+                if let Some(renegade) = plot.int_variables.get_mut(46) {
+                    self.table_next_row();
+                    renegade.draw_raw_ui(self, "Renegade");
+                }
+            }
+        }
+
+        // Gameplay
+        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Gameplay") {
+                // Class
+                if let Some(class) =
+                    Self::me1_find_name_property(player, &m_player.properties, "m_ClassBase")
+                {
+                    self.table_next_row();
+                    ui.text(class.to_str().trim_start_matches("BIO_PARTY_MEMBER_CLASS_BASE_"));
+                    ui.same_line_with_pos(145.0);
+                    ui.text("Class");
+                }
+
+                // Level
+                if let Some(level) =
+                    Self::me1_find_int_property(player, &mut m_player.properties, "m_XPLevel")
+                {
+                    self.table_next_row();
+                    level.draw_raw_ui(self, "Level");
+                }
+
+                // Current XP
+                if let Some(current_xp) = Self::me1_find_int_property(
+                    player,
+                    &mut m_squad.properties,
+                    "m_nSquadExperience",
+                ) {
+                    self.table_next_row();
+                    current_xp.draw_raw_ui(self, "Current XP");
+                }
+            }
+        }
+
+        // 2ème colonne
+        self.table_next_column();
+
+        // General
+        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("General") {
+                // Difficulty
+                if let Some(difficulty) =
+                    Self::me1_find_int_property(player, m_game_options, "m_nCombatDifficulty")
+                {
+                    self.table_next_row();
+                    const DIFFICULTY_LIST: [&ImStr; 5] = [
+                        im_str!("Casual"),
+                        im_str!("Normal"),
+                        im_str!("Veteran"),
+                        im_str!("Hardcore"),
+                        im_str!("Insanity"),
+                    ];
+
+                    let width = ui.push_item_width(200.0);
+                    let mut index = *difficulty as usize;
+                    if ComboBox::new(im_str!("Difficulty")).build_simple_string(
+                        ui,
+                        &mut index,
+                        &DIFFICULTY_LIST,
+                    ) {
+                        *difficulty = index as i32;
+                    }
+                    width.pop(ui);
+                }
+
+                // New Game +
+                if let Some(new_game_plus) = Self::me1_find_bool_property(
+                    player,
+                    &mut current_game.properties,
+                    "m_bSecondPlaythrough",
+                ) {
+                    self.table_next_row();
+                    new_game_plus.draw_raw_ui(self, "New Game +");
+                }
+            }
+        }
+
+        // Ressources
+        if let Some(_t) = self.begin_table(im_str!("ressources-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Ressources") {
+                // Credits
+                if let Some(credits) = Self::me1_find_int_property(
+                    player,
+                    &mut m_inventory.properties,
+                    "m_nResourceCredits",
+                ) {
+                    self.table_next_row();
+                    credits.draw_raw_ui(self, "Credits");
+                }
+
+                // Medigel
+                if let Some(medigel) = Self::me1_find_float_property(
+                    player,
+                    &mut m_inventory.properties,
+                    "m_fResourceMedigel",
+                ) {
+                    self.table_next_row();
+                    medigel.draw_raw_ui(self, "Medigel");
+                }
+
+                // Grenades
+                if let Some(grenades) = Self::me1_find_int_property(
+                    player,
+                    &mut m_inventory.properties,
+                    "m_nResourceGrenades",
+                ) {
+                    self.table_next_row();
+                    grenades.draw_raw_ui(self, "Grenades");
+                }
+
+                // Salvage
+                if let Some(salvage) = Self::me1_find_float_property(
+                    player,
+                    &mut m_inventory.properties,
+                    "m_fResourceSalvage",
+                ) {
+                    self.table_next_row();
+                    salvage.draw_raw_ui(self, "Salvage");
+                }
+            }
+        }
+
+        Some(())
+    }
+
+    fn me1_find_object_property<'a>(
+        player: &'a Player, properties: &[Property], property_name: &str,
+    ) -> Option<RefMut<'a, Data>> {
+        properties.iter().find_map(|property| match property {
+            Property::Object { name_id, object_id, .. }
+                if player.get_name(*name_id).to_str() == property_name =>
+            {
+                Some(player.get_data(*object_id).borrow_mut())
+            }
+            _ => None,
+        })
+    }
+
+    fn me1_find_struct_property<'a>(
+        player: &Player, properties: &'a mut [Property], property_name: &str,
+    ) -> Option<&'a mut Vec<Property>> {
+        properties.iter_mut().find_map(|property| match property {
+            Property::Struct {
+                name_id, properties: StructType::Properties(properties), ..
+            } if player.get_name(*name_id).to_str() == property_name => Some(properties),
+            _ => None,
+        })
+    }
+
+    fn me1_find_bool_property<'a>(
+        player: &Player, properties: &'a mut [Property], property_name: &str,
+    ) -> Option<&'a mut bool> {
+        properties.iter_mut().find_map(|property| match property {
+            Property::Bool { name_id, value, .. }
+                if player.get_name(*name_id).to_str() == property_name =>
+            {
+                Some(value)
+            }
+            _ => None,
+        })
+    }
+
+    fn me1_find_int_property<'a>(
+        player: &Player, properties: &'a mut [Property], property_name: &str,
+    ) -> Option<&'a mut i32> {
+        properties.iter_mut().find_map(|property| match property {
+            Property::Int { name_id, value, .. }
+                if player.get_name(*name_id).to_str() == property_name =>
+            {
+                Some(value)
+            }
+            _ => None,
+        })
+    }
+
+    fn me1_find_float_property<'a>(
+        player: &Player, properties: &'a mut [Property], property_name: &str,
+    ) -> Option<&'a mut f32> {
+        properties.iter_mut().find_map(|property| match property {
+            Property::Float { name_id, value, .. }
+                if player.get_name(*name_id).to_str() == property_name =>
+            {
+                Some(value)
+            }
+            _ => None,
+        })
+    }
+
+    fn me1_find_str_property<'a>(
+        player: &Player, properties: &'a mut [Property], property_name: &str,
+    ) -> Option<&'a mut ImString> {
+        properties.iter_mut().find_map(|property| match property {
+            Property::Str { name_id, string, .. }
+                if player.get_name(*name_id).to_str() == property_name =>
+            {
+                Some(string)
+            }
+            _ => None,
+        })
+    }
+
+    fn me1_find_name_property<'a>(
+        player: &'a Player, properties: &[Property], property_name: &str,
+    ) -> Option<&'a ImStr> {
+        properties.iter().find_map(|property| match property {
+            Property::Name { name_id, value_name_id, .. }
+                if player.get_name(*name_id).to_str() == property_name =>
+            {
+                Some(player.get_name(*value_name_id))
+            }
+            _ => None,
+        })
     }
 
     pub fn draw_me1_known_plot(
         &self, me1_plot_table: &mut Me1PlotTable, me1_known_plot: &Me1KnownPlot,
-    ) {
+    ) -> Option<()> {
         let ui = self.ui;
         let Me1KnownPlot { player_crew, missions } = me1_known_plot;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("plot-tab")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
 
         let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
 
@@ -78,6 +407,8 @@ impl<'ui> Gui<'ui> {
                 }
             }
         }
+
+        Some(())
     }
 
     fn draw_me1_plot_category(&self, plot_table: &mut Me1PlotTable, known_plot: &PlotCategory) {
@@ -115,17 +446,15 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_raw_player(&self, player: &Player) {
-        for (i, _) in player.objects.iter().enumerate() {
-            let object_id = i as i32 + 1;
-            let object = player.get_object(object_id);
-            let object_name = player.get_name(object.object_name_id);
+    fn draw_raw_player(&self, player: &Player) -> Option<()> {
+        let (i, _) =
+            player.objects.iter().enumerate().find(|(_, object)| {
+                player.get_name(object.object_name_id).to_str() == "CurrentGame"
+            })?;
 
-            match object_name.to_str() {
-                "CurrentGame" => self.draw_object(player, i, None, object_id),
-                _ => continue,
-            }
-        }
+        let object_id = i as i32 + 1;
+        self.draw_object(player, i, None, object_id);
+        Some(())
     }
 
     fn draw_object(
@@ -151,9 +480,9 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_property(&self, player: &Player, ident: usize, property: &mut Property) {
+    fn draw_property(&self, player: &Player, ident: usize, property: &mut Property) -> Option<()> {
         match property {
-            Property::Byte { .. } | Property::None { .. } => return,
+            Property::Byte { .. } | Property::None { .. } => return None,
             _ => {
                 self.table_next_row();
             }
@@ -164,7 +493,7 @@ impl<'ui> Gui<'ui> {
                 player,
                 &format!("{}##{}", player.get_name(*name_id), ident),
                 array,
-            ),
+            )?,
             Property::Bool { name_id, value, .. } => self.draw_edit_bool(
                 im_str!("{}##bool-{}", player.get_name(*name_id), ident).to_str(),
                 value,
@@ -220,27 +549,24 @@ impl<'ui> Gui<'ui> {
                 ),
             Property::Byte { .. } | Property::None { .. } => unreachable!(),
         }
+        Some(())
     }
 
-    fn draw_array_property(&self, player: &Player, ident: &str, array: &mut [ArrayType]) {
+    fn draw_array_property(
+        &self, player: &Player, ident: &str, array: &mut [ArrayType],
+    ) -> Option<()> {
         let ui = self.ui;
 
         // Tree node
-        let _t = match self.push_tree_node(ident) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.push_tree_node(ident)?;
 
         // Table
-        let _t = match self.begin_table(im_str!("array-table"), 1) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.begin_table(im_str!("array-table"), 1)?;
 
         if array.is_empty() {
             self.table_next_row();
             ui.text("Empty");
-            return;
+            return None;
         }
 
         for (i, property) in array.iter_mut().enumerate() {
@@ -275,6 +601,7 @@ impl<'ui> Gui<'ui> {
                 }
             }
         }
+        Some(())
     }
 
     fn draw_struct_property(

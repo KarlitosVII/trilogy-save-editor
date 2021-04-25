@@ -13,14 +13,13 @@ use crate::save_data::{
 use super::*;
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_2(&self, save_game: &mut Me2SaveGame, known_plots: &KnownPlotsState) {
+    pub fn draw_mass_effect_2(
+        &self, save_game: &mut Me2SaveGame, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("mass_effect_2")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
 
         // General
         if_chain! {
@@ -59,9 +58,10 @@ impl<'ui> Gui<'ui> {
                 save_game.draw_raw_ui(self, "Mass Effect 2");
             }
         }
+        Some(())
     }
 
-    fn draw_me2_general(&self, save_game: &mut Me2SaveGame) {
+    fn draw_me2_general(&self, save_game: &mut Me2SaveGame) -> Option<()> {
         let ui = self.ui;
         let Me2SaveGame { difficulty, end_game_state, player, plot, .. } = save_game;
         let Player {
@@ -87,10 +87,7 @@ impl<'ui> Gui<'ui> {
         } = player;
 
         // 1ère colonne
-        let _t = match self.begin_columns(2) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.begin_columns(2)?;
         self.table_next_row();
 
         // Role Play
@@ -99,7 +96,7 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node("Role-Play") {
                 self.table_next_row();
-                ui.input_text(im_str!("Name"), first_name).resize_buffer(true).build();
+                first_name.draw_raw_ui(self, "Name");
 
                 // Gender
                 self.table_next_row();
@@ -217,7 +214,7 @@ impl<'ui> Gui<'ui> {
 
         // Bonus Powers
         self.set_next_item_open(true);
-        self.draw_me2_bonus_powers(powers);
+        self.draw_me2_bonus_powers(powers)
     }
 
     fn draw_me2_class(&self, class_name: &mut ImString) {
@@ -251,21 +248,15 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_me2_bonus_powers(&self, powers: &mut Vec<Power>) {
+    fn draw_me2_bonus_powers(&self, powers: &mut Vec<Power>) -> Option<()> {
         let ui = self.ui;
 
         // Table
-        let _t = match self.begin_table(im_str!("gameplay-table"), 1) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.begin_table(im_str!("gameplay-table"), 1)?;
 
         // Tree node
         self.table_next_row();
-        let _t = match self.push_tree_node("Bonus Powers") {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.push_tree_node("Bonus Powers")?;
         ui.same_line();
         self.draw_help_marker("You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend.");
 
@@ -323,14 +314,14 @@ impl<'ui> Gui<'ui> {
                 }
             }
         }
+        Some(())
     }
 
-    fn draw_me2_known_plot(&self, me2_plot_table: &mut PlotTable, known_plots: &KnownPlotsState) {
+    fn draw_me2_known_plot(
+        &self, me2_plot_table: &mut PlotTable, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
         let ui = self.ui;
-        let me2_known_plot = match &known_plots.me2 {
-            Some(me2) => me2,
-            None => return,
-        };
+        let me2_known_plot = known_plots.me2.as_ref()?;
 
         let Me2KnownPlot {
             player,
@@ -396,6 +387,7 @@ impl<'ui> Gui<'ui> {
                 self.draw_me2_plot_category(me2_plot_table, captains_cabin);
             }
         }
+        Some(())
     }
 
     fn draw_me2_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {

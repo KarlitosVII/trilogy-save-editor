@@ -14,14 +14,13 @@ use crate::save_data::{
 use super::*;
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame, known_plots: &KnownPlotsState) {
+    pub fn draw_mass_effect_3(
+        &self, save_game: &mut Me3SaveGame, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("mass_effect_3")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("mass_effect_3")).begin(ui)?;
 
         // General
         if_chain! {
@@ -48,9 +47,10 @@ impl<'ui> Gui<'ui> {
                 save_game.draw_raw_ui(self, "Mass Effect 3");
             }
         }
+        Some(())
     }
 
-    fn draw_me3_general(&self, save_game: &mut Me3SaveGame) {
+    fn draw_me3_general(&self, save_game: &mut Me3SaveGame) -> Option<()> {
         let ui = self.ui;
         let Me3SaveGame { difficulty, end_game_state, conversation_mode, player, plot, .. } =
             save_game;
@@ -73,10 +73,7 @@ impl<'ui> Gui<'ui> {
         } = player;
 
         // 1ère colonne
-        let _t = match self.begin_columns(2) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.begin_columns(2)?;
         self.table_next_row();
 
         // Role Play
@@ -85,9 +82,10 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node("Role-Play") {
                 self.table_next_row();
-                ui.input_text(im_str!("Name"), first_name).resize_buffer(true).build();
+                first_name.draw_raw_ui(self, "Name");
 
                 // Gender
+                // TODO: Change is_female et Loco / Lola plots
                 self.table_next_row();
                 let mut gender = *is_female as usize;
                 const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
@@ -196,7 +194,7 @@ impl<'ui> Gui<'ui> {
 
         // Bonus Powers
         self.set_next_item_open(true);
-        self.draw_me3_bonus_powers(powers);
+        self.draw_me3_bonus_powers(powers)
     }
 
     fn draw_me3_class(&self, class_name: &mut ImString) {
@@ -248,21 +246,15 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_me3_bonus_powers(&self, powers: &mut Vec<Power>) {
+    fn draw_me3_bonus_powers(&self, powers: &mut Vec<Power>) -> Option<()> {
         let ui = self.ui;
 
         // Table
-        let _t = match self.begin_table(im_str!("gameplay-table"), 1) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.begin_table(im_str!("gameplay-table"), 1)?;
 
         // Tree node
         self.table_next_row();
-        let _t = match self.push_tree_node("Bonus Powers") {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = self.push_tree_node("Bonus Powers")?;
         ui.same_line();
         self.draw_help_marker("You can use as many bonus powers as you want\nand customize your build to your liking.\nThe only restriction is the size of your screen !");
 
@@ -334,17 +326,15 @@ impl<'ui> Gui<'ui> {
                 }
             }
         }
+        Some(())
     }
 
     fn draw_me3_known_plot(
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImString, i32>,
         known_plots: &KnownPlotsState,
-    ) {
+    ) -> Option<()> {
         let ui = self.ui;
-        let me3_known_plot = match &known_plots.me3 {
-            Some(me3) => me3,
-            None => return,
-        };
+        let me3_known_plot = known_plots.me3.as_ref()?;
 
         let Me3KnownPlot {
             general,
@@ -360,10 +350,7 @@ impl<'ui> Gui<'ui> {
         } = me3_known_plot;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("plot-tab")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
 
         // Mass Effect 3
         if_chain! {
@@ -427,10 +414,7 @@ impl<'ui> Gui<'ui> {
         }
 
         // Mass Effect 2
-        let me2_known_plot = match &known_plots.me2 {
-            Some(me2) => me2,
-            None => return,
-        };
+        let me2_known_plot = known_plots.me2.as_ref()?;
 
         let _colors = self.style_colors(Theme::MassEffect2);
         if let Some(_t) = TabItem::new(im_str!("Mass Effect 2")).begin(ui) {
@@ -443,11 +427,12 @@ impl<'ui> Gui<'ui> {
                 self.draw_me1_imported_known_plot(plot_table, me1_imported);
             }
         }
+        Some(())
     }
 
     pub fn draw_me2_imported_known_plot(
         &self, me3_plot_table: &mut PlotTable, me2_known_plot: &Me2KnownPlot,
-    ) {
+    ) -> Option<()> {
         let ui = self.ui;
         let Me2KnownPlot {
             player,
@@ -461,10 +446,7 @@ impl<'ui> Gui<'ui> {
         } = me2_known_plot;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("plot-tab")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
 
         // Player
         if_chain! {
@@ -520,19 +502,17 @@ impl<'ui> Gui<'ui> {
                 self.draw_me3_plot_category(me3_plot_table, captains_cabin);
             }
         }
+        Some(())
     }
 
     pub fn draw_me1_imported_known_plot(
         &self, me1_plot_table: &mut PlotTable, me1_imported: &Me1KnownPlot,
-    ) {
+    ) -> Option<()> {
         let ui = self.ui;
         let Me1KnownPlot { player_crew, missions } = me1_imported;
 
         // Tab bar
-        let _t = match TabBar::new(im_str!("plot-tab")).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
 
         let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
 
@@ -552,6 +532,7 @@ impl<'ui> Gui<'ui> {
                 }
             }
         }
+        Some(())
     }
 
     fn draw_me3_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {
