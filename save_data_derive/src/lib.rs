@@ -137,7 +137,7 @@ fn impl_save_data_enum(
         #[automatically_derived]
         impl crate::save_data::SaveData for #name {
             fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
-                let discriminant = <#repr_type>::deserialize(cursor)? as usize;
+                let discriminant = <#repr_type as crate::save_data::SaveData>::deserialize(cursor)? as usize;
                 Ok(match discriminant {
                     #(#repr_variants),*,
                     _ => anyhow::bail!("invalid enum representation"),
@@ -145,7 +145,7 @@ fn impl_save_data_enum(
             }
 
             fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()> {
-                <#repr_type>::serialize(&(self.clone() as #repr_type), output)
+                <#repr_type as crate::save_data::SaveData>::serialize(&(self.clone() as #repr_type), output)
             }
 
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {

@@ -1,39 +1,37 @@
-use imgui::ImString;
-
 use crate::save_data::{
     common::{
         appearance::Appearance,
         player::{Notoriety, Origin, WeaponLoadout},
     },
-    Dummy,
+    Dummy, ImguiString,
 };
 
 #[derive(SaveData, Clone)]
 pub struct Player {
     pub is_female: bool,
-    pub class_name: ImString,
+    pub class_name: ImguiString,
     is_combat_pawn: bool,
     is_injured_pawn: bool,
     use_casual_appearance: bool,
     pub level: i32,
     pub current_xp: f32,
-    pub first_name: ImString,
+    pub first_name: ImguiString,
     last_name: i32,
     pub origin: Origin,
     pub notoriety: Notoriety,
     pub talent_points: i32,
-    mapped_power_1: ImString,
-    mapped_power_2: ImString,
-    mapped_power_3: ImString,
-    appearance: Appearance,
+    mapped_power_1: ImguiString,
+    mapped_power_2: ImguiString,
+    mapped_power_3: ImguiString,
+    pub appearance: Appearance,
     emissive_id: i32,
     pub powers: Vec<Power>,
     gaw_assets: Vec<GawAsset>,
     weapons: Vec<Weapon>,
     weapons_mods: Vec<WeaponMod>,
     weapons_loadout: WeaponLoadout,
-    primary_weapon: ImString,
-    secondary_weapon: ImString,
+    primary_weapon: ImguiString,
+    secondary_weapon: ImguiString,
     loadout_weapon_group: Vec<i32>,
     hotkeys: Vec<Hotkey>,
     current_health: f32,
@@ -46,14 +44,14 @@ pub struct Player {
     probes: i32,
     pub current_fuel: f32,
     pub grenades: i32,
-    pub face_code: ImString,
+    pub face_code: ImguiString,
     class_friendly_name: i32,
     _character_guid: Dummy<16>,
 }
 
 #[derive(SaveData, Default, Clone)]
 pub struct Power {
-    name: ImString,
+    name: ImguiString,
     rank: f32,
     evolved_choice_0: i32,
     evolved_choice_1: i32,
@@ -61,25 +59,25 @@ pub struct Power {
     evolved_choice_3: i32,
     evolved_choice_4: i32,
     evolved_choice_5: i32,
-    pub power_class_name: ImString,
+    pub power_class_name: ImguiString,
     wheel_display_index: i32,
 }
 
 #[derive(SaveData, Default, Clone)]
 pub struct Weapon {
-    class_name: ImString,
+    class_name: ImguiString,
     ammo_used_count: i32,
     ammo_total: i32,
     current_weapon: bool,
     was_last_weapon: bool,
-    ammo_power_name: ImString,
-    ammo_power_source_tag: ImString,
+    ammo_power_name: ImguiString,
+    ammo_power_source_tag: ImguiString,
 }
 
 #[derive(SaveData, Default, Clone)]
 pub struct WeaponMod {
-    weapon_class_name: ImString,
-    weapon_mod_class_names: Vec<ImString>,
+    weapon_class_name: ImguiString,
+    weapon_mod_class_names: Vec<ImguiString>,
 }
 
 #[derive(SaveData, Default, Clone)]
@@ -90,6 +88,6 @@ struct GawAsset {
 
 #[derive(SaveData, Default, Clone)]
 struct Hotkey {
-    pawn_name: ImString,
-    power_name: ImString,
+    pawn_name: ImguiString,
+    power_name: ImguiString,
 }

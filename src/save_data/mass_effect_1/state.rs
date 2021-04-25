@@ -1,9 +1,8 @@
 use anyhow::*;
-use imgui::ImString;
 
 use crate::{
     gui::Gui,
-    save_data::{common::plot::Me1PlotTable, Dummy},
+    save_data::{common::plot::Me1PlotTable, Dummy, ImguiString},
 };
 
 use super::{SaveCursor, SaveData};
@@ -11,7 +10,7 @@ use super::{SaveCursor, SaveData};
 #[derive(Clone)]
 pub struct State {
     _begin: Dummy<12>,
-    base_level_name: ImString,
+    base_level_name: ImguiString,
     _osef1: Dummy<24>,
     pub plot: Me1PlotTable,
     _osef2: Vec<u8>,

@@ -1,12 +1,11 @@
 use anyhow::*;
-use imgui::ImString;
 use indexmap::IndexMap;
 
 use crate::{gui::Gui, save_data::Dummy};
 
 use super::{
     common::{Checksum, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector},
-    SaveCursor, SaveData,
+    ImguiString, SaveCursor, SaveData,
 };
 
 pub mod player;
@@ -26,11 +25,11 @@ use galaxy_map::*;
 #[derive(SaveData, Clone)]
 pub struct Me3SaveGame {
     _version: Version,
-    _debug_name: ImString,
+    _debug_name: ImguiString,
     seconds_played: f32,
     _disc: Dummy<4>,
-    base_level_name: ImString,
-    base_level_name_display_override_as_read: ImString,
+    base_level_name: ImguiString,
+    base_level_name_display_override_as_read: ImguiString,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
@@ -47,7 +46,7 @@ pub struct Me3SaveGame {
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     _me1_plot: Me1PlotTable,
-    pub player_variables: IndexMap<ImString, i32>,
+    pub player_variables: IndexMap<ImguiString, i32>,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
@@ -92,16 +91,16 @@ pub enum Difficulty {
 #[derive(SaveData, Default, Clone)]
 struct DependentDlc {
     id: i32,
-    name: ImString,
-    canonical_name: ImString,
+    name: ImguiString,
+    canonical_name: ImguiString,
 }
 
 #[derive(SaveData, Default, Clone)]
 struct LevelTreasure {
-    level_name: ImString,
+    level_name: ImguiString,
     credits: i32,
     xp: i32,
-    items: Vec<ImString>,
+    items: Vec<ImguiString>,
 }
 
 #[allow(clippy::enum_variant_names)]
@@ -114,10 +113,10 @@ pub enum AutoReplyModeOptions {
 
 #[derive(SaveData, Default, Clone)]
 struct ObjectiveMarker {
-    marker_owned_data: ImString,
+    marker_owned_data: ImguiString,
     marker_offset: Vector,
     marker_label: i32,
-    bone_to_attach_to: ImString,
+    bone_to_attach_to: ImguiString,
     marker_icon_type: ObjectiveMarkerIconType,
 }
 

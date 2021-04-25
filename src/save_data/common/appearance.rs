@@ -1,9 +1,9 @@
 use anyhow::*;
-use imgui::ImString;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     gui::Gui,
-    save_data::{SaveCursor, SaveData},
+    save_data::{ImguiString, SaveCursor, SaveData},
 };
 
 use super::Vector;
@@ -24,7 +24,7 @@ pub struct Appearance {
     pattern_id: i32,
     pattern_color_id: i32,
     helmet_id: i32,
-    head_morph: HasHeadMorph,
+    pub head_morph: HasHeadMorph,
 }
 
 #[derive(SaveData, Clone)]
@@ -33,25 +33,24 @@ enum PlayerAppearanceType {
     Full,
 }
 
-#[derive(Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct HasHeadMorph {
-    has_head_morph: bool,
-    head_morph: Option<HeadMorph>,
+    pub has_head_morph: bool,
+    pub head_morph: Option<HeadMorph>,
 }
 
 impl SaveData for HasHeadMorph {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let has_head_morph = <bool>::deserialize(cursor)?;
-
+        let has_head_morph: bool = SaveData::deserialize(cursor)?;
         let head_morph = if has_head_morph { Some(SaveData::deserialize(cursor)?) } else { None };
         Ok(Self { has_head_morph, head_morph })
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        self.has_head_morph.serialize(output)?;
+        SaveData::serialize(&self.has_head_morph, output)?;
         if self.has_head_morph {
             let head_morph = self.head_morph.as_ref().context("You cannot enable head morph without head morph data. Please import a head morph first.")?;
-            head_morph.serialize(output)?;
+            SaveData::serialize(head_morph, output)?;
         }
         Ok(())
     }
@@ -64,61 +63,61 @@ impl SaveData for HasHeadMorph {
     }
 }
 
-#[derive(SaveData, Clone)]
+#[derive(SaveData, Deserialize, Serialize, Clone)]
 pub struct HeadMorph {
-    hair_mesh: ImString,
-    accessory_mesh: Vec<ImString>,
-    morph_features: Vec<MorphFeature>,
-    offset_bones: Vec<OffsetBone>,
-    lod0_vertices: Vec<Vector>,
-    lod1_vertices: Vec<Vector>,
-    lod2_vertices: Vec<Vector>,
-    lod3_vertices: Vec<Vector>,
-    scalar_parameters: Vec<ScalarParameter>,
-    vector_parameters: Vec<VectorParameter>,
-    texture_parameters: Vec<TextureParameter>,
+    pub hair_mesh: ImguiString,
+    pub accessory_mesh: Vec<ImguiString>,
+    pub morph_features: Vec<MorphFeature>,
+    pub offset_bones: Vec<OffsetBone>,
+    pub lod0_vertices: Vec<Vector>,
+    pub lod1_vertices: Vec<Vector>,
+    pub lod2_vertices: Vec<Vector>,
+    pub lod3_vertices: Vec<Vector>,
+    pub scalar_parameters: Vec<ScalarParameter>,
+    pub vector_parameters: Vec<VectorParameter>,
+    pub texture_parameters: Vec<TextureParameter>,
 }
 
-#[derive(SaveData, Default, Clone)]
-struct MorphFeature {
-    feature: ImString,
+#[derive(SaveData, Deserialize, Serialize, Default, Clone)]
+pub struct MorphFeature {
+    feature: ImguiString,
     offset: f32,
 }
 
-#[derive(SaveData, Default, Clone)]
-struct OffsetBone {
-    name: ImString,
+#[derive(SaveData, Deserialize, Serialize, Default, Clone)]
+pub struct OffsetBone {
+    name: ImguiString,
     offset: Vector,
 }
 
-#[derive(SaveData, Default, Clone)]
-struct ScalarParameter {
-    name: ImString,
+#[derive(SaveData, Deserialize, Serialize, Default, Clone)]
+pub struct ScalarParameter {
+    name: ImguiString,
     value: f32,
 }
 
-#[derive(SaveData, Default, Clone)]
-struct VectorParameter {
-    name: ImString,
+#[derive(SaveData, Deserialize, Serialize, Default, Clone)]
+pub struct VectorParameter {
+    name: ImguiString,
     value: LinearColor,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Deserialize, Serialize, Clone)]
 pub struct LinearColor([f32; 4]);
 
 impl SaveData for LinearColor {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         Ok(Self([
-            <f32>::deserialize(cursor)?,
-            <f32>::deserialize(cursor)?,
-            <f32>::deserialize(cursor)?,
-            <f32>::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
+            SaveData::deserialize(cursor)?,
         ]))
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        for byte in self.0.iter() {
-            <f32>::serialize(byte, output)?;
+        for float in self.0.iter() {
+            SaveData::serialize(float, output)?;
         }
         Ok(())
     }
@@ -128,8 +127,8 @@ impl SaveData for LinearColor {
     }
 }
 
-#[derive(SaveData, Default, Clone)]
-struct TextureParameter {
-    name: ImString,
-    value: ImString,
+#[derive(SaveData, Deserialize, Serialize, Default, Clone)]
+pub struct TextureParameter {
+    name: ImguiString,
+    value: ImguiString,
 }

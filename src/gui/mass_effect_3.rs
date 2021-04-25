@@ -9,6 +9,7 @@ use crate::save_data::{
         plot::PlotTable,
         Me3SaveGame,
     },
+    ImguiString,
 };
 
 use super::*;
@@ -317,7 +318,7 @@ impl<'ui> Gui<'ui> {
             if Selectable::new(power_name).build_with_ref(ui, &mut selected) {
                 if selected {
                     let mut power = Power::default();
-                    power.power_class_name = power_class_name.to_owned();
+                    power.power_class_name = power_class_name.to_owned().into();
                     powers.push(power);
                 } else if let Some((i, _)) = powers.iter().enumerate().find(|(_, power)| {
                     unicase::eq(power.power_class_name.as_ref(), power_class_name)
@@ -330,7 +331,7 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_known_plot(
-        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImString, i32>,
+        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
         known_plots: &KnownPlotsState,
     ) -> Option<()> {
         let ui = self.ui;
@@ -569,7 +570,7 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot_variable(
-        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImString, i32>,
+        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
         known_plot: &PlotVariable,
     ) {
         let ui = self.ui;
@@ -602,7 +603,7 @@ impl<'ui> Gui<'ui> {
 
                 let value = match variable {
                     Some((_, value)) => value,
-                    None => player_variables.entry(ImString::new(variable_id)).or_default(),
+                    None => player_variables.entry(ImString::new(variable_id).into()).or_default(),
                 };
 
                 self.table_next_row();

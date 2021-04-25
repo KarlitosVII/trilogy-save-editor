@@ -9,8 +9,14 @@ use wfd::DialogParams;
 use crate::{
     event_handler::{MainEvent, SaveGame},
     save_data::{
-        common::plot::BoolSlice, mass_effect_1::known_plot::Me1KnownPlot,
-        mass_effect_2::known_plot::Me2KnownPlot, mass_effect_3::known_plot::Me3KnownPlot, SaveData,
+        common::{
+            appearance::{HasHeadMorph, HeadMorph},
+            plot::BoolSlice,
+        },
+        mass_effect_1::known_plot::Me1KnownPlot,
+        mass_effect_2::known_plot::Me2KnownPlot,
+        mass_effect_3::known_plot::Me3KnownPlot,
+        SaveData,
     },
 };
 
@@ -23,12 +29,6 @@ mod mass_effect_3;
 static NOTIFICATION_TIME: f64 = 1.5;
 
 // States
-#[derive(Default)]
-struct ErrorState {
-    errors: Vec<Error>,
-    is_opened: bool,
-}
-
 #[derive(Default)]
 struct NotificationState {
     string: ImString,
@@ -45,7 +45,7 @@ pub struct KnownPlotsState {
 #[derive(Default)]
 struct State {
     save_game: Option<SaveGame>,
-    errors: ErrorState,
+    error: Option<Error>,
     notification: Option<NotificationState>,
     known_plots: KnownPlotsState,
 }
@@ -58,6 +58,7 @@ pub enum UiEvent {
     LoadedMe1KnownPlot(Me1KnownPlot),
     LoadedMe2KnownPlot(Me2KnownPlot),
     LoadedMe3KnownPlot(Me3KnownPlot),
+    ImportedHeadMorph(HeadMorph),
 }
 
 // UI
@@ -71,8 +72,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
     system.main_loop(move |_, ui| {
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
-                state.errors.errors.push(err);
-                state.errors.is_opened = true;
+                state.error = Some(err);
             }
             UiEvent::Notification(string) => {
                 state.notification = Some(NotificationState {
@@ -91,6 +91,19 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
             }
             UiEvent::LoadedMe3KnownPlot(me3_known_plot) => {
                 state.known_plots.me3 = Some(me3_known_plot)
+            }
+            UiEvent::ImportedHeadMorph(head_morph) => {
+                let has_head_morph =
+                    HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };
+                match state.save_game.as_mut() {
+                    Some(SaveGame::MassEffect2(savegame)) => {
+                        savegame.player.appearance.head_morph = has_head_morph
+                    }
+                    Some(SaveGame::MassEffect3(savegame)) => {
+                        savegame.player.appearance.head_morph = has_head_morph
+                    }
+                    _ => unreachable!(),
+                }
             }
         });
 
@@ -145,7 +158,7 @@ impl<'ui> Gui<'ui> {
             }
 
             // Error popup
-            self.draw_errors(&mut state.errors);
+            self.draw_error(&mut state.error);
 
             // Notification
             self.draw_nofification_overlay(&mut state.notification);
@@ -167,18 +180,15 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_errors(&self, errors: &mut ErrorState) {
+    fn draw_error(&self, option_error: &mut Option<Error>) {
         let ui = self.ui;
 
-        let ErrorState { errors, is_opened } = errors;
-        if *is_opened {
+        if let Some(error) = option_error {
             ui.open_popup(im_str!("Error###error"));
-        }
 
-        if let Some(_t) =
-            PopupModal::new(im_str!("Error###error")).always_auto_resize(true).begin_popup(ui)
-        {
-            for error in errors.iter() {
+            if let Some(_t) =
+                PopupModal::new(im_str!("Error###error")).always_auto_resize(true).begin_popup(ui)
+            {
                 ui.text(error.to_string());
 
                 let chain = error.chain().skip(1);
@@ -189,12 +199,11 @@ impl<'ui> Gui<'ui> {
                     }
                 }
                 ui.separator();
-            }
 
-            if ui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
-                *is_opened = false;
-                errors.clear();
-                ui.close_current_popup();
+                if ui.button_with_size(im_str!("OK"), [70.0, 0.0]) {
+                    *option_error = None;
+                    ui.close_current_popup();
+                }
             }
         }
     }

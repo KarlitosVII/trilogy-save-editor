@@ -1,5 +1,4 @@
 use anyhow::*;
-use imgui::ImString;
 
 use crate::{gui::Gui, save_data::Dummy};
 
@@ -8,7 +7,7 @@ use super::{
         plot::Me1PlotTable, Checksum, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord,
         Vector,
     },
-    SaveCursor, SaveData,
+    ImguiString, SaveCursor, SaveData,
 };
 
 pub mod player;
@@ -28,10 +27,10 @@ use galaxy_map::*;
 #[derive(SaveData, Clone)]
 pub struct Me2SaveGame {
     _version: Version,
-    _debug_name: ImString,
+    _debug_name: ImguiString,
     seconds_played: f32,
     _disc: Dummy<4>,
-    base_level_name: ImString,
+    base_level_name: ImguiString,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
@@ -86,15 +85,15 @@ pub enum Difficulty {
 #[derive(SaveData, Default, Clone)]
 struct DependentDlc {
     id: i32,
-    name: ImString,
+    name: ImguiString,
 }
 
 #[derive(SaveData, Default, Clone)]
 struct LevelTreasure {
-    level_name: ImString,
+    level_name: ImguiString,
     credits: i32,
     xp: i32,
-    items: Vec<ImString>,
+    items: Vec<ImguiString>,
 }
 
 #[allow(clippy::enum_variant_names)]
@@ -107,10 +106,10 @@ enum AutoReplyModeOptions {
 
 #[derive(SaveData, Default, Clone)]
 struct ObjectiveMarker {
-    marker_owned_data: ImString,
+    marker_owned_data: ImguiString,
     marker_offset: Vector,
     marker_label: i32,
-    bone_to_attach_to: ImString,
+    bone_to_attach_to: ImguiString,
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
