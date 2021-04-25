@@ -59,7 +59,7 @@ impl SaveData for Player {
             classes.push(SaveData::deserialize(cursor)?);
         }
 
-        // Metadatas
+        // Objects
         let mut objects: Vec<Object> = Vec::new();
         for _ in 0..header.objects_len {
             objects.push(SaveData::deserialize(cursor)?);
@@ -119,7 +119,9 @@ impl SaveData for Player {
             let mut current_offset = header.data_offset;
             for (i, object) in objects.iter_mut().enumerate() {
                 object.data_offset = current_offset;
-                current_offset += datas[i].borrow().size()? as u32;
+                let data_size = datas[i].borrow().size()? as u32;
+                object.data_size = data_size;
+                current_offset += data_size;
             }
         }
 

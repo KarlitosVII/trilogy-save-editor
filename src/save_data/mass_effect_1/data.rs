@@ -15,7 +15,7 @@ use super::{player::Name, SaveCursor, SaveData};
 #[derive(Clone)]
 pub struct Data {
     _osef: Dummy<4>,
-    properties: Vec<Property>,
+    pub properties: Vec<Property>,
 }
 
 impl Data {
