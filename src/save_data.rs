@@ -207,38 +207,6 @@ impl SaveData for ImString {
     }
 }
 
-impl<T> SaveData for Option<T>
-where
-    T: SaveData,
-{
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        cursor.rshift_position(4);
-        let is_some = <bool>::deserialize(cursor)?;
-
-        let inner = match is_some {
-            true => Some(T::deserialize(cursor)?),
-            false => None,
-        };
-        Ok(inner)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let bytes = &output[output.len() - 4..output.len()];
-        if <u32>::from_le_bytes(bytes.try_into()?) != 0 {
-            if let Some(input) = self {
-                T::serialize(input, output)?;
-            }
-        }
-        Ok(())
-    }
-
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        if let Some(inner) = self {
-            inner.draw_raw_ui(gui, ident);
-        }
-    }
-}
-
 impl<T> SaveData for Vec<T>
 where
     T: SaveData + Default,
