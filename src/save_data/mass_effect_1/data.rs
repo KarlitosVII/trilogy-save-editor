@@ -1,12 +1,11 @@
 use anyhow::*;
-use imgui::ImString;
 use std::ops::{Deref, DerefMut};
 
 use crate::{
     gui::Gui,
     save_data::{
         common::{appearance::LinearColor, Rotator, Vector},
-        Dummy,
+        Dummy, ImguiString,
     },
 };
 
@@ -161,7 +160,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        string: ImString,
+        string: ImguiString,
     },
     StringRef {
         name_id: u32,
@@ -443,7 +442,7 @@ pub enum ArrayType {
     Int(i32),
     Object(i32),
     Vector(Vector),
-    String(ImString),
+    String(ImguiString),
     Properties(Vec<Property>),
 }
 

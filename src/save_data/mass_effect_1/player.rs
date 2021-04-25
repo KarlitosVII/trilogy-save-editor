@@ -1,11 +1,13 @@
 use anyhow::*;
-use imgui::{ImStr, ImString};
 use std::{
     cell::RefCell,
     ops::{Deref, DerefMut},
 };
 
-use crate::{gui::Gui, save_data::Dummy};
+use crate::{
+    gui::Gui,
+    save_data::{Dummy, ImguiString},
+};
 
 use super::{data::Data, SaveCursor, SaveData};
 
@@ -23,7 +25,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn get_name(&self, id: u32) -> &ImStr {
+    pub fn get_name(&self, id: u32) -> &ImguiString {
         &self.names[id as usize]
     }
 
@@ -160,7 +162,7 @@ struct Header {
     _magic: u32,
     _version: Dummy<4>, // low_version: u16, high_version: u16
     data_offset: u32,
-    _upk_name: ImString,
+    _upk_name: ImguiString,
     _flags: u32,
     name_len: u32,
     name_offset: u32,
@@ -176,7 +178,7 @@ struct Header {
 
 #[derive(SaveData, Clone)]
 pub struct Name {
-    string: ImString,
+    string: ImguiString,
     _osef: Dummy<8>,
 }
 
@@ -189,15 +191,15 @@ impl Name {
 }
 
 impl Deref for Name {
-    type Target = ImString;
+    type Target = ImguiString;
 
-    fn deref(&self) -> &ImString {
+    fn deref(&self) -> &ImguiString {
         &self.string
     }
 }
 
 impl DerefMut for Name {
-    fn deref_mut(&mut self) -> &mut ImString {
+    fn deref_mut(&mut self) -> &mut ImguiString {
         &mut self.string
     }
 }

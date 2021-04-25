@@ -2,7 +2,14 @@ use anyhow::*;
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
 use imgui::ImString;
 use indexmap::IndexMap;
-use std::{convert::TryInto, fmt::Display, hash::Hash, mem::size_of, usize};
+use serde::de;
+use std::{
+    convert::TryInto,
+    fmt::{self, Display},
+    hash::Hash,
+    mem::size_of,
+    ops::{Deref, DerefMut},
+};
 
 use crate::gui::Gui;
 
@@ -123,11 +130,11 @@ impl SaveData for f32 {
 
 impl SaveData for bool {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(<u32>::deserialize(cursor)? != 0)
+        Ok(<u32 as SaveData>::deserialize(cursor)? != 0)
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        <u32>::serialize(&(*self as u32), output)
+        SaveData::serialize(&(*self as u32), output)
     }
 
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
@@ -135,12 +142,102 @@ impl SaveData for bool {
     }
 }
 
-impl SaveData for ImString {
+impl<T> SaveData for Vec<T>
+where
+    T: SaveData + Default,
+{
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let len = <i32>::deserialize(cursor)?;
+        let len: u32 = SaveData::deserialize(cursor)?;
+        let mut vec = Vec::new();
+
+        for _ in 0..len {
+            vec.push(T::deserialize(cursor)?);
+        }
+        Ok(vec)
+    }
+
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        let len = self.len() as u32;
+        SaveData::serialize(&len, output)?;
+
+        for item in self.iter() {
+            T::serialize(item, output)?;
+        }
+        Ok(())
+    }
+
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_vec(ident, self);
+    }
+}
+
+impl<K, V> SaveData for IndexMap<K, V>
+where
+    K: SaveData + Eq + Hash + Default + Display,
+    V: SaveData + Default,
+{
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        let len: u32 = SaveData::deserialize(cursor)?;
+        let mut map = IndexMap::new();
+
+        for _ in 0..len {
+            map.insert(K::deserialize(cursor)?, V::deserialize(cursor)?);
+        }
+        Ok(map)
+    }
+
+    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
+        let len = self.len() as u32;
+        SaveData::serialize(&len, output)?;
+
+        for (key, value) in self.iter() {
+            K::serialize(key, output)?;
+            V::serialize(value, output)?;
+        }
+        Ok(())
+    }
+
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_indexmap(ident, self);
+    }
+}
+
+// Nouveau string type pour pouvoir implémenter serde...
+#[derive(Clone, Default, PartialEq, Eq, Hash)]
+pub struct ImguiString(ImString);
+
+impl Deref for ImguiString {
+    type Target = ImString;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for ImguiString {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl From<ImString> for ImguiString {
+    fn from(im_string: ImString) -> Self {
+        Self(im_string)
+    }
+}
+
+impl Display for ImguiString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl SaveData for ImguiString {
+    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
+        let len: i32 = SaveData::deserialize(cursor)?;
 
         if len == 0 {
-            return Ok(ImString::default());
+            return Ok(Self(ImString::default()));
         }
 
         let string = if len < 0 {
@@ -163,24 +260,24 @@ impl SaveData for ImString {
             ImString::new(decoded)
         };
 
-        Ok(string)
+        Ok(Self(string))
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        if self.is_empty() {
-            <i32>::serialize(&0, output)?;
+        if self.0.is_empty() {
+            SaveData::serialize(&0i32, output)?;
             return Ok(());
         }
 
-        let string = self.to_str();
+        let string = self.0.to_str();
         let (bytes, len) = if string.chars().any(|c| c as u32 > 0xff) {
             // Unicode
-            let mut encoded: Vec<_> = string.encode_utf16().collect();
+            let mut encoded: Vec<u16> = string.encode_utf16().collect();
             encoded.push(0);
 
             let mut bytes = Vec::new();
-            for doublebyte in encoded.iter() {
-                <u16>::serialize(doublebyte, &mut bytes)?;
+            for doublebyte in encoded.drain(..) {
+                SaveData::serialize(&doublebyte, &mut bytes)?;
             }
 
             let len = bytes.len() as i32;
@@ -197,72 +294,47 @@ impl SaveData for ImString {
             (encoded, len)
         };
 
-        <i32>::serialize(&len, output)?;
+        SaveData::serialize(&len, output)?;
         output.extend(bytes);
         Ok(())
     }
 
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_string(ident, self);
+        gui.draw_edit_string(ident, &mut self.0);
     }
 }
 
-impl<T> SaveData for Vec<T>
-where
-    T: SaveData + Default,
-{
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let len = <u32>::deserialize(cursor)?;
-        let mut vec = Vec::new();
+impl<'de> serde::Deserialize<'de> for ImguiString {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct StringVisitor;
+        impl<'de> de::Visitor<'de> for StringVisitor {
+            type Value = ImString;
 
-        for _ in 0..len {
-            vec.push(T::deserialize(cursor)?);
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a &str")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(ImString::new(value))
+            }
         }
-        Ok(vec)
-    }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let len = self.len() as u32;
-        <u32>::serialize(&len, output)?;
-
-        for item in self.iter() {
-            T::serialize(item, output)?;
-        }
-        Ok(())
-    }
-
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_vec(ident, self);
+        let result = deserializer.deserialize_str(StringVisitor)?;
+        Ok(Self(result))
     }
 }
 
-impl<K, V> SaveData for IndexMap<K, V>
-where
-    K: SaveData + Eq + Hash + Default + Display,
-    V: SaveData + Default,
-{
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let len = <u32>::deserialize(cursor)?;
-        let mut map = IndexMap::new();
-
-        for _ in 0..len {
-            map.insert(K::deserialize(cursor)?, V::deserialize(cursor)?);
-        }
-        Ok(map)
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let len = self.len() as u32;
-        <u32>::serialize(&len, output)?;
-
-        for (key, value) in self.iter() {
-            K::serialize(key, output)?;
-            V::serialize(value, output)?;
-        }
-        Ok(())
-    }
-
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_indexmap(ident, self);
+impl serde::Serialize for ImguiString {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(self.0.to_str())
     }
 }

@@ -1,6 +1,6 @@
 use if_chain::if_chain;
 use imgui::*;
-use std::{cell::RefMut, cmp::Ordering};
+use std::{cell::RefMut, cmp::Ordering, ops::Deref};
 
 use crate::save_data::{
     common::plot::{Me1PlotTable, PlotCategory},
@@ -9,7 +9,7 @@ use crate::save_data::{
         player::Player,
         Me1SaveGame,
     },
-    SaveData,
+    ImguiString, SaveData,
 };
 
 use super::*;
@@ -356,7 +356,7 @@ impl<'ui> Gui<'ui> {
 
     fn me1_find_str_property<'a>(
         player: &Player, properties: &'a mut [Property], property_name: &str,
-    ) -> Option<&'a mut ImString> {
+    ) -> Option<&'a mut ImguiString> {
         properties.iter_mut().find_map(|property| match property {
             Property::Str { name_id, string, .. }
                 if player.get_name(*name_id).to_str() == property_name =>
@@ -369,7 +369,7 @@ impl<'ui> Gui<'ui> {
 
     fn me1_find_name_property<'a>(
         player: &'a Player, properties: &[Property], property_name: &str,
-    ) -> Option<&'a ImStr> {
+    ) -> Option<&'a ImguiString> {
         properties.iter().find_map(|property| match property {
             Property::Name { name_id, value_name_id, .. }
                 if player.get_name(*name_id).to_str() == property_name =>
@@ -465,7 +465,7 @@ impl<'ui> Gui<'ui> {
 
         let property_name = match property_name {
             Option::Some(property_name) => im_str!("{} : {}", object_name, property_name),
-            Option::None => object_name.to_owned(),
+            Option::None => object_name.deref().to_owned(),
         };
 
         if_chain! {

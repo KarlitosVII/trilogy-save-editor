@@ -1,5 +1,6 @@
 use anyhow::*;
 use flume::{Receiver, Sender};
+use ron::ser::PrettyConfig;
 use std::path::{Path, PathBuf};
 use tokio::{
     fs::{self, File},
@@ -9,6 +10,7 @@ use tokio::{
 use crate::{
     gui::UiEvent,
     save_data::{
+        common::appearance::HeadMorph,
         mass_effect_1::{known_plot::Me1KnownPlot, Me1SaveGame},
         mass_effect_2::{self, known_plot::Me2KnownPlot, Me2SaveGame},
         mass_effect_3::{known_plot::Me3KnownPlot, Me3SaveGame},
@@ -20,6 +22,8 @@ pub enum MainEvent {
     OpenSave(PathBuf),
     SaveSave(PathBuf, SaveGame),
     LoadKnownPlots,
+    ImportHeadMorph(PathBuf),
+    ExportHeadMorph(PathBuf, Box<HeadMorph>),
 }
 
 #[derive(Clone)]
@@ -49,6 +53,12 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
                     me1_result?.context("Failed to parse Me1KnownPlot.ron")?;
                     me2_result?.context("Failed to parse Me2KnownPlot.ron")?;
                     me3_result?.context("Failed to parse Me3KnownPlot.ron")
+                }
+                MainEvent::ImportHeadMorph(path) => {
+                    tokio::spawn(import_head_morph(path, ui_addr)).await?
+                }
+                MainEvent::ExportHeadMorph(path, head_morph) => {
+                    tokio::spawn(export_head_morph(path, head_morph, ui_addr)).await?
                 }
             }
         };
@@ -149,5 +159,33 @@ async fn load_me3_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
     let me3_known_plot: Me3KnownPlot = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe3KnownPlot(me3_known_plot)).await;
+    Ok(())
+}
+
+async fn import_head_morph(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
+    let mut import = String::new();
+    {
+        let mut file = File::open(&path).await?;
+        file.read_to_string(&mut import).await?;
+    }
+
+    let head_morph: HeadMorph = ron::from_str(&import)?;
+
+    let _ = ui_addr.send_async(UiEvent::ImportedHeadMorph(head_morph)).await;
+    let _ = ui_addr.send_async(UiEvent::Notification("Imported")).await;
+    Ok(())
+}
+
+async fn export_head_morph(
+    path: PathBuf, head_morph: Box<HeadMorph>, ui_addr: Sender<UiEvent>,
+) -> Result<()> {
+    let pretty_config =
+        PrettyConfig::new().with_enumerate_arrays(true).with_new_line(String::from('\n'));
+    let export = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
+
+    let mut file = File::create(&path).await?;
+    file.write_all(export.as_bytes()).await?;
+
+    let _ = ui_addr.send_async(UiEvent::Notification("Exported")).await;
     Ok(())
 }

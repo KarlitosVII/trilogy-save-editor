@@ -2,7 +2,10 @@ use if_chain::if_chain;
 use imgui::*;
 
 use crate::save_data::{
-    common::plot::PlotCategory,
+    common::{
+        appearance::{HasHeadMorph, HeadMorph},
+        plot::PlotCategory,
+    },
     mass_effect_2::{
         player::{Player, Power},
         plot::PlotTable,
@@ -54,7 +57,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
-                // self.draw_me2_head_morph(save_game);
+                self.draw_me2_head_morph(&mut save_game.player.appearance.head_morph, save_game.player.is_female);
             }
         }
         // Raw
@@ -313,7 +316,7 @@ impl<'ui> Gui<'ui> {
             if Selectable::new(power_name).build_with_ref(ui, &mut selected) {
                 if selected {
                     let mut power = Power::default();
-                    power.power_class_name = power_class_name.to_owned();
+                    power.power_class_name = power_class_name.to_owned().into();
                     powers.push(power);
                 } else if let Some((i, _)) = powers.iter().enumerate().find(|(_, power)| {
                     unicase::eq(power.power_class_name.as_ref(), power_class_name)
@@ -429,6 +432,95 @@ impl<'ui> Gui<'ui> {
                     plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
                 }
             }
+        }
+    }
+
+    fn draw_me2_head_morph(&self, head_morph: &mut HasHeadMorph, is_female: bool) {
+        let ui = self.ui;
+        let HasHeadMorph { has_head_morph, head_morph } = head_morph;
+
+        // Import
+        if ui.button(im_str!("Import")) {
+            let result = wfd::open_dialog(DialogParams {
+                file_types: vec![("Head Morph", "*.ron")],
+                ..Default::default()
+            });
+
+            if let Ok(result) = result {
+                let _ = self.event_addr.send(MainEvent::ImportHeadMorph(result.selected_file_path));
+            }
+        }
+        match head_morph {
+            Some(head_morph) => {
+                // Export
+                ui.same_line();
+                if ui.button(im_str!("Export")) {
+                    let result = wfd::save_dialog(DialogParams {
+                        default_extension: "ron",
+                        file_types: vec![("Head Morph", "*.ron")],
+                        ..Default::default()
+                    });
+
+                    if let Ok(result) = result {
+                        let _ = self.event_addr.send(MainEvent::ExportHeadMorph(
+                            result.selected_file_path,
+                            Box::new(head_morph.clone()),
+                        ));
+                    }
+                }
+                // Toggle head morph
+                if !is_female {
+                    ui.same_line();
+                    has_head_morph.draw_raw_ui(self, "Enable head morph");
+                }
+                ui.separator();
+
+                // Raw
+                if *has_head_morph {
+                    let HeadMorph {
+                        hair_mesh,
+                        accessory_mesh,
+                        morph_features,
+                        offset_bones,
+                        lod0_vertices,
+                        lod1_vertices,
+                        lod2_vertices,
+                        lod3_vertices,
+                        scalar_parameters,
+                        vector_parameters,
+                        texture_parameters,
+                    } = head_morph;
+
+                    if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
+                        self.table_next_row();
+                        if let Some(_t) = self.push_tree_node("Raw") {
+                            self.table_next_row();
+                            hair_mesh.draw_raw_ui(self, "hair_mesh");
+                            self.table_next_row();
+                            accessory_mesh.draw_raw_ui(self, "accessory_mesh");
+                            self.table_next_row();
+                            morph_features.draw_raw_ui(self, "morph_features");
+                            self.table_next_row();
+                            offset_bones.draw_raw_ui(self, "offset_bones");
+                            self.table_next_row();
+                            lod0_vertices.draw_raw_ui(self, "lod0_vertices");
+                            self.table_next_row();
+                            lod1_vertices.draw_raw_ui(self, "lod1_vertices");
+                            self.table_next_row();
+                            lod2_vertices.draw_raw_ui(self, "lod2_vertices");
+                            self.table_next_row();
+                            lod3_vertices.draw_raw_ui(self, "lod3_vertices");
+                            self.table_next_row();
+                            scalar_parameters.draw_raw_ui(self, "scalar_parameters");
+                            self.table_next_row();
+                            vector_parameters.draw_raw_ui(self, "vector_parameters");
+                            self.table_next_row();
+                            texture_parameters.draw_raw_ui(self, "texture_parameters");
+                        }
+                    }
+                }
+            }
+            None => ui.separator(),
         }
     }
 }

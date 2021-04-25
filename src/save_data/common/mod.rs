@@ -1,11 +1,13 @@
 use anyhow::*;
 use crc::{Crc, CRC_32_BZIP2};
-use imgui::ImString;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     gui::Gui,
     save_data::{SaveCursor, SaveData},
 };
+
+use super::ImguiString;
 
 pub mod appearance;
 pub mod player;
@@ -16,12 +18,12 @@ pub struct Checksum(u32);
 
 impl SaveData for Checksum {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self(<u32>::deserialize(cursor)?))
+        Ok(Self(SaveData::deserialize(cursor)?))
     }
 
     fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);
-        <u32>::serialize(&crc.checksum(output), output)
+        SaveData::serialize(&crc.checksum(output), output)
     }
 
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
@@ -43,7 +45,7 @@ pub struct SaveTimeStamp {
     year: i32,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(SaveData, Deserialize, Serialize, Default, Clone)]
 pub struct Vector {
     x: f32,
     y: f32,
@@ -65,13 +67,13 @@ pub struct Rotator {
 
 #[derive(SaveData, Default, Clone)]
 pub struct Level {
-    name: ImString,
+    name: ImguiString,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
 #[derive(SaveData, Default, Clone)]
 pub struct StreamingRecord {
-    name: ImString,
+    name: ImguiString,
     is_active: bool,
 }

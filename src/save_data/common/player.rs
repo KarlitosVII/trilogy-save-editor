@@ -1,4 +1,4 @@
-use imgui::ImString;
+use crate::save_data::ImguiString;
 
 #[derive(SaveData, Clone)]
 pub enum Origin {
@@ -18,10 +18,10 @@ pub enum Notoriety {
 
 #[derive(SaveData, Default, Clone)]
 pub struct WeaponLoadout {
-    assault_rifle: ImString,
-    shotgun: ImString,
-    sniper_rifle: ImString,
-    submachine_gun: ImString,
-    pistol: ImString,
-    heavy_weapon: ImString,
+    assault_rifle: ImguiString,
+    shotgun: ImguiString,
+    sniper_rifle: ImguiString,
+    submachine_gun: ImguiString,
+    pistol: ImguiString,
+    heavy_weapon: ImguiString,
 }
