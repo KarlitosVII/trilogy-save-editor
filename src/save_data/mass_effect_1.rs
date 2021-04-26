@@ -1,10 +1,11 @@
-use anyhow::*;
+use anyhow::Result;
+use serde::{ser::SerializeStruct, Serialize};
 use std::io::{Cursor, Read, Write};
 use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
-use crate::{gui::Gui, save_data::Dummy};
+use crate::{gui::Gui, save_data::Dummy, unreal};
 
-use super::{SaveCursor, SaveData};
+use super::{List, SaveCursor, SaveData};
 
 pub mod player;
 use self::player::*;
@@ -19,17 +20,47 @@ pub mod known_plot;
 pub struct Me1SaveGame {
     _begin: Dummy<8>,
     zip_offset: u32,
-    _no_mans_land: Vec<u8>,
+    _no_mans_land: List<u8>,
     pub player: Player,
     pub state: State,
     _world_save_package: Option<WorldSavePackage>,
+}
+
+impl Me1SaveGame {
+    fn zip(&self) -> Result<List<u8>> {
+        let mut zip = Vec::new();
+        {
+            let mut zipper = ZipWriter::new(Cursor::new(&mut zip));
+            let options = FileOptions::default().compression_method(CompressionMethod::DEFLATE);
+
+            // Player
+            {
+                let player_data = unreal::Serializer::to_bytes(&self.player)?;
+                zipper.start_file("player.sav", options)?;
+                zipper.write_all(&player_data)?;
+            }
+            // State
+            {
+                let state_data = unreal::Serializer::to_bytes(&self.state)?;
+                zipper.start_file("state.sav", options)?;
+                zipper.write_all(&state_data)?;
+            }
+            // WorldSavePackage
+            if let Some(_world_save_package) = &self._world_save_package {
+                let world_save_package_data = unreal::Serializer::to_bytes(_world_save_package)?;
+                zipper.start_file("WorldSavePackage.sav", options)?;
+                zipper.write_all(&world_save_package_data)?;
+            }
+        }
+        Ok(zip.into())
+    }
 }
 
 impl SaveData for Me1SaveGame {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
         let _begin: Dummy<8> = SaveData::deserialize(cursor)?;
         let zip_offset: u32 = SaveData::deserialize(cursor)?;
-        let _no_mans_land = cursor.read(zip_offset as usize - 12)?.to_owned();
+        let _no_mans_land = cursor.read(zip_offset as usize - 12)?.into();
 
         let zip_data = Cursor::new(cursor.read_to_end()?);
         let mut zip = ZipArchive::new(zip_data)?;
@@ -63,62 +94,41 @@ impl SaveData for Me1SaveGame {
         Ok(Self { _begin, zip_offset, _no_mans_land, player, state, _world_save_package })
     }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let Me1SaveGame { _begin, zip_offset, _no_mans_land, player, state, _world_save_package } =
-            self;
-
-        _begin.serialize(output)?;
-        zip_offset.serialize(output)?;
-        output.extend(_no_mans_land);
-
-        let mut zip = Vec::new();
-        {
-            let mut zipper = ZipWriter::new(Cursor::new(&mut zip));
-            let options = FileOptions::default().compression_method(CompressionMethod::DEFLATE);
-
-            // Player
-            {
-                let mut player_data = Vec::new();
-                player.serialize(&mut player_data)?;
-                zipper.start_file("player.sav", options)?;
-                zipper.write_all(&player_data)?;
-            }
-            // State
-            {
-                let mut state_data = Vec::new();
-                state.serialize(&mut state_data)?;
-                zipper.start_file("state.sav", options)?;
-                zipper.write_all(&state_data)?;
-            }
-            // WorldSavePackage
-            if let Some(_world_save_package) = _world_save_package {
-                let mut world_save_package_data = Vec::new();
-                _world_save_package.serialize(&mut world_save_package_data)?;
-                zipper.start_file("WorldSavePackage.sav", options)?;
-                zipper.write_all(&world_save_package_data)?;
-            }
-        }
-        output.extend(&zip);
-
-        Ok(())
-    }
-
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-#[derive(Clone)]
+impl serde::Serialize for Me1SaveGame {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::Error;
+        let Me1SaveGame {
+            _begin,
+            zip_offset,
+            _no_mans_land,
+            player: _,
+            state: _,
+            _world_save_package,
+        } = self;
+
+        let mut s = serializer.serialize_struct("Me1SaveGame", 4)?;
+        s.serialize_field("_begin", _begin)?;
+        s.serialize_field("zip_offset", zip_offset)?;
+        s.serialize_field("_no_mans_land", _no_mans_land)?;
+        s.serialize_field("zip", &self.zip().map_err(Error::custom)?)?;
+        s.end()
+    }
+}
+
+#[derive(Serialize, Clone)]
 pub(super) struct WorldSavePackage {
-    data: Vec<u8>,
+    data: List<u8>,
 }
 
 impl SaveData for WorldSavePackage {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self { data: cursor.read_to_end()?.to_owned() })
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        output.extend(&self.data);
-        Ok(())
+        Ok(Self { data: cursor.read_to_end()?.into() })
     }
 
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
@@ -132,12 +142,12 @@ mod test {
         {fs::File, io::Read},
     };
 
-    use crate::save_data::*;
+    use crate::{save_data::*, unreal};
 
     use super::*;
 
     #[test]
-    fn dezip_deserialize_serialize_zip() -> Result<()> {
+    fn unzip_deserialize_serialize_zip() -> Result<()> {
         let files = [
             "test/Clare00_AutoSave.MassEffectSave", // Avec WorldSavePackage.sav
             "test/Char_01-60-3-2-2-26-6-2018-57-26.MassEffectSave", // Sans
@@ -160,8 +170,7 @@ mod test {
             let now = Instant::now();
 
             // Serialize
-            let mut output = Vec::new();
-            Me1SaveGame::serialize(&me1_save_game, &mut output)?;
+            let output = unreal::Serializer::to_bytes(&me1_save_game)?;
 
             println!("Serialize 1 : {:?}", Instant::now().saturating_duration_since(now));
             let now = Instant::now();
@@ -174,8 +183,7 @@ mod test {
             let now = Instant::now();
 
             // Serialize (again)
-            let mut output_2 = Vec::new();
-            Me1SaveGame::serialize(&me1_save_game, &mut output_2)?;
+            let output_2 = unreal::Serializer::to_bytes(&me1_save_game)?;
 
             println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
 

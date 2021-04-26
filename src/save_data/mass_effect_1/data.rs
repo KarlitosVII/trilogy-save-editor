@@ -1,20 +1,22 @@
 use anyhow::*;
+use serde::Serialize;
 use std::ops::{Deref, DerefMut};
 
 use crate::{
     gui::Gui,
     save_data::{
         common::{appearance::LinearColor, Rotator, Vector},
-        Dummy, ImguiString,
+        Dummy, ImguiString, List,
     },
+    unreal,
 };
 
 use super::{player::Name, SaveCursor, SaveData};
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub struct Data {
     _osef: Dummy<4>,
-    pub properties: Vec<Property>,
+    pub properties: List<Property>,
 }
 
 impl Data {
@@ -33,12 +35,12 @@ impl Data {
             properties.push(property);
         }
 
-        Ok(Self { _osef, properties })
+        Ok(Self { _osef, properties: properties.into() })
     }
 
     pub fn size(&self) -> Result<usize> {
         let mut size = 4;
-        for property in &self.properties {
+        for property in self.properties.iter() {
             size += property.size()?
         }
         Ok(size)
@@ -64,30 +66,14 @@ impl SaveData for Data {
         unreachable!()
     }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        self._osef.serialize(output)?;
-        for property in &self.properties {
-            property.serialize(output)?;
-        }
-        Ok(())
-    }
-
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-}
-
-macro_rules! serialize {
-    ($output:ident, $($vars:ident),+) => {{
-        $(
-            $vars.serialize($output)?;
-        )*
-    }};
 }
 
 fn get_name(names: &[Name], id: u32) -> String {
     names[id as usize].to_string()
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub enum Property {
     Array {
         name_id: u32,
@@ -338,8 +324,7 @@ impl Property {
             Property::Name { .. } => size + 8,
             Property::Object { .. } => size + 4,
             Property::Str { string, .. } => {
-                let mut bytes = Vec::new();
-                string.serialize(&mut bytes)?;
+                let bytes = unreal::Serializer::to_bytes(string)?;
                 size + bytes.len()
             }
             Property::StringRef { .. } => size + 4,
@@ -354,96 +339,16 @@ impl SaveData for Property {
         unreachable!()
     }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        match self {
-            Property::Array { name_id, _osef1, type_id, _osef2, size, _osef3, array } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3);
-
-                let len = array.len() as u32;
-                len.serialize(output)?;
-
-                for item in array.iter() {
-                    SaveData::serialize(item, output)?;
-                }
-            }
-            Property::Bool { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
-            }
-            Property::Byte { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
-            }
-            Property::Float { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
-            }
-            Property::Int { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
-            }
-            Property::Name {
-                name_id,
-                _osef1,
-                type_id,
-                _osef2,
-                size,
-                _osef3,
-                value_name_id,
-                _osef4,
-            } => serialize!(
-                output,
-                name_id,
-                _osef1,
-                type_id,
-                _osef2,
-                size,
-                _osef3,
-                value_name_id,
-                _osef4
-            ),
-            Property::Object { name_id, _osef1, type_id, _osef2, size, _osef3, object_id } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, object_id)
-            }
-            Property::Str { name_id, _osef1, type_id, _osef2, size, _osef3, string } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, string)
-            }
-            Property::StringRef { name_id, _osef1, type_id, _osef2, size, _osef3, value } => {
-                serialize!(output, name_id, _osef1, type_id, _osef2, size, _osef3, value)
-            }
-            Property::Struct {
-                name_id,
-                _osef1,
-                type_id,
-                _osef2,
-                size,
-                _osef3,
-                struct_name_id,
-                _osef4,
-                properties,
-            } => serialize!(
-                output,
-                name_id,
-                _osef1,
-                type_id,
-                _osef2,
-                size,
-                _osef3,
-                struct_name_id,
-                _osef4,
-                properties
-            ),
-            Property::None { name_id, _osef } => serialize!(output, name_id, _osef),
-        };
-        Ok(())
-    }
-
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub enum ArrayType {
     Int(i32),
     Object(i32),
     Vector(Vector),
     String(ImguiString),
-    Properties(Vec<Property>),
+    Properties(List<Property>),
 }
 
 impl ArrayType {
@@ -477,7 +382,7 @@ impl ArrayType {
             properties.push(property);
         }
 
-        Ok(Self::Properties(properties))
+        Ok(Self::Properties(properties.into()))
     }
 
     fn size(&self) -> Result<usize> {
@@ -486,13 +391,12 @@ impl ArrayType {
             ArrayType::Object(_) => 4,
             ArrayType::Vector(_) => 12,
             ArrayType::String(string) => {
-                let mut bytes = Vec::new();
-                string.serialize(&mut bytes)?;
+                let bytes = unreal::Serializer::to_bytes(string)?;
                 bytes.len()
             }
             ArrayType::Properties(properties) => {
                 let mut size = 0;
-                for property in properties {
+                for property in properties.iter() {
                     size += property.size()?
                 }
                 size
@@ -506,30 +410,15 @@ impl SaveData for ArrayType {
         unreachable!()
     }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        match self {
-            ArrayType::Int(value) => value.serialize(output)?,
-            ArrayType::Object(metadata_id) => metadata_id.serialize(output)?,
-            ArrayType::Vector(vector) => vector.serialize(output)?,
-            ArrayType::String(string) => string.serialize(output)?,
-            ArrayType::Properties(properties) => {
-                for property in properties {
-                    property.serialize(output)?;
-                }
-            }
-        }
-        Ok(())
-    }
-
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub enum StructType {
     LinearColor(LinearColor),
     Vector(Vector),
     Rotator(Rotator),
-    Properties(Vec<Property>),
+    Properties(List<Property>),
 }
 
 impl StructType {
@@ -559,7 +448,7 @@ impl StructType {
             properties.push(property);
         }
 
-        Ok(Self::Properties(properties))
+        Ok(Self::Properties(properties.into()))
     }
 
     fn size(&self) -> Result<usize> {
@@ -569,7 +458,7 @@ impl StructType {
             StructType::Rotator(_) => 12,
             StructType::Properties(properties) => {
                 let mut size = 0;
-                for property in properties {
+                for property in properties.iter() {
                     size += property.size()?
                 }
                 size
@@ -581,20 +470,6 @@ impl StructType {
 impl SaveData for StructType {
     fn deserialize(_: &mut SaveCursor) -> Result<Self> {
         unreachable!()
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        match self {
-            StructType::LinearColor(linear_color) => linear_color.serialize(output)?,
-            StructType::Vector(vector) => vector.serialize(output)?,
-            StructType::Rotator(rotator) => rotator.serialize(output)?,
-            StructType::Properties(properties) => {
-                for property in properties {
-                    property.serialize(output)?;
-                }
-            }
-        }
-        Ok(())
     }
 
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}

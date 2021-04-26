@@ -1,8 +1,10 @@
+use serde::Serialize;
+
 use crate::save_data::{common::player::WeaponLoadout, ImguiString};
 
 use super::player::{Power, Weapon, WeaponMod};
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Serialize, SaveData, Default, Clone)]
 pub struct Henchman {
     tag: ImguiString,
     powers: Vec<Power>,

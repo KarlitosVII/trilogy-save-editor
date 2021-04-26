@@ -655,8 +655,8 @@ impl<'ui> Gui<'ui> {
                 }
                 // Toggle head morph
                 // if !is_female {
-                    ui.same_line();
-                    has_head_morph.draw_raw_ui(self, "Enable head morph");
+                ui.same_line();
+                has_head_morph.draw_raw_ui(self, "Enable head morph");
                 // }
                 ui.separator();
 

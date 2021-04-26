@@ -1,4 +1,5 @@
 use anyhow::*;
+use crc::{Crc, CRC_32_BZIP2};
 use flume::{Receiver, Sender};
 use ron::ser::PrettyConfig;
 use std::path::{Path, PathBuf};
@@ -16,6 +17,7 @@ use crate::{
         mass_effect_3::{known_plot::Me3KnownPlot, Me3SaveGame},
         SaveCursor, SaveData,
     },
+    unreal,
 };
 
 pub enum MainEvent {
@@ -100,12 +102,24 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
 }
 
 async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut output = Vec::new();
+    let output = match save_game {
+        SaveGame::MassEffect1(save_game) => unreal::Serializer::to_bytes(&save_game)?,
+        SaveGame::MassEffect2(save_game) => {
+            let mut output = unreal::Serializer::to_bytes(&save_game)?;
 
-    match save_game {
-        SaveGame::MassEffect1(save_game) => Me1SaveGame::serialize(&save_game, &mut output)?,
-        SaveGame::MassEffect2(save_game) => Me2SaveGame::serialize(&save_game, &mut output)?,
-        SaveGame::MassEffect3(save_game) => Me3SaveGame::serialize(&save_game, &mut output)?,
+            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+            let checksum = crc.checksum(&output);
+            output.extend(&u32::to_le_bytes(checksum));
+            output
+        }
+        SaveGame::MassEffect3(save_game) => {
+            let mut output = unreal::Serializer::to_bytes(&save_game)?;
+
+            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+            let checksum = crc.checksum(&output);
+            output.extend(&u32::to_le_bytes(checksum));
+            output
+        }
     };
 
     // Backup si fichier existe

@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::save_data::{
     common::{
         appearance::Appearance,
@@ -6,7 +8,7 @@ use crate::save_data::{
     ImguiString,
 };
 
-#[derive(SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 pub struct Player {
     pub is_female: bool,
     pub class_name: ImguiString,
@@ -37,7 +39,7 @@ pub struct Player {
     class_friendly_name: i32,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
 pub struct Power {
     name: ImguiString,
     rank: f32,
@@ -45,7 +47,7 @@ pub struct Power {
     wheel_display_index: i32,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
 struct Weapon {
     class_name: ImguiString,
     ammo_used_count: i32,
@@ -55,7 +57,7 @@ struct Weapon {
     ammo_power_name: ImguiString,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
 struct Hotkey {
     pawn_name: ImguiString,
     power_id: i32,
