@@ -32,7 +32,7 @@ tokio = { version = "1.0", features = [
 # Sync
 # parking_lot = "0.11"
 flume = { version = "0.10", features = ["async"], default-features = false }
-# Parsing
+# (De)Serializers
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.6", features = ["indexmap"], default-features = false }
 # Utils

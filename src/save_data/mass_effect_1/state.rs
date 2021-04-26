@@ -1,19 +1,20 @@
 use anyhow::*;
+use serde::Serialize;
 
 use crate::{
     gui::Gui,
-    save_data::{common::plot::Me1PlotTable, Dummy, ImguiString},
+    save_data::{common::plot::Me1PlotTable, Dummy, ImguiString, List},
 };
 
 use super::{SaveCursor, SaveData};
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub struct State {
     _begin: Dummy<12>,
     base_level_name: ImguiString,
     _osef1: Dummy<24>,
     pub plot: Me1PlotTable,
-    _osef2: Vec<u8>,
+    _osef2: List<u8>,
 }
 
 impl SaveData for State {
@@ -22,20 +23,9 @@ impl SaveData for State {
         let base_level_name = SaveData::deserialize(cursor)?;
         let _osef1 = SaveData::deserialize(cursor)?;
         let plot = SaveData::deserialize(cursor)?;
-        let _osef2 = cursor.read_to_end()?.to_owned();
+        let _osef2 = cursor.read_to_end()?.into();
 
         Ok(Self { _begin, base_level_name, _osef1, plot, _osef2 })
-    }
-
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        let Self { _begin, base_level_name, _osef1, plot, _osef2 } = self;
-
-        _begin.serialize(output)?;
-        base_level_name.serialize(output)?;
-        _osef1.serialize(output)?;
-        plot.serialize(output)?;
-        output.extend(_osef2);
-        Ok(())
     }
 
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
@@ -52,7 +42,7 @@ mod test {
     };
     use zip::ZipArchive;
 
-    use crate::save_data::*;
+    use crate::{save_data::*, unreal};
 
     use super::*;
 
@@ -83,8 +73,7 @@ mod test {
         let state = State::deserialize(&mut cursor)?;
 
         // Serialize
-        let mut output = Vec::new();
-        State::serialize(&state, &mut output)?;
+        let output = unreal::Serializer::to_bytes(&state)?;
 
         // Check serialized = state_data
         let cmp = state_data.chunks(4).zip(output.chunks(4));

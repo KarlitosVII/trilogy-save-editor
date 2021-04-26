@@ -1,11 +1,11 @@
 use anyhow::*;
+use serde::{Deserialize, Serialize};
 
 use crate::{gui::Gui, save_data::Dummy};
 
 use super::{
     common::{
-        plot::Me1PlotTable, Checksum, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord,
-        Vector,
+        plot::Me1PlotTable, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector,
     },
     ImguiString, SaveCursor, SaveData,
 };
@@ -24,7 +24,7 @@ pub mod known_plot;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[derive(SaveData, Clone)]
+#[derive(Serialize, SaveData, Clone)]
 pub struct Me2SaveGame {
     _version: Version,
     _debug_name: ImguiString,
@@ -48,15 +48,14 @@ pub struct Me2SaveGame {
     pub me1_plot: Me1PlotTable,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
-    _checksum: Checksum,
 }
 
-#[derive(Clone)]
+#[derive(Serialize, Clone)]
 pub struct Version(i32);
 
 impl SaveData for Version {
     fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let version = <i32>::deserialize(cursor)?;
+        let version = SaveData::deserialize(cursor)?;
 
         ensure!(
             version == 29,
@@ -66,14 +65,10 @@ impl SaveData for Version {
         Ok(Self(version))
     }
 
-    fn serialize(&self, output: &mut Vec<u8>) -> Result<()> {
-        <i32>::serialize(&self.0, output)
-    }
-
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
-#[derive(SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 pub enum Difficulty {
     Casual,
     Normal,
@@ -82,13 +77,13 @@ pub enum Difficulty {
     Insanity,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
 struct DependentDlc {
     id: i32,
     name: ImguiString,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
 struct LevelTreasure {
     level_name: ImguiString,
     credits: i32,
@@ -97,14 +92,14 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
     NoDecisions,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
 struct ObjectiveMarker {
     marker_owned_data: ImguiString,
     marker_offset: Vector,
@@ -113,7 +108,7 @@ struct ObjectiveMarker {
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 enum ObjectiveMarkerIconType {
     None,
     Attack,
@@ -130,12 +125,13 @@ impl Default for ObjectiveMarkerIconType {
 #[cfg(test)]
 mod test {
     use anyhow::*;
+    use crc::{Crc, CRC_32_BZIP2};
     use std::{
         time::Instant,
         {fs::File, io::Read},
     };
 
-    use crate::save_data::*;
+    use crate::{save_data::*, unreal};
 
     use super::*;
 
@@ -157,8 +153,12 @@ mod test {
         let now = Instant::now();
 
         // Serialize
-        let mut output = Vec::new();
-        Me2SaveGame::serialize(&me2_save_game, &mut output)?;
+        let mut output = unreal::Serializer::to_bytes(&me2_save_game)?;
+
+        // Checksum
+        let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+        let checksum = crc.checksum(&output);
+        output.extend(&u32::to_le_bytes(checksum));
 
         println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
 

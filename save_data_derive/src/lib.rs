@@ -33,13 +33,6 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
         }
     });
 
-    let serialize_fields = fields.iter().map(|f| {
-        let field_name = &f.ident;
-        quote! {
-            crate::save_data::SaveData::serialize(&self.#field_name, output)?;
-        }
-    });
-
     let let_fields = fields.iter().filter_map(|f| {
         if f.ident.as_ref().unwrap().to_string().starts_with('_') {
             None
@@ -70,11 +63,6 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
                 Ok(Self {
                     #(#deserialize_fields),*
                 })
-            }
-
-            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()> {
-                #(#serialize_fields)*
-                Ok(())
             }
 
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
@@ -142,10 +130,6 @@ fn impl_save_data_enum(
                     #(#repr_variants),*,
                     _ => anyhow::bail!("invalid enum representation"),
                 })
-            }
-
-            fn serialize(&self, output: &mut Vec<u8>) -> anyhow::Result<()> {
-                <#repr_type as crate::save_data::SaveData>::serialize(&(self.clone() as #repr_type), output)
             }
 
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {

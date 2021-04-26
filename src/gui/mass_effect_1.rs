@@ -9,7 +9,7 @@ use crate::save_data::{
         player::Player,
         Me1SaveGame,
     },
-    ImguiString, SaveData,
+    ImguiString, List, SaveData,
 };
 
 use super::*;
@@ -306,7 +306,7 @@ impl<'ui> Gui<'ui> {
 
     fn me1_find_struct_property<'a>(
         player: &Player, properties: &'a mut [Property], property_name: &str,
-    ) -> Option<&'a mut Vec<Property>> {
+    ) -> Option<&'a mut List<Property>> {
         properties.iter_mut().find_map(|property| match property {
             Property::Struct {
                 name_id, properties: StructType::Properties(properties), ..

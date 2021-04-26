@@ -1,8 +1,9 @@
 use indexmap::IndexMap;
+use serde::Serialize;
 
 use crate::save_data::common::plot::{BoolVec, PlotCodex};
 
-#[derive(SaveData, Clone)]
+#[derive(Serialize, SaveData, Clone)]
 pub struct PlotTable {
     pub bool_variables: BoolVec,
     pub int_variables: IndexMap<i32, i32>,
@@ -14,14 +15,14 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[derive(SaveData, Clone)]
+#[derive(Serialize, SaveData, Clone)]
 pub struct Me1PlotTable {
     bool_variables: BoolVec,
     int_variables: IndexMap<i32, i32>,
     float_variables: IndexMap<i32, f32>,
 }
 
-#[derive(SaveData, Default, Clone)]
+#[derive(Serialize, SaveData, Default, Clone)]
 pub struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,
