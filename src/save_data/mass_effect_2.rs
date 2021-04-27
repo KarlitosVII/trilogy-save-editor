@@ -1,5 +1,5 @@
-use anyhow::*;
-use serde::{Deserialize, Serialize};
+use anyhow::{ensure, Result};
+use serde::{de, Deserialize, Serialize};
 
 use crate::{gui::Gui, save_data::Dummy};
 
@@ -24,7 +24,7 @@ pub mod known_plot;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 pub struct Me2SaveGame {
     _version: Version,
     _debug_name: ImguiString,
@@ -66,6 +66,23 @@ impl SaveData for Version {
     }
 
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+}
+
+impl<'de> serde::Deserialize<'de> for Version {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let version: i32 = serde::Deserialize::deserialize(deserializer)?;
+
+        if version != 29 {
+            return Err(de::Error::custom(
+                "Wrong save version, please use a save from the last version of the game",
+            ));
+        }
+
+        Ok(Self(version))
+    }
 }
 
 #[derive(Deserialize, Serialize, SaveData, Clone)]
@@ -124,14 +141,14 @@ impl Default for ObjectiveMarkerIconType {
 
 #[cfg(test)]
 mod test {
-    use anyhow::*;
+    use anyhow::Result;
     use crc::{Crc, CRC_32_BZIP2};
     use std::{
         time::Instant,
         {fs::File, io::Read},
     };
 
-    use crate::{save_data::*, unreal};
+    use crate::unreal;
 
     use super::*;
 
@@ -146,14 +163,13 @@ mod test {
         let now = Instant::now();
 
         // Deserialize
-        let mut cursor = SaveCursor::new(input.clone());
-        let me2_save_game = Me2SaveGame::deserialize(&mut cursor)?;
+        let me2_save_game: Me2SaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
 
         println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
         let now = Instant::now();
 
         // Serialize
-        let mut output = unreal::Serializer::to_bytes(&me2_save_game)?;
+        let mut output = unreal::Serializer::to_byte_buf(&me2_save_game)?;
 
         // Checksum
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);
@@ -163,12 +179,7 @@ mod test {
         println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
 
         // Check serialized = input
-        let cmp = input.chunks(4).zip(output.chunks(4));
-        for (i, (a, b)) in cmp.enumerate() {
-            if a != b {
-                panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
-            }
-        }
+        assert_eq!(input, output);
 
         Ok(())
     }

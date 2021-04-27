@@ -1,9 +1,11 @@
-use std::ops::{Deref, DerefMut};
-
-use anyhow::*;
+use anyhow::Result;
 use bitvec::prelude::*;
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Serialize};
+use std::{
+    fmt,
+    ops::{Deref, DerefMut},
+};
 
 use crate::{
     gui::Gui,
@@ -42,6 +44,36 @@ impl SaveData for BoolVec {
     }
 }
 
+impl<'de> serde::Deserialize<'de> for BoolVec {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct BoolVecVisitor;
+        impl<'de> de::Visitor<'de> for BoolVecVisitor {
+            type Value = BoolVec;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a seq")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::SeqAccess<'de>,
+            {
+                let mut bitfields: Vec<u32> = Vec::new();
+                while let Some(element) = seq.next_element()? {
+                    bitfields.push(element);
+                }
+
+                let variables = BitVec::from_vec(bitfields);
+                Ok(BoolVec(variables))
+            }
+        }
+        deserializer.deserialize_seq(BoolVecVisitor)
+    }
+}
+
 impl serde::Serialize for BoolVec {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -52,7 +84,7 @@ impl serde::Serialize for BoolVec {
     }
 }
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 pub struct Me1PlotTable {
     pub bool_variables: BoolVec,
     pub int_variables: Vec<i32>,

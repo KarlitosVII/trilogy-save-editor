@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_data::common::plot::{BoolVec, PlotCodex};
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 pub struct PlotTable {
     pub bool_variables: BoolVec,
     pub int_variables: Vec<i32>,

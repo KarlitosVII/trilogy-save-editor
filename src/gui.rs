@@ -1,4 +1,4 @@
-use anyhow::*;
+use anyhow::Error;
 use flume::{Receiver, Sender};
 use if_chain::if_chain;
 use imgui::{Ui, *};

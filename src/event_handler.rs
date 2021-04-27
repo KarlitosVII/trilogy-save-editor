@@ -1,4 +1,4 @@
-use anyhow::*;
+use anyhow::{Context, Result};
 use crc::{Crc, CRC_32_BZIP2};
 use flume::{Receiver, Sender};
 use ron::ser::PrettyConfig;
@@ -79,18 +79,18 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
     }
 
     if let Some(ext) = path.extension() {
-        let mut cursor = SaveCursor::new(input);
         let save_game = match ext.to_string_lossy().to_lowercase().as_str() {
             "masseffectsave" => {
+                let mut cursor = SaveCursor::new(input);
                 SaveGame::MassEffect1(Box::new(Me1SaveGame::deserialize(&mut cursor)?))
             }
             _ => {
-                let is_me2 = mass_effect_2::Version::deserialize(&mut cursor).is_ok();
-                cursor.rshift_position(4);
+                let is_me2 =
+                    unreal::Deserializer::from_bytes::<mass_effect_2::Version>(&input).is_ok();
                 if is_me2 {
-                    SaveGame::MassEffect2(Box::new(Me2SaveGame::deserialize(&mut cursor)?))
+                    SaveGame::MassEffect2(Box::new(unreal::Deserializer::from_bytes(&input)?))
                 } else {
-                    SaveGame::MassEffect3(Box::new(Me3SaveGame::deserialize(&mut cursor)?))
+                    SaveGame::MassEffect3(Box::new(unreal::Deserializer::from_bytes(&input)?))
                 }
             }
         };
@@ -103,9 +103,9 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
 
 async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
     let output = match save_game {
-        SaveGame::MassEffect1(save_game) => unreal::Serializer::to_bytes(&save_game)?,
+        SaveGame::MassEffect1(save_game) => unreal::Serializer::to_byte_buf(&save_game)?,
         SaveGame::MassEffect2(save_game) => {
-            let mut output = unreal::Serializer::to_bytes(&save_game)?;
+            let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 
             let crc = Crc::<u32>::new(&CRC_32_BZIP2);
             let checksum = crc.checksum(&output);
@@ -113,7 +113,7 @@ async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>)
             output
         }
         SaveGame::MassEffect3(save_game) => {
-            let mut output = unreal::Serializer::to_bytes(&save_game)?;
+            let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 
             let crc = Crc::<u32>::new(&CRC_32_BZIP2);
             let checksum = crc.checksum(&output);

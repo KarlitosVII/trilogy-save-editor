@@ -35,19 +35,19 @@ impl Me1SaveGame {
 
             // Player
             {
-                let player_data = unreal::Serializer::to_bytes(&self.player)?;
+                let player_data = unreal::Serializer::to_byte_buf(&self.player)?;
                 zipper.start_file("player.sav", options)?;
                 zipper.write_all(&player_data)?;
             }
             // State
             {
-                let state_data = unreal::Serializer::to_bytes(&self.state)?;
+                let state_data = unreal::Serializer::to_byte_buf(&self.state)?;
                 zipper.start_file("state.sav", options)?;
                 zipper.write_all(&state_data)?;
             }
             // WorldSavePackage
             if let Some(_world_save_package) = &self._world_save_package {
-                let world_save_package_data = unreal::Serializer::to_bytes(_world_save_package)?;
+                let world_save_package_data = unreal::Serializer::to_byte_buf(_world_save_package)?;
                 zipper.start_file("WorldSavePackage.sav", options)?;
                 zipper.write_all(&world_save_package_data)?;
             }
@@ -136,7 +136,7 @@ impl SaveData for WorldSavePackage {
 
 #[cfg(test)]
 mod test {
-    use anyhow::*;
+    use anyhow::Result;
     use std::{
         time::Instant,
         {fs::File, io::Read},
@@ -170,7 +170,7 @@ mod test {
             let now = Instant::now();
 
             // Serialize
-            let output = unreal::Serializer::to_bytes(&me1_save_game)?;
+            let output = unreal::Serializer::to_byte_buf(&me1_save_game)?;
 
             println!("Serialize 1 : {:?}", Instant::now().saturating_duration_since(now));
             let now = Instant::now();
@@ -183,7 +183,7 @@ mod test {
             let now = Instant::now();
 
             // Serialize (again)
-            let output_2 = unreal::Serializer::to_bytes(&me1_save_game)?;
+            let output_2 = unreal::Serializer::to_byte_buf(&me1_save_game)?;
 
             println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
 

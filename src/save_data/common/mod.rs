@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Serialize};
 
 use super::ImguiString;
 
@@ -12,6 +12,23 @@ pub enum EndGameState {
     NotFinished,
     OutInABlazeOfGlory,
     LivedToFightAgain,
+}
+
+impl<'de> serde::Deserialize<'de> for EndGameState {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let idx: u32 = serde::Deserialize::deserialize(deserializer)?;
+
+        let end_game_state = match idx {
+            0 => EndGameState::NotFinished,
+            1 => EndGameState::OutInABlazeOfGlory,
+            2 => EndGameState::LivedToFightAgain,
+            _ => return Err(de::Error::custom("invalid EndGameState variant")),
+        };
+        Ok(end_game_state)
+    }
 }
 
 impl serde::Serialize for EndGameState {

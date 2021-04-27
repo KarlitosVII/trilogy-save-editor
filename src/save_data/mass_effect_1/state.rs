@@ -1,4 +1,4 @@
-use anyhow::*;
+use anyhow::Result;
 use serde::Serialize;
 
 use crate::{
@@ -35,7 +35,7 @@ impl SaveData for State {
 
 #[cfg(test)]
 mod test {
-    use anyhow::*;
+    use anyhow::Result;
     use std::{
         fs::File,
         io::{Cursor, Read},
@@ -73,7 +73,7 @@ mod test {
         let state = State::deserialize(&mut cursor)?;
 
         // Serialize
-        let output = unreal::Serializer::to_bytes(&state)?;
+        let output = unreal::Serializer::to_byte_buf(&state)?;
 
         // Check serialized = state_data
         let cmp = state_data.chunks(4).zip(output.chunks(4));

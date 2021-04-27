@@ -1,4 +1,4 @@
-use anyhow::*;
+use anyhow::Result;
 use serde::{ser::SerializeStruct, Serialize};
 use std::{
     cell::RefCell,
@@ -179,7 +179,7 @@ pub struct Name {
 
 impl Name {
     fn size(&self) -> Result<usize> {
-        let bytes = unreal::Serializer::to_bytes(&self.string)?;
+        let bytes = unreal::Serializer::to_byte_buf(&self.string)?;
         Ok(bytes.len() + 8)
     }
 }
@@ -225,7 +225,7 @@ pub struct Object {
 
 #[cfg(test)]
 mod test {
-    use anyhow::*;
+    use anyhow::Result;
     use std::{
         fs::File,
         io::{Cursor, Read},
@@ -263,7 +263,7 @@ mod test {
         let player = Player::deserialize(&mut cursor)?;
 
         // Serialize
-        let output = unreal::Serializer::to_bytes(&player)?;
+        let output = unreal::Serializer::to_byte_buf(&player)?;
 
         // Check serialized = player_data
         let cmp = player_data.chunks(4).zip(output.chunks(4));

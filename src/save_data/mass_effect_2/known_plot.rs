@@ -17,7 +17,7 @@ pub struct Me2KnownPlot {
 
 #[cfg(test)]
 mod test {
-    use anyhow::*;
+    use anyhow::Result;
     use std::{fs::File, io::Read};
 
     use super::*;
