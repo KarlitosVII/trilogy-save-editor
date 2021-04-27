@@ -8,7 +8,7 @@ use std::fmt;
 
 use crate::{
     gui::Gui,
-    save_data::{ImguiString, SaveCursor, SaveData},
+    save_data::{ImguiString, SaveData},
 };
 
 use super::Vector;
@@ -45,12 +45,6 @@ pub struct HasHeadMorph {
 }
 
 impl SaveData for HasHeadMorph {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let has_head_morph: bool = SaveData::deserialize(cursor)?;
-        let head_morph = if has_head_morph { Some(SaveData::deserialize(cursor)?) } else { None };
-        Ok(Self { has_head_morph, head_morph })
-    }
-
     fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
         self.has_head_morph.draw_raw_ui(gui, "has_head_morph");
         if let Some(head_morph) = &mut self.head_morph {
@@ -82,7 +76,7 @@ impl<'de> serde::Deserialize<'de> for HasHeadMorph {
                 Ok(HasHeadMorph { has_head_morph, head_morph })
             }
         }
-        deserializer.deserialize_tuple(2, HasHeadMorphVisitor)
+        deserializer.deserialize_tuple_struct("HasHeadMorph", 2, HasHeadMorphVisitor)
     }
 }
 
@@ -146,15 +140,6 @@ pub struct VectorParameter {
 pub struct LinearColor([f32; 4]);
 
 impl SaveData for LinearColor {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self([
-            SaveData::deserialize(cursor)?,
-            SaveData::deserialize(cursor)?,
-            SaveData::deserialize(cursor)?,
-            SaveData::deserialize(cursor)?,
-        ]))
-    }
-
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_color(ident, &mut self.0);
     }
@@ -165,8 +150,11 @@ impl<'de> serde::Deserialize<'de> for LinearColor {
     where
         D: serde::Deserializer<'de>,
     {
-        let (r, g, b, a): (f32, f32, f32, f32) = serde::Deserialize::deserialize(deserializer)?;
-        Ok(LinearColor([r, g, b, a]))
+        #[derive(Deserialize)]
+        struct LinearColor(f32, f32, f32, f32);
+
+        let LinearColor(r, g, b, a) = serde::Deserialize::deserialize(deserializer)?;
+        Ok(Self([r, g, b, a]))
     }
 }
 

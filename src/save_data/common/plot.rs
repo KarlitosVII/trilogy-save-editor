@@ -7,10 +7,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use crate::{
-    gui::Gui,
-    save_data::{SaveCursor, SaveData},
-};
+use crate::{gui::Gui, save_data::SaveData};
 
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
@@ -32,13 +29,6 @@ impl DerefMut for BoolVec {
 }
 
 impl SaveData for BoolVec {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let bitfields: Vec<u32> = SaveData::deserialize(cursor)?;
-
-        let variables = BitVec::from_vec(bitfields);
-        Ok(Self(variables))
-    }
-
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_boolvec(ident, &mut self.0);
     }

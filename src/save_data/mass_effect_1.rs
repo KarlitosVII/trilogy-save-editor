@@ -1,11 +1,19 @@
 use anyhow::Result;
-use serde::{ser::SerializeStruct, Serialize};
-use std::io::{Cursor, Read, Write};
+use serde::{
+    de,
+    ser::{SerializeSeq, SerializeStruct},
+    Deserialize, Serialize,
+};
+use std::{
+    fmt,
+    io::{Cursor, Read, Write},
+    ops::{Deref, DerefMut},
+};
 use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
-use crate::{gui::Gui, save_data::Dummy, unreal};
+use crate::{save_data::Dummy, unreal};
 
-use super::{List, SaveCursor, SaveData};
+use super::SaveData;
 
 pub mod player;
 use self::player::*;
@@ -15,6 +23,90 @@ use self::state::*;
 
 pub mod data;
 pub mod known_plot;
+
+// List<T> : Vec<T> qui se (dé)sérialise sans précision de longueur
+#[derive(Clone)]
+pub struct List<T>(Vec<T>)
+where
+    T: Serialize + Clone;
+
+impl<T> Deref for List<T>
+where
+    T: Serialize + Clone,
+{
+    type Target = Vec<T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for List<T>
+where
+    T: Serialize + Clone,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<T> From<Vec<T>> for List<T>
+where
+    T: Serialize + Clone,
+{
+    fn from(from: Vec<T>) -> Self {
+        Self(from)
+    }
+}
+
+impl<T> From<&[T]> for List<T>
+where
+    T: Serialize + Clone,
+{
+    fn from(from: &[T]) -> Self {
+        Self(from.to_vec())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for List<u8> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct ByteListVisitor;
+        impl<'de> de::Visitor<'de> for ByteListVisitor {
+            type Value = List<u8>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a byte buf")
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(List(v))
+            }
+        }
+        deserializer.deserialize_byte_buf(ByteListVisitor)
+    }
+}
+
+impl<T> serde::Serialize for List<T>
+where
+    T: Serialize + Clone,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut s = serializer.serialize_seq(None)?;
+        for element in &self.0 {
+            s.serialize_element(element)?;
+        }
+        s.end()
+    }
+}
 
 #[derive(Clone)]
 pub struct Me1SaveGame {
@@ -27,6 +119,35 @@ pub struct Me1SaveGame {
 }
 
 impl Me1SaveGame {
+    fn unzip(input: &[u8]) -> Result<(Player, State, Option<WorldSavePackage>)> {
+        let mut zip = ZipArchive::new(Cursor::new(input))?;
+
+        let player: Player = {
+            let mut bytes = Vec::new();
+            zip.by_name("player.sav")?.read_to_end(&mut bytes)?;
+            unreal::Deserializer::from_bytes(&bytes)?
+        };
+
+        let state: State = {
+            let mut bytes = Vec::new();
+            zip.by_name("state.sav")?.read_to_end(&mut bytes)?;
+            unreal::Deserializer::from_bytes(&bytes)?
+        };
+
+        let _world_save_package: Option<WorldSavePackage> =
+            if zip.file_names().any(|f| f == "WorldSavePackage.sav") {
+                Some({
+                    let mut bytes = Vec::new();
+                    zip.by_name("WorldSavePackage.sav")?.read_to_end(&mut bytes)?;
+                    unreal::Deserializer::from_bytes(&bytes)?
+                })
+            } else {
+                None
+            };
+
+        Ok((player, state, _world_save_package))
+    }
+
     fn zip(&self) -> Result<List<u8>> {
         let mut zip = Vec::new();
         {
@@ -56,45 +177,48 @@ impl Me1SaveGame {
     }
 }
 
-impl SaveData for Me1SaveGame {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let _begin: Dummy<8> = SaveData::deserialize(cursor)?;
-        let zip_offset: u32 = SaveData::deserialize(cursor)?;
-        let _no_mans_land = cursor.read(zip_offset as usize - 12)?.into();
+impl<'de> serde::Deserialize<'de> for Me1SaveGame {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct Me1SaveGameVisitor;
+        impl<'de> de::Visitor<'de> for Me1SaveGameVisitor {
+            type Value = Me1SaveGame;
 
-        let zip_data = Cursor::new(cursor.read_to_end()?);
-        let mut zip = ZipArchive::new(zip_data)?;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a seq")
+            }
 
-        let player: Player = {
-            let mut bytes = Vec::new();
-            zip.by_name("player.sav")?.read_to_end(&mut bytes)?;
-            let mut cursor = SaveCursor::new(bytes);
-            SaveData::deserialize(&mut cursor)?
-        };
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::SeqAccess<'de>,
+            {
+                let _begin = seq.next_element()?.unwrap();
+                let zip_offset = seq.next_element()?.unwrap();
 
-        let state: State = {
-            let mut bytes = Vec::new();
-            zip.by_name("state.sav")?.read_to_end(&mut bytes)?;
-            let mut cursor = SaveCursor::new(bytes);
-            SaveData::deserialize(&mut cursor)?
-        };
+                // No man's land
+                let mut _no_mans_land = Vec::new();
+                for _ in 0..(zip_offset - 12) {
+                    _no_mans_land.push(seq.next_element()?.unwrap());
+                }
 
-        let _world_save_package: Option<WorldSavePackage> =
-            if zip.file_names().any(|f| f == "WorldSavePackage.sav") {
-                Some({
-                    let mut bytes = Vec::new();
-                    zip.by_name("WorldSavePackage.sav")?.read_to_end(&mut bytes)?;
-                    let mut cursor = SaveCursor::new(bytes);
-                    SaveData::deserialize(&mut cursor)?
+                let zip_data: List<u8> = seq.next_element()?.unwrap();
+                let (player, state, _world_save_package) =
+                    Me1SaveGame::unzip(&zip_data).map_err(de::Error::custom)?;
+
+                Ok(Me1SaveGame {
+                    _begin,
+                    zip_offset,
+                    _no_mans_land: _no_mans_land.into(),
+                    player,
+                    state,
+                    _world_save_package,
                 })
-            } else {
-                None
-            };
-
-        Ok(Self { _begin, zip_offset, _no_mans_land, player, state, _world_save_package })
+            }
+        }
+        deserializer.deserialize_tuple_struct("Me1SaveGame", usize::MAX, Me1SaveGameVisitor)
     }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 impl serde::Serialize for Me1SaveGame {
@@ -121,17 +245,9 @@ impl serde::Serialize for Me1SaveGame {
     }
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 pub(super) struct WorldSavePackage {
     data: List<u8>,
-}
-
-impl SaveData for WorldSavePackage {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self { data: cursor.read_to_end()?.into() })
-    }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 #[cfg(test)]
@@ -142,7 +258,7 @@ mod test {
         {fs::File, io::Read},
     };
 
-    use crate::{save_data::*, unreal};
+    use crate::unreal;
 
     use super::*;
 
@@ -163,8 +279,7 @@ mod test {
             let now = Instant::now();
 
             // Deserialize
-            let mut cursor = SaveCursor::new(input);
-            let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
+            let me1_save_game: Me1SaveGame = unreal::Deserializer::from_bytes(&input)?;
 
             println!("Deserialize 1 : {:?}", Instant::now().saturating_duration_since(now));
             let now = Instant::now();
@@ -176,8 +291,7 @@ mod test {
             let now = Instant::now();
 
             // Deserialize (again)
-            let mut cursor = SaveCursor::new(output.clone());
-            let me1_save_game = Me1SaveGame::deserialize(&mut cursor)?;
+            let me1_save_game: Me1SaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
 
             println!("Deserialize 2 : {:?}", Instant::now().saturating_duration_since(now));
             let now = Instant::now();
@@ -188,12 +302,15 @@ mod test {
             println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
 
             // Check 2nd serialize = first serialize
-            let cmp = output.chunks(4).zip(output_2.chunks(4));
-            for (i, (a, b)) in cmp.enumerate() {
-                if a != b {
-                    panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
-                }
-            }
+            // let cmp = output.chunks(4).zip(output_2.chunks(4));
+            // for (i, (a, b)) in cmp.enumerate() {
+            //     if a != b {
+            //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+            //     }
+            // }
+
+            // Check 2nd serialize = first serialize
+            assert_eq!(output, output_2);
         }
         Ok(())
     }
