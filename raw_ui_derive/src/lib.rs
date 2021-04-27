@@ -7,18 +7,18 @@ use syn::{
     punctuated::Punctuated, token::Comma,
 };
 
-#[proc_macro_derive(SaveData)]
-pub fn save_data_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(RawUi)]
+pub fn raw_ui_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
 
     match ast.data {
-        syn::Data::Struct(ref s) => impl_save_data_struct(&ast, &s.fields),
-        syn::Data::Enum(ref e) => impl_save_data_enum(&ast, &e.variants),
+        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields),
+        syn::Data::Enum(ref e) => impl_raw_ui_enum(&ast, &e.variants),
         _ => panic!("union not supported"),
     }
 }
 
-fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream {
+fn impl_raw_ui_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream {
     let fields = match *fields {
         syn::Fields::Named(ref fields) => &fields.named,
         _ => panic!("non named fields not supported"),
@@ -33,14 +33,14 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
             let field_name = &f.ident;
             let field_string = field_name.as_ref().unwrap().to_string();
             Some(quote! {
-                (&mut self.#field_name  as &mut dyn crate::save_data::SaveData, #field_string)
+                (&mut self.#field_name  as &mut dyn crate::save_data::RawUi, #field_string)
             })
         }
     });
 
     let gen = quote! {
         #[automatically_derived]
-        impl crate::save_data::SaveData for #name {
+        impl crate::save_data::RawUi for #name {
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
                 let mut fields = [#(#draw_fields),*];
                 gui.draw_struct(ident, &mut fields);
@@ -50,7 +50,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
     gen.into()
 }
 
-fn impl_save_data_enum(
+fn impl_raw_ui_enum(
     ast: &syn::DeriveInput, variants: &Punctuated<Variant, Comma>,
 ) -> TokenStream {
     let name = &ast.ident;
@@ -87,7 +87,7 @@ fn impl_save_data_enum(
 
     let gen = quote! {
         #[automatically_derived]
-        impl crate::save_data::SaveData for #name {
+        impl crate::save_data::RawUi for #name {
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
                 #(#let_variants)*
 

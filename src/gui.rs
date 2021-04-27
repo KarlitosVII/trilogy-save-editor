@@ -16,7 +16,7 @@ use crate::{
         mass_effect_1::known_plot::Me1KnownPlot,
         mass_effect_2::known_plot::Me2KnownPlot,
         mass_effect_3::known_plot::Me3KnownPlot,
-        SaveData,
+        RawUi,
     },
 };
 
@@ -299,7 +299,7 @@ impl<'ui> Gui<'ui> {
     }
 
     // View widgets
-    pub fn draw_struct(&self, ident: &str, fields: &mut [(&mut dyn SaveData, &str)]) {
+    pub fn draw_struct(&self, ident: &str, fields: &mut [(&mut dyn RawUi, &str)]) {
         if let Some(_t) = self.push_tree_node(ident) {
             if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
                 for (field, ident) in fields {
@@ -340,7 +340,7 @@ impl<'ui> Gui<'ui> {
 
     pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
     where
-        T: SaveData + Default,
+        T: RawUi + Default,
     {
         let ui = self.ui;
 
@@ -391,8 +391,8 @@ impl<'ui> Gui<'ui> {
 
     pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
     where
-        K: SaveData + Eq + Hash + Default + Display,
-        V: SaveData + Default,
+        K: RawUi + Eq + Hash + Default + Display,
+        V: RawUi + Default,
     {
         let ui = self.ui;
 

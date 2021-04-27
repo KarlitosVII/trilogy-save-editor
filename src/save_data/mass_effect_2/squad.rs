@@ -4,7 +4,7 @@ use crate::save_data::{common::player::WeaponLoadout, ImguiString};
 
 use super::player::Power;
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Henchman {
     tag: ImguiString,
     powers: Vec<Power>,

@@ -3,7 +3,7 @@
 #![warn(clippy::all)]
 
 #[macro_use]
-extern crate save_data_derive;
+extern crate raw_ui_derive;
 
 use std::panic::{self, PanicInfo};
 use tokio::task;

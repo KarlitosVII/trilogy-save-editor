@@ -7,7 +7,7 @@ use crate::{
     save_data::{common::plot::Me1PlotTable, Dummy, ImguiString},
 };
 
-use super::{List, SaveData};
+use super::{List, RawUi};
 
 #[derive(Serialize, Clone)]
 pub struct State {
@@ -18,7 +18,7 @@ pub struct State {
     _osef2: List<u8>,
 }
 
-impl SaveData for State {
+impl RawUi for State {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         self.plot.draw_raw_ui(gui, ident);
     }

@@ -24,7 +24,7 @@ pub mod known_plot;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me2SaveGame {
     _version: Version,
     _debug_name: ImguiString,
@@ -70,7 +70,7 @@ impl<'de> serde::Deserialize<'de> for Version {
     }
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub enum Difficulty {
     Casual,
     Normal,
@@ -79,13 +79,13 @@ pub enum Difficulty {
     Insanity,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct DependentDlc {
     id: i32,
     name: ImguiString,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct LevelTreasure {
     level_name: ImguiString,
     credits: i32,
@@ -94,14 +94,14 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
     NoDecisions,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct ObjectiveMarker {
     marker_owned_data: ImguiString,
     marker_offset: Vector,
@@ -110,7 +110,7 @@ struct ObjectiveMarker {
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 enum ObjectiveMarkerIconType {
     None,
     Attack,

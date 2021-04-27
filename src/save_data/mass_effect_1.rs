@@ -13,7 +13,7 @@ use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
 use crate::{save_data::Dummy, unreal};
 
-use super::SaveData;
+use super::RawUi;
 
 pub mod player;
 use self::player::*;

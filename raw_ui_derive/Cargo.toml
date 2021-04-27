@@ -1,5 +1,5 @@
 [package]
-name = "save_data_derive"
+name = "raw_ui_derive"
 version = "0.1.0"
 authors = ["Karlitos <ke0opt4cq@relay.firefox.com>"]
 edition = "2018"

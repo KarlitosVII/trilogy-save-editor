@@ -11,7 +11,7 @@ lto = true
 
 [dependencies]
 # Macro
-save_data_derive = { path = "save_data_derive" }
+raw_ui_derive = { path = "raw_ui_derive" }
 # Windows
 winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-features = false }
 wfd = "0.1"

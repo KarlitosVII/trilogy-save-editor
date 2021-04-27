@@ -8,12 +8,12 @@ use std::fmt;
 
 use crate::{
     gui::Gui,
-    save_data::{ImguiString, SaveData},
+    save_data::{ImguiString, RawUi},
 };
 
 use super::Vector;
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Appearance {
     combat_appearance: PlayerAppearanceType,
     casual_id: i32,
@@ -32,7 +32,7 @@ pub struct Appearance {
     pub head_morph: HasHeadMorph,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 enum PlayerAppearanceType {
     Parts,
     Full,
@@ -44,7 +44,7 @@ pub struct HasHeadMorph {
     pub head_morph: Option<HeadMorph>,
 }
 
-impl SaveData for HasHeadMorph {
+impl RawUi for HasHeadMorph {
     fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
         self.has_head_morph.draw_raw_ui(gui, "has_head_morph");
         if let Some(head_morph) = &mut self.head_morph {
@@ -97,7 +97,7 @@ impl serde::Serialize for HasHeadMorph {
     }
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct HeadMorph {
     pub hair_mesh: ImguiString,
     pub accessory_mesh: Vec<ImguiString>,
@@ -112,25 +112,25 @@ pub struct HeadMorph {
     pub texture_parameters: Vec<TextureParameter>,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct MorphFeature {
     feature: ImguiString,
     offset: f32,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct OffsetBone {
     name: ImguiString,
     offset: Vector,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct ScalarParameter {
     name: ImguiString,
     value: f32,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct VectorParameter {
     name: ImguiString,
     value: LinearColor,
@@ -139,7 +139,7 @@ pub struct VectorParameter {
 #[derive(Default, Clone)]
 pub struct LinearColor([f32; 4]);
 
-impl SaveData for LinearColor {
+impl RawUi for LinearColor {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_color(ident, &mut self.0);
     }
@@ -171,7 +171,7 @@ impl serde::Serialize for LinearColor {
     }
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct TextureParameter {
     name: ImguiString,
     value: ImguiString,
