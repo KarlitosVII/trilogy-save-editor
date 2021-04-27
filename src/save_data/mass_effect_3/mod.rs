@@ -5,7 +5,7 @@ use serde::{de, Deserialize, Serialize};
 use crate::save_data::Dummy;
 
 use super::{
-    common::{EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector},
+    common::{EndGameState, Level, Rotator, SaveTimeStamp, Vector},
     ImguiString,
 };
 
@@ -38,7 +38,7 @@ pub struct Me3SaveGame {
     rotation: Rotator,
     _current_loading_tip: Dummy<4>,
     levels: Vec<Level>,
-    streaming_records: Vec<StreamingRecord>,
+    streaming_records: IndexMap<ImguiString, bool>,
     _kismet_records: Vec<Dummy<20>>,
     _doors: Vec<Dummy<18>>,
     _placeables: Vec<Dummy<18>>,
