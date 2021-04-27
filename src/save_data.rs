@@ -15,8 +15,8 @@ pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
 
-// Save Data
-pub trait SaveData {
+// Raw Ui
+pub trait RawUi {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str);
 }
 
@@ -50,7 +50,7 @@ impl Display for ImguiString {
     }
 }
 
-impl SaveData for ImguiString {
+impl RawUi for ImguiString {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_string(ident, &mut self.0);
     }
@@ -125,37 +125,37 @@ impl<const LEN: usize> serde::Serialize for Dummy<LEN> {
 }
 
 // Implémentation des types std
-impl SaveData for i32 {
+impl RawUi for i32 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_i32(ident, self);
     }
 }
 
-impl SaveData for f32 {
+impl RawUi for f32 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_f32(ident, self);
     }
 }
 
-impl SaveData for bool {
+impl RawUi for bool {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_bool(ident, self);
     }
 }
 
-impl<T> SaveData for Vec<T>
+impl<T> RawUi for Vec<T>
 where
-    T: SaveData + Default,
+    T: RawUi + Default,
 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_vec(ident, self);
     }
 }
 
-impl<K, V> SaveData for IndexMap<K, V>
+impl<K, V> RawUi for IndexMap<K, V>
 where
-    K: SaveData + Eq + Hash + Default + Display,
-    V: SaveData + Default,
+    K: RawUi + Eq + Hash + Default + Display,
+    V: RawUi + Default,
 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_indexmap(ident, self);

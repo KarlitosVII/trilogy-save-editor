@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_data::ImguiString;
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub enum Origin {
     None,
     Spacer,
@@ -10,7 +10,7 @@ pub enum Origin {
     Earthborn,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub enum Notoriety {
     None,
     Survivor,
@@ -18,7 +18,7 @@ pub enum Notoriety {
     Ruthless,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct WeaponLoadout {
     assault_rifle: ImguiString,
     shotgun: ImguiString,

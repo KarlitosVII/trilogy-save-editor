@@ -7,7 +7,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use crate::{gui::Gui, save_data::SaveData};
+use crate::{gui::Gui, save_data::RawUi};
 
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
@@ -28,7 +28,7 @@ impl DerefMut for BoolVec {
     }
 }
 
-impl SaveData for BoolVec {
+impl RawUi for BoolVec {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_boolvec(ident, &mut self.0);
     }
@@ -74,19 +74,19 @@ impl serde::Serialize for BoolVec {
     }
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me1PlotTable {
     pub bool_variables: BoolVec,
     pub int_variables: Vec<i32>,
     pub float_variables: Vec<f32>,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct PlotCodexPage {
     page: i32,
     is_new: bool,

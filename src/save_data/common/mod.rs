@@ -6,7 +6,7 @@ pub mod appearance;
 pub mod player;
 pub mod plot;
 
-#[derive(SaveData, Clone)]
+#[derive(RawUi, Clone)]
 #[repr(u32)]
 pub enum EndGameState {
     NotFinished,
@@ -40,7 +40,7 @@ impl serde::Serialize for EndGameState {
     }
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct SaveTimeStamp {
     seconds_since_midnight: i32,
     day: i32,
@@ -48,34 +48,34 @@ pub struct SaveTimeStamp {
     year: i32,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Vector {
     x: f32,
     y: f32,
     z: f32,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Vector2d {
     x: f32,
     y: f32,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Rotator {
     pitch: i32,
     yaw: i32,
     roll: i32,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Level {
     name: ImguiString,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Default, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct StreamingRecord {
     name: ImguiString,
     is_active: bool,

@@ -195,7 +195,7 @@ struct Header {
     _osef2: Dummy<12>,
 }
 
-#[derive(Deserialize, Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Name {
     string: ImguiString,
     _osef: Dummy<8>,
