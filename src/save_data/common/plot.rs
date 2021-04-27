@@ -83,13 +83,7 @@ pub struct Me1PlotTable {
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct PlotCodex {
-    pages: Vec<PlotCodexPage>,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct PlotCodexPage {
-    page: i32,
-    is_new: bool,
+    pages: IndexMap<i32, bool>,
 }
 
 #[derive(Deserialize, Serialize)]

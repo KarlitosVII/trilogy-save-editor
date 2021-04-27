@@ -74,9 +74,3 @@ pub struct Level {
     should_be_loaded: bool,
     should_be_visible: bool,
 }
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct StreamingRecord {
-    name: ImguiString,
-    is_active: bool,
-}

@@ -1,3 +1,4 @@
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::save_data::{
@@ -28,7 +29,7 @@ pub struct Player {
     pub appearance: Appearance,
     emissive_id: i32,
     pub powers: Vec<Power>,
-    gaw_assets: Vec<GawAsset>,
+    gaw_assets: IndexMap<i32, i32>,
     weapons: Vec<Weapon>,
     weapons_mods: Vec<WeaponMod>,
     weapons_loadout: WeaponLoadout,
@@ -80,12 +81,6 @@ pub struct Weapon {
 pub struct WeaponMod {
     weapon_class_name: ImguiString,
     weapon_mod_class_names: Vec<ImguiString>,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-struct GawAsset {
-    id: i32,
-    strength: i32,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]

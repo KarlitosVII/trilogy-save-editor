@@ -1,4 +1,5 @@
 use anyhow::Result;
+use indexmap::IndexMap;
 use serde::{
     de,
     ser::{Error, SerializeStruct, SerializeTupleStruct},
@@ -101,39 +102,15 @@ impl serde::Serialize for HasHeadMorph {
 pub struct HeadMorph {
     pub hair_mesh: ImguiString,
     pub accessory_mesh: Vec<ImguiString>,
-    pub morph_features: Vec<MorphFeature>,
-    pub offset_bones: Vec<OffsetBone>,
+    pub morph_features: IndexMap<ImguiString, f32>,
+    pub offset_bones: IndexMap<ImguiString, Vector>,
     pub lod0_vertices: Vec<Vector>,
     pub lod1_vertices: Vec<Vector>,
     pub lod2_vertices: Vec<Vector>,
     pub lod3_vertices: Vec<Vector>,
-    pub scalar_parameters: Vec<ScalarParameter>,
-    pub vector_parameters: Vec<VectorParameter>,
-    pub texture_parameters: Vec<TextureParameter>,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct MorphFeature {
-    feature: ImguiString,
-    offset: f32,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct OffsetBone {
-    name: ImguiString,
-    offset: Vector,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct ScalarParameter {
-    name: ImguiString,
-    value: f32,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct VectorParameter {
-    name: ImguiString,
-    value: LinearColor,
+    pub scalar_parameters: IndexMap<ImguiString, f32>,
+    pub vector_parameters: IndexMap<ImguiString, LinearColor>,
+    pub texture_parameters: IndexMap<ImguiString, ImguiString>,
 }
 
 #[derive(Default, Clone)]
@@ -169,10 +146,4 @@ impl serde::Serialize for LinearColor {
         }
         linear_color.end()
     }
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
-pub struct TextureParameter {
-    name: ImguiString,
-    value: ImguiString,
 }

@@ -1,11 +1,12 @@
 use anyhow::Result;
+use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 
 use crate::save_data::Dummy;
 
 use super::{
     common::{
-        plot::Me1PlotTable, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector,
+        plot::Me1PlotTable, EndGameState, Level, Rotator, SaveTimeStamp, Vector,
     },
     ImguiString,
 };
@@ -38,7 +39,7 @@ pub struct Me2SaveGame {
     rotation: Rotator,
     _current_loading_tip: Dummy<4>,
     levels: Vec<Level>,
-    streaming_records: Vec<StreamingRecord>,
+    streaming_records: IndexMap<ImguiString, bool>,
     _kismet_records: Vec<Dummy<20>>,
     _doors: Vec<Dummy<18>>,
     _pawns: Vec<Dummy<16>>,
