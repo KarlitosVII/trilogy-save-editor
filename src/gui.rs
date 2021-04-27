@@ -421,7 +421,7 @@ impl<'ui> Gui<'ui> {
 
                 if_chain! {
                     if let Some((key, value)) = list.get_index_mut(i);
-                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", key.to_string(), i));
+                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", key, i));
                     if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1);
                     then {
                         self.table_next_row();
@@ -445,7 +445,8 @@ impl<'ui> Gui<'ui> {
         if ui.button(im_str!("add")) {
             // Ça ouvre automatiquement le tree node de l'élément ajouté
             let new_k = K::default();
-            TreeNode::new(&im_str!("{}##{}", new_k, list.len()))
+            TreeNode::new(&im_str!("{}", list.len()))
+                .label(&ImString::new(new_k.to_string()))
                 .opened(true, Condition::Always)
                 .build(ui, || {});
 
