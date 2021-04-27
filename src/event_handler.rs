@@ -15,7 +15,6 @@ use crate::{
         mass_effect_1::{known_plot::Me1KnownPlot, Me1SaveGame},
         mass_effect_2::{self, known_plot::Me2KnownPlot, Me2SaveGame},
         mass_effect_3::{known_plot::Me3KnownPlot, Me3SaveGame},
-        SaveCursor, SaveData,
     },
     unreal,
 };
@@ -81,8 +80,7 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
     if let Some(ext) = path.extension() {
         let save_game = match ext.to_string_lossy().to_lowercase().as_str() {
             "masseffectsave" => {
-                let mut cursor = SaveCursor::new(input);
-                SaveGame::MassEffect1(Box::new(Me1SaveGame::deserialize(&mut cursor)?))
+                SaveGame::MassEffect1(Box::new(unreal::Deserializer::from_bytes(&input)?))
             }
             _ => {
                 let is_me2 =

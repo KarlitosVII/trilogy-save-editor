@@ -1,17 +1,17 @@
 use anyhow::Result;
-use serde::{ser::SerializeStruct, Serialize};
+use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
 use std::{
     cell::RefCell,
+    fmt,
     ops::{Deref, DerefMut},
 };
 
 use crate::{
-    gui::Gui,
-    save_data::{Dummy, ImguiString, List},
+    save_data::{Dummy, ImguiString},
     unreal,
 };
 
-use super::{data::Data, SaveCursor, SaveData};
+use super::{data::Data, List};
 
 #[derive(Clone)]
 pub struct Player {
@@ -44,56 +44,80 @@ impl Player {
     }
 }
 
-impl SaveData for Player {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let _begin = SaveData::deserialize(cursor)?;
-        let header_offset = SaveData::deserialize(cursor)?;
-        let _no_mans_land1 = cursor.read((header_offset - 12) as usize)?.into();
-        let header: Header = SaveData::deserialize(cursor)?;
+impl<'de> serde::Deserialize<'de> for Player {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct PlayerVisitor;
+        impl<'de> de::Visitor<'de> for PlayerVisitor {
+            type Value = Player;
 
-        // Names
-        let mut names = Vec::new();
-        for _ in 0..header.name_len {
-            names.push(SaveData::deserialize(cursor)?);
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a seq")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::SeqAccess<'de>,
+            {
+                let _begin = seq.next_element()?.unwrap();
+                let header_offset = seq.next_element()?.unwrap();
+
+                // No man's land 1
+                let mut _no_mans_land1 = Vec::new();
+                for _ in 0..(header_offset - 12) {
+                    _no_mans_land1.push(seq.next_element()?.unwrap());
+                }
+
+                let header: Header = seq.next_element()?.unwrap();
+
+                // Names
+                let mut names = Vec::new();
+                for _ in 0..header.name_len {
+                    names.push(seq.next_element()?.unwrap());
+                }
+
+                // Imports
+                let mut classes = Vec::new();
+                for _ in 0..header.classes_len {
+                    classes.push(seq.next_element()?.unwrap());
+                }
+
+                // Objects
+                let mut objects: Vec<Object> = Vec::new();
+                for _ in 0..header.objects_len {
+                    objects.push(seq.next_element()?.unwrap());
+                }
+
+                // No man's land 2
+                let mut _no_mans_land2 = Vec::new();
+                for _ in 0..(header.data_offset - header.no_mans_land_offset) {
+                    _no_mans_land2.push(seq.next_element()?.unwrap());
+                }
+
+                // Data
+                let mut datas = Vec::new();
+                for _ in objects.iter() {
+                    let data = Data::visit_seq(&names, &mut seq)?;
+                    datas.push(RefCell::new(data));
+                }
+
+                Ok(Player {
+                    _begin,
+                    header_offset,
+                    _no_mans_land1: _no_mans_land1.into(),
+                    header,
+                    names: names.into(),
+                    classes: classes.into(),
+                    objects: objects.into(),
+                    _no_mans_land2: _no_mans_land2.into(),
+                    datas: datas.into(),
+                })
+            }
         }
-
-        // Imports
-        let mut classes = Vec::new();
-        for _ in 0..header.classes_len {
-            classes.push(SaveData::deserialize(cursor)?);
-        }
-
-        // Objects
-        let mut objects: Vec<Object> = Vec::new();
-        for _ in 0..header.objects_len {
-            objects.push(SaveData::deserialize(cursor)?);
-        }
-
-        let _no_mans_land2 =
-            cursor.read((header.data_offset - header.no_mans_land_offset) as usize)?.into();
-
-        // Data
-        let mut datas = Vec::new();
-        for object in objects.iter() {
-            let data_bytes = cursor.read((object.data_size) as usize)?.into();
-            let mut cursor = SaveCursor::new(data_bytes);
-            datas.push(RefCell::new(Data::new(&names, &mut cursor)?));
-        }
-
-        Ok(Self {
-            _begin,
-            header_offset,
-            _no_mans_land1,
-            header,
-            names: names.into(),
-            classes: classes.into(),
-            objects: objects.into(),
-            _no_mans_land2,
-            datas: datas.into(),
-        })
+        deserializer.deserialize_tuple_struct("Player", usize::MAX, PlayerVisitor)
     }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }
 
 impl serde::Serialize for Player {
@@ -152,7 +176,7 @@ impl serde::Serialize for Player {
     }
 }
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 struct Header {
     _magic: u32,
     _version: Dummy<4>, // low_version: u16, high_version: u16
@@ -171,7 +195,7 @@ struct Header {
     _osef2: Dummy<12>,
 }
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, SaveData, Clone)]
 pub struct Name {
     string: ImguiString,
     _osef: Dummy<8>,
@@ -198,7 +222,7 @@ impl DerefMut for Name {
     }
 }
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Class {
     package_id: u32,
     _osef1: Dummy<4>,
@@ -209,7 +233,7 @@ pub struct Class {
     _osef3: Dummy<4>,
 }
 
-#[derive(Serialize, SaveData, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Object {
     pub class_id: i32,
     class_parent_id: u32,
@@ -227,12 +251,13 @@ pub struct Object {
 mod test {
     use anyhow::Result;
     use std::{
+        convert::TryInto,
         fs::File,
         io::{Cursor, Read},
     };
     use zip::ZipArchive;
 
-    use crate::{save_data::*, unreal};
+    use crate::unreal;
 
     use super::*;
 
@@ -245,13 +270,8 @@ mod test {
         }
 
         let player_data = {
-            let mut cursor = SaveCursor::new(input);
-            let _: Dummy<8> = SaveData::deserialize(&mut cursor)?;
-            let zip_offset: u32 = SaveData::deserialize(&mut cursor)?;
-            let _ = cursor.read(zip_offset as usize - 12)?.to_owned();
-
-            let zip_data = cursor.read_to_end()?;
-            let mut zip = ZipArchive::new(Cursor::new(zip_data))?;
+            let zip_offset = <u32>::from_le_bytes((&input[8..12]).try_into()?);
+            let mut zip = ZipArchive::new(Cursor::new(&input[zip_offset as usize..]))?;
 
             let mut bytes = Vec::new();
             zip.by_name("player.sav")?.read_to_end(&mut bytes)?;
@@ -259,19 +279,21 @@ mod test {
         };
 
         // Deserialize
-        let mut cursor = SaveCursor::new(player_data.clone());
-        let player = Player::deserialize(&mut cursor)?;
+        let player: Player = unreal::Deserializer::from_bytes(&player_data.clone())?;
 
         // Serialize
         let output = unreal::Serializer::to_byte_buf(&player)?;
 
+        // // Check serialized = player_data
+        // let cmp = player_data.chunks(4).zip(output.chunks(4));
+        // for (i, (a, b)) in cmp.enumerate() {
+        //     if a != b {
+        //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+        //     }
+        // }
+
         // Check serialized = player_data
-        let cmp = player_data.chunks(4).zip(output.chunks(4));
-        for (i, (a, b)) in cmp.enumerate() {
-            if a != b {
-                panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
-            }
-        }
+        assert_eq!(player_data, output);
 
         Ok(())
     }

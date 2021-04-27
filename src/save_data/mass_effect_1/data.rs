@@ -1,17 +1,16 @@
 use anyhow::Result;
-use serde::Serialize;
+use serde::{de, Serialize};
 use std::ops::{Deref, DerefMut};
 
 use crate::{
-    gui::Gui,
     save_data::{
         common::{appearance::LinearColor, Rotator, Vector},
-        Dummy, ImguiString, List,
+        Dummy, ImguiString,
     },
     unreal,
 };
 
-use super::{player::Name, SaveCursor, SaveData};
+use super::{player::Name, List};
 
 #[derive(Serialize, Clone)]
 pub struct Data {
@@ -20,22 +19,13 @@ pub struct Data {
 }
 
 impl Data {
-    pub fn new(names: &[Name], cursor: &mut SaveCursor) -> Result<Self> {
-        let _osef: Dummy<4> = SaveData::deserialize(cursor)?;
-        let mut properties = Vec::new();
-
-        let mut finished = false;
-        while !finished {
-            let property = Property::new(&names, cursor)?;
-
-            // Ça se termine toujours par un None donc on break ici
-            if let Property::None { .. } = property {
-                finished = true;
-            }
-            properties.push(property);
-        }
-
-        Ok(Self { _osef, properties: properties.into() })
+    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
+    where
+        A: de::SeqAccess<'de>,
+    {
+        let _osef = seq.next_element()?.unwrap();
+        let properties = List::<Property>::visit_seq(names, seq)?;
+        Ok(Self { _osef, properties })
     }
 
     pub fn size(&self) -> Result<usize> {
@@ -61,16 +51,30 @@ impl DerefMut for Data {
     }
 }
 
-impl SaveData for Data {
-    fn deserialize(_: &mut SaveCursor) -> Result<Self> {
-        unreachable!()
-    }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-}
-
 fn get_name(names: &[Name], id: u32) -> String {
     names[id as usize].to_string()
+}
+
+impl List<Property> {
+    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
+    where
+        A: de::SeqAccess<'de>,
+    {
+        let mut properties = Vec::new();
+
+        let mut finished = false;
+        while !finished {
+            let property = Property::visit_seq(names, seq)?;
+
+            // Ça se termine toujours par un None donc on break ici
+            if let Property::None { .. } = property {
+                finished = true;
+            }
+            properties.push(property);
+        }
+
+        Ok(properties.into())
+    }
 }
 
 #[derive(Serialize, Clone)]
@@ -175,33 +179,37 @@ pub enum Property {
 }
 
 impl Property {
-    pub fn new(names: &[Name], cursor: &mut SaveCursor) -> Result<Self> {
+    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
+    where
+        A: de::SeqAccess<'de>,
+    {
         // Name
-        let name_id = SaveData::deserialize(cursor)?;
-        let _osef1 = SaveData::deserialize(cursor)?;
+        let name_id = seq.next_element()?.unwrap();
+        let _osef1 = seq.next_element()?.unwrap();
 
         let name = get_name(names, name_id);
         if name == "None" {
-            return Ok(Self::None { name_id, _osef: _osef1 });
+            return Ok(Property::None { name_id, _osef: _osef1 });
         }
 
         // Type
-        let type_id = SaveData::deserialize(cursor)?;
-        let _osef2 = SaveData::deserialize(cursor)?;
+        let type_id = seq.next_element()?.unwrap();
+        let _osef2 = seq.next_element()?.unwrap();
         // Size
-        let size = SaveData::deserialize(cursor)?;
-        let _osef3 = SaveData::deserialize(cursor)?;
+        let size = seq.next_element()?.unwrap();
+        let _osef3 = seq.next_element()?.unwrap();
 
         let type_name = get_name(names, type_id);
         let property = match type_name.as_str() {
             "ArrayProperty" => {
-                let len: u32 = SaveData::deserialize(cursor)?;
+                let len: u32 = seq.next_element()?.unwrap();
                 let mut array = Vec::new();
                 // Hardcodé sinon je dois chercher dans toutes les classes du jeu...
                 match name.as_str() {
                     "m_PrereqTalentIDArray" | "m_PrereqTalentRankArray" => {
                         for _ in 0..len {
-                            array.push(ArrayType::int(cursor)?);
+                            let array_int = ArrayType::Int(seq.next_element()?.unwrap());
+                            array.push(array_int);
                         }
                     }
                     "m_aItem"
@@ -210,39 +218,44 @@ impl Property {
                     | "m_QuickSlotArray"
                     | "m_savedBuybackItems" => {
                         for _ in 0..len {
-                            array.push(ArrayType::object(cursor)?);
+                            let array_object = ArrayType::Object(seq.next_element()?.unwrap());
+                            array.push(array_object);
                         }
                     }
                     "m_vPosition" => {
                         for _ in 0..len {
-                            array.push(ArrayType::vector(cursor)?);
+                            let array_vector = ArrayType::Vector(seq.next_element()?.unwrap());
+                            array.push(array_vector);
                         }
                     }
                     "m_DependentPackages" => {
                         for _ in 0..len {
-                            array.push(ArrayType::string(cursor)?);
+                            let array_string = ArrayType::String(seq.next_element()?.unwrap());
+                            array.push(array_string);
                         }
                     }
                     _ => {
                         for _ in 0..len {
-                            array.push(ArrayType::properties(names, cursor)?);
+                            let array_properties =
+                                ArrayType::Properties(List::<Property>::visit_seq(names, seq)?);
+                            array.push(array_properties);
                         }
                     }
                 }
-                Self::Array { name_id, _osef1, type_id, _osef2, size, _osef3, array }
+                Property::Array { name_id, _osef1, type_id, _osef2, size, _osef3, array }
             }
             "BoolProperty" => {
-                let value = SaveData::deserialize(cursor)?;
-                Self::Bool { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                let value = seq.next_element()?.unwrap();
+                Property::Bool { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "ByteProperty" => {
                 if size == 1 {
-                    let value = SaveData::deserialize(cursor)?;
-                    Self::Byte { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                    let value = seq.next_element()?.unwrap();
+                    Property::Byte { name_id, _osef1, type_id, _osef2, size, _osef3, value }
                 } else {
-                    let value_name_id = SaveData::deserialize(cursor)?;
-                    let _osef4 = SaveData::deserialize(cursor)?;
-                    Self::Name {
+                    let value_name_id = seq.next_element()?.unwrap();
+                    let _osef4 = seq.next_element()?.unwrap();
+                    Property::Name {
                         name_id,
                         _osef1,
                         type_id,
@@ -255,42 +268,51 @@ impl Property {
                 }
             }
             "FloatProperty" => {
-                let value = SaveData::deserialize(cursor)?;
-                Self::Float { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                let value = seq.next_element()?.unwrap();
+                Property::Float { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "IntProperty" => {
-                let value = SaveData::deserialize(cursor)?;
-                Self::Int { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                let value = seq.next_element()?.unwrap();
+                Property::Int { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "NameProperty" => {
-                let value_name_id = SaveData::deserialize(cursor)?;
-                let _osef4 = SaveData::deserialize(cursor)?;
-                Self::Name { name_id, _osef1, type_id, _osef2, size, _osef3, value_name_id, _osef4 }
+                let value_name_id = seq.next_element()?.unwrap();
+                let _osef4 = seq.next_element()?.unwrap();
+                Property::Name {
+                    name_id,
+                    _osef1,
+                    type_id,
+                    _osef2,
+                    size,
+                    _osef3,
+                    value_name_id,
+                    _osef4,
+                }
             }
             "ObjectProperty" => {
-                let object_id = SaveData::deserialize(cursor)?;
-                Self::Object { name_id, _osef1, type_id, _osef2, size, _osef3, object_id }
+                let object_id = seq.next_element()?.unwrap();
+                Property::Object { name_id, _osef1, type_id, _osef2, size, _osef3, object_id }
             }
             "StrProperty" => {
-                let string = SaveData::deserialize(cursor)?;
-                Self::Str { name_id, _osef1, type_id, _osef2, size, _osef3, string }
+                let string = seq.next_element()?.unwrap();
+                Property::Str { name_id, _osef1, type_id, _osef2, size, _osef3, string }
             }
             "StringRefProperty" => {
-                let value = SaveData::deserialize(cursor)?;
-                Self::StringRef { name_id, _osef1, type_id, _osef2, size, _osef3, value }
+                let value = seq.next_element()?.unwrap();
+                Property::StringRef { name_id, _osef1, type_id, _osef2, size, _osef3, value }
             }
             "StructProperty" => {
-                let struct_name_id = SaveData::deserialize(cursor)?;
-                let _osef4 = SaveData::deserialize(cursor)?;
+                let struct_name_id = seq.next_element()?.unwrap();
+                let _osef4 = seq.next_element()?.unwrap();
 
                 let struct_name = get_name(names, struct_name_id);
                 let properties = match struct_name.as_str() {
-                    "LinearColor" => StructType::linear_color(cursor)?,
-                    "Vector" => StructType::vector(cursor)?,
-                    "Rotator" => StructType::rotator(cursor)?,
-                    _ => StructType::properties(names, cursor)?,
+                    "LinearColor" => StructType::LinearColor(seq.next_element()?.unwrap()),
+                    "Vector" => StructType::Vector(seq.next_element()?.unwrap()),
+                    "Rotator" => StructType::Rotator(seq.next_element()?.unwrap()),
+                    _ => StructType::Properties(List::<Property>::visit_seq(names, seq)?),
                 };
-                Self::Struct {
+                Property::Struct {
                     name_id,
                     _osef1,
                     type_id,
@@ -334,14 +356,6 @@ impl Property {
     }
 }
 
-impl SaveData for Property {
-    fn deserialize(_: &mut SaveCursor) -> Result<Self> {
-        unreachable!()
-    }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-}
-
 #[derive(Serialize, Clone)]
 pub enum ArrayType {
     Int(i32),
@@ -352,39 +366,6 @@ pub enum ArrayType {
 }
 
 impl ArrayType {
-    pub fn int(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::Int(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn object(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::Object(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn vector(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::Vector(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn string(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::String(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn properties(names: &[Name], cursor: &mut SaveCursor) -> Result<Self> {
-        let mut properties = Vec::new();
-
-        let mut finished = false;
-        while !finished {
-            let property = Property::new(&names, cursor)?;
-
-            // Ça se termine toujours par un None donc on break ici
-            if let Property::None { .. } = property {
-                finished = true;
-            }
-            properties.push(property);
-        }
-
-        Ok(Self::Properties(properties.into()))
-    }
-
     fn size(&self) -> Result<usize> {
         Ok(match self {
             ArrayType::Int(_) => 4,
@@ -405,14 +386,6 @@ impl ArrayType {
     }
 }
 
-impl SaveData for ArrayType {
-    fn deserialize(_: &mut SaveCursor) -> Result<Self> {
-        unreachable!()
-    }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-}
-
 #[derive(Serialize, Clone)]
 pub enum StructType {
     LinearColor(LinearColor),
@@ -422,35 +395,6 @@ pub enum StructType {
 }
 
 impl StructType {
-    pub fn linear_color(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::LinearColor(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn vector(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::Vector(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn rotator(cursor: &mut SaveCursor) -> Result<Self> {
-        Ok(Self::Rotator(SaveData::deserialize(cursor)?))
-    }
-
-    pub fn properties(names: &[Name], cursor: &mut SaveCursor) -> Result<Self> {
-        let mut properties = Vec::new();
-
-        let mut finished = false;
-        while !finished {
-            let property = Property::new(&names, cursor)?;
-
-            // Ça se termine toujours par un None donc on break ici
-            if let Property::None { .. } = property {
-                finished = true;
-            }
-            properties.push(property);
-        }
-
-        Ok(Self::Properties(properties.into()))
-    }
-
     fn size(&self) -> Result<usize> {
         Ok(match self {
             StructType::LinearColor(_) => 16,
@@ -465,12 +409,4 @@ impl StructType {
             }
         })
     }
-}
-
-impl SaveData for StructType {
-    fn deserialize(_: &mut SaveCursor) -> Result<Self> {
-        unreachable!()
-    }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
 }

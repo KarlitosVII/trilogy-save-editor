@@ -71,7 +71,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
 
     impl_serialize!(serialize_u32(u32)); // Impl
     impl_serialize!(serialize_u64(u64)); // Impl
-    
+
     // Floats
     impl_serialize!(serialize_f32(f32)); // Impl
 
@@ -186,9 +186,8 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
-        match len {
-            Some(len) => self.serialize_u32(len as u32)?,
-            None => self.serialize_u32(0)?,
+        if let Some(len) = len {
+            self.serialize_u32(len as u32)?;
         }
         Ok(self)
     }
@@ -202,7 +201,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     ) -> Result<Self::SerializeStructVariant> {
         Ok(self)
     }
-    
+
     fn is_human_readable(&self) -> bool {
         false
     }

@@ -7,9 +7,9 @@ use crate::save_data::{
     mass_effect_1::{
         data::{ArrayType, Data, Property, StructType},
         player::Player,
-        Me1SaveGame,
+        List, Me1SaveGame,
     },
-    ImguiString, List, SaveData,
+    ImguiString, SaveData,
 };
 
 use super::*;

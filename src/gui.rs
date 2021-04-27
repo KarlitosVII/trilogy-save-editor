@@ -299,12 +299,12 @@ impl<'ui> Gui<'ui> {
     }
 
     // View widgets
-    pub fn draw_struct(&self, ident: &str, fields: &mut [&mut dyn FnMut()]) {
+    pub fn draw_struct(&self, ident: &str, fields: &mut [(&mut dyn SaveData, &str)]) {
         if let Some(_t) = self.push_tree_node(ident) {
             if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
-                for field in fields {
+                for (field, ident) in fields {
                     self.table_next_row();
-                    field();
+                    field.draw_raw_ui(self, ident);
                 }
             }
         }

@@ -26,24 +26,6 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
 
     let name = &ast.ident;
 
-    let deserialize_fields = fields.iter().map(|f| {
-        let field_name = &f.ident;
-        quote! {
-            #field_name: crate::save_data::SaveData::deserialize(cursor)?
-        }
-    });
-
-    let let_fields = fields.iter().filter_map(|f| {
-        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
-            None
-        } else {
-            let field_name = &f.ident;
-            Some(quote! {
-                let #field_name = &mut self.#field_name;
-            })
-        }
-    });
-
     let draw_fields = fields.iter().filter_map(|f| {
         if f.ident.as_ref().unwrap().to_string().starts_with('_') {
             None
@@ -51,7 +33,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
             let field_name = &f.ident;
             let field_string = field_name.as_ref().unwrap().to_string();
             Some(quote! {
-                (&mut || { #field_name.draw_raw_ui(gui, #field_string); }) as &mut dyn FnMut()
+                (&mut self.#field_name  as &mut dyn crate::save_data::SaveData, #field_string)
             })
         }
     });
@@ -59,15 +41,7 @@ fn impl_save_data_struct(ast: &syn::DeriveInput, fields: &Fields) -> TokenStream
     let gen = quote! {
         #[automatically_derived]
         impl crate::save_data::SaveData for #name {
-            fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
-                Ok(Self {
-                    #(#deserialize_fields),*
-                })
-            }
-
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
-                #(#let_fields)*
-
                 let mut fields = [#(#draw_fields),*];
                 gui.draw_struct(ident, &mut fields);
             }
@@ -80,21 +54,6 @@ fn impl_save_data_enum(
     ast: &syn::DeriveInput, variants: &Punctuated<Variant, Comma>,
 ) -> TokenStream {
     let name = &ast.ident;
-
-    // Exception
-    let repr = ast
-        .attrs
-        .iter()
-        .any(|attr| attr.path.segments.iter().any(|segment| segment.ident == "repr"));
-
-    let repr_type = Ident::new(if repr { "u32" } else { "u8" }, Span::call_site());
-
-    let repr_variants = variants.iter().enumerate().map(|(i, v)| {
-        let variant = &v.ident;
-        quote! {
-            #i => #name::#variant
-        }
-    });
 
     // Variants
     let let_variants = variants.iter().enumerate().map(|(i, v)| {
@@ -119,19 +78,16 @@ fn impl_save_data_enum(
         }
     });
 
-    let edit_variants = repr_variants.clone();
+    let edit_variants = variants.iter().enumerate().map(|(i, v)| {
+        let variant = &v.ident;
+        quote! {
+            #i => #name::#variant
+        }
+    });
 
     let gen = quote! {
         #[automatically_derived]
         impl crate::save_data::SaveData for #name {
-            fn deserialize(cursor: &mut crate::save_data::SaveCursor) -> anyhow::Result<Self> {
-                let discriminant = <#repr_type as crate::save_data::SaveData>::deserialize(cursor)? as usize;
-                Ok(match discriminant {
-                    #(#repr_variants),*,
-                    _ => anyhow::bail!("invalid enum representation"),
-                })
-            }
-
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
                 #(#let_variants)*
 

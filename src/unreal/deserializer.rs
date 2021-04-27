@@ -1,8 +1,11 @@
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
-use serde::{Deserialize, de::{
+use serde::{
+    de::{
         self, DeserializeSeed, EnumAccess, Error, IntoDeserializer, MapAccess, SeqAccess,
         VariantAccess, Visitor,
-    }};
+    },
+    Deserialize,
+};
 use std::{convert::TryInto, mem::size_of};
 
 use super::Result;
@@ -207,20 +210,22 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor.visit_seq(SizedSeqMap::new(self, len))
     }
 
-    fn deserialize_tuple_struct<V>(self, _: &'static str, _: usize, _: V) -> Result<V::Value>
-    where
-        V: Visitor<'de>,
-    {
-        unimplemented!()
-    }
-
-    fn deserialize_struct<V>(
-        self, _: &'static str, fields: &'static [&'static str], visitor: V,
+    fn deserialize_tuple_struct<V>(
+        self, _: &'static str, len: usize, visitor: V,
     ) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        self.deserialize_tuple(fields.len(), visitor)
+        self.deserialize_tuple(len, visitor)
+    }
+
+    fn deserialize_struct<V>(
+        self, name: &'static str, fields: &'static [&'static str], visitor: V,
+    ) -> Result<V::Value>
+    where
+        V: Visitor<'de>,
+    {
+        self.deserialize_tuple_struct(name, fields.len(), visitor)
     }
 
     fn deserialize_enum<V>(

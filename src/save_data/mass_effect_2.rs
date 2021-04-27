@@ -1,13 +1,13 @@
-use anyhow::{ensure, Result};
+use anyhow::Result;
 use serde::{de, Deserialize, Serialize};
 
-use crate::{gui::Gui, save_data::Dummy};
+use crate::save_data::Dummy;
 
 use super::{
     common::{
         plot::Me1PlotTable, EndGameState, Level, Rotator, SaveTimeStamp, StreamingRecord, Vector,
     },
-    ImguiString, SaveCursor, SaveData,
+    ImguiString,
 };
 
 pub mod player;
@@ -52,21 +52,6 @@ pub struct Me2SaveGame {
 
 #[derive(Serialize, Clone)]
 pub struct Version(i32);
-
-impl SaveData for Version {
-    fn deserialize(cursor: &mut SaveCursor) -> Result<Self> {
-        let version = SaveData::deserialize(cursor)?;
-
-        ensure!(
-            version == 29,
-            "Wrong save version, please use a save from the last version of the game"
-        );
-
-        Ok(Self(version))
-    }
-
-    fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
-}
 
 impl<'de> serde::Deserialize<'de> for Version {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -177,6 +162,14 @@ mod test {
         output.extend(&u32::to_le_bytes(checksum));
 
         println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
+
+        // // Check serialized = input
+        // let cmp = input.chunks(4).zip(output.chunks(4));
+        // for (i, (a, b)) in cmp.enumerate() {
+        //     if a != b {
+        //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+        //     }
+        // }
 
         // Check serialized = input
         assert_eq!(input, output);

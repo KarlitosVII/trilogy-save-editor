@@ -1,5 +1,5 @@
-use std::fmt::{self, Display};
 use serde::{de, ser};
+use std::fmt::{self, Display};
 
 mod serializer;
 pub use serializer::*;
