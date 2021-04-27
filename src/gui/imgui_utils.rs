@@ -1,7 +1,7 @@
-use imgui::{sys, Ui};
+use imgui::{im_str, sys, Condition, ImStr, ImString, TreeNode, TreeNodeFlags, TreeNodeToken, Ui};
 use std::marker::PhantomData;
 
-use super::*;
+use super::Gui;
 
 impl<'ui> Gui<'ui> {
     pub fn set_next_item_open(&self, is_open: bool) {

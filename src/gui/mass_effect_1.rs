@@ -1,18 +1,19 @@
 use if_chain::if_chain;
-use imgui::*;
+use imgui::{im_str, ChildWindow, ComboBox, ImStr, ListClipper, TabBar, TabItem};
 use std::{cell::RefMut, cmp::Ordering, ops::Deref};
 
 use crate::save_data::{
     common::plot::{Me1PlotTable, PlotCategory},
     mass_effect_1::{
         data::{ArrayType, Data, Property, StructType},
+        known_plot::Me1KnownPlot,
         player::Player,
         List, Me1SaveGame,
     },
     ImguiString, RawUi,
 };
 
-use super::*;
+use super::{Gui, KnownPlotsState};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_1(
