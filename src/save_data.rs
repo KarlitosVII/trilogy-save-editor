@@ -1,4 +1,4 @@
-use anyhow::*;
+use anyhow::{Result, ensure};
 use encoding_rs::{UTF_16LE, WINDOWS_1252};
 use imgui::ImString;
 use indexmap::IndexMap;
@@ -42,10 +42,6 @@ impl SaveCursor {
 
     pub fn read_to_end(&mut self) -> Result<&[u8]> {
         self.read(self.bytes.len() - self.position)
-    }
-
-    pub fn rshift_position(&mut self, shift: usize) {
-        self.position -= shift;
     }
 }
 
@@ -126,24 +122,8 @@ impl<'de> serde::Deserialize<'de> for ImguiString {
     where
         D: serde::Deserializer<'de>,
     {
-        struct StringVisitor;
-        impl<'de> de::Visitor<'de> for StringVisitor {
-            type Value = ImString;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a &str")
-            }
-
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-            where
-                E: de::Error,
-            {
-                Ok(ImString::new(value))
-            }
-        }
-
-        let result = deserializer.deserialize_str(StringVisitor)?;
-        Ok(Self(result))
+        let string: String = serde::Deserialize::deserialize(deserializer)?;
+        Ok(Self(ImString::new(string)))
     }
 }
 
@@ -233,6 +213,36 @@ impl<const LEN: usize> SaveData for Dummy<LEN> {
     }
 
     fn draw_raw_ui(&mut self, _: &Gui, _: &str) {}
+}
+
+impl<'de, const LEN: usize> serde::Deserialize<'de> for Dummy<LEN> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct DummyVisitor<const LEN: usize>;
+        impl<'de, const LEN: usize> de::Visitor<'de> for DummyVisitor<LEN> {
+            type Value = Dummy<LEN>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a seq")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::SeqAccess<'de>,
+            {
+                let mut result = [0u8; LEN];
+                let mut i = 0;
+                while let Some(element) = seq.next_element()? {
+                    result[i] = element;
+                    i += 1;
+                }
+                Ok(Dummy(result))
+            }
+        }
+        deserializer.deserialize_tuple(LEN, DummyVisitor)
+    }
 }
 
 impl<const LEN: usize> serde::Serialize for Dummy<LEN> {

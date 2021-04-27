@@ -12,7 +12,7 @@ pub struct Serializer {
 
 impl Serializer {
     #[allow(clippy::wrong_self_convention)]
-    pub fn to_bytes<T>(value: &T) -> Result<Vec<u8>>
+    pub fn to_byte_buf<T>(value: &T) -> Result<Vec<u8>>
     where
         T: Serialize,
     {
@@ -20,6 +20,24 @@ impl Serializer {
         value.serialize(&mut serializer)?;
         Ok(serializer.output)
     }
+}
+
+macro_rules! unimpl_serialize {
+    ($ser_method:ident($type:ty)) => {
+        fn $ser_method(self, _: $type) -> Result<()> {
+            unimplemented!()
+        }
+    };
+}
+
+macro_rules! impl_serialize {
+    ($ser_method:ident($type:ty)) => {
+        fn $ser_method(self, value: $type) -> Result<()> {
+            let bytes = <$type>::to_le_bytes(value);
+            self.output.extend(&bytes);
+            Ok(())
+        }
+    };
 }
 
 impl<'a> ser::Serializer for &'a mut Serializer {
@@ -38,59 +56,29 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         self.serialize_u32(value as u32)
     }
 
-    fn serialize_i8(self, _: i8) -> Result<()> {
-        unimplemented!()
-    }
+    // Signed ints
+    unimpl_serialize!(serialize_i8(i8));
+    unimpl_serialize!(serialize_i16(i16));
 
-    fn serialize_i16(self, _: i16) -> Result<()> {
-        unimplemented!()
-    }
+    impl_serialize!(serialize_i32(i32)); // Impl
 
-    fn serialize_i32(self, value: i32) -> Result<()> {
-        let bytes = i32::to_le_bytes(value);
-        self.output.extend(&bytes);
-        Ok(())
-    }
+    unimpl_serialize!(serialize_i64(i64));
 
-    fn serialize_i64(self, _: i64) -> Result<()> {
-        unimplemented!()
-    }
+    // Unsigned ints
+    impl_serialize!(serialize_u8(u8)); // Impl
 
-    fn serialize_u8(self, value: u8) -> Result<()> {
-        let bytes = u8::to_le_bytes(value);
-        self.output.extend(&bytes);
-        Ok(())
-    }
+    unimpl_serialize!(serialize_u16(u16));
 
-    fn serialize_u16(self, _: u16) -> Result<()> {
-        unimplemented!()
-    }
+    impl_serialize!(serialize_u32(u32)); // Impl
+    impl_serialize!(serialize_u64(u64)); // Impl
+    
+    // Floats
+    impl_serialize!(serialize_f32(f32)); // Impl
 
-    fn serialize_u32(self, value: u32) -> Result<()> {
-        let bytes = u32::to_le_bytes(value);
-        self.output.extend(&bytes);
-        Ok(())
-    }
+    unimpl_serialize!(serialize_f64(f64));
 
-    fn serialize_u64(self, value: u64) -> Result<()> {
-        let bytes = u64::to_le_bytes(value);
-        self.output.extend(&bytes);
-        Ok(())
-    }
-
-    fn serialize_f32(self, value: f32) -> Result<()> {
-        let bytes = f32::to_le_bytes(value);
-        self.output.extend(&bytes);
-        Ok(())
-    }
-
-    fn serialize_f64(self, _: f64) -> Result<()> {
-        unimplemented!()
-    }
-
-    fn serialize_char(self, _: char) -> Result<()> {
-        unimplemented!()
-    }
+    // Char
+    unimpl_serialize!(serialize_char(char));
 
     fn serialize_str(self, string: &str) -> Result<()> {
         if string.is_empty() {
@@ -213,6 +201,10 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         self, _: &'static str, _: u32, _: &'static str, _: usize,
     ) -> Result<Self::SerializeStructVariant> {
         Ok(self)
+    }
+    
+    fn is_human_readable(&self) -> bool {
+        false
     }
 }
 

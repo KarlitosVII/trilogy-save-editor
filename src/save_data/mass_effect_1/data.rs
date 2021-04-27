@@ -1,4 +1,4 @@
-use anyhow::*;
+use anyhow::Result;
 use serde::Serialize;
 use std::ops::{Deref, DerefMut};
 
@@ -324,7 +324,7 @@ impl Property {
             Property::Name { .. } => size + 8,
             Property::Object { .. } => size + 4,
             Property::Str { string, .. } => {
-                let bytes = unreal::Serializer::to_bytes(string)?;
+                let bytes = unreal::Serializer::to_byte_buf(string)?;
                 size + bytes.len()
             }
             Property::StringRef { .. } => size + 4,
@@ -391,7 +391,7 @@ impl ArrayType {
             ArrayType::Object(_) => 4,
             ArrayType::Vector(_) => 12,
             ArrayType::String(string) => {
-                let bytes = unreal::Serializer::to_bytes(string)?;
+                let bytes = unreal::Serializer::to_byte_buf(string)?;
                 bytes.len()
             }
             ArrayType::Properties(properties) => {

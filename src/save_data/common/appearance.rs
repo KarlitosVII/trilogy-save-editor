@@ -1,8 +1,10 @@
-use anyhow::*;
+use anyhow::Result;
 use serde::{
+    de,
     ser::{Error, SerializeStruct, SerializeTupleStruct},
     Deserialize, Serialize,
 };
+use std::fmt;
 
 use crate::{
     gui::Gui,
@@ -36,7 +38,7 @@ enum PlayerAppearanceType {
     Full,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Clone)]
 pub struct HasHeadMorph {
     pub has_head_morph: bool,
     pub head_morph: Option<HeadMorph>,
@@ -54,6 +56,33 @@ impl SaveData for HasHeadMorph {
         if let Some(head_morph) = &mut self.head_morph {
             head_morph.draw_raw_ui(gui, "head_morph");
         }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for HasHeadMorph {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct HasHeadMorphVisitor;
+        impl<'de> de::Visitor<'de> for HasHeadMorphVisitor {
+            type Value = HasHeadMorph;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a seq")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: de::SeqAccess<'de>,
+            {
+                let has_head_morph = seq.next_element()?.unwrap();
+                let head_morph =
+                    if has_head_morph { Some(seq.next_element()?.unwrap()) } else { None };
+                Ok(HasHeadMorph { has_head_morph, head_morph })
+            }
+        }
+        deserializer.deserialize_tuple(2, HasHeadMorphVisitor)
     }
 }
 
@@ -113,7 +142,7 @@ pub struct VectorParameter {
     value: LinearColor,
 }
 
-#[derive(Deserialize, Default, Clone)]
+#[derive(Default, Clone)]
 pub struct LinearColor([f32; 4]);
 
 impl SaveData for LinearColor {
@@ -128,6 +157,16 @@ impl SaveData for LinearColor {
 
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_color(ident, &mut self.0);
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for LinearColor {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let (r, g, b, a): (f32, f32, f32, f32) = serde::Deserialize::deserialize(deserializer)?;
+        Ok(LinearColor([r, g, b, a]))
     }
 }
 
