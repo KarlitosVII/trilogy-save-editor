@@ -1,18 +1,30 @@
 use if_chain::if_chain;
-use imgui::*;
+use imgui::{
+    im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
+};
+use indexmap::IndexMap;
+use wfd::DialogParams;
 
-use crate::save_data::{
-    common::plot::PlotCategory,
-    mass_effect_3::{
-        known_plot::PlotVariable,
-        player::{Player, Power},
-        plot::PlotTable,
-        Me3SaveGame,
+use crate::{
+    event_handler::MainEvent,
+    save_data::{
+        common::{
+            appearance::{HasHeadMorph, HeadMorph},
+            plot::PlotCategory,
+        },
+        mass_effect_1::known_plot::Me1KnownPlot,
+        mass_effect_2::known_plot::Me2KnownPlot,
+        mass_effect_3::{
+            known_plot::{Me3KnownPlot, PlotVariable},
+            player::{Player, Power},
+            plot::PlotTable,
+            Me3SaveGame,
+        },
+        ImguiString, RawUi,
     },
-    ImguiString,
 };
 
-use super::*;
+use super::{Gui, KnownPlotsState, Theme};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_3(

@@ -1,19 +1,27 @@
 use if_chain::if_chain;
-use imgui::*;
+use imgui::{
+    im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
+};
+use wfd::DialogParams;
 
-use crate::save_data::{
-    common::{
-        appearance::{HasHeadMorph, HeadMorph},
-        plot::PlotCategory,
-    },
-    mass_effect_2::{
-        player::{Player, Power},
-        plot::PlotTable,
-        Me2SaveGame,
+use crate::{
+    event_handler::MainEvent,
+    save_data::{
+        common::{
+            appearance::{HasHeadMorph, HeadMorph},
+            plot::PlotCategory,
+        },
+        mass_effect_2::{
+            known_plot::Me2KnownPlot,
+            player::{Player, Power},
+            plot::PlotTable,
+            Me2SaveGame,
+        },
+        RawUi,
     },
 };
 
-use super::*;
+use super::{Gui, KnownPlotsState, Theme};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_2(
