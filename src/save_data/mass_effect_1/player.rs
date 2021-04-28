@@ -1,10 +1,7 @@
 use anyhow::Result;
+use derive_more::{Deref, DerefMut};
 use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
-use std::{
-    cell::RefCell,
-    fmt,
-    ops::{Deref, DerefMut},
-};
+use std::{cell::RefCell, fmt};
 
 use crate::{
     save_data::{Dummy, ImguiString},
@@ -195,8 +192,10 @@ struct Header {
     _osef2: Dummy<12>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, RawUi, Deref, DerefMut, Clone)]
 pub struct Name {
+    #[deref]
+    #[deref_mut]
     string: ImguiString,
     _osef: Dummy<8>,
 }
@@ -205,20 +204,6 @@ impl Name {
     fn size(&self) -> Result<usize> {
         let bytes = unreal::Serializer::to_byte_buf(&self.string)?;
         Ok(bytes.len() + 8)
-    }
-}
-
-impl Deref for Name {
-    type Target = ImguiString;
-
-    fn deref(&self) -> &ImguiString {
-        &self.string
-    }
-}
-
-impl DerefMut for Name {
-    fn deref_mut(&mut self) -> &mut ImguiString {
-        &mut self.string
     }
 }
 

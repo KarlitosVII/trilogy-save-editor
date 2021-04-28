@@ -1,11 +1,11 @@
 use anyhow::Result;
+use derive_more::{Deref, DerefMut, Display, From};
 use imgui::ImString;
 use indexmap::IndexMap;
 use serde::de;
 use std::{
     fmt::{self, Display},
     hash::Hash,
-    ops::{Deref, DerefMut},
 };
 
 use crate::gui::Gui;
@@ -21,34 +21,8 @@ pub trait RawUi {
 }
 
 // Nouveau string type pour pouvoir implémenter serde...
-#[derive(Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Deref, DerefMut, From, Clone, Default, PartialEq, Eq, Hash, Display)]
 pub struct ImguiString(ImString);
-
-impl Deref for ImguiString {
-    type Target = ImString;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for ImguiString {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl From<ImString> for ImguiString {
-    fn from(im_string: ImString) -> Self {
-        Self(im_string)
-    }
-}
-
-impl Display for ImguiString {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
 
 impl RawUi for ImguiString {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {

@@ -2,11 +2,13 @@
 #![cfg_attr(test, windows_subsystem = "console")]
 #![warn(clippy::all)]
 
-#[macro_use]
-extern crate raw_ui_derive;
+extern crate derive_more;
 
 use std::panic::{self, PanicInfo};
 use tokio::task;
+
+#[macro_use]
+extern crate raw_ui_derive;
 
 mod event_handler;
 mod gui;
