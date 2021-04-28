@@ -3,7 +3,6 @@ use imgui::{
     im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
 };
 use indexmap::IndexMap;
-use wfd::DialogParams;
 
 use crate::{
     event_handler::MainEvent,
@@ -638,13 +637,10 @@ impl<'ui> Gui<'ui> {
 
         // Import
         if ui.button(im_str!("Import")) {
-            let result = wfd::open_dialog(DialogParams {
-                file_types: vec![("Head Morph", "*.ron")],
-                ..Default::default()
-            });
+            let file = rfd::FileDialog::new().add_filter("Head Morph", &["ron"]).pick_file();
 
-            if let Ok(result) = result {
-                let _ = self.event_addr.send(MainEvent::ImportHeadMorph(result.selected_file_path));
+            if let Some(path) = file {
+                let _ = self.event_addr.send(MainEvent::ImportHeadMorph(path));
             }
         }
         match head_morph {
@@ -652,17 +648,13 @@ impl<'ui> Gui<'ui> {
                 // Export
                 ui.same_line();
                 if ui.button(im_str!("Export")) {
-                    let result = wfd::save_dialog(DialogParams {
-                        default_extension: "ron",
-                        file_types: vec![("Head Morph", "*.ron")],
-                        ..Default::default()
-                    });
+                    let file =
+                        rfd::FileDialog::new().add_filter("Head Morph", &["ron"]).save_file();
 
-                    if let Ok(result) = result {
-                        let _ = self.event_addr.send(MainEvent::ExportHeadMorph(
-                            result.selected_file_path,
-                            Box::new(head_morph.clone()),
-                        ));
+                    if let Some(path) = file {
+                        let _ = self
+                            .event_addr
+                            .send(MainEvent::ExportHeadMorph(path, Box::new(head_morph.clone())));
                     }
                 }
                 // Toggle head morph

@@ -53,16 +53,7 @@ impl ClipboardBackend for ClipboardSupport {
 }
 
 // Backend
-pub struct System {
-    pub event_loop: EventLoop<()>,
-    pub display: glium::Display,
-    pub imgui: Context,
-    pub platform: WinitPlatform,
-    pub renderer: Renderer,
-    pub font_size: f32,
-}
-
-pub fn init(title: &str, width: f64, height: f64) -> System {
+pub fn init(title: &str, width: f64, height: f64) -> Backend {
     let event_loop = EventLoop::new_any_thread();
     let context = glutin::ContextBuilder::new().with_vsync(true);
     let builder = WindowBuilder::new()
@@ -98,15 +89,24 @@ pub fn init(title: &str, width: f64, height: f64) -> System {
 
     let renderer = Renderer::init(&mut imgui, &display).expect("Failed to initialize renderer");
 
-    System { event_loop, display, imgui, platform, renderer, font_size }
+    Backend { event_loop, display, imgui, platform, renderer, font_size }
 }
 
-impl System {
+pub struct Backend {
+    pub event_loop: EventLoop<()>,
+    pub display: glium::Display,
+    pub imgui: Context,
+    pub platform: WinitPlatform,
+    pub renderer: Renderer,
+    pub font_size: f32,
+}
+
+impl Backend {
     pub fn main_loop<F>(self, mut run_ui: F)
     where
         F: FnMut(&mut bool, &mut Ui) + 'static,
     {
-        let System { event_loop, display, mut imgui, mut platform, mut renderer, .. } = self;
+        let Backend { event_loop, display, mut imgui, mut platform, mut renderer, .. } = self;
         let mut last_frame = Instant::now();
 
         event_loop.run(move |event, _, control_flow| match event {
