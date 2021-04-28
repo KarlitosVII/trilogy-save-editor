@@ -1,8 +1,7 @@
 use anyhow::Error;
 use flume::{Receiver, Sender};
 use imgui::{
-    im_str, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor, StyleVar,
-    Ui, Window,
+    im_str, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor, Ui, Window,
 };
 use wfd::DialogParams;
 
@@ -23,7 +22,7 @@ mod mass_effect_2;
 mod mass_effect_3;
 mod raw_ui;
 
-static NOTIFICATION_TIME: f64 = 1.5;
+static NOTIFICATION_TIME: f64 = 1.5; // seconde
 
 // States
 #[derive(Default)]
@@ -65,8 +64,8 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
     let _ = event_addr.send(MainEvent::LoadKnownPlots);
 
     // UI
-    let system = backend::init("Trilogy Save Editor", 1000.0, 700.0);
-    system.main_loop(move |_, ui| {
+    let system = backend::init("Trilogy Save Editor", 1000.0, 670.0);
+    system.main_loop(move |run, ui| {
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
                 state.error = Some(err);
@@ -105,7 +104,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
         });
 
         let ui = Gui::new(ui, &event_addr);
-        ui.draw(&mut state);
+        ui.draw(run, &mut state);
     });
 }
 
@@ -119,7 +118,7 @@ impl<'ui> Gui<'ui> {
         Self { ui, event_addr: Sender::clone(event_addr) }
     }
 
-    fn draw(&self, state: &mut State) -> Option<()> {
+    fn draw(&self, _: &mut bool, state: &mut State) -> Option<()> {
         let ui = self.ui;
 
         // Main window
@@ -140,7 +139,6 @@ impl<'ui> Gui<'ui> {
             Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
             Some(SaveGame::MassEffect3(_)) => Theme::MassEffect3,
         });
-        let _style = ui.push_style_var(StyleVar::WindowRounding(0.0));
 
         // Window
         if let Some(_t) = window.begin(ui) {
@@ -162,7 +160,7 @@ impl<'ui> Gui<'ui> {
 
             // Game
             match &mut state.save_game {
-                None => ui.text(im_str!("Rien ici")),
+                None => self.draw_main_page(),
                 Some(SaveGame::MassEffect1(save_game)) => {
                     self.draw_mass_effect_1(save_game, &state.known_plots)?
                 }
@@ -223,8 +221,8 @@ impl<'ui> Gui<'ui> {
 
                 let remaining = (*close_time - time) / NOTIFICATION_TIME;
                 ProgressBar::new(remaining as f32)
-                    .overlay_text(&ImString::new("time_bar"))
-                    .size([-0.0001, 2.0])
+                    .overlay_text(im_str!("time_bar"))
+                    .size([-0.000001, 2.0])
                     .build(ui);
             }
 
@@ -244,8 +242,10 @@ impl<'ui> Gui<'ui> {
         }
     }
 
+    fn draw_main_page(&self) {}
+
     // Style
-    fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 20] {
+    fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 21] {
         let ui = self.ui;
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
@@ -270,6 +270,7 @@ impl<'ui> Gui<'ui> {
 
         [
             ui.push_style_color(StyleColor::WindowBg, [0.05, 0.05, 0.05, 1.0]),
+            ui.push_style_color(StyleColor::Border, [0.20, 0.20, 0.20, 1.0]),
             ui.push_style_color(StyleColor::TitleBgActive, theme.active_color),
             ui.push_style_color(StyleColor::FrameBg, theme.bg_color),
             ui.push_style_color(StyleColor::FrameBgActive, theme.active_color),

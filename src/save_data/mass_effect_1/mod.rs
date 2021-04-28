@@ -1,4 +1,5 @@
 use anyhow::Result;
+use derive_more::{Deref, DerefMut, From};
 use serde::{
     de,
     ser::{SerializeSeq, SerializeStruct},
@@ -7,7 +8,6 @@ use serde::{
 use std::{
     fmt,
     io::{Cursor, Read, Write},
-    ops::{Deref, DerefMut},
 };
 use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
@@ -25,46 +25,17 @@ pub mod data;
 pub mod known_plot;
 
 // List<T> : Vec<T> qui se (dé)sérialise sans précision de longueur
-#[derive(Clone)]
+#[derive(Deref, DerefMut, From, Clone)]
 pub struct List<T>(Vec<T>)
 where
     T: Serialize + Clone;
-
-impl<T> Deref for List<T>
-where
-    T: Serialize + Clone,
-{
-    type Target = Vec<T>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T> DerefMut for List<T>
-where
-    T: Serialize + Clone,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl<T> From<Vec<T>> for List<T>
-where
-    T: Serialize + Clone,
-{
-    fn from(from: Vec<T>) -> Self {
-        Self(from)
-    }
-}
 
 impl<T> From<&[T]> for List<T>
 where
     T: Serialize + Clone,
 {
-    fn from(from: &[T]) -> Self {
-        Self(from.to_vec())
+    fn from(from: &[T]) -> List<T> {
+        List(from.to_vec())
     }
 }
 

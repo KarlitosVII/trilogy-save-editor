@@ -1,32 +1,16 @@
 use anyhow::Result;
 use bitvec::prelude::*;
+use derive_more::{Deref, DerefMut};
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
-use std::{
-    fmt,
-    ops::{Deref, DerefMut},
-};
+use std::fmt;
 
 use crate::{gui::Gui, save_data::RawUi};
 
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
-#[derive(Clone)]
+#[derive(Deref, DerefMut, Clone)]
 pub struct BoolVec(BitVec<Lsb0, u32>);
-
-impl Deref for BoolVec {
-    type Target = BoolSlice;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for BoolVec {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
 
 impl RawUi for BoolVec {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {

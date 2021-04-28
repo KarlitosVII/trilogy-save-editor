@@ -1,5 +1,5 @@
 use if_chain::if_chain;
-use imgui::{im_str, ChildWindow, ComboBox, ImStr, ListClipper, TabBar, TabItem};
+use imgui::{im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, TabBar, TabItem};
 use std::{cell::RefMut, cmp::Ordering, ops::Deref};
 
 use crate::save_data::{
@@ -108,9 +108,10 @@ impl<'ui> Gui<'ui> {
                     Self::me1_find_name_property(player, &m_player.properties, "m_Gender")
                 {
                     self.table_next_row();
-                    ui.text(gender.to_str().trim_start_matches("BIO_ATTRIBUTE_PAWN_GENDER_"));
-                    ui.same_line_with_pos(145.0);
-                    ui.text("Gender");
+                    let text = ImString::new(
+                        gender.to_str().trim_start_matches("BIO_ATTRIBUTE_PAWN_GENDER_"),
+                    );
+                    self.draw_text(&text, Some(im_str!("Gender")));
                 }
 
                 // Origin
@@ -118,13 +119,12 @@ impl<'ui> Gui<'ui> {
                     Self::me1_find_name_property(player, &m_player.properties, "m_BackgroundOrigin")
                 {
                     self.table_next_row();
-                    ui.text(
+                    let text = ImString::new(
                         origin
                             .to_str()
                             .trim_start_matches("BIO_PLAYER_CHARACTER_BACKGROUND_ORIGIN_"),
                     );
-                    ui.same_line_with_pos(145.0);
-                    ui.text("Origin");
+                    self.draw_text(&text, Some(im_str!("Origin")));
                 }
 
                 // Notoriety
@@ -134,13 +134,12 @@ impl<'ui> Gui<'ui> {
                     "m_BackgroundNotoriety",
                 ) {
                     self.table_next_row();
-                    ui.text(
+                    let text = ImString::new(
                         notoriety
                             .to_str()
                             .trim_start_matches("BIO_PLAYER_CHARACTER_BACKGROUND_NOTORIETY_"),
                     );
-                    ui.same_line_with_pos(145.0);
-                    ui.text("Notoriety");
+                    self.draw_text(&text, Some(im_str!("Notoriety")));
                 }
             }
         }
@@ -172,9 +171,10 @@ impl<'ui> Gui<'ui> {
                     Self::me1_find_name_property(player, &m_player.properties, "m_ClassBase")
                 {
                     self.table_next_row();
-                    ui.text(class.to_str().trim_start_matches("BIO_PARTY_MEMBER_CLASS_BASE_"));
-                    ui.same_line_with_pos(145.0);
-                    ui.text("Class");
+                    let text = ImString::new(
+                        class.to_str().trim_start_matches("BIO_PARTY_MEMBER_CLASS_BASE_"),
+                    );
+                    self.draw_text(&text, Some(im_str!("Class")));
                 }
 
                 // Level
@@ -634,11 +634,11 @@ impl<'ui> Gui<'ui> {
 
     fn draw_text(&self, text: &ImStr, label: Option<&ImStr>) {
         let ui = self.ui;
-        ui.text(text);
 
         if let Some(label) = label {
-            ui.same_line_with_pos(500.0);
-            ui.text(label);
+            ui.label_text(label, text)
+        } else {
+            ui.text(text);
         }
     }
 }

@@ -1,6 +1,6 @@
 use anyhow::Result;
+use derive_more::{Deref, DerefMut};
 use serde::{de, Serialize};
-use std::ops::{Deref, DerefMut};
 
 use crate::{
     save_data::{
@@ -12,9 +12,11 @@ use crate::{
 
 use super::{player::Name, List};
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deref, DerefMut, Clone)]
 pub struct Data {
     _osef: Dummy<4>,
+    #[deref]
+    #[deref_mut]
     pub properties: List<Property>,
 }
 
@@ -34,20 +36,6 @@ impl Data {
             size += property.size()?
         }
         Ok(size)
-    }
-}
-
-impl Deref for Data {
-    type Target = Vec<Property>;
-
-    fn deref(&self) -> &Vec<Property> {
-        &self.properties
-    }
-}
-
-impl DerefMut for Data {
-    fn deref_mut(&mut self) -> &mut Vec<Property> {
-        &mut self.properties
     }
 }
 

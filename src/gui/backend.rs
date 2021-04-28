@@ -52,7 +52,7 @@ impl ClipboardBackend for ClipboardSupport {
     }
 }
 
-// Support
+// Backend
 pub struct System {
     pub event_loop: EventLoop<()>,
     pub display: glium::Display,
@@ -68,6 +68,7 @@ pub fn init(title: &str, width: f64, height: f64) -> System {
     let builder = WindowBuilder::new()
         .with_resizable(true)
         .with_title(title)
+        .with_min_inner_size(glutin::dpi::LogicalSize::new(480.0, 270.0))
         .with_inner_size(glutin::dpi::LogicalSize::new(width, height));
     let display =
         Display::new(builder, context, &event_loop).expect("Failed to initialize display");
