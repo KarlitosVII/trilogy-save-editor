@@ -14,7 +14,6 @@ lto = true
 raw_ui_derive = { path = "raw_ui_derive" }
 # Windows
 winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-features = false }
-wfd = "0.1"
 # Std-like
 anyhow = "1.0"
 derive_more = { version = "0.99", features = ["deref", "deref_mut", "from", "display"], default-features = false }
@@ -41,6 +40,9 @@ crc = "2.0.0-rc.1"
 zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }
 unicase = "2.6"
 if_chain = "1.0"
+# GUI
+rfd = "0.3"
+dirs = "3.0"
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs" }

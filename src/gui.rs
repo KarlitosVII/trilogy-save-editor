@@ -1,9 +1,10 @@
+use std::path::PathBuf;
+
 use anyhow::Error;
 use flume::{Receiver, Sender};
 use imgui::{
     im_str, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor, Ui, Window,
 };
-use wfd::DialogParams;
 
 use crate::{
     event_handler::{MainEvent, SaveGame},
@@ -92,11 +93,11 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
                 let has_head_morph =
                     HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };
                 match state.save_game.as_mut() {
-                    Some(SaveGame::MassEffect2(savegame)) => {
-                        savegame.player.appearance.head_morph = has_head_morph
+                    Some(SaveGame::MassEffect2 { save_game, .. }) => {
+                        save_game.player.appearance.head_morph = has_head_morph
                     }
-                    Some(SaveGame::MassEffect3(savegame)) => {
-                        savegame.player.appearance.head_morph = has_head_morph
+                    Some(SaveGame::MassEffect3 { save_game, .. }) => {
+                        save_game.player.appearance.head_morph = has_head_morph
                     }
                     _ => unreachable!(),
                 }
@@ -118,7 +119,7 @@ impl<'ui> Gui<'ui> {
         Self { ui, event_addr: Sender::clone(event_addr) }
     }
 
-    fn draw(&self, _: &mut bool, state: &mut State) -> Option<()> {
+    fn draw(&self, _: &mut bool, state: &mut State) {
         let ui = self.ui;
 
         // Main window
@@ -135,9 +136,9 @@ impl<'ui> Gui<'ui> {
         // Pop on drop
         let _colors = self.style_colors(match state.save_game {
             None => Theme::MassEffect3,
-            Some(SaveGame::MassEffect1(_)) => Theme::MassEffect1,
-            Some(SaveGame::MassEffect2(_)) => Theme::MassEffect2,
-            Some(SaveGame::MassEffect3(_)) => Theme::MassEffect3,
+            Some(SaveGame::MassEffect1 { .. }) => Theme::MassEffect1,
+            Some(SaveGame::MassEffect2 { .. }) => Theme::MassEffect2,
+            Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
         });
 
         // Window
@@ -145,10 +146,10 @@ impl<'ui> Gui<'ui> {
             // Main menu bar
             if let Some(_t) = ui.begin_menu_bar() {
                 if ui.button(im_str!("Open")) {
-                    self.open_save();
+                    self.open_dialog();
                 }
                 if ui.button(im_str!("Save")) {
-                    self.save_save(&state.save_game);
+                    self.save_dialog(&state.save_game);
                 }
             }
 
@@ -161,16 +162,55 @@ impl<'ui> Gui<'ui> {
             // Game
             match &mut state.save_game {
                 None => self.draw_main_page(),
-                Some(SaveGame::MassEffect1(save_game)) => {
-                    self.draw_mass_effect_1(save_game, &state.known_plots)?
+                Some(SaveGame::MassEffect1 { save_game, .. }) => {
+                    self.draw_mass_effect_1(save_game, &state.known_plots);
                 }
-                Some(SaveGame::MassEffect2(save_game)) => {
-                    self.draw_mass_effect_2(save_game, &state.known_plots)?
+                Some(SaveGame::MassEffect2 { save_game, .. }) => {
+                    self.draw_mass_effect_2(save_game, &state.known_plots);
                 }
-                Some(SaveGame::MassEffect3(save_game)) => {
-                    self.draw_mass_effect_3(save_game, &state.known_plots)?
+                Some(SaveGame::MassEffect3 { save_game, .. }) => {
+                    self.draw_mass_effect_3(save_game, &state.known_plots);
                 }
             };
+        }
+    }
+
+    fn open_dialog(&self) {
+        let dir = match dirs::document_dir() {
+            Some(mut path) => {
+                path.push("BioWare");
+                path
+            }
+            None => PathBuf::default(),
+        };
+
+        let file = rfd::FileDialog::new()
+            .add_filter("Mass Effect Save", &["MassEffectSave", "pcsav"])
+            .set_directory(dir)
+            .pick_file();
+
+        if let Some(path) = file {
+            let _ = self.event_addr.send(MainEvent::OpenSave(path));
+        }
+    }
+
+    fn save_dialog(&self, save_game: &Option<SaveGame>) -> Option<()> {
+        let save_game = save_game.as_ref()?;
+        let (file_name, game_filter, extension) = match save_game {
+            SaveGame::MassEffect1 { file_name, .. } => {
+                (file_name, "Mass Effect Save", "MassEffectSave")
+            }
+            SaveGame::MassEffect2 { file_name, .. } => (file_name, "Mass Effect 2 Save", "pcsav"),
+            SaveGame::MassEffect3 { file_name, .. } => (file_name, "Mass Effect 3 Save", "pcsav"),
+        };
+
+        let file = rfd::FileDialog::new()
+            .add_filter(game_filter, &[extension])
+            .set_file_name(file_name)
+            .save_file();
+
+        if let Some(path) = file {
+            let _ = self.event_addr.send(MainEvent::SaveSave(path, save_game.clone()));
         }
         Some(())
     }
@@ -291,39 +331,6 @@ impl<'ui> Gui<'ui> {
             ui.push_style_color(StyleColor::TableRowBgAlt, [0.1, 0.1, 0.1, 1.0]),
             ui.push_style_color(StyleColor::TableBorderStrong, [0.20, 0.20, 0.20, 1.0]),
         ]
-    }
-
-    // Actions
-    fn open_save(&self) {
-        let result = wfd::open_dialog(DialogParams {
-            file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
-            ..Default::default()
-        });
-
-        if let Ok(result) = result {
-            let _ = self.event_addr.send(MainEvent::OpenSave(result.selected_file_path));
-        }
-    }
-
-    fn save_save(&self, save_game: &Option<SaveGame>) {
-        if let Some(save_game) = save_game {
-            let default_ext = match save_game {
-                SaveGame::MassEffect1(_) => "MassEffectSave",
-                SaveGame::MassEffect2(_) | SaveGame::MassEffect3(_) => "pcsav",
-            };
-
-            let result = wfd::save_dialog(DialogParams {
-                default_extension: default_ext,
-                file_types: vec![("Mass Effect Save", "*.MassEffectSave;*.pcsav")],
-                ..Default::default()
-            });
-
-            if let Ok(result) = result {
-                let _ = self
-                    .event_addr
-                    .send(MainEvent::SaveSave(result.selected_file_path, save_game.clone()));
-            }
-        }
     }
 }
 

@@ -1,8 +1,11 @@
 use anyhow::{Context, Result};
 use crc::{Crc, CRC_32_BZIP2};
 use flume::{Receiver, Sender};
+use if_chain::if_chain;
 use ron::ser::PrettyConfig;
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+};
 use tokio::{
     fs::{self, File},
     io::{AsyncReadExt, AsyncWriteExt},
@@ -29,9 +32,9 @@ pub enum MainEvent {
 
 #[derive(Clone)]
 pub enum SaveGame {
-    MassEffect1(Box<Me1SaveGame>),
-    MassEffect2(Box<Me2SaveGame>),
-    MassEffect3(Box<Me3SaveGame>),
+    MassEffect1 { file_name: String, save_game: Box<Me1SaveGame> },
+    MassEffect2 { file_name: String, save_game: Box<Me2SaveGame> },
+    MassEffect3 { file_name: String, save_game: Box<Me3SaveGame> },
 }
 
 pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
@@ -77,32 +80,42 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
         file.read_to_end(&mut input).await?;
     }
 
-    if let Some(ext) = path.extension() {
-        let save_game = match ext.to_string_lossy().to_lowercase().as_str() {
-            "masseffectsave" => {
-                SaveGame::MassEffect1(Box::new(unreal::Deserializer::from_bytes(&input)?))
-            }
-            _ => {
-                let is_me2 =
-                    unreal::Deserializer::from_bytes::<mass_effect_2::Version>(&input).is_ok();
-                if is_me2 {
-                    SaveGame::MassEffect2(Box::new(unreal::Deserializer::from_bytes(&input)?))
-                } else {
-                    SaveGame::MassEffect3(Box::new(unreal::Deserializer::from_bytes(&input)?))
+    if_chain! {
+        if let Some(file_name) = path.file_name();
+        if let Some(ext) = path.extension();
+        then {
+            let save_game = if unicase::eq(ext.to_string_lossy().to_string().as_str(), "MassEffectSave")
+            {
+                SaveGame::MassEffect1 {
+                    file_name: file_name.to_string_lossy().into(),
+                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
-            }
-        };
+            } else {
+                let is_me2 = unreal::Deserializer::from_bytes::<mass_effect_2::Version>(&input).is_ok();
+                if is_me2 {
+                    SaveGame::MassEffect2 {
+                        file_name: file_name.to_string_lossy().into(),
+                        save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+                    }
+                } else {
+                    SaveGame::MassEffect3 {
+                        file_name: file_name.to_string_lossy().into(),
+                        save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+                    }
+                }
+            };
 
-        let _ = ui_addr.send_async(UiEvent::OpenedSave(save_game)).await;
-        let _ = ui_addr.send_async(UiEvent::Notification("Opened")).await;
+            let _ = ui_addr.send_async(UiEvent::OpenedSave(save_game)).await;
+            let _ = ui_addr.send_async(UiEvent::Notification("Opened")).await;
+        }
     }
     Ok(())
 }
 
 async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
     let output = match save_game {
-        SaveGame::MassEffect1(save_game) => unreal::Serializer::to_byte_buf(&save_game)?,
-        SaveGame::MassEffect2(save_game) => {
+        SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_byte_buf(&save_game)?,
+        SaveGame::MassEffect2 { save_game, .. } => {
             let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 
             let crc = Crc::<u32>::new(&CRC_32_BZIP2);
@@ -110,7 +123,7 @@ async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>)
             output.extend(&u32::to_le_bytes(checksum));
             output
         }
-        SaveGame::MassEffect3(save_game) => {
+        SaveGame::MassEffect3 { save_game, .. } => {
             let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 
             let crc = Crc::<u32>::new(&CRC_32_BZIP2);
