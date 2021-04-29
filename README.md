@@ -8,6 +8,7 @@ This software is similar to Gibbed's save editors (and forks) but adds a lot of 
 
 - Mass Effect 1 (yay!) with about a hundred plots.
 - A lot of new plots for ME2/3 (including N7 and DLC Weapons)
+- Multiple bonus powers support for ME2/3
 - Some fixes (ME2 Squad appearance)
 - Free (as freedom) and open-source software with [CeCILL license](https://en.wikipedia.org/wiki/CeCILL)
 
