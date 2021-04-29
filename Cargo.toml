@@ -1,7 +1,7 @@
 [package]
 name = "trilogy_save_editor"
 version = "1.0.0"
-authors = ["Karlitos <ke0opt4cq@relay.firefox.com>"]
+authors = ["Karlitos"]
 license = "CeCILL-2.1"
 edition = "2018"
 
