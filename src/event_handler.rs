@@ -3,9 +3,7 @@ use crc::{Crc, CRC_32_BZIP2};
 use flume::{Receiver, Sender};
 use if_chain::if_chain;
 use ron::ser::PrettyConfig;
-use std::{
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 use tokio::{
     fs::{self, File},
     io::{AsyncReadExt, AsyncWriteExt},
