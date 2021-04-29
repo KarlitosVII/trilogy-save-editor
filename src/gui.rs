@@ -2,8 +2,10 @@ use std::path::PathBuf;
 
 use anyhow::Error;
 use flume::{Receiver, Sender};
+use if_chain::if_chain;
 use imgui::{
-    im_str, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor, Ui, Window,
+    im_str, ChildWindow, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor,
+    TabBar, TabItem, Ui, Window,
 };
 
 use crate::{
@@ -65,7 +67,11 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
     let _ = event_addr.send(MainEvent::LoadKnownPlots);
 
     // UI
-    let system = backend::init("Trilogy Save Editor", 1000.0, 670.0);
+    let system = backend::init(
+        &format!("Trilogy Save Editor - v{}", env!("CARGO_PKG_VERSION")),
+        1000.0,
+        670.0,
+    );
     system.main_loop(move |run, ui| {
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
@@ -148,8 +154,13 @@ impl<'ui> Gui<'ui> {
                 if ui.button(im_str!("Open")) {
                     self.open_dialog();
                 }
-                if ui.button(im_str!("Save")) {
-                    self.save_dialog(&state.save_game);
+                if let Some(save_game) = &state.save_game {
+                    if ui.button(im_str!("Save")) {
+                        self.save_dialog(save_game);
+                    }
+                }
+                if let Some(_t) = ui.begin_menu(im_str!("About")) {
+                    self.draw_about();
                 }
             }
 
@@ -194,8 +205,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn save_dialog(&self, save_game: &Option<SaveGame>) -> Option<()> {
-        let save_game = save_game.as_ref()?;
+    fn save_dialog(&self, save_game: &SaveGame) {
         let (file_name, game_filter, extension) = match save_game {
             SaveGame::MassEffect1 { file_name, .. } => {
                 (file_name, "Mass Effect Save", "MassEffectSave")
@@ -212,7 +222,34 @@ impl<'ui> Gui<'ui> {
         if let Some(path) = file {
             let _ = self.event_addr.send(MainEvent::SaveSave(path, save_game.clone()));
         }
-        Some(())
+    }
+
+    fn draw_about(&self) {
+        let ui = self.ui;
+
+        ui.separator();
+        ui.text(im_str!("(C) 2021 Karlitos"));
+        ui.separator();
+        if_chain! {
+            if let Some(_t) = ui.begin_menu(im_str!("Licence"));
+            if let Some(_t) = TabBar::new(im_str!("tabs")).begin(ui);
+            then {
+                if_chain! {
+                    if let Some(_t) = TabItem::new(im_str!("English")).begin(ui);
+                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
+                    then {
+                        ui.text(include_str!("../Licence_CeCILL_V2.1-en.txt"));
+                    }
+                }
+                if_chain! {
+                    if let Some(_t) = TabItem::new(im_str!("French")).begin(ui);
+                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
+                    then {
+                        ui.text(include_str!("../Licence_CeCILL_V2.1-fr.txt"));
+                    }
+                }
+            }
+        }
     }
 
     fn draw_error(&self, option_error: &mut Option<Error>) {
@@ -282,10 +319,24 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_main_page(&self) {}
+    fn draw_main_page(&self) {
+        let ui = self.ui;
+
+        ui.text("Changelog");
+        ui.separator();
+        // 1.0.0
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("1.0.0") {
+                self.table_next_row();
+                ui.text("Initial release");
+            }
+        }
+    }
 
     // Style
-    fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 21] {
+    fn style_colors(&self, game_theme: Theme) -> [ColorStackToken<'ui>; 22] {
         let ui = self.ui;
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
@@ -311,6 +362,7 @@ impl<'ui> Gui<'ui> {
         [
             ui.push_style_color(StyleColor::WindowBg, [0.05, 0.05, 0.05, 1.0]),
             ui.push_style_color(StyleColor::Border, [0.20, 0.20, 0.20, 1.0]),
+            ui.push_style_color(StyleColor::Separator, [0.20, 0.20, 0.20, 1.0]),
             ui.push_style_color(StyleColor::TitleBgActive, theme.active_color),
             ui.push_style_color(StyleColor::FrameBg, theme.bg_color),
             ui.push_style_color(StyleColor::FrameBgActive, theme.active_color),
