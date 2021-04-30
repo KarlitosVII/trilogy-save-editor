@@ -31,7 +31,7 @@ use glium::{
     },
     Display, Surface,
 };
-use imgui::{ClipboardBackend, Context, ImStr, ImString, Ui};
+use imgui::{ClipboardBackend, Context, FontConfig, FontSource, ImStr, ImString, Ui};
 use imgui_glium_renderer::Renderer;
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use std::time::Instant;
@@ -79,17 +79,20 @@ pub fn init(title: &str, width: f64, height: f64) -> Backend {
     {
         let gl_window = display.gl_window();
         let window = gl_window.window();
-        platform.attach_window(imgui.io_mut(), window, HiDpiMode::Rounded);
+        platform.attach_window(imgui.io_mut(), window, HiDpiMode::Default);
     }
 
     let hidpi_factor = platform.hidpi_factor();
-    let font_size = (14.0 * hidpi_factor) as f32;
+    let font_size = (13.0 * hidpi_factor) as f32;
+    imgui.fonts().add_font(&[FontSource::DefaultFontData {
+        config: Some(FontConfig { size_pixels: font_size, ..Default::default() }),
+    }]);
 
     imgui.io_mut().font_global_scale = (1.0 / hidpi_factor) as f32;
 
     let renderer = Renderer::init(&mut imgui, &display).expect("Failed to initialize renderer");
 
-    Backend { event_loop, display, imgui, platform, renderer, font_size }
+    Backend { event_loop, display, imgui, platform, renderer }
 }
 
 pub struct Backend {
@@ -98,7 +101,6 @@ pub struct Backend {
     pub imgui: Context,
     pub platform: WinitPlatform,
     pub renderer: Renderer,
-    pub font_size: f32,
 }
 
 impl Backend {
@@ -106,7 +108,7 @@ impl Backend {
     where
         F: FnMut(&mut bool, &mut Ui) + 'static,
     {
-        let Backend { event_loop, display, mut imgui, mut platform, mut renderer, .. } = self;
+        let Backend { event_loop, display, mut imgui, mut platform, mut renderer } = self;
         let mut last_frame = Instant::now();
 
         event_loop.run(move |event, _, control_flow| match event {

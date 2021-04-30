@@ -1,13 +1,16 @@
 use if_chain::if_chain;
 use imgui::{im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, TabBar, TabItem};
-use std::{cell::RefMut, cmp::Ordering, ops::Deref};
+use std::{
+    cell::{RefCell, RefMut},
+    cmp::Ordering,
+};
 
 use crate::save_data::{
     common::plot::{Me1PlotTable, PlotCategory},
     mass_effect_1::{
         data::{ArrayType, Data, Property, StructType},
         known_plot::Me1KnownPlot,
-        player::Player,
+        player::{Name, Player},
         List, Me1SaveGame,
     },
     ImguiString, RawUi,
@@ -20,6 +23,14 @@ impl<'ui> Gui<'ui> {
         &self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState,
     ) -> Option<()> {
         let ui = self.ui;
+
+        // Ajoute un Name dupliqué à la liste
+        {
+            let duplicate = &mut *save_game.player.duplicate.borrow_mut();
+            if let Some(name) = duplicate.take() {
+                save_game.player.names.push(RefCell::new(name));
+            }
+        }
 
         // Tab bar
         let _t = TabBar::new(im_str!("mass_effect_1")).begin(ui)?;
@@ -65,7 +76,7 @@ impl<'ui> Gui<'ui> {
 
         // Current Game
         let mut current_game = player.objects.iter().enumerate().find_map(|(i, object)| {
-            match player.get_name(object.object_name_id).to_str() {
+            match player.get_name(object.object_name_id).borrow().to_str() {
                 "CurrentGame" => Some(player.get_data(i as i32 + 1).borrow_mut()),
                 _ => None,
             }
@@ -109,7 +120,7 @@ impl<'ui> Gui<'ui> {
                 {
                     self.table_next_row();
                     let text = ImString::new(
-                        gender.to_str().trim_start_matches("BIO_ATTRIBUTE_PAWN_GENDER_"),
+                        gender.borrow().to_str().trim_start_matches("BIO_ATTRIBUTE_PAWN_GENDER_"),
                     );
                     self.draw_text(&text, Some(im_str!("Gender")));
                 }
@@ -121,6 +132,7 @@ impl<'ui> Gui<'ui> {
                     self.table_next_row();
                     let text = ImString::new(
                         origin
+                            .borrow()
                             .to_str()
                             .trim_start_matches("BIO_PLAYER_CHARACTER_BACKGROUND_ORIGIN_"),
                     );
@@ -136,6 +148,7 @@ impl<'ui> Gui<'ui> {
                     self.table_next_row();
                     let text = ImString::new(
                         notoriety
+                            .borrow()
                             .to_str()
                             .trim_start_matches("BIO_PLAYER_CHARACTER_BACKGROUND_NOTORIETY_"),
                     );
@@ -172,7 +185,7 @@ impl<'ui> Gui<'ui> {
                 {
                     self.table_next_row();
                     let text = ImString::new(
-                        class.to_str().trim_start_matches("BIO_PARTY_MEMBER_CLASS_BASE_"),
+                        class.borrow().to_str().trim_start_matches("BIO_PARTY_MEMBER_CLASS_BASE_"),
                     );
                     self.draw_text(&text, Some(im_str!("Class")));
                 }
@@ -297,7 +310,7 @@ impl<'ui> Gui<'ui> {
     ) -> Option<RefMut<'a, Data>> {
         properties.iter().find_map(|property| match property {
             Property::Object { name_id, object_id, .. }
-                if player.get_name(*name_id).to_str() == property_name =>
+                if player.get_name(*name_id).borrow().to_str() == property_name =>
             {
                 Some(player.get_data(*object_id).borrow_mut())
             }
@@ -311,7 +324,7 @@ impl<'ui> Gui<'ui> {
         properties.iter_mut().find_map(|property| match property {
             Property::Struct {
                 name_id, properties: StructType::Properties(properties), ..
-            } if player.get_name(*name_id).to_str() == property_name => Some(properties),
+            } if player.get_name(*name_id).borrow().to_str() == property_name => Some(properties),
             _ => None,
         })
     }
@@ -321,7 +334,7 @@ impl<'ui> Gui<'ui> {
     ) -> Option<&'a mut bool> {
         properties.iter_mut().find_map(|property| match property {
             Property::Bool { name_id, value, .. }
-                if player.get_name(*name_id).to_str() == property_name =>
+                if player.get_name(*name_id).borrow().to_str() == property_name =>
             {
                 Some(value)
             }
@@ -334,7 +347,7 @@ impl<'ui> Gui<'ui> {
     ) -> Option<&'a mut i32> {
         properties.iter_mut().find_map(|property| match property {
             Property::Int { name_id, value, .. }
-                if player.get_name(*name_id).to_str() == property_name =>
+                if player.get_name(*name_id).borrow().to_str() == property_name =>
             {
                 Some(value)
             }
@@ -347,7 +360,7 @@ impl<'ui> Gui<'ui> {
     ) -> Option<&'a mut f32> {
         properties.iter_mut().find_map(|property| match property {
             Property::Float { name_id, value, .. }
-                if player.get_name(*name_id).to_str() == property_name =>
+                if player.get_name(*name_id).borrow().to_str() == property_name =>
             {
                 Some(value)
             }
@@ -360,7 +373,7 @@ impl<'ui> Gui<'ui> {
     ) -> Option<&'a mut ImguiString> {
         properties.iter_mut().find_map(|property| match property {
             Property::Str { name_id, string, .. }
-                if player.get_name(*name_id).to_str() == property_name =>
+                if player.get_name(*name_id).borrow().to_str() == property_name =>
             {
                 Some(string)
             }
@@ -370,10 +383,10 @@ impl<'ui> Gui<'ui> {
 
     fn me1_find_name_property<'a>(
         player: &'a Player, properties: &[Property], property_name: &str,
-    ) -> Option<&'a ImguiString> {
+    ) -> Option<&'a RefCell<Name>> {
         properties.iter().find_map(|property| match property {
             Property::Name { name_id, value_name_id, .. }
-                if player.get_name(*name_id).to_str() == property_name =>
+                if player.get_name(*name_id).borrow().to_str() == property_name =>
             {
                 Some(player.get_name(*value_name_id))
             }
@@ -448,10 +461,9 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_raw_player(&self, player: &Player) -> Option<()> {
-        let (i, _) =
-            player.objects.iter().enumerate().find(|(_, object)| {
-                player.get_name(object.object_name_id).to_str() == "CurrentGame"
-            })?;
+        let (i, _) = player.objects.iter().enumerate().find(|(_, object)| {
+            player.get_name(object.object_name_id).borrow().to_str() == "CurrentGame"
+        })?;
 
         let object_id = i as i32 + 1;
         self.draw_object(player, i, None, object_id);
@@ -462,11 +474,11 @@ impl<'ui> Gui<'ui> {
         &self, player: &Player, ident: usize, property_name: Option<&ImStr>, object_id: i32,
     ) {
         let object = player.get_object(object_id);
-        let object_name = player.get_name(object.object_name_id);
+        let object_name: &ImStr = &*player.get_name(object.object_name_id).borrow();
 
         let property_name = match property_name {
             Option::Some(property_name) => im_str!("{} : {}", object_name, property_name),
-            Option::None => object_name.deref().to_owned(),
+            Option::None => object_name.to_owned(),
         };
 
         if_chain! {
@@ -490,67 +502,96 @@ impl<'ui> Gui<'ui> {
         }
 
         match property {
-            Property::Array { name_id, array, .. } => self.draw_array_property(
-                player,
-                &format!("{}##{}", player.get_name(*name_id), ident),
-                array,
-            )?,
-            Property::Bool { name_id, value, .. } => self.draw_edit_bool(
-                im_str!("{}##bool-{}", player.get_name(*name_id), ident).to_str(),
-                value,
-            ),
-            Property::Float { name_id, value, .. } => self.draw_edit_f32(
-                im_str!("{}##f32-{}", player.get_name(*name_id), ident).to_str(),
-                value,
-            ),
-            Property::Int { name_id, value, .. } => self.draw_edit_i32(
-                im_str!("{}##i32-{}", player.get_name(*name_id), ident).to_str(),
-                value,
-            ),
+            Property::Array { name_id, array, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                self.draw_array_property(player, &format!("{}##{}", name, ident), array)?;
+            }
+            Property::Bool { name_id, value, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                self.draw_edit_bool(im_str!("{}##bool-{}", name, ident).to_str(), value)
+            }
+            Property::Float { name_id, value, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                self.draw_edit_f32(im_str!("{}##f32-{}", name, ident).to_str(), value)
+            }
+            Property::Int { name_id, value, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                self.draw_edit_i32(im_str!("{}##i32-{}", name, ident).to_str(), value)
+            }
             Property::Name { name_id, value_name_id, .. } => {
-                self.draw_text(player.get_name(*value_name_id), Some(player.get_name(*name_id)));
+                self.draw_name_property(player, ident, name_id, value_name_id);
             }
             Property::Object { name_id, object_id, .. } => {
                 match (*object_id).cmp(&0) {
                     Ordering::Greater => {
                         // Object
-                        let property_name = player.get_name(*name_id);
+                        let property_name: &ImStr = &*player.get_name(*name_id).borrow();
                         self.draw_object(player, ident, Some(property_name), *object_id);
                     }
                     Ordering::Less => {
                         // Class
                         let class = player.get_class(*object_id);
-                        let class_name = player.get_name(class.class_name_id);
-                        self.draw_text(class_name, Some(player.get_name(*name_id)));
+                        let class_name = &*player.get_name(class.class_name_id).borrow();
+                        let label = &*player.get_name(*name_id).borrow();
+                        self.draw_text(class_name, Some(label));
                     }
                     Ordering::Equal => {
                         // Null => Nom de classe par défaut
-                        self.draw_text(im_str!("Class"), Some(player.get_name(*name_id)))
+                        let label = &*player.get_name(*name_id).borrow();
+                        self.draw_text(im_str!("Class"), Some(label))
                     }
                 }
             }
-            Property::Str { name_id, string, .. } => self.draw_edit_string(
-                im_str!("{}##string-{}", player.get_name(*name_id), ident).to_str(),
-                string,
-            ),
-            Property::StringRef { name_id, value, .. } => self.draw_edit_i32(
-                im_str!("{}##string-ref-{}", player.get_name(*name_id), ident).to_str(),
-                value,
-            ),
-            Property::Struct { name_id, struct_name_id, properties, .. } => self
-                .draw_struct_property(
+            Property::Str { name_id, string, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                self.draw_edit_string(im_str!("{}##string-{}", name, ident).to_str(), string)
+            }
+            Property::StringRef { name_id, value, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                self.draw_edit_i32(im_str!("{}##string-ref-{}", name, ident).to_str(), value)
+            }
+            Property::Struct { name_id, struct_name_id, properties, .. } => {
+                let name: &ImStr = &*player.get_name(*name_id).borrow();
+                let struct_name: &ImStr = &*player.get_name(*struct_name_id).borrow();
+                self.draw_struct_property(
                     player,
                     ident,
-                    &im_str!(
-                        "{} : {}",
-                        player.get_name(*struct_name_id),
-                        player.get_name(*name_id),
-                    ),
+                    &im_str!("{} : {}", struct_name, name),
                     properties,
-                ),
+                )
+            }
             Property::Byte { .. } | Property::None { .. } => unreachable!(),
         }
         Some(())
+    }
+
+    fn draw_name_property(
+        &self, player: &Player, ident: usize, name_id: &u32, value_name_id: &mut u32,
+    ) {
+        let ui = self.ui;
+
+        let is_duplicate = player.get_name(*value_name_id).borrow().is_duplicate;
+        if !is_duplicate {
+            let label = &*player.get_name(*name_id).borrow();
+            let value = &*player.get_name(*value_name_id).borrow();
+
+            self.draw_text(value, Some(label));
+            ui.same_line();
+            if ui.small_button(&im_str!("duplicate##dupe-{}", ident)) {
+                // Duplicate name à la prochaine frame
+                let mut new_value = value.clone();
+                new_value.is_duplicate = true;
+                *player.duplicate.borrow_mut() = Some(new_value);
+                *value_name_id = player.names.len() as u32;
+            }
+            ui.same_line();
+            self.draw_help_marker("In order to modify this string you have to duplicate it first.");
+        } else {
+            let ident = &*player.get_name(*name_id).borrow();
+            let value = &mut *player.get_name(*value_name_id).borrow_mut();
+
+            self.draw_edit_string(ident.to_str(), value);
+        }
     }
 
     fn draw_array_property(

@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use anyhow::Result;
 use derive_more::{Deref, DerefMut};
 use serde::{de, Serialize};
@@ -21,7 +23,7 @@ pub struct Data {
 }
 
 impl Data {
-    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
+    pub fn visit_seq<'de, A>(names: &[RefCell<Name>], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
     {
@@ -39,12 +41,12 @@ impl Data {
     }
 }
 
-fn get_name(names: &[Name], id: u32) -> String {
-    names[id as usize].to_string()
+fn get_name(names: &[RefCell<Name>], id: u32) -> String {
+    names[id as usize].borrow().to_string()
 }
 
 impl List<Property> {
-    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
+    pub fn visit_seq<'de, A>(names: &[RefCell<Name>], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
     {
@@ -167,7 +169,7 @@ pub enum Property {
 }
 
 impl Property {
-    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
+    pub fn visit_seq<'de, A>(names: &[RefCell<Name>], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
     {

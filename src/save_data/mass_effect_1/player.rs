@@ -16,15 +16,16 @@ pub struct Player {
     header_offset: u32,
     _no_mans_land1: List<u8>,
     header: Header,
-    names: List<Name>,
+    pub names: List<RefCell<Name>>,
     classes: List<Class>,
     pub objects: List<Object>,
     _no_mans_land2: List<u8>,
     datas: List<RefCell<Data>>,
+    pub duplicate: RefCell<Option<Name>>, // Spécial n'est pas (dé)sérialisé
 }
 
 impl Player {
-    pub fn get_name(&self, id: u32) -> &ImguiString {
+    pub fn get_name(&self, id: u32) -> &RefCell<Name> {
         &self.names[id as usize]
     }
 
@@ -72,7 +73,7 @@ impl<'de> serde::Deserialize<'de> for Player {
                 // Names
                 let mut names = Vec::new();
                 for _ in 0..header.name_len {
-                    names.push(seq.next_element()?.unwrap());
+                    names.push(RefCell::new(seq.next_element()?.unwrap()));
                 }
 
                 // Imports
@@ -110,6 +111,7 @@ impl<'de> serde::Deserialize<'de> for Player {
                     objects: objects.into(),
                     _no_mans_land2: _no_mans_land2.into(),
                     datas: datas.into(),
+                    duplicate: RefCell::new(None),
                 })
             }
         }
@@ -133,6 +135,7 @@ impl serde::Serialize for Player {
             objects,
             _no_mans_land2,
             datas,
+            duplicate: _,
         } = self;
 
         // Calculs d'offsets
@@ -140,7 +143,7 @@ impl serde::Serialize for Player {
 
         header.classes_offset = header.name_offset;
         for name in names.iter() {
-            header.classes_offset += name.size().map_err(Error::custom)? as u32;
+            header.classes_offset += name.borrow().size().map_err(Error::custom)? as u32;
         }
 
         header.objects_offset = header.classes_offset + (classes.len() * 28) as u32;
@@ -198,6 +201,8 @@ pub struct Name {
     #[deref_mut]
     string: ImguiString,
     _osef: Dummy<8>,
+    #[serde(skip)]
+    pub is_duplicate: bool, // Spécial
 }
 
 impl Name {
