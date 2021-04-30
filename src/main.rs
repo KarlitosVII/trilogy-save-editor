@@ -17,8 +17,7 @@ mod unreal;
 
 #[tokio::main]
 async fn main() {
-    #[cfg(debug_assertions)]
-    console::attach();
+    console::attach_if_run_in_console();
 
     panic::set_hook(Box::new(|e| {
         console::attach();
@@ -28,12 +27,10 @@ async fn main() {
     let (event_addr, event_rx) = flume::unbounded();
     let (ui_addr, ui_rx) = flume::unbounded();
 
-    let event_loop = event_handler::event_loop(event_rx, ui_addr);
+    let event_loop = tokio::spawn(event_handler::event_loop(event_rx, ui_addr));
 
-    let gui = task::spawn_blocking(move || gui::run(event_addr, ui_rx));
-
-    let (_, gui) = tokio::join!(event_loop, gui);
-    gui.expect("GUI panicked");
+    task::block_in_place(move || gui::run(event_addr, ui_rx));
+    event_loop.await.unwrap();
 }
 
 fn panic_hook(info: &PanicInfo<'_>) {
@@ -63,6 +60,12 @@ mod console {
             if AttachConsole(ATTACH_PARENT_PROCESS) == FALSE {
                 AllocConsole();
             }
+        }
+    }
+
+    pub fn attach_if_run_in_console() -> bool {
+        unsafe {
+            AttachConsole(ATTACH_PARENT_PROCESS) != FALSE
         }
     }
 }

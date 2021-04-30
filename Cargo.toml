@@ -1,6 +1,6 @@
 [package]
 name = "trilogy_save_editor"
-version = "1.0.0"
+version = "1.1.1"
 authors = ["Karlitos"]
 license = "CeCILL-2.1"
 edition = "2018"
@@ -8,6 +8,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [profile.release]
 lto = true
+debug-assertions = true # High CPU usage fix
 
 [dependencies]
 # Macro
@@ -47,5 +48,5 @@ dirs = "3.0"
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs" }
-glium = "0.29"
+glium = { version = "0.29", features = ["glutin"], default-features = false }
 clipboard = "0.5"

@@ -26,7 +26,6 @@ use glium::{
         self,
         event::{Event, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
-        platform::windows::EventLoopExtWindows,
         window::WindowBuilder,
     },
     Display, Surface,
@@ -54,7 +53,7 @@ impl ClipboardBackend for ClipboardSupport {
 
 // Backend
 pub fn init(title: &str, width: f64, height: f64) -> Backend {
-    let event_loop = EventLoop::new_any_thread();
+    let event_loop = EventLoop::new();
     let context = glutin::ContextBuilder::new().with_vsync(true);
     let builder = WindowBuilder::new()
         .with_resizable(true)
