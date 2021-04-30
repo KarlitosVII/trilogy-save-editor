@@ -141,6 +141,7 @@ impl serde::Serialize for Player {
         // Calculs d'offsets
         let mut header = header.clone();
 
+        header.name_len = names.len() as u32;
         header.classes_offset = header.name_offset;
         for name in names.iter() {
             header.classes_offset += name.borrow().size().map_err(Error::custom)? as u32;
