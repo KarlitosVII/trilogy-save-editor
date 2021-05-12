@@ -8,6 +8,7 @@ use crate::{
     save_data::{
         common::{
             appearance::{HasHeadMorph, HeadMorph},
+            player::{Notoriety, Origin},
             plot::PlotCategory,
         },
         mass_effect_2::{
@@ -81,7 +82,7 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me2_general(&self, save_game: &mut Me2SaveGame) -> Option<()> {
         let ui = self.ui;
-        let Me2SaveGame { difficulty, end_game_state, player, plot, .. } = save_game;
+        let Me2SaveGame { difficulty, end_game_state, player, plot, me1_plot, .. } = save_game;
         let Player {
             is_female,
             class_name,
@@ -121,30 +122,70 @@ impl<'ui> Gui<'ui> {
                 let mut gender = *is_female as usize;
                 const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
                 {
-                    let width = ui.push_item_width(200.0);
-                    if ComboBox::new(im_str!("Gender")).build_simple_string(
-                        ui,
-                        &mut gender,
-                        &GENDER_LIST,
-                    ) {
+                    if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
                         *is_female = gender != 0;
                     }
-                    width.pop(ui);
 
                     ui.same_line();
-                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries...");
+                    self.draw_help_marker(
+                        "If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries..."
+                    );
                 }
 
                 self.table_next_row();
-                origin.draw_raw_ui(self, "Origin");
+                let mut origin_idx = origin.clone() as usize;
+                const ORIGIN_LIST: [&ImStr; 4] =
+                    [im_str!("None"), im_str!("Spacer"), im_str!("Colony"), im_str!("Earthborn")];
+                {
+                    if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                        // Enum
+                        *origin = match origin_idx {
+                            0 => Origin::None,
+                            1 => Origin::Spacer,
+                            2 => Origin::Colonist,
+                            3 => Origin::Earthborn,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
+                            *me1_origin = origin_idx as i32;
+                        }
+                    }
+                }
 
                 self.table_next_row();
-                notoriety.draw_raw_ui(self, "Notoriety");
+                let mut notoriety_idx = notoriety.clone() as usize;
+                const NOTORIETY_LIST: [&ImStr; 4] = [
+                    im_str!("None"),
+                    im_str!("Survivor"),
+                    im_str!("War Hero"),
+                    im_str!("Ruthless"),
+                ];
+                {
+                    if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                        // Enum
+                        *notoriety = match notoriety_idx {
+                            0 => Notoriety::None,
+                            1 => Notoriety::Survivor,
+                            2 => Notoriety::Warhero,
+                            3 => Notoriety::Ruthless,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
+                            *me1_notoriety = notoriety_idx as i32;
+                        }
+                    }
+                }
 
                 self.table_next_row();
                 face_code.draw_raw_ui(self, "Identity Code");
                 ui.same_line();
-                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
+                self.draw_help_marker(
+                    "If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !"
+                );
             }
         }
 
@@ -276,7 +317,9 @@ impl<'ui> Gui<'ui> {
         self.table_next_row();
         let _t = self.push_tree_node("Bonus Powers")?;
         ui.same_line();
-        self.draw_help_marker("You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend.");
+        self.draw_help_marker(
+            "You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend."
+        );
 
         const POWER_LIST: [(&ImStr, &ImStr); 14] = [
             (im_str!("SFXGameContent_Powers.SFXPower_Crush_Player"), im_str!("Slam")),

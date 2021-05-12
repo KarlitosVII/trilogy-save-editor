@@ -853,7 +853,7 @@ Me3KnownPlot(
                 },
                 ints: {
                     10001: "Origin (1 = Spacer, 2 = Colonist, 3 = Earthborn)",
-                    10002: "Notoriety (1 = Sole Survivor, 2 = War Hero, 3 = Ruthless)",
+                    10002: "Notoriety (1 = Survivor, 2 = War Hero, 3 = Ruthless)",
                     10046: "Renegade points",
                     10047: "Paragon points",
                 },

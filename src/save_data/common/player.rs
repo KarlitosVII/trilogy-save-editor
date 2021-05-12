@@ -6,7 +6,7 @@ use crate::save_data::ImguiString;
 pub enum Origin {
     None,
     Spacer,
-    Colony,
+    Colonist,
     Earthborn,
 }
 

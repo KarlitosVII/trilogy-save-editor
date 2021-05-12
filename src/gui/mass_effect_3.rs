@@ -9,6 +9,7 @@ use crate::{
     save_data::{
         common::{
             appearance::{HasHeadMorph, HeadMorph},
+            player::{Notoriety, Origin},
             plot::PlotCategory,
         },
         mass_effect_1::known_plot::Me1KnownPlot,
@@ -105,35 +106,98 @@ impl<'ui> Gui<'ui> {
                 first_name.draw_raw_ui(self, "Name");
 
                 // Gender
-                // TODO: Change is_female et Loco / Lola plots
                 self.table_next_row();
                 let mut gender = *is_female as usize;
                 const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
                 {
-                    let width = ui.push_item_width(200.0);
-                    if ComboBox::new(im_str!("Gender")).build_simple_string(
-                        ui,
-                        &mut gender,
-                        &GENDER_LIST,
-                    ) {
+                    if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
                         *is_female = gender != 0;
+
+                        // Plot
+                        if let Some(mut is_female) = plot.bool_variables.get_mut(17662) {
+                            *is_female = gender != 0;
+                        }
+
+                        // Loco / Lola
+                        let is_loco = match plot.bool_variables.get(19578) {
+                            Some(val) => *val,
+                            None => false,
+                        };
+                        let is_lola = match plot.bool_variables.get(19579) {
+                            Some(val) => *val,
+                            None => false,
+                        };
+
+                        if is_loco || is_lola {
+                            if let Some(mut is_loco) = plot.bool_variables.get_mut(19578) {
+                                *is_loco = gender == 0;
+                            }
+                            if let Some(mut is_lola) = plot.bool_variables.get_mut(19579) {
+                                *is_lola = gender != 0;
+                            }
+                        }
                     }
-                    width.pop(ui);
 
                     ui.same_line();
-                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Reapers will be the least of your worries...\nAlso consider changing your gender and Loco / Lola plots.");
+                    self.draw_help_marker(
+                        "If you change your gender, disable head morph or import one appropriate\nor the Reapers will be the least of your worries..."
+                    );
                 }
 
                 self.table_next_row();
-                origin.draw_raw_ui(self, "Origin");
+                let mut origin_idx = origin.clone() as usize;
+                const ORIGIN_LIST: [&ImStr; 4] =
+                    [im_str!("None"), im_str!("Spacer"), im_str!("Colony"), im_str!("Earthborn")];
+                {
+                    if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                        // Enum
+                        *origin = match origin_idx {
+                            0 => Origin::None,
+                            1 => Origin::Spacer,
+                            2 => Origin::Colonist,
+                            3 => Origin::Earthborn,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_origin) = plot.int_variables.get_mut(&10001) {
+                            *me1_origin = origin_idx as i32;
+                        }
+                    }
+                }
 
                 self.table_next_row();
-                notoriety.draw_raw_ui(self, "Notoriety");
+                let mut notoriety_idx = notoriety.clone() as usize;
+                const NOTORIETY_LIST: [&ImStr; 4] = [
+                    im_str!("None"),
+                    im_str!("Survivor"),
+                    im_str!("War Hero"),
+                    im_str!("Ruthless"),
+                ];
+                {
+                    if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                        // Enum
+                        *notoriety = match notoriety_idx {
+                            0 => Notoriety::None,
+                            1 => Notoriety::Survivor,
+                            2 => Notoriety::Warhero,
+                            3 => Notoriety::Ruthless,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_notoriety) = plot.int_variables.get_mut(&10002) {
+                            *me1_notoriety = notoriety_idx as i32;
+                        }
+                    }
+                }
 
                 self.table_next_row();
                 face_code.draw_raw_ui(self, "Identity Code");
                 ui.same_line();
-                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
+                self.draw_help_marker(
+                    "If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !"
+                );
             }
         }
 
@@ -276,7 +340,9 @@ impl<'ui> Gui<'ui> {
         self.table_next_row();
         let _t = self.push_tree_node("Bonus Powers")?;
         ui.same_line();
-        self.draw_help_marker("You can use as many bonus powers as you want\nand customize your build to your liking.\nThe only restriction is the size of your screen !");
+        self.draw_help_marker(
+            "You can use as many bonus powers as you want\nand customize your build to your liking.\nThe only restriction is the size of your screen !"
+        );
 
         const POWER_LIST: [(&ImStr, &ImStr); 19] = [
             (im_str!("SFXGameContent.SFXPowerCustomAction_EnergyDrain"), im_str!("Energy Drain")),

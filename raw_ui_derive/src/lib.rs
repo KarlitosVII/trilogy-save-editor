@@ -61,12 +61,7 @@ fn impl_raw_ui_enum(
         }
     });
 
-    let match_variants = variants.iter().enumerate().map(|(i, v)| {
-        let variant = &v.ident;
-        quote! {
-            #name::#variant => #i
-        }
-    });
+    let variant_number = array_variants.len();
 
     let edit_variants = variants.iter().enumerate().map(|(i, v)| {
         let variant = &v.ident;
@@ -79,13 +74,11 @@ fn impl_raw_ui_enum(
         #[automatically_derived]
         impl crate::save_data::RawUi for #name {
             fn draw_raw_ui(&mut self, gui: &crate::gui::Gui, ident: &str) {
-                let items = [#(#array_variants),*];
+                const ITEMS: [&imgui::ImStr; #variant_number] = [#(#array_variants),*];
 
-                let mut edit_item = match self {
-                    #(#match_variants),*
-                };
+                let mut edit_item = self.clone() as usize;
 
-                if gui.draw_edit_enum(ident, &mut edit_item, &items) {
+                if gui.draw_edit_enum(ident, &mut edit_item, &ITEMS) {
                     *self = match edit_item {
                         #(#edit_variants),*,
                         _ => unreachable!(),

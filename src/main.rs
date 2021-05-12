@@ -64,8 +64,6 @@ mod console {
     }
 
     pub fn attach_if_run_in_console() -> bool {
-        unsafe {
-            AttachConsole(ATTACH_PARENT_PROCESS) != FALSE
-        }
+        unsafe { AttachConsole(ATTACH_PARENT_PROCESS) != FALSE }
     }
 }

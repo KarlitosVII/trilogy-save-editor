@@ -6,7 +6,7 @@ Me1KnownPlot(
             },
             ints: {
                 1: "Origin (1 = Spacer, 2 = Colonist, 3 = Earthborn)",
-                2: "Notoriety (1 = Sole Survivor, 2 = War Hero, 3 = Ruthless)",
+                2: "Notoriety (1 = Survivor, 2 = War Hero, 3 = Ruthless)",
                 47: "Paragon points",
                 46: "Renegade points",
             },

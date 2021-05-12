@@ -52,9 +52,9 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
                     let (me1_result, me2_result, me3_result) =
                         tokio::join!(me1_handle, me2_handle, me3_handle);
 
-                    me1_result?.context("Failed to parse Me1KnownPlot.ron")?;
-                    me2_result?.context("Failed to parse Me2KnownPlot.ron")?;
-                    me3_result?.context("Failed to parse Me3KnownPlot.ron")
+                    me1_result?.context("Failed to parse Plot/Me1KnownPlot.ron")?;
+                    me2_result?.context("Failed to parse Plot/Me2KnownPlot.ron")?;
+                    me3_result?.context("Failed to parse Plot/Me3KnownPlot.ron")
                 }
                 MainEvent::ImportHeadMorph(path) => {
                     tokio::spawn(import_head_morph(path, ui_addr)).await?
