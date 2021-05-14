@@ -7,11 +7,6 @@ use indexmap::IndexMap;
 use crate::{
     event_handler::MainEvent,
     save_data::{
-        shared::{
-            appearance::{HasHeadMorph, HeadMorph},
-            player::{Notoriety, Origin},
-            plot::PlotCategory,
-        },
         mass_effect_1::known_plot::Me1KnownPlot,
         mass_effect_2::known_plot::Me2KnownPlot,
         mass_effect_3::{
@@ -19,6 +14,11 @@ use crate::{
             player::{Player, Power},
             plot::PlotTable,
             Me3SaveGame,
+        },
+        shared::{
+            appearance::{HasHeadMorph, HeadMorph},
+            player::{Notoriety, Origin},
+            plot::PlotCategory,
         },
         ImguiString, RawUi,
     },

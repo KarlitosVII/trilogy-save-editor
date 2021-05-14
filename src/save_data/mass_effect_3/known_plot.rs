@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::save_data::{shared::plot::PlotCategory, mass_effect_1::known_plot::Me1KnownPlot};
+use crate::save_data::{mass_effect_1::known_plot::Me1KnownPlot, shared::plot::PlotCategory};
 
 #[derive(Deserialize)]
 pub struct Me3KnownPlot {

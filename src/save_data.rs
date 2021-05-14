@@ -10,10 +10,10 @@ use std::{
 
 use crate::gui::Gui;
 
-pub mod shared;
 pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
+pub mod shared;
 
 // Raw Ui
 pub trait RawUi {

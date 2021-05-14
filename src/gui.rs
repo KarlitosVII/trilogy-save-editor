@@ -11,10 +11,10 @@ use imgui::{
 use crate::{
     event_handler::{MainEvent, SaveGame},
     save_data::{
-        shared::appearance::{HasHeadMorph, HeadMorph},
         mass_effect_1::known_plot::Me1KnownPlot,
         mass_effect_2::known_plot::Me2KnownPlot,
         mass_effect_3::known_plot::Me3KnownPlot,
+        shared::appearance::{HasHeadMorph, HeadMorph},
     },
 };
 
@@ -102,10 +102,13 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
                     Some(SaveGame::MassEffect2 { save_game, .. }) => {
                         save_game.player.appearance.head_morph = has_head_morph
                     }
+                    Some(SaveGame::MassEffect2Leg { save_game, .. }) => {
+                        save_game.player.appearance.head_morph = has_head_morph
+                    }
                     Some(SaveGame::MassEffect3 { save_game, .. }) => {
                         save_game.player.appearance.head_morph = has_head_morph
                     }
-                    _ => unreachable!(),
+                    Some(SaveGame::MassEffect1 { .. }) | None => unreachable!(),
                 }
             }
         });
@@ -144,6 +147,7 @@ impl<'ui> Gui<'ui> {
             None => Theme::MassEffect3,
             Some(SaveGame::MassEffect1 { .. }) => Theme::MassEffect1,
             Some(SaveGame::MassEffect2 { .. }) => Theme::MassEffect2,
+            Some(SaveGame::MassEffect2Leg { .. }) => Theme::MassEffect2,
             Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
         });
 
@@ -179,6 +183,9 @@ impl<'ui> Gui<'ui> {
                 Some(SaveGame::MassEffect2 { save_game, .. }) => {
                     self.draw_mass_effect_2(save_game, &state.known_plots)
                 }
+                Some(SaveGame::MassEffect2Leg { save_game, .. }) => {
+                    self.draw_mass_effect_2_leg(save_game, &state.known_plots)
+                }
                 Some(SaveGame::MassEffect3 { save_game, .. }) => {
                     self.draw_mass_effect_3(save_game, &state.known_plots)
                 }
@@ -210,7 +217,10 @@ impl<'ui> Gui<'ui> {
             SaveGame::MassEffect1 { file_name, .. } => {
                 (file_name, "Mass Effect Save", "MassEffectSave")
             }
-            SaveGame::MassEffect2 { file_name, .. } => (file_name, "Mass Effect 2 Save", "pcsav"),
+            SaveGame::MassEffect2 { file_name, .. }
+            | SaveGame::MassEffect2Leg { file_name, .. } => {
+                (file_name, "Mass Effect 2 Save", "pcsav")
+            }
             SaveGame::MassEffect3 { file_name, .. } => (file_name, "Mass Effect 3 Save", "pcsav"),
         };
 
@@ -326,11 +336,19 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.1.2
+        // 1.2.0
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("ME2/3 Legendary support");
+            }
+        }
+        // 1.1.2
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            if let Some(_t) = self.push_tree_node("1.1.2") {
                 self.table_next_row();
                 ui.text("Changing ME2/3 origin / notoriety will update ME1's");
                 self.table_next_row();

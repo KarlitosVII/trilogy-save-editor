@@ -6,16 +6,16 @@ use imgui::{
 use crate::{
     event_handler::MainEvent,
     save_data::{
-        shared::{
-            appearance::{HasHeadMorph, HeadMorph},
-            player::{Notoriety, Origin},
-            plot::PlotCategory,
-        },
         mass_effect_2::{
             known_plot::Me2KnownPlot,
             player::{Player, Power},
             plot::PlotTable,
-            Me2SaveGame,
+            Me2LegSaveGame, Me2SaveGame,
+        },
+        shared::{
+            appearance::{HasHeadMorph, HeadMorph},
+            player::{Notoriety, Origin},
+            plot::PlotCategory,
         },
         RawUi,
     },
@@ -83,6 +83,257 @@ impl<'ui> Gui<'ui> {
     fn draw_me2_general(&self, save_game: &mut Me2SaveGame) -> Option<()> {
         let ui = self.ui;
         let Me2SaveGame { difficulty, end_game_state, player, plot, me1_plot, .. } = save_game;
+        let Player {
+            is_female,
+            class_name,
+            level,
+            current_xp,
+            first_name,
+            origin,
+            notoriety,
+            talent_points,
+            powers,
+            credits,
+            medigel,
+            eezo,
+            iridium,
+            palladium,
+            platinum,
+            probes,
+            current_fuel,
+            face_code,
+            ..
+        } = player;
+
+        // 1ère colonne
+        let _t = self.begin_columns(2)?;
+        self.table_next_row();
+
+        // Role Play
+        if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Role-Play") {
+                self.table_next_row();
+                first_name.draw_raw_ui(self, "Name");
+
+                // Gender
+                self.table_next_row();
+                let mut gender = *is_female as usize;
+                const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
+                {
+                    if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
+                        *is_female = gender != 0;
+                    }
+
+                    ui.same_line();
+                    self.draw_help_marker(
+                        "If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries..."
+                    );
+                }
+
+                self.table_next_row();
+                let mut origin_idx = origin.clone() as usize;
+                const ORIGIN_LIST: [&ImStr; 4] =
+                    [im_str!("None"), im_str!("Spacer"), im_str!("Colony"), im_str!("Earthborn")];
+                {
+                    if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                        // Enum
+                        *origin = match origin_idx {
+                            0 => Origin::None,
+                            1 => Origin::Spacer,
+                            2 => Origin::Colonist,
+                            3 => Origin::Earthborn,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
+                            *me1_origin = origin_idx as i32;
+                        }
+                    }
+                }
+
+                self.table_next_row();
+                let mut notoriety_idx = notoriety.clone() as usize;
+                const NOTORIETY_LIST: [&ImStr; 4] = [
+                    im_str!("None"),
+                    im_str!("Survivor"),
+                    im_str!("War Hero"),
+                    im_str!("Ruthless"),
+                ];
+                {
+                    if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                        // Enum
+                        *notoriety = match notoriety_idx {
+                            0 => Notoriety::None,
+                            1 => Notoriety::Survivor,
+                            2 => Notoriety::Warhero,
+                            3 => Notoriety::Ruthless,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
+                            *me1_notoriety = notoriety_idx as i32;
+                        }
+                    }
+                }
+
+                self.table_next_row();
+                face_code.draw_raw_ui(self, "Identity Code");
+                ui.same_line();
+                self.draw_help_marker(
+                    "If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !"
+                );
+            }
+        }
+
+        // Morality
+        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Morality") {
+                if let Some(paragon) = plot.int_variables.get_mut(2) {
+                    self.table_next_row();
+                    paragon.draw_raw_ui(self, "Paragon");
+                }
+
+                if let Some(renegade) = plot.int_variables.get_mut(3) {
+                    self.table_next_row();
+                    renegade.draw_raw_ui(self, "Renegade");
+                }
+            }
+        }
+
+        // Gameplay
+        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Gameplay") {
+                self.table_next_row();
+                self.draw_me2_class(class_name);
+
+                self.table_next_row();
+                level.draw_raw_ui(self, "Level");
+
+                self.table_next_row();
+                current_xp.draw_raw_ui(self, "Current XP");
+
+                self.table_next_row();
+                talent_points.draw_raw_ui(self, "Talent Points");
+
+                self.table_next_row();
+                credits.draw_raw_ui(self, "Credits");
+
+                self.table_next_row();
+                medigel.draw_raw_ui(self, "Medi-gel");
+            }
+        }
+
+        // Ressources
+        if let Some(_t) = self.begin_table(im_str!("ressources-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Ressources") {
+                self.table_next_row();
+                eezo.draw_raw_ui(self, "Eezo");
+
+                self.table_next_row();
+                iridium.draw_raw_ui(self, "Iridium");
+
+                self.table_next_row();
+                palladium.draw_raw_ui(self, "Palladium");
+
+                self.table_next_row();
+                platinum.draw_raw_ui(self, "Platinum");
+
+                self.table_next_row();
+                probes.draw_raw_ui(self, "Probes");
+
+                self.table_next_row();
+                current_fuel.draw_raw_ui(self, "Current Fuel");
+            }
+        }
+
+        // 2ème colonne
+        self.table_next_column();
+
+        // General
+        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("General") {
+                self.table_next_row();
+                difficulty.draw_raw_ui(self, "Difficulty");
+                self.table_next_row();
+                end_game_state.draw_raw_ui(self, "End Game State");
+            }
+        }
+
+        // Bonus Powers
+        self.set_next_item_open(true);
+        self.draw_me2_bonus_powers(powers)
+    }
+    pub fn draw_mass_effect_2_leg(
+        &self, save_game: &mut Me2LegSaveGame, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
+        let ui = self.ui;
+
+        // Tab bar
+        let _t = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
+
+        // General
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.draw_me2_leg_general(save_game);
+            }
+        }
+        // Plot
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
+            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
+            then {
+                // Mass Effect 2
+                self.draw_me2_known_plot(&mut save_game.plot, &known_plots);
+                // Mass Effect 1
+                {
+                    let _colors = self.style_colors(Theme::MassEffect1);
+                    if_chain! {
+                        if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
+                        if let Some(me1_known_plot) = &known_plots.me1;
+                        then {
+                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot);
+                        }
+                    }
+                }
+            }
+        }
+        // Head Morph
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.draw_me2_head_morph(&mut save_game.player.appearance.head_morph, save_game.player.is_female);
+            }
+        }
+        // Raw
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.set_next_item_open(true);
+                save_game.draw_raw_ui(self, "Mass Effect 2");
+            }
+        }
+        Some(())
+    }
+
+    fn draw_me2_leg_general(&self, save_game: &mut Me2LegSaveGame) -> Option<()> {
+        let ui = self.ui;
+        let Me2LegSaveGame { difficulty, end_game_state, player, plot, me1_plot, .. } = save_game;
         let Player {
             is_female,
             class_name,

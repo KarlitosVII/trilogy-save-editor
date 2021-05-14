@@ -10,6 +10,7 @@ This software is similar to Gibbed's save editors (and forks) but adds a lot of 
 - A lot of new plots for ME2/3 (including N7 and DLC Weapons)
 - Multiple bonus powers support for ME2/3
 - Some fixes (ME2 Squad appearance)
+- ME2/3 Legendary support
 - Free (as freedom) and open-source software with [CeCILL license](https://en.wikipedia.org/wiki/CeCILL)
 
 The goal was to have an editor for all 3 games before the Legendary Edition was released. That's done.

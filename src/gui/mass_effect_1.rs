@@ -6,13 +6,13 @@ use std::{
 };
 
 use crate::save_data::{
-    shared::plot::{Me1PlotTable, PlotCategory},
     mass_effect_1::{
         data::{ArrayType, Data, Property, StructType},
         known_plot::Me1KnownPlot,
         player::{Name, Player},
         List, Me1SaveGame,
     },
+    shared::plot::{Me1PlotTable, PlotCategory},
     ImguiString, RawUi,
 };
 

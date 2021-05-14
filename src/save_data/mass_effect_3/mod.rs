@@ -25,7 +25,7 @@ use galaxy_map::*;
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me3SaveGame {
-    _version: Version,
+    _version: Me3Version,
     _debug_name: ImguiString,
     seconds_played: f32,
     _disc: Dummy<4>,
@@ -58,9 +58,9 @@ pub struct Me3SaveGame {
 }
 
 #[derive(Serialize, Clone)]
-pub struct Version(i32);
+pub struct Me3Version(i32);
 
-impl<'de> serde::Deserialize<'de> for Version {
+impl<'de> serde::Deserialize<'de> for Me3Version {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -69,7 +69,7 @@ impl<'de> serde::Deserialize<'de> for Version {
 
         if version != 59 {
             return Err(de::Error::custom(
-                "Wrong save version, please use a save from the last version of the game",
+                "Wrong save version, please use a save from the latest version of the game",
             ));
         }
 
