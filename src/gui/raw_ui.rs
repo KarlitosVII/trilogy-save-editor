@@ -6,7 +6,7 @@ use imgui::{
 use indexmap::IndexMap;
 use std::{fmt::Display, hash::Hash};
 
-use crate::save_data::{common::plot::BoolSlice, RawUi};
+use crate::save_data::{shared::plot::BoolSlice, RawUi};
 
 use super::Gui;
 

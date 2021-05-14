@@ -11,7 +11,7 @@ use imgui::{
 use crate::{
     event_handler::{MainEvent, SaveGame},
     save_data::{
-        common::appearance::{HasHeadMorph, HeadMorph},
+        shared::appearance::{HasHeadMorph, HeadMorph},
         mass_effect_1::known_plot::Me1KnownPlot,
         mass_effect_2::known_plot::Me2KnownPlot,
         mass_effect_3::known_plot::Me3KnownPlot,

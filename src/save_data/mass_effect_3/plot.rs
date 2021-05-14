@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::common::plot::{BoolVec, PlotCodex};
+use crate::save_data::shared::plot::{BoolVec, PlotCodex};
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct PlotTable {

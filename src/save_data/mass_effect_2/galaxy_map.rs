@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::common::Vector2d;
+use crate::save_data::shared::Vector2d;
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct GalaxyMap {

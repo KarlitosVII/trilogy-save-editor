@@ -1,12 +1,12 @@
 use if_chain::if_chain;
-use imgui::{im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, TabBar, TabItem};
+use imgui::{im_str, ChildWindow, ImStr, ImString, ListClipper, TabBar, TabItem};
 use std::{
     cell::{RefCell, RefMut},
     cmp::Ordering,
 };
 
 use crate::save_data::{
-    common::plot::{Me1PlotTable, PlotCategory},
+    shared::plot::{Me1PlotTable, PlotCategory},
     mass_effect_1::{
         data::{ArrayType, Data, Property, StructType},
         known_plot::Me1KnownPlot,
@@ -70,7 +70,6 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me1_general(&self, save_game: &mut Me1SaveGame) -> Option<()> {
-        let ui = self.ui;
         let player = &mut save_game.player;
         let plot = &mut save_game.state.plot;
 
@@ -231,16 +230,10 @@ impl<'ui> Gui<'ui> {
                         im_str!("Insanity"),
                     ];
 
-                    let width = ui.push_item_width(200.0);
                     let mut index = *difficulty as usize;
-                    if ComboBox::new(im_str!("Difficulty")).build_simple_string(
-                        ui,
-                        &mut index,
-                        &DIFFICULTY_LIST,
-                    ) {
+                    if self.draw_edit_enum("Difficulty", &mut index, &DIFFICULTY_LIST) {
                         *difficulty = index as i32;
                     }
-                    width.pop(ui);
                 }
 
                 // New Game +

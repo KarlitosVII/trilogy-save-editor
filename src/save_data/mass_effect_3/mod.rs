@@ -5,7 +5,7 @@ use serde::{de, Deserialize, Serialize};
 use crate::save_data::Dummy;
 
 use super::{
-    common::{EndGameState, Level, Rotator, SaveTimeStamp, Vector},
+    shared::{EndGameState, Level, Rotator, SaveTimeStamp, Vector},
     ImguiString,
 };
 

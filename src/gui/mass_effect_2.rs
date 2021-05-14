@@ -6,7 +6,7 @@ use imgui::{
 use crate::{
     event_handler::MainEvent,
     save_data::{
-        common::{
+        shared::{
             appearance::{HasHeadMorph, HeadMorph},
             player::{Notoriety, Origin},
             plot::PlotCategory,

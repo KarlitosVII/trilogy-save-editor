@@ -12,7 +12,7 @@ use tokio::{
 use crate::{
     gui::UiEvent,
     save_data::{
-        common::appearance::HeadMorph,
+        shared::appearance::HeadMorph,
         mass_effect_1::{known_plot::Me1KnownPlot, Me1SaveGame},
         mass_effect_2::{self, known_plot::Me2KnownPlot, Me2SaveGame},
         mass_effect_3::{known_plot::Me3KnownPlot, Me3SaveGame},

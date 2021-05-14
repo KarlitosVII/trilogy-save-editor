@@ -2,7 +2,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 use crate::save_data::{
-    common::{
+    shared::{
         appearance::Appearance,
         player::{Notoriety, Origin, WeaponLoadout},
     },

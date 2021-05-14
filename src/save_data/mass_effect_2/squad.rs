@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::{common::player::WeaponLoadout, ImguiString};
+use crate::save_data::{shared::player::WeaponLoadout, ImguiString};
 
 use super::player::Power;
 

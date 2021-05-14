@@ -6,7 +6,7 @@ use serde::{de, Serialize};
 
 use crate::{
     save_data::{
-        common::{appearance::LinearColor, Rotator, Vector},
+        shared::{appearance::LinearColor, Rotator, Vector},
         Dummy, ImguiString,
     },
     unreal,

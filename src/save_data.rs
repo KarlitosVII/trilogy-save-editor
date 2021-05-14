@@ -10,7 +10,7 @@ use std::{
 
 use crate::gui::Gui;
 
-pub mod common;
+pub mod shared;
 pub mod mass_effect_1;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
