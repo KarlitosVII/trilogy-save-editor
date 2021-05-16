@@ -1,19 +1,14 @@
 use anyhow::Result;
-use derive_more::{Deref, DerefMut, From};
-use serde::{
-    de,
-    ser::{SerializeSeq, SerializeStruct},
-    Deserialize, Serialize,
-};
+use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
 use std::{
     fmt,
     io::{Cursor, Read, Write},
 };
 use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
-use crate::{save_data::Dummy, unreal};
+use crate::unreal;
 
-use super::RawUi;
+use super::{Dummy, List};
 
 pub mod player;
 use self::player::*;
@@ -23,61 +18,6 @@ use self::state::*;
 
 pub mod data;
 pub mod known_plot;
-
-// List<T> : Vec<T> qui se (dé)sérialise sans précision de longueur
-#[derive(Deref, DerefMut, From, Clone)]
-pub struct List<T>(Vec<T>)
-where
-    T: Serialize + Clone;
-
-impl<T> From<&[T]> for List<T>
-where
-    T: Serialize + Clone,
-{
-    fn from(from: &[T]) -> List<T> {
-        List(from.to_vec())
-    }
-}
-
-impl<'de> serde::Deserialize<'de> for List<u8> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        struct ByteListVisitor;
-        impl<'de> de::Visitor<'de> for ByteListVisitor {
-            type Value = List<u8>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a byte buf")
-            }
-
-            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
-            where
-                E: de::Error,
-            {
-                Ok(List(v))
-            }
-        }
-        deserializer.deserialize_byte_buf(ByteListVisitor)
-    }
-}
-
-impl<T> serde::Serialize for List<T>
-where
-    T: Serialize + Clone,
-{
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut s = serializer.serialize_seq(None)?;
-        for element in &self.0 {
-            s.serialize_element(element)?;
-        }
-        s.end()
-    }
-}
 
 #[derive(Clone)]
 pub struct Me1SaveGame {

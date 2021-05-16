@@ -1,0 +1,103 @@
+
+// Bool
+typedef struct {
+	uint value: 1;
+    uint : 31;
+} bool <read=read_bool>;
+
+string read_bool(bool &b) {
+    if(b.value == 1)
+        return "true";
+    else
+        return "false";
+}
+
+// String
+typedef struct {
+	int len <bgcolor=0x000077>;
+    SetBackColor(0x000044 + len);
+
+	// Détection utf8
+	if (len < 0) {
+		wchar_t chars[Abs(len)];
+	}
+	else {
+		char chars[len];
+	}
+} String <read=read_string>;
+
+string read_string(String &s) {
+    if(exists(s.chars))
+        return s.chars;
+    else
+        return "<empty>";
+}
+
+// Plot Table
+typedef struct {
+    uint b00: 1;
+    uint b01: 1;
+    uint b02: 1;
+    uint b03: 1;
+    uint b04: 1;
+    uint b05: 1;
+    uint b06: 1;
+    uint b07: 1;
+    uint b08: 1;
+    uint b09: 1;
+    uint b10: 1;
+    uint b11: 1;
+    uint b12: 1;
+    uint b13: 1;
+    uint b14: 1;
+    uint b15: 1;
+    uint b16: 1;
+    uint b17: 1;
+    uint b18: 1;
+    uint b19: 1;
+    uint b20: 1;
+    uint b21: 1;
+    uint b22: 1;
+    uint b23: 1;
+    uint b24: 1;
+    uint b25: 1;
+    uint b26: 1;
+    uint b27: 1;
+    uint b28: 1;
+    uint b29: 1;
+    uint b30: 1;
+    uint b31: 1;
+} BitField;
+
+struct BitArray {
+	uint len;
+    BitField bit_field[len];
+};
+
+struct PlotTable {
+	BitArray bool_variables <bgcolor=0x5555ff>;
+    struct {
+        int len;
+        int pair[len];
+    } int_variables <bgcolor=0x88ff55>;
+    struct {
+        int len;
+        float pair[len];
+    } float_variables <bgcolor=0xff8855>;
+};
+
+struct Unknown2 {
+};
+
+// ME1 Legendary
+struct {
+    uint version;
+    String career_id;
+    FSkip(16);
+    PlotTable plot;
+    struct {
+        int len;
+        Unknown2 list[len];
+    } unknown2 <bgcolor=0x88ffff>;
+    int test <bgcolor=0x0000ff>;
+} Me1Legendary <open=true>;

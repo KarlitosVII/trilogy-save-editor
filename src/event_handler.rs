@@ -13,6 +13,7 @@ use crate::{
     gui::UiEvent,
     save_data::{
         mass_effect_1::{known_plot::Me1KnownPlot, Me1SaveGame},
+        mass_effect_1_leg::Me1LegSaveGame,
         mass_effect_2::{
             known_plot::Me2KnownPlot, Me2LegSaveGame, Me2LegVersion, Me2SaveGame, Me2Version,
         },
@@ -33,6 +34,7 @@ pub enum MainEvent {
 #[derive(Clone)]
 pub enum SaveGame {
     MassEffect1 { file_name: String, save_game: Box<Me1SaveGame> },
+    MassEffect1Leg { file_name: String, save_game: Box<Me1LegSaveGame> },
     MassEffect2 { file_name: String, save_game: Box<Me2SaveGame> },
     MassEffect2Leg { file_name: String, save_game: Box<Me2LegSaveGame> },
     MassEffect3 { file_name: String, save_game: Box<Me3SaveGame> },
@@ -91,6 +93,12 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
                     file_name: file_name.to_string_lossy().into(),
                     save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
+            } else if input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
+                // ME1 Legendary
+                SaveGame::MassEffect1Leg {
+                    file_name: file_name.to_string_lossy().into(),
+                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+                }
             } else if unreal::Deserializer::from_bytes::<Me2Version>(&input).is_ok() {
                 // ME2
                 SaveGame::MassEffect2 {
@@ -121,6 +129,19 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
 async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
     let output = match save_game {
         SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_byte_buf(&save_game)?,
+        SaveGame::MassEffect1Leg { save_game, .. } => {
+            let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
+
+            // Checksum
+            let checksum_offset = output.len() - 12;
+            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+            let checksum = crc.checksum(&output[..checksum_offset]);
+
+            // Update checksum
+            let end = checksum_offset + 4;
+            output[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+            output
+        }
         SaveGame::MassEffect2 { save_game, .. } => {
             let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 

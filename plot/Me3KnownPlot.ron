@@ -849,7 +849,7 @@ Me3KnownPlot(
         player_crew: {
             "Player": PlotCategory(
                 booleans: {
-                    17156: "Shepard is rich",
+                    17156: "Rich Achievement (to unlock Spectre Master gear)",
                 },
                 ints: {
                     10001: "Origin (1 = Spacer, 2 = Colonist, 3 = Earthborn)",

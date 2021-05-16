@@ -2,7 +2,7 @@ use anyhow::Result;
 use derive_more::{Deref, DerefMut, Display, From};
 use imgui::ImString;
 use indexmap::IndexMap;
-use serde::de;
+use serde::{de, ser::SerializeSeq, Serialize};
 use std::{
     fmt::{self, Display},
     hash::Hash,
@@ -11,6 +11,7 @@ use std::{
 use crate::gui::Gui;
 
 pub mod mass_effect_1;
+pub mod mass_effect_1_leg;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
 pub mod shared;
@@ -95,6 +96,61 @@ impl<const LEN: usize> serde::Serialize for Dummy<LEN> {
         S: serde::Serializer,
     {
         serializer.serialize_bytes(&self.0)
+    }
+}
+
+// List<T> : Vec<T> qui se (dé)sérialise sans précision de longueur
+#[derive(Deref, DerefMut, From, Clone)]
+pub struct List<T>(Vec<T>)
+where
+    T: Serialize + Clone;
+
+impl<T> From<&[T]> for List<T>
+where
+    T: Serialize + Clone,
+{
+    fn from(from: &[T]) -> List<T> {
+        List(from.to_vec())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for List<u8> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct ByteListVisitor;
+        impl<'de> de::Visitor<'de> for ByteListVisitor {
+            type Value = List<u8>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a byte buf")
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(List(v))
+            }
+        }
+        deserializer.deserialize_byte_buf(ByteListVisitor)
+    }
+}
+
+impl<T> serde::Serialize for List<T>
+where
+    T: Serialize + Clone,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut s = serializer.serialize_seq(None)?;
+        for element in &self.0 {
+            s.serialize_element(element)?;
+        }
+        s.end()
     }
 }
 

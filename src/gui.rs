@@ -99,6 +99,9 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
                 let has_head_morph =
                     HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };
                 match state.save_game.as_mut() {
+                    Some(SaveGame::MassEffect1Leg { save_game: _, .. }) => {
+                        todo!()
+                    }
                     Some(SaveGame::MassEffect2 { save_game, .. }) => {
                         save_game.player.appearance.head_morph = has_head_morph
                     }
@@ -145,9 +148,12 @@ impl<'ui> Gui<'ui> {
         // Pop on drop
         let _colors = self.style_colors(match state.save_game {
             None => Theme::MassEffect3,
-            Some(SaveGame::MassEffect1 { .. }) => Theme::MassEffect1,
-            Some(SaveGame::MassEffect2 { .. }) => Theme::MassEffect2,
-            Some(SaveGame::MassEffect2Leg { .. }) => Theme::MassEffect2,
+            Some(SaveGame::MassEffect1 { .. }) | Some(SaveGame::MassEffect1Leg { .. }) => {
+                Theme::MassEffect1
+            }
+            Some(SaveGame::MassEffect2 { .. }) | Some(SaveGame::MassEffect2Leg { .. }) => {
+                Theme::MassEffect2
+            }
             Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
         });
 
@@ -179,6 +185,9 @@ impl<'ui> Gui<'ui> {
                 None => self.draw_change_log(),
                 Some(SaveGame::MassEffect1 { save_game, .. }) => {
                     self.draw_mass_effect_1(save_game, &state.known_plots)
+                }
+                Some(SaveGame::MassEffect1Leg { save_game, .. }) => {
+                    self.draw_mass_effect_1_leg(&mut save_game.save_data, &state.known_plots)
                 }
                 Some(SaveGame::MassEffect2 { save_game, .. }) => {
                     self.draw_mass_effect_2(save_game, &state.known_plots)
@@ -216,6 +225,9 @@ impl<'ui> Gui<'ui> {
         let (file_name, game_filter, extension) = match save_game {
             SaveGame::MassEffect1 { file_name, .. } => {
                 (file_name, "Mass Effect Save", "MassEffectSave")
+            }
+            SaveGame::MassEffect1Leg { file_name, .. } => {
+                (file_name, "Mass Effect 1 Legendary", "pcsav")
             }
             SaveGame::MassEffect2 { file_name, .. }
             | SaveGame::MassEffect2Leg { file_name, .. } => {
@@ -336,11 +348,19 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.2.0
+        // 1.3.0
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("Initial Mass Effect 1 Legendary support (only plot)");
+            }
+        }
+        // 1.2.0
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            if let Some(_t) = self.push_tree_node("1.2.0") {
                 self.table_next_row();
                 ui.text("ME2/3 Legendary support");
             }

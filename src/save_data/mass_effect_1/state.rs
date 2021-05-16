@@ -4,10 +4,8 @@ use std::fmt;
 
 use crate::{
     gui::Gui,
-    save_data::{shared::plot::Me1PlotTable, Dummy, ImguiString},
+    save_data::{shared::plot::Me1PlotTable, Dummy, ImguiString, List, RawUi},
 };
-
-use super::{List, RawUi};
 
 #[derive(Serialize, Clone)]
 pub struct State {

@@ -10,10 +10,11 @@ use crate::save_data::{
         data::{ArrayType, Data, Property, StructType},
         known_plot::Me1KnownPlot,
         player::{Name, Player},
-        List, Me1SaveGame,
+        Me1SaveGame,
     },
+    mass_effect_1_leg::Me1LegSaveData,
     shared::plot::{Me1PlotTable, PlotCategory},
-    ImguiString, RawUi,
+    ImguiString, List, RawUi,
 };
 
 use super::{Gui, KnownPlotsState};
@@ -66,6 +67,34 @@ impl<'ui> Gui<'ui> {
             }
         }
 
+        Some(())
+    }
+
+    pub fn draw_mass_effect_1_leg(
+        &self, save_game: &mut Me1LegSaveData, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
+        let ui = self.ui;
+
+        // Tab bar
+        let _t = TabBar::new(im_str!("mass_effect_1_leg")).begin(ui)?;
+
+        // Plot
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
+            if let Some(me1_known_plot) = &known_plots.me1;
+            then {
+                self.draw_me1_known_plot(&mut save_game.plot, me1_known_plot);
+            }
+        }
+        // Raw
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.set_next_item_open(true);
+                save_game.draw_raw_ui(self, "Mass Effect 1");
+            }
+        }
         Some(())
     }
 
