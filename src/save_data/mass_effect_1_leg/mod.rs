@@ -54,6 +54,12 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
                 // Headers
                 let mut headers = Vec::new();
                 {
+                    let full_header = ChunkHeader {
+                        compressed_size: seq.next_element()?.unwrap(),
+                        uncompressed_size: seq.next_element()?.unwrap(),
+                    };
+                    headers.push(full_header);
+
                     let mut finished = false;
                     while !finished {
                         let header = ChunkHeader {

@@ -348,11 +348,19 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.3.0
+        // 1.3.1
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("Fix ME1LE `unexpected end of file...` error for some people");
+            }
+        }
+        // 1.3.0
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            if let Some(_t) = self.push_tree_node("1.3.0") {
                 self.table_next_row();
                 ui.text("Initial Mass Effect 1 Legendary support (only plot)");
             }
