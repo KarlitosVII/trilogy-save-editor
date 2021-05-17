@@ -1,5 +1,5 @@
-#![cfg_attr(not(test), windows_subsystem = "windows")]
-#![cfg_attr(test, windows_subsystem = "console")]
+// #![cfg_attr(not(test), windows_subsystem = "windows")]
+// #![cfg_attr(test, windows_subsystem = "console")]
 #![warn(clippy::all)]
 
 extern crate derive_more;
@@ -17,9 +17,11 @@ mod unreal;
 
 #[tokio::main]
 async fn main() {
+    #[cfg(target_os = "windows")]
     console::attach_if_run_in_console();
 
     panic::set_hook(Box::new(|e| {
+        #[cfg(target_os = "windows")]
         console::attach();
         panic_hook(e);
     }));
@@ -45,7 +47,7 @@ fn panic_hook(info: &PanicInfo<'_>) {
 
     eprintln!("Panic : '{}', {}", msg, location);
 }
-
+#[cfg(target_os = "windows")]
 mod console {
     use winapi::{
         shared::minwindef::FALSE,
