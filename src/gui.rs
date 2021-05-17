@@ -213,6 +213,10 @@ impl<'ui> Gui<'ui> {
         }
     }
 
+    // FIXME: Find some nicer way of finding where the game saves are.
+    // Currently, this should be universal for everyone who has their
+    // Mass Effect games installed in the default steam library, in
+    // the user's home directory.
     #[cfg(target_os = "linux")]
     fn get_document_dir() -> PathBuf {
         match dirs::home_dir() {
