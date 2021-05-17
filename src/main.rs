@@ -1,5 +1,5 @@
-// #![cfg_attr(not(test), windows_subsystem = "windows")]
-// #![cfg_attr(test, windows_subsystem = "console")]
+#![cfg_attr(not(test), windows_subsystem = "windows")]
+#![cfg_attr(test, windows_subsystem = "console")]
 #![warn(clippy::all)]
 
 extern crate derive_more;
