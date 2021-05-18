@@ -54,7 +54,15 @@ impl<'ui> Gui<'ui> {
                         if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
                         if let Some(me1_known_plot) = &known_plots.me1;
                         then {
-                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot);
+                            if save_game.me1_plot.bool_variables.is_empty() {
+                                ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
+                            }
+                            else {
+                                ui.text("If you change ME1 plot this will ONLY take effect after an import.");
+                                ui.same_line();
+                                self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.");
+                                self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot);
+                            }
                         }
                     }
                 }
@@ -305,7 +313,15 @@ impl<'ui> Gui<'ui> {
                         if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
                         if let Some(me1_known_plot) = &known_plots.me1;
                         then {
-                            self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot);
+                            if save_game.me1_plot.bool_variables.is_empty() {
+                                ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
+                            }
+                            else {
+                                ui.text("If you change ME1 plot this will ONLY take effect after an import.");
+                                ui.same_line();
+                                self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.");
+                                self.draw_me1_known_plot(&mut save_game.me1_plot, &me1_known_plot);
+                            }
                         }
                     }
                 }

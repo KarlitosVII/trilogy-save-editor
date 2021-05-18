@@ -76,16 +76,16 @@ Me1KnownPlot(
                 4862: "[I Remember Me (Colonist)] Bait and switch",
                 4926: "[Old, Unhappy, Far-Off Things (Spacer)] Spoke to Mom",
                 7164: "Got Elkoss Combine license",
-                4948: "[Reporter's Request] Gave OSD information to Emily Wong ?",
+                4948: "[Reporter's Request] Gave OSD information to Emily Wong",
             },
             ints: {
-                39: "[Scan the Keepers] Number of keepers scanned",
+                39: "[Scan the Keepers] Keepers scanned (0-21)",
             },
         ),
         "Feros": PlotCategory(
             booleans: {
-                2490: "Intimidated Ethan Jeong",
-                2491: "Convinced Ethan Jeong",
+                2490: "Convinced Ethan Jeong",
+                2491: "Intimidated Ethan Jeong",
                 2883: "Retrieved Gavin's data",
                 2514: "Too many colonists killed",
                 3046: "[The Thorian] Zhu's Hope saved",
@@ -152,7 +152,15 @@ Me1KnownPlot(
                 5885: "[Cerberus] Obtained quest",
             },
             ints: {
-                54: "[Asari Writings] Writings found",
+                48: "[Valuable Minerals] Light Metals (0-20 max 34)",
+                50: "[Valuable Minerals] Heavy Metals (0-20 max 34)",
+                51: "[Valuable Minerals] Gases (0-6 max 10)",
+                52: "[Valuable Minerals] Rare Earths (0-20 max 36)",
+                53: "[Prothean Data Discs] Prothean Data Discs (0-7 max 10)",
+                54: "[Asari Writings] Asari Writings (0-10 max 16)",
+                55: "[Turian Insignias] Turian Emblem (0-13 max 17)",
+                43: "[Locate Signs of Battle] League Medallions (0-10 max 12)",
+                56: "[Locate Signs of Battle] Salarian ID Tags (0-3 max 4)",
             },
         ),
         "DLC": PlotCategory(

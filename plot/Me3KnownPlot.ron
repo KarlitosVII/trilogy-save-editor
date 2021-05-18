@@ -932,8 +932,8 @@ Me3KnownPlot(
             ),
             "Feros": PlotCategory(
                 booleans: {
-                    12490: "Intimidated Ethan Jeong",
-                    12491: "Convinced Ethan Jeong",
+                    12490: "Convinced Ethan Jeong",
+                    12491: "Intimidated Ethan Jeong",
                     12883: "Retrieved Gavin's data",
                     12514: "Too many colonists killed",
                     13046: "[The Thorian] Zhu's Hope saved",
@@ -1001,7 +1001,15 @@ Me3KnownPlot(
                     15885: "[Cerberus] Obtained quest",
                 },
                 ints: {
-                    10054: "[Asari Writings] Writings found",
+                    10048: "[Valuable Minerals] Light Metals (0-20 max 34)",
+                    10050: "[Valuable Minerals] Heavy Metals (0-20 max 34)",
+                    10051: "[Valuable Minerals] Gases (0-6 max 10)",
+                    10052: "[Valuable Minerals] Rare Earths (0-20 max 36)",
+                    10053: "[Prothean Data Discs] Prothean Data Discs (0-7 max 10)",
+                    10054: "[Asari Writings] Asari Writings (0-10 max 16)",
+                    10055: "[Turian Insignias] Turian Emblem (0-13 max 17)",
+                    10043: "[Locate Signs of Battle] League Medallions (0-10 max 12)",
+                    10056: "[Locate Signs of Battle] Salarian ID Tags (0-3 max 4)",
                 },
             ),
             "DLC": PlotCategory(
