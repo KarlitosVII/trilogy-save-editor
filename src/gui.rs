@@ -202,14 +202,39 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn open_dialog(&self) {
-        let dir = match dirs::document_dir() {
+    #[cfg(target_os = "windows")]
+    fn get_document_dir() -> PathBuf {
+        match dirs::document_dir() {
             Some(mut path) => {
                 path.push("BioWare");
                 path
             }
             None => PathBuf::default(),
-        };
+        }
+    }
+
+    // FIXME: Find some nicer way of finding where the game saves are.
+    // Currently, this should be universal for everyone who has their
+    // Mass Effect games installed in the default steam library, in
+    // the user's home directory.
+    #[cfg(target_os = "linux")]
+    fn get_document_dir() -> PathBuf {
+        match dirs::home_dir() {
+            Some(mut path) => {
+                path.push(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare");
+                path
+            }
+            None => PathBuf::default(),
+        }
+    }
+
+    #[cfg(all(not(target_os = "linux"), not(target_os = "windows")))]
+    fn get_document_dir() -> PathBuf {
+        PathBuf::default()
+    }
+
+    fn open_dialog(&self) {
+        let dir = Self::get_document_dir();
 
         let file = rfd::FileDialog::new()
             .add_filter("Mass Effect Save", &["MassEffectSave", "pcsav"])
