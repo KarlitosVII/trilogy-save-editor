@@ -3,12 +3,23 @@ use imgui::{
     im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
 };
 
-use crate::{event_handler::MainEvent, save_data::{RawUi, mass_effect_2::{
+use crate::{
+    event_handler::MainEvent,
+    save_data::{
+        mass_effect_2::{
             known_plot::Me2KnownPlot,
             player::{Player, Power},
             plot::PlotTable,
             Me2LegSaveGame, Me2SaveGame,
-        }, shared::{appearance::{HasHeadMorph, HeadMorph}, player::{Notoriety, Origin}, plot::{Me1PlotTable, PlotCategory}}}};
+        },
+        shared::{
+            appearance::{HasHeadMorph, HeadMorph},
+            player::{Notoriety, Origin},
+            plot::{Me1PlotTable, PlotCategory},
+        },
+        RawUi,
+    },
+};
 
 use super::{Gui, KnownPlotsState, Theme};
 
@@ -178,24 +189,61 @@ impl<'ui> Gui<'ui> {
                         const ORIGIN_LIST: [&ImStr; 4] = [
                             im_str!("None"),
                             im_str!("Spacer"),
-                            im_str!("Colony"),
+                            im_str!("Colonist"),
                             im_str!("Earthborn"),
                         ];
-                        {
-                            if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
-                                // Enum
-                                *origin = match origin_idx {
-                                    0 => Origin::None,
-                                    1 => Origin::Spacer,
-                                    2 => Origin::Colonist,
-                                    3 => Origin::Earthborn,
-                                    _ => unreachable!(),
-                                };
 
-                                // ME1 plot
-                                if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
-                                    *me1_origin = origin_idx as i32;
+                        if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                            // Enum
+                            *origin = match origin_idx {
+                                0 => Origin::None,
+                                1 => Origin::Spacer,
+                                2 => Origin::Colonist,
+                                3 => Origin::Earthborn,
+                                _ => unreachable!(),
+                            };
+
+                            // ME1 imported
+                            match origin {
+                                Origin::None => {}
+                                Origin::Spacer => {
+                                    if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                        *spacer = true;
+                                    }
+                                    if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                        *colonist = false;
+                                    }
+                                    if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                        *eathborn = false;
+                                    }
                                 }
+                                Origin::Colonist => {
+                                    if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                        *spacer = false;
+                                    }
+                                    if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                        *colonist = true;
+                                    }
+                                    if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                        *eathborn = false;
+                                    }
+                                }
+                                Origin::Earthborn => {
+                                    if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                        *spacer = false;
+                                    }
+                                    if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                        *colonist = false;
+                                    }
+                                    if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                        *eathborn = true;
+                                    }
+                                }
+                            }
+
+                            // ME1 plot
+                            if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
+                                *me1_origin = origin_idx as i32;
                             }
                         }
 
@@ -207,22 +255,58 @@ impl<'ui> Gui<'ui> {
                             im_str!("War Hero"),
                             im_str!("Ruthless"),
                         ];
-                        {
-                            if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST)
-                            {
-                                // Enum
-                                *notoriety = match notoriety_idx {
-                                    0 => Notoriety::None,
-                                    1 => Notoriety::Survivor,
-                                    2 => Notoriety::Warhero,
-                                    3 => Notoriety::Ruthless,
-                                    _ => unreachable!(),
-                                };
 
-                                // ME1 plot
-                                if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
-                                    *me1_notoriety = notoriety_idx as i32;
+                        if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                            // Enum
+                            *notoriety = match notoriety_idx {
+                                0 => Notoriety::None,
+                                1 => Notoriety::Survivor,
+                                2 => Notoriety::Warhero,
+                                3 => Notoriety::Ruthless,
+                                _ => unreachable!(),
+                            };
+
+                            // ME1 imported
+                            match notoriety {
+                                Notoriety::None => {}
+                                Notoriety::Survivor => {
+                                    if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                        *survivor = true;
+                                    }
+                                    if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                        *war_hero = false;
+                                    }
+                                    if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                        *ruthless = false;
+                                    }
                                 }
+                                Notoriety::Warhero => {
+                                    if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                        *survivor = false;
+                                    }
+                                    if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                        *war_hero = true;
+                                    }
+                                    if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                        *ruthless = false;
+                                    }
+                                }
+                                Notoriety::Ruthless => {
+                                    if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                        *survivor = false;
+                                    }
+                                    if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                        *war_hero = false;
+                                    }
+                                    if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                        *ruthless = true;
+                                    }
+                                }
+                            }
+
+                            // ME1 plot
+                            if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
+                                *me1_notoriety = notoriety_idx as i32;
                             }
                         }
 
@@ -440,6 +524,7 @@ impl<'ui> Gui<'ui> {
             research_upgrades,
             rewards,
             captains_cabin,
+            imported_me1,
         } = me2_known_plot;
 
         // Player
@@ -500,6 +585,25 @@ impl<'ui> Gui<'ui> {
         {
             let _colors = self.style_colors(Theme::MassEffect1);
             if_chain! {
+                if let Some(_t) = TabItem::new(im_str!("Imported ME1")).begin(ui);
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+                then {
+                    ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner bugfix :");
+                    ui.same_line();
+                    self.draw_help_marker("- Untick `[The Fan] Intimidated him`\n- Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n- Only works if you didn't talk to Aethyta");
+                    ui.separator();
+                    for (category_name, known_plot) in imported_me1.iter() {
+                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
+                            self.table_next_row();
+                            if let Some(_t) = self.push_tree_node(category_name) {
+                                self.draw_me2_plot_category(me2_plot_table, known_plot);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if_chain! {
                 if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
                 if let Some(me1_known_plot) = &known_plots.me1;
                 then {
@@ -508,7 +612,8 @@ impl<'ui> Gui<'ui> {
                     } else {
                         ui.text("If you change these plots this will ONLY take effect after an import.");
                         ui.same_line();
-                        self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.");
+                        self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.\nOr you can start a New Game +.");
+                        ui.separator();
                         self.draw_me1_known_plot(me1_plot_table, me1_known_plot);
                     }
                 }

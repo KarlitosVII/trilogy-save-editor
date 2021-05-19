@@ -147,7 +147,7 @@ impl<'ui> Gui<'ui> {
                 self.table_next_row();
                 let mut origin_idx = origin.clone() as usize;
                 const ORIGIN_LIST: [&ImStr; 4] =
-                    [im_str!("None"), im_str!("Spacer"), im_str!("Colony"), im_str!("Earthborn")];
+                    [im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
                 {
                     if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
                         // Enum
@@ -158,6 +158,44 @@ impl<'ui> Gui<'ui> {
                             3 => Origin::Earthborn,
                             _ => unreachable!(),
                         };
+
+                        // ME1 imported
+                        match origin {
+                            Origin::None => {}
+                            Origin::Spacer => {
+                                if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                    *spacer = true;
+                                }
+                                if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                    *colonist = false;
+                                }
+                                if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                    *eathborn = false;
+                                }
+                            }
+                            Origin::Colonist => {
+                                if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                    *spacer = false;
+                                }
+                                if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                    *colonist = true;
+                                }
+                                if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                    *eathborn = false;
+                                }
+                            }
+                            Origin::Earthborn => {
+                                if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                    *spacer = false;
+                                }
+                                if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                    *colonist = false;
+                                }
+                                if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                    *eathborn = true;
+                                }
+                            }
+                        }
 
                         // ME1 plot
                         if let Some(me1_origin) = plot.int_variables.get_mut(&10001) {
@@ -184,6 +222,44 @@ impl<'ui> Gui<'ui> {
                             3 => Notoriety::Ruthless,
                             _ => unreachable!(),
                         };
+
+                        // ME1 imported
+                        match notoriety {
+                            Notoriety::None => {}
+                            Notoriety::Survivor => {
+                                if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                    *survivor = true;
+                                }
+                                if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                    *war_hero = false;
+                                }
+                                if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                    *ruthless = false;
+                                }
+                            }
+                            Notoriety::Warhero => {
+                                if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                    *survivor = false;
+                                }
+                                if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                    *war_hero = true;
+                                }
+                                if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                    *ruthless = false;
+                                }
+                            }
+                            Notoriety::Ruthless => {
+                                if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                    *survivor = false;
+                                }
+                                if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                    *war_hero = false;
+                                }
+                                if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                    *ruthless = true;
+                                }
+                            }
+                        }
 
                         // ME1 plot
                         if let Some(me1_notoriety) = plot.int_variables.get_mut(&10002) {
@@ -529,6 +605,7 @@ impl<'ui> Gui<'ui> {
             research_upgrades,
             rewards,
             captains_cabin,
+            imported_me1: _,
         } = me2_known_plot;
 
         // Tab bar

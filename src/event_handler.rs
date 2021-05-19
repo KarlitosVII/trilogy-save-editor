@@ -57,9 +57,9 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
                     let (me1_result, me2_result, me3_result) =
                         tokio::join!(me1_handle, me2_handle, me3_handle);
 
-                    me1_result?.context("Failed to parse Plot/Me1KnownPlot.ron")?;
-                    me2_result?.context("Failed to parse Plot/Me2KnownPlot.ron")?;
-                    me3_result?.context("Failed to parse Plot/Me3KnownPlot.ron")
+                    me1_result?.context("Failed to parse plot/me1_known_plot.ron")?;
+                    me2_result?.context("Failed to parse plot/me2_known_plot.ron")?;
+                    me3_result?.context("Failed to parse plot/me3_known_plot.ron")
                 }
                 MainEvent::ImportHeadMorph(path) => {
                     tokio::spawn(import_head_morph(path, ui_addr)).await?
@@ -186,7 +186,7 @@ async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>)
 async fn load_me1_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = String::new();
     {
-        let mut file = File::open("plot/Me1KnownPlot.ron").await?;
+        let mut file = File::open("plot/me1_known_plot.ron").await?;
         file.read_to_string(&mut input).await?;
     }
 
@@ -199,7 +199,7 @@ async fn load_me1_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
 async fn load_me2_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = String::new();
     {
-        let mut file = File::open("plot/Me2KnownPlot.ron").await?;
+        let mut file = File::open("plot/me2_known_plot.ron").await?;
         file.read_to_string(&mut input).await?;
     }
 
@@ -212,7 +212,7 @@ async fn load_me2_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
 async fn load_me3_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = String::new();
     {
-        let mut file = File::open("plot/Me3KnownPlot.ron").await?;
+        let mut file = File::open("plot/me3_known_plot.ron").await?;
         file.read_to_string(&mut input).await?;
     }
 

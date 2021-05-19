@@ -34,7 +34,7 @@ mod test {
     fn deserialize_know_plot() -> Result<()> {
         let mut input = String::new();
         {
-            let mut file = File::open("plot/Me3KnownPlot.ron")?;
+            let mut file = File::open("plot/me3_known_plot.ron")?;
             file.read_to_string(&mut input)?;
         }
 
