@@ -56,7 +56,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
-                self.draw_me3_head_morph(&mut save_game.player.appearance.head_morph, save_game.player.is_female);
+                self.draw_me3_and_le_head_morph(&mut save_game.player.appearance.head_morph);
             }
         }
         // Raw
@@ -774,7 +774,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_me3_head_morph(&self, head_morph: &mut HasHeadMorph, _is_female: bool) {
+    pub fn draw_me3_and_le_head_morph(&self, head_morph: &mut HasHeadMorph) {
         let ui = self.ui;
         let HasHeadMorph { has_head_morph, head_morph } = head_morph;
 
@@ -801,10 +801,8 @@ impl<'ui> Gui<'ui> {
                     }
                 }
                 // Toggle head morph
-                // if !is_female {
                 ui.same_line();
                 has_head_morph.draw_raw_ui(self, "Enable head morph");
-                // }
                 ui.separator();
 
                 // Raw

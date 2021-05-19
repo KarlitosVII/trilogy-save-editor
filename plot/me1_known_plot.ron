@@ -146,9 +146,9 @@ Me1KnownPlot(
                 5015: "[Hostile Takeover] Persuaded criminal to disband gang",
                 5038: "[Dead Scientists] Convinced Corporal Toombs",
                 5039: "[Dead Scientists] Killed scientist",
-                5379: "[Major Kyle] Fought cultists",
+                5380: "[Major Kyle] Fought cultists",
                 5377: "[Major Kyle] Fought Kyle",
-                5380: "[Major Kyle] Kyle surrendered",
+                5379: "[Major Kyle] Kyle surrendered",
                 5885: "[Cerberus] Obtained quest",
             },
             ints: {

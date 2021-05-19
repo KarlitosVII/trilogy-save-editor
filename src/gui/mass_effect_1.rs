@@ -12,14 +12,169 @@ use crate::save_data::{
         player::{Name, Player},
         Me1SaveGame,
     },
-    mass_effect_1_leg::Me1LegSaveData,
-    shared::plot::{Me1PlotTable, PlotCategory},
+    mass_effect_1_leg::{self, Me1LegSaveData},
+    shared::{
+        player::{Notoriety, Origin},
+        plot::{Me1PlotTable, PlotCategory},
+    },
     ImguiString, List, RawUi,
 };
 
 use super::{Gui, KnownPlotsState};
 
 impl<'ui> Gui<'ui> {
+    pub fn draw_mass_effect_1_leg(
+        &self, save_game: &mut Me1LegSaveData, known_plots: &KnownPlotsState,
+    ) -> Option<()> {
+        let ui = self.ui;
+
+        // Tab bar
+        let _t = TabBar::new(im_str!("mass_effect_1_leg")).begin(ui)?;
+
+        // General
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.draw_me1_leg_general(save_game);
+            }
+        }
+        // Plot
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
+            if let Some(me1_known_plot) = &known_plots.me1;
+            then {
+                self.draw_me1_known_plot(&mut save_game.plot, me1_known_plot);
+            }
+        }
+        // Head Morph
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.draw_me3_and_le_head_morph(&mut save_game.player.head_morph);
+            }
+        }
+        // Raw
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            then {
+                self.set_next_item_open(true);
+                save_game.draw_raw_ui(self, "Mass Effect 1");
+            }
+        }
+        Some(())
+    }
+
+    fn draw_me1_leg_general(&self, save_game: &mut Me1LegSaveData) -> Option<()> {
+        let ui = self.ui;
+        let Me1LegSaveData { plot, player, .. } = save_game;
+        let mass_effect_1_leg::player::Player { is_female, first_name, origin, notoriety, .. } =
+            player;
+
+        // 1ère colonne
+        let _t = self.begin_columns(2)?;
+        self.table_next_row();
+
+        // Role Play
+        if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Role-Play") {
+                self.table_next_row();
+                first_name.draw_raw_ui(self, "Name");
+
+                // Gender
+                self.table_next_row();
+                let mut gender = *is_female as usize;
+                const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
+                {
+                    if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
+                        *is_female = gender != 0;
+                    }
+
+                    ui.same_line();
+                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor Saren and his Geths will be the least of your worries...");
+                }
+
+                self.table_next_row();
+                let mut origin_idx = origin.clone() as usize;
+                const ORIGIN_LIST: [&ImStr; 4] =
+                    [im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
+                {
+                    if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                        // Enum
+                        *origin = match origin_idx {
+                            0 => Origin::None,
+                            1 => Origin::Spacer,
+                            2 => Origin::Colonist,
+                            3 => Origin::Earthborn,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_origin) = plot.int_variables.get_mut(1) {
+                            *me1_origin = origin_idx as i32;
+                        }
+                    }
+                }
+
+                self.table_next_row();
+                let mut notoriety_idx = notoriety.clone() as usize;
+                const NOTORIETY_LIST: [&ImStr; 4] = [
+                    im_str!("None"),
+                    im_str!("Survivor"),
+                    im_str!("War Hero"),
+                    im_str!("Ruthless"),
+                ];
+                {
+                    if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                        // Enum
+                        *notoriety = match notoriety_idx {
+                            0 => Notoriety::None,
+                            1 => Notoriety::Survivor,
+                            2 => Notoriety::Warhero,
+                            3 => Notoriety::Ruthless,
+                            _ => unreachable!(),
+                        };
+
+                        // ME1 plot
+                        if let Some(me1_notoriety) = plot.int_variables.get_mut(2) {
+                            *me1_notoriety = notoriety_idx as i32;
+                        }
+                    }
+                }
+
+                // self.table_next_row();
+                // face_code.draw_raw_ui(self, "Identity Code");
+                // ui.same_line();
+                // self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
+            }
+        }
+
+        // 2ème colonne
+        self.table_next_column();
+
+        // Morality
+        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Morality") {
+                if let Some(paragon) = plot.int_variables.get_mut(47) {
+                    self.table_next_row();
+                    paragon.draw_raw_ui(self, "Paragon");
+                }
+
+                if let Some(renegade) = plot.int_variables.get_mut(46) {
+                    self.table_next_row();
+                    renegade.draw_raw_ui(self, "Renegade");
+                }
+            }
+        }
+        Some(())
+    }
+
     pub fn draw_mass_effect_1(
         &self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState,
     ) -> Option<()> {
@@ -67,34 +222,6 @@ impl<'ui> Gui<'ui> {
             }
         }
 
-        Some(())
-    }
-
-    pub fn draw_mass_effect_1_leg(
-        &self, save_game: &mut Me1LegSaveData, known_plots: &KnownPlotsState,
-    ) -> Option<()> {
-        let ui = self.ui;
-
-        // Tab bar
-        let _t = TabBar::new(im_str!("mass_effect_1_leg")).begin(ui)?;
-
-        // Plot
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_known_plot) = &known_plots.me1;
-            then {
-                self.draw_me1_known_plot(&mut save_game.plot, me1_known_plot);
-            }
-        }
-        // Raw
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
-                self.set_next_item_open(true);
-                save_game.draw_raw_ui(self, "Mass Effect 1");
-            }
-        }
         Some(())
     }
 

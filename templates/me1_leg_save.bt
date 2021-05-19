@@ -86,18 +86,211 @@ struct PlotTable {
     } float_variables <bgcolor=0xff8855>;
 };
 
-struct Unknown2 {
+// Timestamp
+typedef struct {
+	int seconds_since_midnight;
+	int day;
+	int month;
+	int year;
+} SaveTimeStamp <read=read_timestamp>;
+
+string read_timestamp(SaveTimeStamp &t) {
+    string s;
+    SPrintf(s, "%is, %id, %im, %iy", t.seconds_since_midnight, t.day, t.month, t.year);
+    return s;
+}
+
+// Vector
+typedef struct {
+	float x;
+	float y;
+	float z;
+} Vector <read=read_vector>;
+
+string read_vector(Vector &v) {
+    string s;
+    SPrintf(s, "[%g, %g, %g]", v.x, v.y, v.z);
+    return s;
+}
+
+// Rotation
+typedef struct {
+	int pitch;
+	int yaw;
+	int roll;
+} Rotation <read=read_rotation>;
+
+string read_rotation(Rotation &r) {
+    string s;
+    SPrintf(s, "[%i, %i, %i]", r.pitch, r.yaw, r.roll);
+    return s;
+}
+
+// Appearance
+enum <ubyte> PlayerAppearanceType {
+	Parts,
+	Full
+};
+
+struct MorphFeature {
+    String feature;
+	float offset;
+};
+
+struct OffsetBone {
+	String name;
+	Vector offset;
+};
+
+struct ScalarParameter {
+	String name;
+	float value;
+};
+
+typedef struct {
+	float r;
+	float g;
+	float b;
+	float a;
+} LinearColor <read=read_linear_color>;
+
+string read_linear_color(LinearColor &c) {
+    string s;
+    SPrintf(s, "r: %g, g: %g, b: %g, a: %g]", c.r, c.g, c.b, c.a);
+    return s;
+}
+
+
+struct VectorParameter {
+	String name;
+	LinearColor value;
+};
+
+struct TextureParameter {
+	String name;
+	String value;
+};
+
+struct HeadMorph {
+	String hair_mesh;
+    struct {
+        int len;
+        String mesh[len];
+    } accessory_mesh;
+    struct {
+        int len;
+        MorphFeature feature[len] <optimize=false>;
+    } morph_features;
+    struct {
+        int len;
+        OffsetBone bone[len] <optimize=false>;
+    } offset_bones;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod0_vertices;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod1_vertices;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod2_vertices;
+    struct {
+        int len;
+        Vector vertice[len];
+    } lod3_vertices;
+    struct {
+        int len;
+        ScalarParameter scalar[len] <optimize=false>;
+    } scalar_parameters;
+    struct {
+        int len;
+        VectorParameter vector[len] <optimize=false>;
+    } vector_parameters;
+    struct {
+        int len;
+        TextureParameter texture[len] <optimize=false>;
+    } texture_parameters;
+};
+
+// Player
+enum <byte> Origin {
+	None,
+	Spacer,
+	Colonist,
+	Earthborn,
+};
+
+enum <byte> Notoriety {
+	NoneN,
+	Survivor,
+	Warhero,
+	Ruthless,
+};
+
+struct Unknown6 {
+    int len <bgcolor=0x88ccee>;
+    int list[len * 2];
+};
+
+struct Player {
+	bool is_female;
+    FSkip(13);
+    String name;
+    int last_name;
+    Origin origin;
+    Notoriety notoriety;
+    FSkip(13);
+    String none;
+	bool has_head_morph;
+	if (has_head_morph.value == 1) {
+		HeadMorph head_morph;
+	}
+    struct {
+        int len <bgcolor=0xff44ff>;
+        int list[len * 2] <optimize=false>;
+    } unknown6 <bgcolor=0xaaaa88>;
+	//String face_code;
 };
 
 // ME1 Legendary
+struct Unknown2 {
+    int id <bgcolor=0x6666ff>;
+    FSkip(4);
+    int len2 <bgcolor=0x88ccff>;
+    int list2[len2];
+};
+
+struct Unknown4 {
+    int len <bgcolor=0x88ccee>;
+    int list[len * 2];
+};
+
 struct {
     uint version;
     String career_id;
     FSkip(16);
     PlotTable plot;
+    FSkip(4);
     struct {
         int len;
-        Unknown2 list[len];
+        Unknown2 list[len] <optimize=false>;
     } unknown2 <bgcolor=0x88ffff>;
-    int test <bgcolor=0x0000ff>;
+    struct {
+        int len <bgcolor=0xff44ff>;
+        int list[len] <optimize=false>;
+    } unknown3 <bgcolor=0xaaaa88>;
+    struct {
+        int len <bgcolor=0x44ddff>;
+        Unknown4 list[len] <optimize=false>;
+    } unknown4 <bgcolor=0xaa88aa>;
+    struct {
+        int len <bgcolor=0xff44ff>;
+        int list[len] <optimize=false>;
+    } unknown5 <bgcolor=0xaaaa88>;
+	SaveTimeStamp timestamp <bgcolor=0xaa44aa>;
+	int seconds_played <bgcolor=0xaa44cc>;
+    Player player;
 } Me1Legendary <open=true>;

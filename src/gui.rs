@@ -100,8 +100,8 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
                 let has_head_morph =
                     HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };
                 match state.save_game.as_mut() {
-                    Some(SaveGame::MassEffect1Leg { save_game: _, .. }) => {
-                        todo!()
+                    Some(SaveGame::MassEffect1Leg { save_game, .. }) => {
+                        save_game.save_data.player.head_morph = has_head_morph
                     }
                     Some(SaveGame::MassEffect2 { save_game, .. }) => {
                         save_game.player.appearance.head_morph = has_head_morph

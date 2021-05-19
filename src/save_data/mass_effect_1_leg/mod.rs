@@ -12,7 +12,13 @@ use std::{fmt, io::Read};
 
 use crate::unreal;
 
-use super::{shared::plot::Me1PlotTable, Dummy, ImguiString, List};
+use super::{
+    shared::{plot::Me1PlotTable, SaveTimeStamp},
+    Dummy, ImguiString, List,
+};
+
+pub mod player;
+use self::player::*;
 
 #[derive(Serialize, Clone)]
 struct ChunkHeader {
@@ -171,6 +177,14 @@ pub struct Me1LegSaveData {
     _career_id: ImguiString,
     _unknown1: Dummy<16>,
     pub plot: Me1PlotTable,
+    _unknown2: Dummy<4>,
+    _unknown3: Vec<Unknown3>,
+    _unknown4: Vec<Dummy<4>>,
+    _unknown5: Vec<Vec<Dummy<8>>>,
+    _unknown6: Vec<Dummy<4>>,
+    timestamp: SaveTimeStamp,
+    seconds_played: i32,
+    pub player: Player,
     // ---
     _trailing: List<u8>,
 }
@@ -193,6 +207,12 @@ impl<'de> serde::Deserialize<'de> for Me1LegVersion {
 
         Ok(Self(version))
     }
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+struct Unknown3 {
+    _unknown1: Dummy<8>,
+    _unknown2: Vec<Dummy<4>>,
 }
 
 #[cfg(test)]
@@ -236,16 +256,35 @@ mod test {
         println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
 
         // Check serialized = input
-        let cmp = input.chunks(4).zip(output.chunks(4));
-        for (i, (a, b)) in cmp.enumerate() {
-            if a != b {
-                panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
-            }
-        }
+        // let cmp = input.chunks(4).zip(output.chunks(4));
+        // for (i, (a, b)) in cmp.enumerate() {
+        //     if a != b {
+        //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+        //     }
+        // }
 
         // Check serialized = input
-        // assert_eq!(input, output);
+        assert_eq!(input, output);
 
         Ok(())
     }
+
+    // #[test]
+    // fn uncompress() -> Result<()> {
+    //     let mut input = Vec::new();
+    //     {
+    //         let mut file = File::open("test/Clare00_QuickSave.pcsav")?;
+    //         file.read_to_end(&mut input)?;
+    //     }
+
+    //     let me1_save_game: Me1LegSaveGame = unreal::Deserializer::from_bytes(&input)?;
+
+    //     let output = unreal::Serializer::to_byte_buf(&me1_save_game.save_data)?;
+    //     {
+    //         let mut file = File::create("test/Clare00_QuickSave.uncompressed")?;
+    //         file.write_all(&output)?;
+    //     }
+
+    //     Ok(())
+    // }
 }
