@@ -19,7 +19,7 @@ pub struct Player {
     pub level: i32,
     pub current_xp: f32,
     pub first_name: ImguiString,
-    last_name: i32,
+    localized_last_name: i32,
     pub origin: Origin,
     pub notoriety: Notoriety,
     pub talent_points: i32,

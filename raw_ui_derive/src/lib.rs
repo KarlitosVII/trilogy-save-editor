@@ -1,5 +1,6 @@
 extern crate proc_macro;
 
+use heck::TitleCase;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
@@ -31,7 +32,7 @@ fn impl_raw_ui_struct(ast: &syn::DeriveInput, fields: &Fields) -> proc_macro2::T
             None
         } else {
             let field_name = &f.ident;
-            let field_string = field_name.as_ref().unwrap().to_string();
+            let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
             Some(quote! {
                 (&mut self.#field_name as &mut dyn crate::save_data::RawUi, #field_string)
             })

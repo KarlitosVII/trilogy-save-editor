@@ -825,27 +825,27 @@ impl<'ui> Gui<'ui> {
                         self.table_next_row();
                         if let Some(_t) = self.push_tree_node("Raw") {
                             self.table_next_row();
-                            hair_mesh.draw_raw_ui(self, "hair_mesh");
+                            hair_mesh.draw_raw_ui(self, "Hair Mesh");
                             self.table_next_row();
-                            accessory_mesh.draw_raw_ui(self, "accessory_mesh");
+                            accessory_mesh.draw_raw_ui(self, "Accessory Mesh");
                             self.table_next_row();
-                            morph_features.draw_raw_ui(self, "morph_features");
+                            morph_features.draw_raw_ui(self, "Morph Features");
                             self.table_next_row();
-                            offset_bones.draw_raw_ui(self, "offset_bones");
+                            offset_bones.draw_raw_ui(self, "Offset Bones");
                             self.table_next_row();
-                            lod0_vertices.draw_raw_ui(self, "lod0_vertices");
+                            lod0_vertices.draw_raw_ui(self, "Lod0 Vertices");
                             self.table_next_row();
-                            lod1_vertices.draw_raw_ui(self, "lod1_vertices");
+                            lod1_vertices.draw_raw_ui(self, "Lod1 Vertices");
                             self.table_next_row();
-                            lod2_vertices.draw_raw_ui(self, "lod2_vertices");
+                            lod2_vertices.draw_raw_ui(self, "Lod2 Vertices");
                             self.table_next_row();
-                            lod3_vertices.draw_raw_ui(self, "lod3_vertices");
+                            lod3_vertices.draw_raw_ui(self, "Lod3 Vertices");
                             self.table_next_row();
-                            scalar_parameters.draw_raw_ui(self, "scalar_parameters");
+                            scalar_parameters.draw_raw_ui(self, "Scalar Parameters");
                             self.table_next_row();
-                            vector_parameters.draw_raw_ui(self, "vector_parameters");
+                            vector_parameters.draw_raw_ui(self, "Vector Parameters");
                             self.table_next_row();
-                            texture_parameters.draw_raw_ui(self, "texture_parameters");
+                            texture_parameters.draw_raw_ui(self, "Texture Parameters");
                         }
                     }
                 }

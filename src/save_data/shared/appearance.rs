@@ -47,9 +47,9 @@ pub struct HasHeadMorph {
 
 impl RawUi for HasHeadMorph {
     fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
-        self.has_head_morph.draw_raw_ui(gui, "has_head_morph");
+        self.has_head_morph.draw_raw_ui(gui, "Has Head Morph");
         if let Some(head_morph) = &mut self.head_morph {
-            head_morph.draw_raw_ui(gui, "head_morph");
+            head_morph.draw_raw_ui(gui, "Head Morph");
         }
     }
 }
