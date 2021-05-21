@@ -69,7 +69,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
 
     // UI
     let system = backend::init(
-        &format!("Trilogy Save Editor - v{}", env!("CARGO_PKG_VERSION")),
+        &format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")),
         1000.0,
         670.0,
     );

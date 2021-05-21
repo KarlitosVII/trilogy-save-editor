@@ -230,14 +230,34 @@ enum <byte> Notoriety {
 	Ruthless,
 };
 
-struct Unknown6 {
-    int len <bgcolor=0x88ccee>;
-    int list[len * 2];
+struct SimpleTalent {
+    int talent_id;
+    int ranks;
+};
+
+struct ComplexTalent {
+    int talent_id;
+    int ranks;
+    int max_rank;
+    int level_offset;
+    int levels_per_rank;
+    int visual_order;
+    struct {
+        int len <bgcolor=0x888888>;
+        int list[len];
+    } prereq_talent_id_array;
+    struct {
+        int len <bgcolor=0x888888>;
+        int list[len];
+    } prereq_talent_rank_array;
 };
 
 struct Player {
 	bool is_female;
-    FSkip(13);
+    int localized_class_name;
+    FSkip(1);
+    int level;
+    float current_xp;
     String name;
     int last_name;
     Origin origin;
@@ -249,9 +269,15 @@ struct Player {
 		HeadMorph head_morph;
 	}
     struct {
-        int len <bgcolor=0xff44ff>;
-        int list[len * 2] <optimize=false>;
-    } unknown6 <bgcolor=0xaaaa88>;
+        int len <bgcolor=0xaaaaaa>;
+        SimpleTalent list[len] <optimize=false>;
+    } simple_talents <bgcolor=0xaaaa88>;
+    struct {
+        int len <bgcolor=0x88aaaa>;
+        ComplexTalent list[len] <optimize=false>;
+    } complex_talents <bgcolor=0x88aa88>;
+    FSkip(33);
+    int cece;
 	//String face_code;
 };
 
@@ -259,8 +285,8 @@ struct Player {
 struct Unknown2 {
     int id <bgcolor=0x6666ff>;
     FSkip(4);
-    int len2 <bgcolor=0x88ccff>;
-    int list2[len2];
+    int len <bgcolor=0x88ccff>;
+    int list[len];
 };
 
 struct Unknown4 {
@@ -280,7 +306,7 @@ struct {
     } unknown2 <bgcolor=0x88ffff>;
     struct {
         int len <bgcolor=0xff44ff>;
-        int list[len] <optimize=false>;
+        int list[len];
     } unknown3 <bgcolor=0xaaaa88>;
     struct {
         int len <bgcolor=0x44ddff>;
@@ -288,7 +314,7 @@ struct {
     } unknown4 <bgcolor=0xaa88aa>;
     struct {
         int len <bgcolor=0xff44ff>;
-        int list[len] <optimize=false>;
+        int list[len];
     } unknown5 <bgcolor=0xaaaa88>;
 	SaveTimeStamp timestamp <bgcolor=0xaa44aa>;
 	int seconds_played <bgcolor=0xaa44cc>;

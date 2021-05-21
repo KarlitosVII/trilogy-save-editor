@@ -70,8 +70,15 @@ impl<'ui> Gui<'ui> {
     fn draw_me1_leg_general(&self, save_game: &mut Me1LegSaveData) -> Option<()> {
         let ui = self.ui;
         let Me1LegSaveData { plot, player, .. } = save_game;
-        let mass_effect_1_leg::player::Player { is_female, first_name, origin, notoriety, .. } =
-            player;
+        let mass_effect_1_leg::player::Player {
+            is_female,
+            level,
+            current_xp,
+            first_name,
+            origin,
+            notoriety,
+            ..
+        } = player;
 
         // 1ère colonne
         let _t = self.begin_columns(2)?;
@@ -150,6 +157,21 @@ impl<'ui> Gui<'ui> {
                 // face_code.draw_raw_ui(self, "Identity Code");
                 // ui.same_line();
                 // self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
+            }
+        }
+
+        // Gameplay
+        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Gameplay") {
+                self.table_next_row();
+                level.draw_raw_ui(self, "Level");
+                ui.same_line();
+                self.draw_help_marker("Classic mode (1 - 60)");
+
+                self.table_next_row();
+                current_xp.draw_raw_ui(self, "Current XP");
             }
         }
 
@@ -312,23 +334,6 @@ impl<'ui> Gui<'ui> {
             }
         }
 
-        // Morality
-        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
-            self.table_next_row();
-            self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Morality") {
-                if let Some(paragon) = plot.int_variables.get_mut(47) {
-                    self.table_next_row();
-                    paragon.draw_raw_ui(self, "Paragon");
-                }
-
-                if let Some(renegade) = plot.int_variables.get_mut(46) {
-                    self.table_next_row();
-                    renegade.draw_raw_ui(self, "Renegade");
-                }
-            }
-        }
-
         // Gameplay
         if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
             self.table_next_row();
@@ -361,6 +366,23 @@ impl<'ui> Gui<'ui> {
                 ) {
                     self.table_next_row();
                     current_xp.draw_raw_ui(self, "Current XP");
+                }
+            }
+        }
+
+        // Morality
+        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Morality") {
+                if let Some(paragon) = plot.int_variables.get_mut(47) {
+                    self.table_next_row();
+                    paragon.draw_raw_ui(self, "Paragon");
+                }
+
+                if let Some(renegade) = plot.int_variables.get_mut(46) {
+                    self.table_next_row();
+                    renegade.draw_raw_ui(self, "Renegade");
                 }
             }
         }

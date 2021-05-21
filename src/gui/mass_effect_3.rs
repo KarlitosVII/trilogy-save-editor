@@ -823,6 +823,7 @@ impl<'ui> Gui<'ui> {
 
                     if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
                         self.table_next_row();
+                        self.set_next_item_open(true);
                         if let Some(_t) = self.push_tree_node("Raw") {
                             self.table_next_row();
                             hair_mesh.draw_raw_ui(self, "Hair Mesh");

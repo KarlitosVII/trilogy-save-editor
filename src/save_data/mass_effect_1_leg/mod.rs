@@ -282,6 +282,7 @@ mod test {
     //     let output = unreal::Serializer::to_byte_buf(&me1_save_game.save_data)?;
     //     {
     //         let mut file = File::create("test/Clare00_QuickSave.uncompressed")?;
+    //         use std::io::Write;
     //         file.write_all(&output)?;
     //     }
 

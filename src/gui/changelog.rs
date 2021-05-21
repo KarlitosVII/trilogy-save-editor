@@ -10,11 +10,23 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.5.0
+        // 1.6.0
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("Added ME1LE Level and Current XP");
+                self.table_next_row();
+                ui.text("Added ME1LE Raw talents");
+                self.table_next_row();
+                ui.text("Converted raw texts to title case for better readability");
+            }
+        }
+        // 1.5.0
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            if let Some(_t) = self.push_tree_node("1.5.0") {
                 self.table_next_row();
                 ui.text("Added ME1LE `General` tab with basic informations such as Name, Gender, Origin, Notoriety and Morality");
                 self.table_next_row();
