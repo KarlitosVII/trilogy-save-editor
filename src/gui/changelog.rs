@@ -10,11 +10,19 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.6.0
+        // 1.6.1
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("Changed backend from OpenGL to Vulkan, I hope it will fix GPU and OpenGL related bugs");
+            }
+        }
+        // 1.6.0
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            if let Some(_t) = self.push_tree_node("1.6.0") {
                 self.table_next_row();
                 ui.text("Added ME1LE Level and Current XP");
                 self.table_next_row();

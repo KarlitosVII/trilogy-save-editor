@@ -72,7 +72,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
         &format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")),
         1000.0,
         670.0,
-    );
+    ).unwrap();
     system.main_loop(move |run, ui| {
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
@@ -279,14 +279,14 @@ impl<'ui> Gui<'ui> {
         ui.text(im_str!("(C) 2021 Karlitos"));
         ui.separator();
         if_chain! {
-            if let Some(_t) = ui.begin_menu(im_str!("Licence"));
+            if let Some(_t) = ui.begin_menu(im_str!("License"));
             if let Some(_t) = TabBar::new(im_str!("tabs")).begin(ui);
             then {
                 if_chain! {
                     if let Some(_t) = TabItem::new(im_str!("English")).begin(ui);
                     if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
                     then {
-                        ui.text(include_str!("../Licence_CeCILL_V2.1-en.txt"));
+                        ui.text(include_str!("../License_CeCILL_V2.1-en.txt"));
                     }
                 }
                 if_chain! {

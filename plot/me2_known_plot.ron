@@ -780,9 +780,9 @@ Me2KnownPlot(
             7200: "[Model] Shadow Broker Base",
         },
         ints: {
-            485: "Illium Skald Fish state (0 = alive, 3 = dead)",
-            486: "Thessian Sunfish state (0 = alive, 3 = dead)",
-            487: "Prejek Paddle Fish state (0 = alive, 3 = dead)",
+            485: "Illium Skald Fish state (0 = alive, 3 = dead, -1000 = will never die)",
+            486: "Thessian Sunfish state (0 = alive, 3 = dead, -1000 = will never die)",
+            487: "Prejek Paddle Fish state (0 = alive, 3 = dead, -1000 = will never die)",
         },
     ),
     imported_me1: {
@@ -872,7 +872,7 @@ Me2KnownPlot(
                 1540: "Rescued Kaidan",
                 3752: "Wrex killed by Ashley or Shepard",
                 1862: "Wrex killed by Ashley",
-                3390: "Geth flyers disabled and reported",
+                3390: "Geth flyers disabled and reported (Kirrahe alive)",
                 2278: "Killed Rana Thanoptis",
             },
             ints: {},
