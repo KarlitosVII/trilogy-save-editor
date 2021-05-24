@@ -77,6 +77,11 @@ impl<'ui> Gui<'ui> {
             first_name,
             origin,
             notoriety,
+            credits,
+            grenades,
+            medigel,
+            salvage,
+            face_code,
             ..
         } = player;
 
@@ -153,10 +158,10 @@ impl<'ui> Gui<'ui> {
                     }
                 }
 
-                // self.table_next_row();
-                // face_code.draw_raw_ui(self, "Identity Code");
-                // ui.same_line();
-                // self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
+                self.table_next_row();
+                face_code.draw_raw_ui(self, "Identity Code");
+                ui.same_line();
+                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
             }
         }
 
@@ -192,6 +197,22 @@ impl<'ui> Gui<'ui> {
                     self.table_next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }
+            }
+        }
+
+        // Ressources
+        if let Some(_t) = self.begin_table(im_str!("ressources-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Ressources") {
+                self.table_next_row();
+                credits.draw_raw_ui(self, "Credits");
+                self.table_next_row();
+                grenades.draw_raw_ui(self, "Grenades");
+                self.table_next_row();
+                medigel.draw_raw_ui(self, "Medigel");
+                self.table_next_row();
+                salvage.draw_raw_ui(self, "Salvage");
             }
         }
         Some(())

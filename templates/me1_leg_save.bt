@@ -252,6 +252,49 @@ struct ComplexTalent {
     } prereq_talent_rank_array;
 };
 
+struct BioItemXMod {
+    int id;
+    byte type_enum;
+    int manufacturer_id;
+    FSkip(4);
+};
+
+struct BioItemXModdable {
+    int id;
+    byte item_level;
+    int manufacturer_id;
+    FSkip(4);
+    bool unknown1;
+    bool unknown2;
+    struct {
+        int len <bgcolor=0x88eecc>;
+        BioItemXMod list[len] <optimize=false>;
+    } slot_spec <bgcolor=0x88ffff>;
+};
+
+struct Inventory {
+    struct {
+        int len <bgcolor=0x8888ff>;
+        BioItemXModdable list[len] <optimize=false>;
+    } equipped <bgcolor=0x88ff33>;
+    struct {
+        int len <bgcolor=0x8888ff>;
+        BioItemXModdable list[len] <optimize=false>;
+    } quick_slot <bgcolor=0x88ff33>;
+    struct {
+        int len <bgcolor=0x8888ff>;
+        BioItemXModdable list[len] <optimize=false>;
+    } inventory <bgcolor=0x88ff33>;
+    struct {
+        int len <bgcolor=0x8888ff>;
+        BioItemXModdable list[len] <optimize=false>;
+    } saved_backpack_items <bgcolor=0x88ff33>;
+    int credits <bgcolor=0x0000ff>;
+    int grenades <bgcolor=0x0000dd>;
+    float medigel <bgcolor=0x0000bb>;
+    float salvage <bgcolor=0x000099>;
+};
+
 struct Player {
 	bool is_female;
     int localized_class_name;
@@ -276,9 +319,8 @@ struct Player {
         int len <bgcolor=0x88aaaa>;
         ComplexTalent list[len] <optimize=false>;
     } complex_talents <bgcolor=0x88aa88>;
-    FSkip(33);
-    int cece;
-	//String face_code;
+    Inventory inventory;
+    String face_code;
 };
 
 // ME1 Legendary

@@ -24,6 +24,12 @@ pub struct Player {
     pub head_morph: HasHeadMorph,
     simple_talents: Vec<SimpleTalent>,
     complex_talents: Vec<ComplexTalent>,
+    inventory: Inventory,
+    pub credits: i32,
+    pub grenades: i32,
+    pub medigel: f32,
+    pub salvage: f32,
+    pub face_code: ImguiString,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
@@ -42,4 +48,53 @@ pub struct ComplexTalent {
     visual_order: i32,
     prereq_talent_id_array: Vec<i32>,
     prereq_talent_rank_array: Vec<i32>,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+pub struct Inventory {
+    equipped: Vec<Item>,
+    quick_slot: Vec<Item>,
+    inventory: Vec<Item>,
+    saved_backpack_items: Vec<Item>,
+}
+
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Deserialize, Serialize, RawUi, Clone)]
+pub enum ItemLevel {
+    None,
+    I,
+    II,
+    III,
+    IV,
+    V,
+    VI,
+    VII,
+    VIII,
+    IX,
+    X,
+}
+
+impl Default for ItemLevel {
+    fn default() -> Self {
+        ItemLevel::None
+    }
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+struct Item {
+    item_id: i32,
+    item_level: ItemLevel,
+    manufacturer_id: i32,
+    _osef: Dummy<4>,
+    unknown_bool: bool,
+    is_junk: bool,
+    attached_mods: Vec<ItemMod>,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+struct ItemMod {
+    item_id: i32,
+    item_level: ItemLevel,
+    manufacturer_id: i32,
+    _osef: Dummy<4>,
 }
