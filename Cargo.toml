@@ -42,13 +42,12 @@ zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }
 unicase = "2.6"
 if_chain = "1.0"
 # GUI
-rfd = "0.4"
+rfd = "0.3"
 dirs = "3.0"
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs" }
-imgui-rs-vulkan-renderer = { git = "https://github.com/KarlitosVII/imgui-rs-vulkan-renderer" }
-ash = "0.32"
-ash-window = "0.6"
+imgui-wgpu = { git = "https://github.com/KarlitosVII/imgui-wgpu-rs" }
+wgpu = "0.8"
 winit = "0.24"
 clipboard = "0.5"

@@ -47,6 +47,7 @@ fn panic_hook(info: &PanicInfo<'_>) {
 
     eprintln!("Panic : '{}', {}", msg, location);
 }
+
 #[cfg(target_os = "windows")]
 mod console {
     use winapi::{

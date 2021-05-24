@@ -72,7 +72,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
         &format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")),
         1000.0,
         670.0,
-    ).unwrap();
+    );
     system.main_loop(move |run, ui| {
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
