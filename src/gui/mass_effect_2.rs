@@ -662,7 +662,8 @@ impl<'ui> Gui<'ui> {
 
         // Import
         if ui.button(im_str!("Import")) {
-            let file = rfd::FileDialog::new().add_filter("Head Morph", &["ron"]).pick_file();
+            let file =
+                tinyfiledialogs::open_file_dialog("", "", Some((&["*.ron"], "Head Morph (*.ron)")));
 
             if let Some(path) = file {
                 let _ = self.event_addr.send(MainEvent::ImportHeadMorph(path));
@@ -673,8 +674,12 @@ impl<'ui> Gui<'ui> {
                 // Export
                 ui.same_line();
                 if ui.button(im_str!("Export")) {
-                    let file =
-                        rfd::FileDialog::new().add_filter("Head Morph", &["ron"]).save_file();
+                    let file = tinyfiledialogs::save_file_dialog_with_filter(
+                        "",
+                        "",
+                        &["*.ron"],
+                        "Head Morph (*.ron)",
+                    );
 
                     if let Some(path) = file {
                         let _ = self

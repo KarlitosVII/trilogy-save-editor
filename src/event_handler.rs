@@ -24,11 +24,11 @@ use crate::{
 };
 
 pub enum MainEvent {
-    OpenSave(PathBuf),
-    SaveSave(PathBuf, SaveGame),
+    OpenSave(String),
+    SaveSave(String, SaveGame),
     LoadKnownPlots,
-    ImportHeadMorph(PathBuf),
-    ExportHeadMorph(PathBuf, Box<HeadMorph>),
+    ImportHeadMorph(String),
+    ExportHeadMorph(String, Box<HeadMorph>),
 }
 
 #[derive(Clone)]
@@ -76,7 +76,8 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
     }
 }
 
-async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
+async fn open_save(path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
+    let path = PathBuf::from(path);
     let mut input = Vec::new();
     {
         let mut file = File::open(&path).await?;
@@ -126,7 +127,7 @@ async fn open_save(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
     Ok(())
 }
 
-async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
+async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
     let output = match save_game {
         SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_byte_buf(&save_game)?,
         SaveGame::MassEffect1Leg { save_game, .. } => {
@@ -169,6 +170,7 @@ async fn save_save(path: PathBuf, save_game: SaveGame, ui_addr: Sender<UiEvent>)
     };
 
     // Backup si fichier existe
+    let path = PathBuf::from(path);
     if fs::metadata(&path).await.is_ok() {
         if let Some(ext) = path.extension() {
             let to = Path::with_extension(&path, ext.to_string_lossy().into_owned() + ".bak");
@@ -222,7 +224,7 @@ async fn load_me3_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
     Ok(())
 }
 
-async fn import_head_morph(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()> {
+async fn import_head_morph(path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut import = String::new();
     {
         let mut file = File::open(&path).await?;
@@ -237,14 +239,16 @@ async fn import_head_morph(path: PathBuf, ui_addr: Sender<UiEvent>) -> Result<()
 }
 
 async fn export_head_morph(
-    path: PathBuf, head_morph: Box<HeadMorph>, ui_addr: Sender<UiEvent>,
+    path: String, head_morph: Box<HeadMorph>, ui_addr: Sender<UiEvent>,
 ) -> Result<()> {
     let pretty_config =
         PrettyConfig::new().with_enumerate_arrays(true).with_new_line(String::from('\n'));
-    let export = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
 
-    let mut file = File::create(&path).await?;
-    file.write_all(export.as_bytes()).await?;
+    let export = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
+    {
+        let mut file = File::create(&path).await?;
+        file.write_all(export.as_bytes()).await?;
+    }
 
     let _ = ui_addr.send_async(UiEvent::Notification("Exported")).await;
     Ok(())

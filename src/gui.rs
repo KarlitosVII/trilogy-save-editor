@@ -207,7 +207,7 @@ impl<'ui> Gui<'ui> {
     fn get_document_dir() -> PathBuf {
         match dirs::document_dir() {
             Some(mut path) => {
-                path.push("BioWare");
+                path.push("BioWare/");
                 path
             }
             None => PathBuf::default(),
@@ -222,7 +222,7 @@ impl<'ui> Gui<'ui> {
     fn get_document_dir() -> PathBuf {
         match dirs::home_dir() {
             Some(mut path) => {
-                path.push(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare");
+                path.push(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare/");
                 path
             }
             None => PathBuf::default(),
@@ -237,10 +237,14 @@ impl<'ui> Gui<'ui> {
     fn open_dialog(&self) {
         let dir = Self::get_document_dir();
 
-        let file = rfd::FileDialog::new()
-            .add_filter("Mass Effect Save", &["MassEffectSave", "pcsav"])
-            .set_directory(dir)
-            .pick_file();
+        let file = tinyfiledialogs::open_file_dialog(
+            "",
+            &dir.to_string_lossy(),
+            Some((
+                &["*.pcsav", "*.MassEffectSave"],
+                "Mass Effect Trilogy Save (*.pcsav, *.MassEffectSave)",
+            )),
+        );
 
         if let Some(path) = file {
             let _ = self.event_addr.send(MainEvent::OpenSave(path));
@@ -248,24 +252,24 @@ impl<'ui> Gui<'ui> {
     }
 
     fn save_dialog(&self, save_game: &SaveGame) {
-        let (file_name, game_filter, extension) = match save_game {
+        let (file_name, description, extension) = match save_game {
             SaveGame::MassEffect1 { file_name, .. } => {
-                (file_name, "Mass Effect Save", "MassEffectSave")
+                (file_name, "Mass Effect 1 Save (*.MassEffectSave)", "*.MassEffectSave")
             }
             SaveGame::MassEffect1Leg { file_name, .. } => {
-                (file_name, "Mass Effect 1 Legendary", "pcsav")
+                (file_name, "Mass Effect 1 Legendary Save (*.pcsav)", "*.pcsav")
             }
             SaveGame::MassEffect2 { file_name, .. }
             | SaveGame::MassEffect2Leg { file_name, .. } => {
-                (file_name, "Mass Effect 2 Save", "pcsav")
+                (file_name, "Mass Effect 2 Save (*.pcsav)", "*.pcsav")
             }
-            SaveGame::MassEffect3 { file_name, .. } => (file_name, "Mass Effect 3 Save", "pcsav"),
+            SaveGame::MassEffect3 { file_name, .. } => {
+                (file_name, "Mass Effect 3 Save (*.pcsav)", "*.pcsav")
+            }
         };
 
-        let file = rfd::FileDialog::new()
-            .add_filter(game_filter, &[extension])
-            .set_file_name(file_name)
-            .save_file();
+        let file =
+            tinyfiledialogs::save_file_dialog_with_filter("", file_name, &[extension], description);
 
         if let Some(path) = file {
             let _ = self.event_addr.send(MainEvent::SaveSave(path, save_game.clone()));

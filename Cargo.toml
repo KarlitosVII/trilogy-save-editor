@@ -1,6 +1,6 @@
 [package]
 name = "trilogy_save_editor"
-version = "1.7.0"
+version = "1.7.1"
 authors = ["Karlitos"]
 license = "CeCILL-2.1"
 edition = "2018"
@@ -36,13 +36,13 @@ flume = { version = "0.10", features = ["async"], default-features = false }
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.6", features = ["indexmap"], default-features = false }
 # Utils
-crc = "2.0.0-rc.1"
+crc = "2.0"
 flate2 = { version = "1.0", features = ["zlib"], default-features = false }
 zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }
 unicase = "2.6"
 if_chain = "1.0"
 # GUI
-rfd = "0.3"
+tinyfiledialogs = "3.8"
 dirs = "3.0"
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
