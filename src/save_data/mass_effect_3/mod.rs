@@ -2,10 +2,8 @@ use anyhow::Result;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 
-use crate::save_data::Dummy;
-
 use super::{
-    shared::{EndGameState, Level, Rotator, SaveTimeStamp, Vector},
+    shared::{Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector},
     ImguiString,
 };
 
@@ -26,9 +24,9 @@ use galaxy_map::*;
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me3SaveGame {
     _version: Me3Version,
-    _debug_name: ImguiString,
+    debug_name: ImguiString,
     seconds_played: f32,
-    _disc: Dummy<4>,
+    disc: i32,
     base_level_name: ImguiString,
     base_level_name_display_override_as_read: ImguiString,
     pub difficulty: Difficulty,
@@ -36,13 +34,13 @@ pub struct Me3SaveGame {
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotator,
-    _current_loading_tip: Dummy<4>,
+    current_loading_tip: i32,
     levels: Vec<Level>,
     streaming_records: IndexMap<ImguiString, bool>,
-    _kismet_records: Vec<Dummy<20>>,
-    _doors: Vec<Dummy<18>>,
-    _placeables: Vec<Dummy<18>>,
-    _pawns: Vec<Dummy<16>>,
+    kismet_records: Vec<KismetRecord>,
+    doors: Vec<Door>,
+    placeables: Vec<Placeable>,
+    pawns: Vec<Guid>,
     pub player: Player,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
@@ -51,10 +49,10 @@ pub struct Me3SaveGame {
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
-    _use_modules: Vec<Dummy<16>>,
+    use_modules: Vec<Guid>,
     pub conversation_mode: AutoReplyModeOptions,
     objectice_markers: Vec<ObjectiveMarker>,
-    _saved_objective_text: Dummy<4>,
+    saved_objective_text: i32,
 }
 
 #[derive(Serialize, Clone)]
@@ -84,6 +82,25 @@ pub enum Difficulty {
     Normal,
     Hardcore,
     Insanity,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+pub struct Placeable {
+    guid: Guid,
+    is_destroyed: PlaceableState,
+    is_deactivated: PlaceableState,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone)]
+pub enum PlaceableState {
+    No,
+    Yes,
+}
+
+impl Default for PlaceableState {
+    fn default() -> Self {
+        PlaceableState::No
+    }
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]

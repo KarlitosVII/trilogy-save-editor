@@ -6,18 +6,17 @@ use imgui::{
 use indexmap::IndexMap;
 use std::{fmt::Display, hash::Hash};
 
-use crate::save_data::{shared::plot::BoolSlice, RawUi};
+use crate::save_data::{
+    shared::{plot::BoolSlice, Guid},
+    RawUi,
+};
 
 use super::Gui;
 
 impl<'ui> Gui<'ui> {
     // Edit boxes
     pub fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
-        let ui = self.ui;
-
-        // let width = ui.push_item_width(500.0);
-        ui.input_text(&ImString::new(ident), value).resize_buffer(true).build();
-        // width.pop(ui);
+        self.ui.input_text(&ImString::new(ident), value).resize_buffer(true).build();
     }
 
     pub fn draw_edit_bool(&self, ident: &str, value: &mut bool) {
@@ -60,6 +59,57 @@ impl<'ui> Gui<'ui> {
         let width = ui.push_item_width(200.0);
         ColorEdit::new(&ImString::new(ident), color).build(ui);
         width.pop(ui);
+    }
+
+    pub fn draw_edit_guid(&self, ident: &str, guid: &mut Guid) {
+        let ui = self.ui;
+        {
+            let width = ui.push_item_width(65.0);
+            ui.input_text(&im_str!("##{}-part1", ident), &mut guid.part1)
+                .chars_hexadecimal(true)
+                .build();
+            width.pop(ui);
+        }
+        ui.same_line();
+        ui.text("-");
+        {
+            ui.same_line();
+            let width = ui.push_item_width(36.0);
+            ui.input_text(&im_str!("##{}-part2", ident), &mut guid.part2)
+                .chars_hexadecimal(true)
+                .build();
+            width.pop(ui);
+        }
+        ui.same_line();
+        ui.text("-");
+        {
+            ui.same_line();
+            let width = ui.push_item_width(36.0);
+            ui.input_text(&im_str!("##{}-part3", ident), &mut guid.part3)
+                .chars_hexadecimal(true)
+                .build();
+            width.pop(ui);
+        }
+        ui.same_line();
+        ui.text("-");
+        {
+            ui.same_line();
+            let width = ui.push_item_width(36.0);
+            ui.input_text(&im_str!("##{}-part4", ident), &mut guid.part4)
+                .chars_hexadecimal(true)
+                .build();
+            width.pop(ui);
+        }
+        ui.same_line();
+        ui.text("-");
+        {
+            ui.same_line();
+            let width = ui.push_item_width(93.0);
+            ui.input_text(&im_str!("{}##{}-part5", ident, ident), &mut guid.part5)
+                .chars_hexadecimal(true)
+                .build();
+            width.pop(ui);
+        }
     }
 
     // View widgets
@@ -143,6 +193,7 @@ impl<'ui> Gui<'ui> {
         }
 
         // Add
+        self.table_next_row();
         if ui.button(im_str!("add")) {
             // Ça ouvre automatiquement le tree node de l'élément ajouté
             TreeNode::new(&im_str!("{}", list.len()))
@@ -206,6 +257,7 @@ impl<'ui> Gui<'ui> {
         }
 
         // Add
+        self.table_next_row();
         if ui.button(im_str!("add")) {
             // Ça ouvre automatiquement le tree node de l'élément ajouté
             let new_k = K::default();

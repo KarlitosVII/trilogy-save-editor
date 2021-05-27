@@ -290,14 +290,14 @@ impl<'ui> Gui<'ui> {
                     if let Some(_t) = TabItem::new(im_str!("English")).begin(ui);
                     if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
                     then {
-                        ui.text(include_str!("../License_CeCILL_V2.1-en.txt"));
+                        ui.text(include_str!("../../License_CeCILL_V2.1-en.txt"));
                     }
                 }
                 if_chain! {
                     if let Some(_t) = TabItem::new(im_str!("French")).begin(ui);
                     if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
                     then {
-                        ui.text(include_str!("../Licence_CeCILL_V2.1-fr.txt"));
+                        ui.text(include_str!("../../Licence_CeCILL_V2.1-fr.txt"));
                     }
                 }
             }

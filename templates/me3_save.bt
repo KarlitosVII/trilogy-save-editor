@@ -260,7 +260,7 @@ struct Power {
 	int wheel_display_index;
 };
 
-struct GawAsset {
+struct WarAsset {
 	int id;
 	int strength;
 };

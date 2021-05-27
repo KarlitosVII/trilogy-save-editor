@@ -2,11 +2,12 @@ use anyhow::Result;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 
-use crate::save_data::Dummy;
-
 use super::{
-    shared::{plot::Me1PlotTable, EndGameState, Level, Rotator, SaveTimeStamp, Vector},
-    ImguiString,
+    shared::{
+        plot::Me1PlotTable, Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp,
+        Vector,
+    },
+    Dummy, ImguiString,
 };
 
 pub mod player;
@@ -26,21 +27,21 @@ use galaxy_map::*;
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me2SaveGame {
     _version: Me2Version,
-    _debug_name: ImguiString,
+    debug_name: ImguiString,
     seconds_played: f32,
-    _disc: Dummy<4>,
+    disc: i32,
     base_level_name: ImguiString,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotator,
-    _current_loading_tip: Dummy<4>,
+    current_loading_tip: i32,
     levels: Vec<Level>,
     streaming_records: IndexMap<ImguiString, bool>,
-    _kismet_records: Vec<Dummy<20>>,
-    _doors: Vec<Dummy<18>>,
-    _pawns: Vec<Dummy<16>>,
+    kismet_records: Vec<KismetRecord>,
+    doors: Vec<Door>,
+    pawns: Vec<Guid>,
     pub player: Player,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
@@ -72,21 +73,21 @@ impl<'de> serde::Deserialize<'de> for Me2Version {
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me2LegSaveGame {
     _version: Me2LegVersion,
-    _debug_name: ImguiString,
+    debug_name: ImguiString,
     seconds_played: f32,
-    _disc: Dummy<4>,
+    disc: i32,
     base_level_name: ImguiString,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
     location: Vector,
     rotation: Rotator,
-    _current_loading_tip: Dummy<4>,
+    current_loading_tip: i32,
     levels: Vec<Level>,
     streaming_records: IndexMap<ImguiString, bool>,
-    _kismet_records: Vec<Dummy<20>>,
-    _doors: Vec<Dummy<18>>,
-    _pawns: Vec<Dummy<16>>,
+    kismet_records: Vec<KismetRecord>,
+    doors: Vec<Door>,
+    pawns: Vec<Guid>,
     pub player: Player,
     _unknown: Dummy<28>,
     squad: Vec<Henchman>,

@@ -20,7 +20,7 @@ pub struct Player {
     pub origin: Origin,
     pub notoriety: Notoriety,
     _unknown2: Dummy<13>,
-    _unknown3: ImguiString,
+    unknown_string: ImguiString,
     pub head_morph: HasHeadMorph,
     simple_talents: Vec<SimpleTalent>,
     complex_talents: Vec<ComplexTalent>,
@@ -53,7 +53,7 @@ pub struct ComplexTalent {
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
 pub struct Inventory {
     equipped: Vec<Item>,
-    quick_slot: Vec<Item>,
+    quick_slots: Vec<Item>,
     inventory: Vec<Item>,
     saved_backpack_items: Vec<Item>,
 }

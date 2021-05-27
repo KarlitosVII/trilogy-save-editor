@@ -174,7 +174,7 @@ impl serde::Serialize for Me1LegSaveGame {
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me1LegSaveData {
     _version: Me1LegVersion,
-    _career_id: ImguiString,
+    character_id: ImguiString,
     _unknown1: Dummy<16>,
     pub plot: Me1PlotTable,
     _unknown2: Dummy<4>,
@@ -186,7 +186,7 @@ pub struct Me1LegSaveData {
     seconds_played: i32,
     pub player: Player,
     // ---
-    _trailing: List<u8>,
+    _remaining_bytes: List<u8>,
 }
 
 #[derive(Serialize, Clone)]
