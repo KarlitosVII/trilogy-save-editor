@@ -29,7 +29,7 @@ pub struct Player {
     pub appearance: Appearance,
     emissive_id: i32,
     pub powers: Vec<Power>,
-    gaw_assets: IndexMap<i32, i32>,
+    war_assets: IndexMap<i32, i32>,
     weapons: Vec<Weapon>,
     weapons_mods: Vec<WeaponMod>,
     weapons_loadout: WeaponLoadout,

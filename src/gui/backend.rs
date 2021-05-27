@@ -57,11 +57,7 @@ const MIN_HEIGHT: u32 = 270;
 pub fn init(title: &str, width: f64, height: f64) -> Backend {
     let rt = Runtime::new().unwrap();
 
-    #[cfg(target_os = "windows")]
     let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY | wgpu::BackendBit::DX11);
-
-    #[cfg(not(target_os = "windows"))]
-    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()

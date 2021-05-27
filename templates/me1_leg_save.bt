@@ -289,10 +289,6 @@ struct Inventory {
         int len <bgcolor=0x8888ff>;
         BioItemXModdable list[len] <optimize=false>;
     } saved_backpack_items <bgcolor=0x88ff33>;
-    int credits <bgcolor=0x0000ff>;
-    int grenades <bgcolor=0x0000dd>;
-    float medigel <bgcolor=0x0000bb>;
-    float salvage <bgcolor=0x000099>;
 };
 
 struct Player {
@@ -320,6 +316,10 @@ struct Player {
         ComplexTalent list[len] <optimize=false>;
     } complex_talents <bgcolor=0x88aa88>;
     Inventory inventory;
+    int credits <bgcolor=0x0000ff>;
+    int grenades <bgcolor=0x0000dd>;
+    float medigel <bgcolor=0x0000bb>;
+    float salvage <bgcolor=0x000099>;
     String face_code;
 };
 
