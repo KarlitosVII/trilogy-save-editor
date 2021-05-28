@@ -424,11 +424,11 @@ impl<'ui> Gui<'ui> {
             (im_str!("SFXGameContent.SFXPowerCustomAction_EnergyDrain"), im_str!("Energy Drain")),
             (
                 im_str!("SFXGameContent.SFXPowerCustomAction_ProtectorDrone"),
-                im_str!("Protector Drone"),
+                im_str!("Defense Drone"),
             ),
             (
                 im_str!("SFXGameContent.SFXPowerCustomAction_GethShieldBoost"),
-                im_str!("Geth Shield Boost"),
+                im_str!("Defense Matrix"),
             ),
             (im_str!("SFXGameContent.SFXPowerCustomAction_Decoy"), im_str!("Decoy")),
             (
@@ -454,7 +454,7 @@ impl<'ui> Gui<'ui> {
             ),
             (im_str!("SFXGameContent.SFXPowerCustomAction_Carnage"), im_str!("Carnage")),
             (im_str!("SFXGameContent.SFXPowerCustomAction_Slam"), im_str!("Slam")),
-            (im_str!("SFXGameContent.SFXPowerCustomAction_DarkChannel"), im_str!("DarkChannel")),
+            (im_str!("SFXGameContent.SFXPowerCustomAction_DarkChannel"), im_str!("Dark Channel")),
             (
                 im_str!("SFXGameContentDLC_Exp_Pack001.SFXPowerCustomAction_Dominate"),
                 im_str!("Dominate"),
