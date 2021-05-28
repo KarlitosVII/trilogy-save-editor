@@ -78,8 +78,8 @@ impl<'ui> Gui<'ui> {
             origin,
             notoriety,
             credits,
-            grenades,
             medigel,
+            grenades,
             salvage,
             face_code,
             ..
@@ -208,9 +208,9 @@ impl<'ui> Gui<'ui> {
                 self.table_next_row();
                 credits.draw_raw_ui(self, "Credits");
                 self.table_next_row();
-                grenades.draw_raw_ui(self, "Grenades");
-                self.table_next_row();
                 medigel.draw_raw_ui(self, "Medigel");
+                self.table_next_row();
+                grenades.draw_raw_ui(self, "Grenades");
                 self.table_next_row();
                 salvage.draw_raw_ui(self, "Salvage");
             }

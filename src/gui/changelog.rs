@@ -16,6 +16,8 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
                 self.table_next_row();
+                ui.text("Swapped ME1LE medigel and grenades");
+                self.table_next_row();
                 ui.text("Unhide some raw data that can be use for modding purpose (Debug name, placeables, doors, etc.)");
             }
         }

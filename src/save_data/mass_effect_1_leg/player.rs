@@ -26,8 +26,8 @@ pub struct Player {
     complex_talents: Vec<ComplexTalent>,
     inventory: Inventory,
     pub credits: i32,
-    pub grenades: i32,
-    pub medigel: f32,
+    pub medigel: i32,
+    pub grenades: f32,
     pub salvage: f32,
     pub face_code: ImguiString,
 }
