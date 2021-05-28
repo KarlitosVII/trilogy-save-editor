@@ -80,7 +80,7 @@ impl<'ui> Gui<'ui> {
             credits,
             medigel,
             grenades,
-            salvage,
+            omnigel,
             face_code,
             ..
         } = player;
@@ -212,7 +212,7 @@ impl<'ui> Gui<'ui> {
                 self.table_next_row();
                 grenades.draw_raw_ui(self, "Grenades");
                 self.table_next_row();
-                salvage.draw_raw_ui(self, "Salvage");
+                omnigel.draw_raw_ui(self, "Omnigel");
             }
         }
         Some(())
@@ -483,13 +483,13 @@ impl<'ui> Gui<'ui> {
                 }
 
                 // Salvage
-                if let Some(salvage) = Self::me1_find_float_property(
+                if let Some(omnigel) = Self::me1_find_float_property(
                     player,
                     &mut m_inventory.properties,
                     "m_fResourceSalvage",
                 ) {
                     self.table_next_row();
-                    salvage.draw_raw_ui(self, "Salvage");
+                    omnigel.draw_raw_ui(self, "Omnigel");
                 }
             }
         }

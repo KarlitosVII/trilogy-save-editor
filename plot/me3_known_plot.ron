@@ -823,8 +823,8 @@ Me3KnownPlot(
         "Powers": PlotVariable(
             booleans: {
                 22100: "Energy Drain",
-                22101: "Protector Drone",
-                22102: "Geth Shield Boost",
+                22101: "Defense Drone",
+                22102: "Defense Matrix",
                 22103: "Decoy",
                 22104: "Armor Piercing Ammo",
                 22105: "Proximity Mine",

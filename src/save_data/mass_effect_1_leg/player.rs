@@ -28,7 +28,7 @@ pub struct Player {
     pub credits: i32,
     pub medigel: i32,
     pub grenades: f32,
-    pub salvage: f32,
+    pub omnigel: f32,
     pub face_code: ImguiString,
 }
 

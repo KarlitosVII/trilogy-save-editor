@@ -319,7 +319,7 @@ struct Player {
     int credits <bgcolor=0x0000ff>;
     int grenades <bgcolor=0x0000dd>;
     float medigel <bgcolor=0x0000bb>;
-    float salvage <bgcolor=0x000099>;
+    float omnigel <bgcolor=0x000099>;
     String face_code;
 };
 
