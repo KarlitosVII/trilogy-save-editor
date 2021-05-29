@@ -1,7 +1,6 @@
 use anyhow::{Context, Result};
 use crc::{Crc, CRC_32_BZIP2};
 use flume::{Receiver, Sender};
-use if_chain::if_chain;
 use ron::ser::PrettyConfig;
 use std::path::{Path, PathBuf};
 use tokio::{
@@ -33,11 +32,11 @@ pub enum MainEvent {
 
 #[derive(Clone)]
 pub enum SaveGame {
-    MassEffect1 { file_name: String, save_game: Box<Me1SaveGame> },
-    MassEffect1Leg { file_name: String, save_game: Box<Me1LegSaveGame> },
-    MassEffect2 { file_name: String, save_game: Box<Me2SaveGame> },
-    MassEffect2Leg { file_name: String, save_game: Box<Me2LegSaveGame> },
-    MassEffect3 { file_name: String, save_game: Box<Me3SaveGame> },
+    MassEffect1 { file_path: String, save_game: Box<Me1SaveGame> },
+    MassEffect1Leg { file_path: String, save_game: Box<Me1LegSaveGame> },
+    MassEffect2 { file_path: String, save_game: Box<Me2SaveGame> },
+    MassEffect2Leg { file_path: String, save_game: Box<Me2LegSaveGame> },
+    MassEffect3 { file_path: String, save_game: Box<Me3SaveGame> },
 }
 
 pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
@@ -76,54 +75,51 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
     }
 }
 
-async fn open_save(path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
-    let path = PathBuf::from(path);
+async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = Vec::new();
     {
-        let mut file = File::open(&path).await?;
+        let mut file = File::open(&file_path).await?;
         file.read_to_end(&mut input).await?;
     }
 
-    if_chain! {
-        if let Some(file_name) = path.file_name();
-        if let Some(ext) = path.extension();
-        then {
-            let save_game = if unicase::eq(ext.to_string_lossy().to_string().as_str(), "MassEffectSave") {
-                // ME1
-                SaveGame::MassEffect1 {
-                    file_name: file_name.to_string_lossy().into(),
-                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
-                }
-            } else if input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
-                // ME1 Legendary
-                SaveGame::MassEffect1Leg {
-                    file_name: file_name.to_string_lossy().into(),
-                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
-                }
-            } else if unreal::Deserializer::from_bytes::<Me2Version>(&input).is_ok() {
-                // ME2
-                SaveGame::MassEffect2 {
-                    file_name: file_name.to_string_lossy().into(),
-                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
-                }
-            } else if unreal::Deserializer::from_bytes::<Me2LegVersion>(&input).is_ok() {
-                // ME2 Legendary
-                SaveGame::MassEffect2Leg {
-                    file_name: file_name.to_string_lossy().into(),
-                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
-                }
-            } else {
-                // ME3
-                SaveGame::MassEffect3 {
-                    file_name: file_name.to_string_lossy().into(),
-                    save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
-                }
-            };
+    if let Some(ext) = Path::new(&file_path).extension() {
+        let save_game = if unicase::eq(ext.to_string_lossy().to_string().as_str(), "MassEffectSave")
+        {
+            // ME1
+            SaveGame::MassEffect1 {
+                file_path,
+                save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+            }
+        } else if input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
+            // ME1 Legendary
+            SaveGame::MassEffect1Leg {
+                file_path,
+                save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+            }
+        } else if unreal::Deserializer::from_bytes::<Me2Version>(&input).is_ok() {
+            // ME2
+            SaveGame::MassEffect2 {
+                file_path,
+                save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+            }
+        } else if unreal::Deserializer::from_bytes::<Me2LegVersion>(&input).is_ok() {
+            // ME2 Legendary
+            SaveGame::MassEffect2Leg {
+                file_path,
+                save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+            }
+        } else {
+            // ME3
+            SaveGame::MassEffect3 {
+                file_path,
+                save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+            }
+        };
 
-            let _ = ui_addr.send_async(UiEvent::OpenedSave(save_game)).await;
-            let _ = ui_addr.send_async(UiEvent::Notification("Opened")).await;
-        }
+        let _ = ui_addr.send_async(UiEvent::OpenedSave(save_game)).await;
+        let _ = ui_addr.send_async(UiEvent::Notification("Opened")).await;
     }
+
     Ok(())
 }
 

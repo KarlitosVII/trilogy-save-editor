@@ -252,24 +252,24 @@ impl<'ui> Gui<'ui> {
     }
 
     fn save_dialog(&self, save_game: &SaveGame) {
-        let (file_name, description, extension) = match save_game {
-            SaveGame::MassEffect1 { file_name, .. } => {
-                (file_name, "Mass Effect 1 Save (*.MassEffectSave)", "*.MassEffectSave")
+        let (file_path, description, extension) = match save_game {
+            SaveGame::MassEffect1 { file_path, .. } => {
+                (file_path, "Mass Effect 1 Save (*.MassEffectSave)", "*.MassEffectSave")
             }
-            SaveGame::MassEffect1Leg { file_name, .. } => {
-                (file_name, "Mass Effect 1 Legendary Save (*.pcsav)", "*.pcsav")
+            SaveGame::MassEffect1Leg { file_path, .. } => {
+                (file_path, "Mass Effect 1 Legendary Save (*.pcsav)", "*.pcsav")
             }
-            SaveGame::MassEffect2 { file_name, .. }
-            | SaveGame::MassEffect2Leg { file_name, .. } => {
-                (file_name, "Mass Effect 2 Save (*.pcsav)", "*.pcsav")
+            SaveGame::MassEffect2 { file_path, .. }
+            | SaveGame::MassEffect2Leg { file_path, .. } => {
+                (file_path, "Mass Effect 2 Save (*.pcsav)", "*.pcsav")
             }
-            SaveGame::MassEffect3 { file_name, .. } => {
-                (file_name, "Mass Effect 3 Save (*.pcsav)", "*.pcsav")
+            SaveGame::MassEffect3 { file_path, .. } => {
+                (file_path, "Mass Effect 3 Save (*.pcsav)", "*.pcsav")
             }
         };
 
         let file =
-            tinyfiledialogs::save_file_dialog_with_filter("", file_name, &[extension], description);
+            tinyfiledialogs::save_file_dialog_with_filter("", file_path, &[extension], description);
 
         if let Some(path) = file {
             let _ = self.event_addr.send(MainEvent::SaveSave(path, save_game.clone()));
