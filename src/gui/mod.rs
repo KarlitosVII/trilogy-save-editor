@@ -179,7 +179,7 @@ impl<'ui> Gui<'ui> {
             self.draw_error(&mut state.error);
 
             // Notification
-            self.draw_nofification_overlay(&mut state.notification);
+            self.draw_notification_overlay(&mut state.notification);
 
             // Game
             match &mut state.save_game {
@@ -332,7 +332,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_nofification_overlay(&self, notification: &mut Option<NotificationState>) {
+    fn draw_notification_overlay(&self, notification: &mut Option<NotificationState>) {
         if let Some(NotificationState { string, close_time }) = notification {
             let ui = self.ui;
             let time = ui.time();

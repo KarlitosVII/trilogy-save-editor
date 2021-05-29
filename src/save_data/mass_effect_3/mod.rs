@@ -51,7 +51,7 @@ pub struct Me3SaveGame {
     treasures: Vec<LevelTreasure>,
     use_modules: Vec<Guid>,
     pub conversation_mode: AutoReplyModeOptions,
-    objectice_markers: Vec<ObjectiveMarker>,
+    objective_markers: Vec<ObjectiveMarker>,
     saved_objective_text: i32,
 }
 

@@ -213,11 +213,11 @@ impl<'ui> Gui<'ui> {
             }
         }
 
-        // Ressources
-        if let Some(_t) = self.begin_table(im_str!("ressources-table"), 1) {
+        // Resources
+        if let Some(_t) = self.begin_table(im_str!("resources-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Ressources") {
+            if let Some(_t) = self.push_tree_node("Resources") {
                 self.table_next_row();
                 credits.draw_raw_ui(self, "Credits");
                 self.table_next_row();
@@ -460,11 +460,11 @@ impl<'ui> Gui<'ui> {
             }
         }
 
-        // Ressources
-        if let Some(_t) = self.begin_table(im_str!("ressources-table"), 1) {
+        // Resources
+        if let Some(_t) = self.begin_table(im_str!("resources-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Ressources") {
+            if let Some(_t) = self.push_tree_node("Resources") {
                 // Credits
                 if let Some(credits) = Self::me1_find_int_property(
                     player,
