@@ -10,10 +10,28 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.7.2
+        // 1.8.0
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("ME1: Renamed salvage to omnigel");
+                self.table_next_row();
+                ui.text("ME1LE: Added player talent points and some stats");
+                self.table_next_row();
+                ui.text("ME1LE: Added squad (with talents, talent points, inventory and stats)");
+                self.table_next_row();
+                ui.text("ME1LE: Added map name, location and rotation");
+                self.table_next_row();
+                ui.text("ME1LE: Added difficulty, character creation date and player controller");
+                self.table_next_row();
+                ui.text("When creating backup, copy the old save instead of renaming it. This should fix the game loading old save.");
+            }
+        }
+        // 1.7.2
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
                 self.table_next_row();
                 ui.text("Swapped ME1LE medigel and grenades");

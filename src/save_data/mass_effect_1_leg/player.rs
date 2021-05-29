@@ -19,7 +19,10 @@ pub struct Player {
     localized_last_name: i32,
     pub origin: Origin,
     pub notoriety: Notoriety,
-    _unknown2: Dummy<13>,
+    specialization_bonus_id: i32,
+    _unknown2: Dummy<1>,
+    pub talent_points: i32,
+    _unknown3: Dummy<4>,
     unknown_string: ImguiString,
     pub head_morph: HasHeadMorph,
     simple_talents: Vec<SimpleTalent>,
@@ -30,6 +33,16 @@ pub struct Player {
     pub grenades: f32,
     pub omnigel: f32,
     pub face_code: ImguiString,
+    _unknown4: Dummy<4>,
+    auto_levelup_template_id: i32,
+    health_per_level: f32,
+    _unknown5: Dummy<9>,
+    stamina: i32,
+    focus: i32,
+    precision: i32,
+    coordination: i32,
+    _unknown6: Dummy<14>,
+    health_current: f32,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
@@ -81,11 +94,11 @@ impl Default for ItemLevel {
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
-struct Item {
+pub struct Item {
     item_id: i32,
     item_level: ItemLevel,
     manufacturer_id: i32,
-    _osef: Dummy<4>,
+    plot_conditional_id: i32,
     unknown_bool: bool,
     is_junk: bool,
     attached_mods: Vec<ItemMod>,

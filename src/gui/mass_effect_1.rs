@@ -69,7 +69,7 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me1_leg_general(&self, save_game: &mut Me1LegSaveData) -> Option<()> {
         let ui = self.ui;
-        let Me1LegSaveData { plot, player, .. } = save_game;
+        let Me1LegSaveData { plot, player, difficulty, .. } = save_game;
         let mass_effect_1_leg::player::Player {
             is_female,
             level,
@@ -77,6 +77,7 @@ impl<'ui> Gui<'ui> {
             first_name,
             origin,
             notoriety,
+            talent_points,
             credits,
             medigel,
             grenades,
@@ -177,11 +178,23 @@ impl<'ui> Gui<'ui> {
 
                 self.table_next_row();
                 current_xp.draw_raw_ui(self, "Current XP");
+                self.table_next_row();
+                talent_points.draw_raw_ui(self, "Talent Points");
             }
         }
 
         // 2ème colonne
         self.table_next_column();
+
+        // General
+        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("General") {
+                self.table_next_row();
+                difficulty.draw_raw_ui(self, "Difficulty");
+            }
+        }
 
         // Morality
         if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {

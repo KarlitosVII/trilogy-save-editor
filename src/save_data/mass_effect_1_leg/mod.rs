@@ -13,12 +13,15 @@ use std::{fmt, io::Read};
 use crate::unreal;
 
 use super::{
-    shared::{plot::Me1PlotTable, SaveTimeStamp},
+    shared::{plot::Me1PlotTable, Rotator, SaveTimeStamp, Vector},
     Dummy, ImguiString, List,
 };
 
 pub mod player;
 use self::player::*;
+
+pub mod squad;
+use self::squad::*;
 
 #[derive(Serialize, Clone)]
 struct ChunkHeader {
@@ -175,7 +178,7 @@ impl serde::Serialize for Me1LegSaveGame {
 pub struct Me1LegSaveData {
     _version: Me1LegVersion,
     character_id: ImguiString,
-    _unknown1: Dummy<16>,
+    character_creation_date: SaveTimeStamp,
     pub plot: Me1PlotTable,
     _unknown2: Dummy<4>,
     _unknown3: Vec<Unknown3>,
@@ -185,6 +188,16 @@ pub struct Me1LegSaveData {
     timestamp: SaveTimeStamp,
     seconds_played: i32,
     pub player: Player,
+    _unknown7: Dummy<16>,
+    pub difficulty: Difficulty,
+    _unknown8: Dummy<177>,
+    player_controller: PlayerController,
+    map_name: ImguiString,
+    maybe_sub_map_name: ImguiString,
+    _unknown9: Dummy<4>,
+    location: Vector,
+    rotation: Rotator,
+    squad: Vec<Henchman>,
     // ---
     _remaining_bytes: List<u8>,
 }
@@ -215,6 +228,59 @@ struct Unknown3 {
     _unknown2: Vec<Dummy<4>>,
 }
 
+#[derive(RawUi, Clone)]
+#[repr(u32)]
+pub enum Difficulty {
+    Casual,
+    Normal,
+    Veteran,
+    Hardcore,
+    Insanity,
+}
+
+impl<'de> serde::Deserialize<'de> for Difficulty {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let idx: u32 = serde::Deserialize::deserialize(deserializer)?;
+
+        let difficulty = match idx {
+            0 => Difficulty::Casual,
+            1 => Difficulty::Normal,
+            2 => Difficulty::Veteran,
+            3 => Difficulty::Hardcore,
+            4 => Difficulty::Insanity,
+            _ => return Err(de::Error::custom("invalid Difficulty variant")),
+        };
+        Ok(difficulty)
+    }
+}
+
+impl serde::Serialize for Difficulty {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u32(self.clone() as u32)
+    }
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+struct PlayerController {
+    action_map: ImguiString,
+    _unknown: Dummy<4>,
+    hotkeys: Vec<Hotkey>,
+    current_weapon: ImguiString,
+    last_weapon: ImguiString,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+struct Hotkey {
+    pawn: i32,
+    event: i32,
+}
+
 #[cfg(test)]
 mod test {
     use anyhow::Result;
@@ -238,34 +304,58 @@ mod test {
         // Deserialize
         let me1_save_game: Me1LegSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
-        println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
+        println!("Deserialize 1 : {:?}", Instant::now().saturating_duration_since(now));
         let now = Instant::now();
 
         // Serialize
         let mut output = unreal::Serializer::to_byte_buf(&me1_save_game)?;
 
         // Checksum
-        let checksum_offset = output.len() - 12;
-        let crc = Crc::<u32>::new(&CRC_32_BZIP2);
-        let checksum = crc.checksum(&output[..checksum_offset]);
+        {
+            let checksum_offset = output.len() - 12;
+            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+            let checksum = crc.checksum(&output[..checksum_offset]);
 
-        // Update checksum
-        let end = checksum_offset + 4;
-        output[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+            // Update checksum
+            let end = checksum_offset + 4;
+            output[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+        }
 
-        println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
+        println!("Serialize 1 : {:?}", Instant::now().saturating_duration_since(now));
+        let now = Instant::now();
 
-        // Check serialized = input
-        // let cmp = input.chunks(4).zip(output.chunks(4));
+        // Deserialize (again)
+        let me1_save_game: Me1LegSaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
+
+        println!("Deserialize 2 : {:?}", Instant::now().saturating_duration_since(now));
+        let now = Instant::now();
+
+        // Serialize (again)
+        let mut output_2 = unreal::Serializer::to_byte_buf(&me1_save_game)?;
+
+        // Checksum
+        {
+            let checksum_offset = output_2.len() - 12;
+            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+            let checksum = crc.checksum(&output_2[..checksum_offset]);
+
+            // Update checksum
+            let end = checksum_offset + 4;
+            output_2[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+        }
+
+        println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
+
+        // Check 2nd serialize = first serialize
+        // let cmp = output.chunks(4).zip(output_2.chunks(4));
         // for (i, (a, b)) in cmp.enumerate() {
         //     if a != b {
         //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
         //     }
         // }
 
-        // Check serialized = input
-        assert_eq!(input, output);
-
+        // Check 2nd serialize = first serialize
+        assert_eq!(output, output_2);
         Ok(())
     }
 

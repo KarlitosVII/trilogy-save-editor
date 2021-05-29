@@ -113,14 +113,14 @@ string read_vector(Vector &v) {
     return s;
 }
 
-// Rotation
+// Rotator
 typedef struct {
 	int pitch;
 	int yaw;
 	int roll;
-} Rotation <read=read_rotation>;
+} Rotator <read=read_rotator>;
 
-string read_rotation(Rotation &r) {
+string read_rotator(Rotator &r) {
     string s;
     SPrintf(s, "[%i, %i, %i]", r.pitch, r.yaw, r.roll);
     return s;
@@ -263,9 +263,9 @@ struct BioItemXModdable {
     int id;
     byte item_level;
     int manufacturer_id;
-    FSkip(4);
+    int plot_conditional_id;
     bool unknown1;
-    bool unknown2;
+    bool is_junk;
     struct {
         int len <bgcolor=0x88eecc>;
         BioItemXMod list[len] <optimize=false>;
@@ -301,7 +301,10 @@ struct Player {
     int last_name;
     Origin origin;
     Notoriety notoriety;
-    FSkip(13);
+    int specialization_bonus_id;
+    FSkip(1);
+    int talent_points;
+    FSkip(4);
     String none;
 	bool has_head_morph;
 	if (has_head_morph.value == 1) {
@@ -321,6 +324,33 @@ struct Player {
     float medigel <bgcolor=0x0000bb>;
     float omnigel <bgcolor=0x000099>;
     String face_code;
+    FSkip(4);
+    int auto_levelup_template_id;
+    float health_per_level;
+    FSkip(9);
+    int stamina;
+    int focus;
+    int precision;
+    int coordination;
+    FSkip(14);
+    float health_current;
+};
+
+// PlayerController
+struct Hotkey {
+    int pawn;
+    int event;
+};
+
+struct PlayerController {
+    String action_map;
+    FSkip(4);
+    struct {
+        int len <bgcolor=0xaa33ff>;
+        Hotkey list[len];
+    } hotkeys;
+    String current_weapon;
+    String last_weapon;
 };
 
 // ME1 Legendary
@@ -336,10 +366,60 @@ struct Unknown4 {
     int list[len * 2];
 };
 
+// Difficulty
+enum <int> Difficulty {
+	Casual,
+	Normal,
+    Veteran,
+	Hardcore,
+	Insanity,
+};
+
+// Squad
+struct Henchman {
+    String tag;
+    struct {
+        int len <bgcolor=0xaaaaaa>;
+        SimpleTalent list[len] <optimize=false>;
+    } simple_talents <bgcolor=0xaaaa88>;
+    struct {
+        int len <bgcolor=0x88aaaa>;
+        ComplexTalent list[len] <optimize=false>;
+    } complex_talents <bgcolor=0x88aa88>;
+    struct {
+        int len <bgcolor=0x8888ff>;
+        BioItemXModdable list[len] <optimize=false>;
+    } equipped <bgcolor=0x88ff33>;
+    struct {
+        int len <bgcolor=0x8888ff>;
+        BioItemXModdable list[len] <optimize=false>;
+    } quick_slot <bgcolor=0x88ff33>;
+    int talent_points;
+    FSkip(4);
+    int auto_levelup_template_id;
+    int localized_last_name;
+    int localized_class_name;
+    FSkip(1);
+    float health_per_level;
+    float stability_current;
+    FSkip(6);
+    int stamina;
+    int focus;
+    int precision;
+    int coordination;
+    FSkip(2);
+    float health_current;
+    FSkip(4);
+    int level;
+    FSkip(4);
+    bool helmet_visible;
+    FSkip(1);
+};
+
 struct {
     uint version;
     String career_id;
-    FSkip(16);
+	SaveTimeStamp character_creation_date <bgcolor=0xaa44aa>;
     PlotTable plot;
     FSkip(4);
     struct {
@@ -361,4 +441,17 @@ struct {
 	SaveTimeStamp timestamp <bgcolor=0xaa44aa>;
 	int seconds_played <bgcolor=0xaa44cc>;
     Player player;
+    FSkip(16);
+    Difficulty difficulty;
+    FSkip(177);
+    PlayerController player_controller <bgcolor=0xaa33aa>;
+    String map_name;
+    String maybe_sub_map_name;
+    FSkip(4);
+    Vector location;
+    Rotator rotation;
+    struct {
+        int len;
+        Henchman list[len] <optimize=false>;
+    } squad <bgcolor=0x33aaaa>;
 } Me1Legendary <open=true>;
