@@ -174,7 +174,7 @@ async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) 
     if fs::metadata(&path).await.is_ok() {
         if let Some(ext) = path.extension() {
             let to = Path::with_extension(&path, ext.to_string_lossy().into_owned() + ".bak");
-            fs::rename(&path, to).await?;
+            fs::copy(&path, to).await?;
         }
     }
 
