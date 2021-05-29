@@ -10,11 +10,21 @@ impl<'ui> Gui<'ui> {
 
         ui.text("Changelog");
         ui.separator();
-        // 1.8.0
+        // 1.8.1
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
             self.set_next_item_open(true);
             if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+                self.table_next_row();
+                ui.text("Fixed `invalid value: '6', expected variant index 0 <= i < 6`");
+                self.table_next_row();
+                ui.text("Open save dialog in the same directory of the save");
+            }
+        }
+        // 1.8.0
+        if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
+            self.table_next_row();
+            if let Some(_t) = self.push_tree_node("1.8.0") {
                 self.table_next_row();
                 ui.text("ME1: Renamed salvage to omnigel");
                 self.table_next_row();
@@ -32,7 +42,7 @@ impl<'ui> Gui<'ui> {
         // 1.7.2
         if let Some(_t) = self.begin_table(im_str!("changelog-table"), 1) {
             self.table_next_row();
-            if let Some(_t) = self.push_tree_node(env!("CARGO_PKG_VERSION")) {
+            if let Some(_t) = self.push_tree_node("1.7.2") {
                 self.table_next_row();
                 ui.text("Swapped ME1LE medigel and grenades");
                 self.table_next_row();

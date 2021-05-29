@@ -198,6 +198,7 @@ pub enum DoorState {
     State3,
     State4,
     State5,
+    State6,
 }
 
 impl Default for DoorState {
