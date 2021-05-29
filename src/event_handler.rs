@@ -33,11 +33,11 @@ pub enum MainEvent {
 
 #[derive(Clone)]
 pub enum SaveGame {
-    MassEffect1 { file_name: String, save_game: Box<Me1SaveGame> },
-    MassEffect1Leg { file_name: String, save_game: Box<Me1LegSaveGame> },
-    MassEffect2 { file_name: String, save_game: Box<Me2SaveGame> },
-    MassEffect2Leg { file_name: String, save_game: Box<Me2LegSaveGame> },
-    MassEffect3 { file_name: String, save_game: Box<Me3SaveGame> },
+    MassEffect1 { file_path: String, save_game: Box<Me1SaveGame> },
+    MassEffect1Leg { file_path: String, save_game: Box<Me1LegSaveGame> },
+    MassEffect2 { file_path: String, save_game: Box<Me2SaveGame> },
+    MassEffect2Leg { file_path: String, save_game: Box<Me2LegSaveGame> },
+    MassEffect3 { file_path: String, save_game: Box<Me3SaveGame> },
 }
 
 pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
@@ -85,37 +85,36 @@ async fn open_save(path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
     }
 
     if_chain! {
-        if let Some(file_name) = path.file_name();
         if let Some(ext) = path.extension();
         then {
             let save_game = if unicase::eq(ext.to_string_lossy().to_string().as_str(), "MassEffectSave") {
                 // ME1
                 SaveGame::MassEffect1 {
-                    file_name: file_name.to_string_lossy().into(),
+                    file_path: path.to_string_lossy().into(),
                     save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
             } else if input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
                 // ME1 Legendary
                 SaveGame::MassEffect1Leg {
-                    file_name: file_name.to_string_lossy().into(),
+                    file_path: path.to_string_lossy().into(),
                     save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
             } else if unreal::Deserializer::from_bytes::<Me2Version>(&input).is_ok() {
                 // ME2
                 SaveGame::MassEffect2 {
-                    file_name: file_name.to_string_lossy().into(),
+                    file_path: path.to_string_lossy().into(),
                     save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
             } else if unreal::Deserializer::from_bytes::<Me2LegVersion>(&input).is_ok() {
                 // ME2 Legendary
                 SaveGame::MassEffect2Leg {
-                    file_name: file_name.to_string_lossy().into(),
+                    file_path: path.to_string_lossy().into(),
                     save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
             } else {
                 // ME3
                 SaveGame::MassEffect3 {
-                    file_name: file_name.to_string_lossy().into(),
+                    file_path: path.to_string_lossy().into(),
                     save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
                 }
             };
