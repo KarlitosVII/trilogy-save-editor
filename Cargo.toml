@@ -36,6 +36,7 @@ flume = { version = "0.10", features = ["async"], default-features = false }
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.6", features = ["indexmap"], default-features = false }
 # Utils
+lazy_static = "1.4"
 crc = "2.0"
 flate2 = { version = "1.0", features = ["zlib"], default-features = false }
 zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }
