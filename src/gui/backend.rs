@@ -65,6 +65,7 @@ pub fn init(title: &str, width: f64, height: f64) -> Backend {
         .with_title(title)
         .with_min_inner_size(LogicalSize::new(MIN_WIDTH, MIN_HEIGHT))
         .with_inner_size(LogicalSize::new(width, height))
+        .with_visible(false)
         .build(&event_loop)
         .expect("Failed to create a window");
 
@@ -153,6 +154,8 @@ impl Backend {
             mut platform,
             mut renderer,
         } = self;
+
+        window.set_visible(true);
 
         let mut last_frame = Instant::now();
         let mut last_cursor = None;
