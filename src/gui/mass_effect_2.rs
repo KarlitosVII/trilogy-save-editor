@@ -181,7 +181,10 @@ impl<'ui> Gui<'ui> {
                             }
 
                             ui.same_line();
-                            self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor the Collectors will be the least of your worries...");
+                            self.draw_help_marker(
+                                "If you change your gender, disable the head morph or import an appropriate one.\n\
+                                Otherwise, the Collectors will be the least of your worries..."
+                            );
                         }
 
                         self.table_next_row();
@@ -448,7 +451,13 @@ impl<'ui> Gui<'ui> {
         let _t = self.push_tree_node("Bonus Powers")?;
         ui.same_line();
         self.draw_help_marker(
-            "You can use as many bonus powers as you want and customize your\nbuild to your liking.\nThe only restriction is the size of your screen !\nIf you want to remove a bonus power you need to reset your\ntalents `before` or you will loose some talent points.\nUnlike Mass Effect 3 the game will never recalculate your points.\nAt level 30 you have `51` points to spend."
+            "You can use as many bonus powers as you want and customize your\n\
+            build to your liking.\n\
+            The only restriction is the size of your screen !\n\
+            If you want to remove a bonus power you need to reset your\n\
+            talents `before` or you will lose some talent points.\n\
+            Unlike Mass Effect 3 the game will never recalculate your points.\n\
+            At level 30 you have `51` points to spend.",
         );
 
         const POWER_LIST: [(&ImStr, &ImStr); 14] = [
@@ -590,7 +599,11 @@ impl<'ui> Gui<'ui> {
                 then {
                     ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner bugfix :");
                     ui.same_line();
-                    self.draw_help_marker("- Untick `[The Fan] Intimidated him`\n- Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n- Only works if you didn't talk to Aethyta");
+                    self.draw_help_marker(
+                        "- Untick `[The Fan] Intimidated him`\n\
+                         - Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
+                         - Only works if you didn't talk to Aethyta"
+                    );
                     ui.separator();
                     for (category_name, known_plot) in imported_me1.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
