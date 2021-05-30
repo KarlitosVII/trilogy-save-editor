@@ -456,7 +456,7 @@ impl<'ui> Gui<'ui> {
             The only restriction is the size of your screen !\n\
             If you want to remove a bonus power you need to reset your\n\
             talents `before` or you will lose some talent points.\n\
-            Unlike Mass Effect 3 the game will never recalculate your points.\n\
+            Unlike Mass Effect 3, the game will never recalculate your points.\n\
             At level 30 you have `51` points to spend.",
         );
 
