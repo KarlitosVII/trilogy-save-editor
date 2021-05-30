@@ -140,7 +140,8 @@ impl<'ui> Gui<'ui> {
 
                     ui.same_line();
                     self.draw_help_marker(
-                        "If you change your gender, disable head morph or import one appropriate\nor the Reapers will be the least of your worries..."
+                        "If you change your gender, disable the head morph or import an appropriate one.\n\
+                        Otherwise, the Reapers will be the least of your worries..."
                     );
                 }
 

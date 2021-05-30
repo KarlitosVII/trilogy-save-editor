@@ -108,7 +108,10 @@ impl<'ui> Gui<'ui> {
                     }
 
                     ui.same_line();
-                    self.draw_help_marker("If you change your gender, disable head morph or import one appropriate\nor Saren and his Geths will be the least of your worries...");
+                    self.draw_help_marker(
+                        "If you change your gender, disable the head morph or import an appropriate one.\n\
+                        Otherwise, Saren and his Geths will be the least of your worries..."
+                    );
                 }
 
                 self.table_next_row();
