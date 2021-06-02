@@ -24,11 +24,14 @@ use clipboard::{ClipboardContext, ClipboardProvider};
 use imgui::{ClipboardBackend, Context, FontConfig, FontSource, ImStr, ImString, Ui};
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
-use std::time::{Duration, Instant};
+use std::{
+    thread,
+    time::{Duration, Instant},
+};
 use tokio::runtime::Runtime;
 use wgpu::{Device, Queue, Surface, SwapChain};
 use winit::{
-    dpi::LogicalSize,
+    dpi::{LogicalSize, PhysicalSize},
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::{Window, WindowBuilder},
@@ -166,18 +169,18 @@ impl Backend {
 
             match event {
                 Event::WindowEvent { event: WindowEvent::Resized(_), .. } => {
-                    let size = window.inner_size();
+                    let PhysicalSize { width, height } = window.inner_size();
 
                     // Prevent a crash when minimizing because it triggers `WindowEvent::Resized`
-                    if size.width == 0 || size.height == 0 {
+                    if width == 0 || height == 0 {
                         return;
                     }
 
                     let sc_desc = wgpu::SwapChainDescriptor {
                         usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
                         format: wgpu::TextureFormat::Bgra8UnormSrgb,
-                        width: size.width as u32,
-                        height: size.height as u32,
+                        width: width as u32,
+                        height: height as u32,
                         present_mode: wgpu::PresentMode::Fifo,
                     };
 
@@ -189,15 +192,27 @@ impl Backend {
                 Event::MainEventsCleared => window.request_redraw(),
                 Event::RedrawEventsCleared => {
                     // Prevent CPU tanking when minimized
-                    let size = window.inner_size();
-                    if size.width == 0 || size.height == 0 {
-                        std::thread::sleep(Duration::from_secs_f32(1.0 / 60.0)); // 60 fps
+                    let PhysicalSize { width, height } = window.inner_size();
+                    if width == 0 || height == 0 {
+                        thread::sleep(Duration::from_secs_f32(1.0 / 10.0)); // 10 fps
                         return;
                     }
 
-                    let now = Instant::now();
-                    imgui.io_mut().update_delta_time(now - last_frame);
-                    last_frame = now;
+                    // Delta time
+                    {
+                        let now = Instant::now();
+                        let mut delta = now - last_frame;
+
+                        // FPS limit to 60
+                        let frame_duration = Duration::from_secs_f32(1.0 / 60.0);
+                        if delta < frame_duration {
+                            thread::sleep(frame_duration - delta);
+                            delta = Instant::now() - last_frame;
+                        }
+
+                        imgui.io_mut().update_delta_time(delta);
+                        last_frame = now;
+                    }
 
                     let frame = match swap_chain.get_current_frame() {
                         Ok(frame) => frame,
