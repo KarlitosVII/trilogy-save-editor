@@ -4,7 +4,7 @@ use imgui::{
     TreeNode,
 };
 use indexmap::IndexMap;
-use std::{fmt::Display, hash::Hash};
+use std::{any::Any, fmt::Display, hash::Hash};
 
 use crate::save_data::{
     shared::{plot::BoolSlice, Guid},
@@ -206,7 +206,7 @@ impl<'ui> Gui<'ui> {
 
     pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
     where
-        K: RawUi + Eq + Hash + Default + Display,
+        K: RawUi + Eq + Hash + Default + Display + 'static,
         V: RawUi + Default,
     {
         let ui = self.ui;
@@ -259,14 +259,19 @@ impl<'ui> Gui<'ui> {
         // Add
         self.table_next_row();
         if ui.button(im_str!("add")) {
+            let mut new_k = K::default();
+
+            // i32 exception to fix K = 0 already in the hashmap
+            if let Some(new_k_as_i32) = (&mut new_k as &mut dyn Any).downcast_mut::<i32>() {
+                *new_k_as_i32 = -1;
+            }
+
             // Ça ouvre automatiquement le tree node de l'élément ajouté
-            let new_k = K::default();
             TreeNode::new(&im_str!("{}", list.len()))
                 .label(&ImString::new(new_k.to_string()))
                 .opened(true, Condition::Always)
                 .build(ui, || {});
 
-            // FIXME: Ajout d'un nouvel élément si K = 0i32 déjà présent
             list.entry(new_k).or_default();
         }
     }

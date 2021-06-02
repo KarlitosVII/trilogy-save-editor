@@ -184,7 +184,7 @@ where
 
 impl<K, V> RawUi for IndexMap<K, V>
 where
-    K: RawUi + Eq + Hash + Default + Display,
+    K: RawUi + Eq + Hash + Default + Display + 'static,
     V: RawUi + Default,
 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {

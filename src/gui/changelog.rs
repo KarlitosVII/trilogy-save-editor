@@ -5,7 +5,13 @@ use super::Gui;
 
 lazy_static! {
     static ref CHANGELOGS: Vec<(&'static str, Vec<&'static str>)> = vec![
-        (env!("CARGO_PKG_VERSION"), // 1.8.1
+        (env!("CARGO_PKG_VERSION"), // "1.8.2",
+        vec![
+            "Fixed `add` button not working for War Assets and some other lists",
+            "60 fps limit for those who have a display above 60Hz. (May reduce CPU / GPU usage on some configs)",
+            "Various small fixes",
+        ]),
+        ("1.8.1",
         vec![
             "Fixed `invalid value: '6', expected variant index 0 <= i < 6`",
             "Open save dialog in the same directory of the save",
