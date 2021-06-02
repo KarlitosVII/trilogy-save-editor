@@ -23,7 +23,7 @@ lazy_static! {
         vec![
             "Swapped ME1LE medigel and grenades",
             "Fixed some ME3 bonus power names",
-            "Unhide some raw data that can be use for modding purpose (Debug name, placeables, doors, etc.)",
+            "Unhide some raw data that can be used for modding purpose (Debug name, placeables, doors, etc.)",
         ]),
         ("1.7.1",
         vec![

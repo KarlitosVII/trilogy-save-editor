@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use anyhow::Error;
 use flume::{Receiver, Sender};
 use if_chain::if_chain;
@@ -7,6 +5,7 @@ use imgui::{
     im_str, ChildWindow, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor,
     TabBar, TabItem, Ui, Window,
 };
+use std::path::PathBuf;
 
 use crate::{
     event_handler::{MainEvent, SaveGame},

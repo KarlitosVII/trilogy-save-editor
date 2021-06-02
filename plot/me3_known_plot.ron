@@ -424,7 +424,6 @@ Me3KnownPlot(
                 17787: "Geth destroyed",
                 17788: "Quarians destroyed",
                 17789: "Brokered a peace deal between Geth and Quarians",
-                17795: "Shepard wants quarians to beat geth",
             },
             ints: {
                 10212: "Points toward Geth and Quarian peace (>= 5 points to enable paragon / renegade dialogue)",
