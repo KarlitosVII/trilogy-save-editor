@@ -21,7 +21,9 @@
 // From https://github.com/Yatekii/imgui-wgpu-rs/blob/master/examples/hello_world.rs
 
 use clipboard::{ClipboardContext, ClipboardProvider};
-use imgui::{ClipboardBackend, Context, FontConfig, FontSource, ImStr, ImString, Ui};
+use imgui::{
+    ClipboardBackend, Context, FontConfig, FontGlyphRanges, FontSource, ImStr, ImString, Ui,
+};
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use std::{
@@ -112,14 +114,29 @@ pub fn init(title: &str, width: f64, height: f64) -> Backend {
 
     let hidpi_factor = platform.hidpi_factor();
     let font_size = (13.0 * hidpi_factor) as f32;
-    imgui.fonts().add_font(&[FontSource::DefaultFontData {
-        config: Some(FontConfig {
-            oversample_h: 1,
-            pixel_snap_h: true,
-            size_pixels: font_size,
-            ..Default::default()
-        }),
-    }]);
+
+    const FONT: &[u8] = include_bytes!("mplus-1p-regular.ttf");
+    imgui.fonts().add_font(&[
+        FontSource::DefaultFontData {
+            config: Some(FontConfig { size_pixels: font_size, ..Default::default() }),
+        },
+        FontSource::TtfData {
+            data: FONT,
+            size_pixels: font_size * 1.4,
+            config: Some(FontConfig {
+                glyph_ranges: FontGlyphRanges::cyrillic(),
+                ..Default::default()
+            }),
+        },
+        FontSource::TtfData {
+            data: FONT,
+            size_pixels: font_size * 1.4,
+            config: Some(FontConfig {
+                glyph_ranges: FontGlyphRanges::japanese(),
+                ..Default::default()
+            }),
+        },
+    ]);
 
     imgui.io_mut().font_global_scale = (1.0 / hidpi_factor) as f32;
 
