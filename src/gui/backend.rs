@@ -194,20 +194,22 @@ impl Backend {
                     // Prevent CPU tanking when minimized
                     let PhysicalSize { width, height } = window.inner_size();
                     if width == 0 || height == 0 {
-                        thread::sleep(Duration::from_secs_f32(1.0 / 10.0)); // 10 fps
+                        const SLEEP_DURATION: Duration = Duration::from_millis(100); // 10 fps
+                        thread::sleep(SLEEP_DURATION);
                         return;
                     }
 
                     // Delta time
                     {
                         let now = Instant::now();
-                        let mut delta = now - last_frame;
+                        let delta = now - last_frame;
 
                         // FPS limit to 60
-                        let frame_duration = Duration::from_secs_f32(1.0 / 60.0);
-                        if delta < frame_duration {
-                            thread::sleep(frame_duration - delta);
-                            delta = Instant::now() - last_frame;
+                        const FRAME_DURATION: Duration = Duration::from_nanos(16_666_667); // 16.666667ms AKA 60fps
+                        if delta < FRAME_DURATION {
+                            const SLEEP_DURATION: Duration = Duration::from_millis(1);
+                            thread::sleep(SLEEP_DURATION);
+                            return;
                         }
 
                         imgui.io_mut().update_delta_time(delta);
