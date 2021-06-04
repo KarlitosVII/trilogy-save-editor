@@ -18,8 +18,8 @@ lazy_static! {
                     _ => {}
                 }
             } else {
-                changelog.push((version, changes.clone()));
-                changes.clear();
+                changelog.push((version, changes));
+                changes = Vec::new();
             }
         }
 

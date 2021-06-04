@@ -178,6 +178,8 @@ impl Backend {
         window.set_visible(true);
 
         let mut last_frame = Instant::now();
+        let mut next_frame_factor = 0.0;
+
         let mut last_cursor = None;
         let mut run = true;
 
@@ -222,12 +224,16 @@ impl Backend {
                         let delta = now - last_frame;
 
                         // FPS limit to 60
-                        const FRAME_DURATION: Duration = Duration::from_nanos(16_666_667); // 16.666667ms AKA 60fps
-                        if delta < FRAME_DURATION {
+                        const FRAME_TARGET: f32 = 1.0 / 60.0;
+                        let frame_duration_target =
+                            Duration::from_secs_f32((FRAME_TARGET + next_frame_factor).max(0.0));
+                        if delta < frame_duration_target {
                             const SLEEP_DURATION: Duration = Duration::from_millis(1);
                             thread::sleep(SLEEP_DURATION);
                             return;
                         }
+                        next_frame_factor =
+                            frame_duration_target.as_secs_f32() - delta.as_secs_f32();
 
                         imgui.io_mut().update_delta_time(delta);
                         last_frame = now;
