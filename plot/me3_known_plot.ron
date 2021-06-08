@@ -271,7 +271,6 @@ Me3KnownPlot(
                 10316: "[Friendship] EDI friendship",
                 10319: "[Friendship] James friendship",
                 10317: "[Friendship] Javik friendship",
-                10665: "[Friendship] The Illusive Man progress",
             },
         ),
     },
@@ -443,6 +442,12 @@ Me3KnownPlot(
                 20687: "Miranda survived Horizon",
             },
             ints: {},
+        ),
+        "Priority: Earth": PlotCategory(
+            booleans: {},
+            ints: {
+                10665: "The Illusive Man progress (>= 6 points to enable all paragon / renegade dialogues)",
+            },
         ),
         "DLC: Omega: Assist the Mechanic": PlotCategory(
             booleans: {
