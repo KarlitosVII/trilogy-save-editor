@@ -48,7 +48,7 @@ pub struct Player {
     pub current_fuel: f32,
     pub grenades: i32,
     pub face_code: ImguiString,
-    class_friendly_name: i32,
+    localized_class_name: i32,
     _character_guid: Dummy<16>,
 }
 

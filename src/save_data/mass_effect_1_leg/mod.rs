@@ -197,7 +197,7 @@ pub struct Me1LegSaveData {
     _unknown9: Dummy<4>,
     location: Vector,
     rotation: Rotator,
-    squad: Vec<Henchman>,
+    pub squad: Vec<Henchman>,
     // ---
     _remaining_bytes: List<u8>,
 }

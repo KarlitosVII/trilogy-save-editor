@@ -1,15 +1,16 @@
 
 // Bool
 typedef struct {
-	uint value: 1;
-    uint : 31;
+	int value;
 } bool <read=read_bool>;
 
 string read_bool(bool &b) {
     if(b.value == 1)
         return "true";
-    else
+    else if (b.value == 0)
         return "false";
+    else
+        return "NOT a BOOLEAN";
 }
 
 // String
@@ -454,4 +455,6 @@ struct {
         int len;
         Henchman list[len] <optimize=false>;
     } squad <bgcolor=0x33aaaa>;
+    String save_stat_display;
+    String save_name;
 } Me1Legendary <open=true>;

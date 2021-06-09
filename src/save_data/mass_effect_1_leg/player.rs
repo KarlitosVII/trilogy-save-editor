@@ -26,7 +26,7 @@ pub struct Player {
     unknown_string: ImguiString,
     pub head_morph: HasHeadMorph,
     simple_talents: Vec<SimpleTalent>,
-    complex_talents: Vec<ComplexTalent>,
+    pub complex_talents: Vec<ComplexTalent>,
     inventory: Inventory,
     pub credits: i32,
     pub medigel: i32,
@@ -54,7 +54,7 @@ pub struct SimpleTalent {
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
 pub struct ComplexTalent {
     talent_id: i32,
-    ranks: i32,
+    pub ranks: i32,
     max_rank: i32,
     level_offset: i32,
     levels_per_rank: i32,

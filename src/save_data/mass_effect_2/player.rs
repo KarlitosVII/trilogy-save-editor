@@ -36,7 +36,7 @@ pub struct Player {
     pub probes: i32,
     pub current_fuel: f32,
     pub face_code: ImguiString,
-    class_friendly_name: i32,
+    localized_class_name: i32,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]

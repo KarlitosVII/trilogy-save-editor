@@ -12,7 +12,7 @@ use crate::save_data::{
         player::{Name, Player},
         Me1SaveGame,
     },
-    mass_effect_1_leg::{self, Me1LegSaveData},
+    mass_effect_1_leg::{self, player::ComplexTalent, squad::Henchman, Me1LegSaveData},
     shared::{
         player::{Notoriety, Origin},
         plot::{Me1PlotTable, PlotCategory},
@@ -69,7 +69,7 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me1_leg_general(&self, save_game: &mut Me1LegSaveData) -> Option<()> {
         let ui = self.ui;
-        let Me1LegSaveData { plot, player, difficulty, .. } = save_game;
+        let Me1LegSaveData { plot, player, difficulty, squad, .. } = save_game;
         let mass_effect_1_leg::player::Player {
             is_female,
             level,
@@ -83,6 +83,7 @@ impl<'ui> Gui<'ui> {
             grenades,
             omnigel,
             face_code,
+            complex_talents,
             ..
         } = player;
 
@@ -165,37 +166,10 @@ impl<'ui> Gui<'ui> {
                 self.table_next_row();
                 face_code.draw_raw_ui(self, "Identity Code");
                 ui.same_line();
-                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
-            }
-        }
-
-        // Gameplay
-        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
-            self.table_next_row();
-            self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Gameplay") {
-                self.table_next_row();
-                level.draw_raw_ui(self, "Level");
-                ui.same_line();
-                self.draw_help_marker("Classic mode (1 - 60)");
-
-                self.table_next_row();
-                current_xp.draw_raw_ui(self, "Current XP");
-                self.table_next_row();
-                talent_points.draw_raw_ui(self, "Talent Points");
-            }
-        }
-
-        // 2ème colonne
-        self.table_next_column();
-
-        // General
-        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
-            self.table_next_row();
-            self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("General") {
-                self.table_next_row();
-                difficulty.draw_raw_ui(self, "Difficulty");
+                self.draw_help_marker(
+                    "If you change this you can display whatever you want in the menus\n\
+                    in place of your `Identity Code`, which is pretty cool !",
+                );
             }
         }
 
@@ -231,7 +205,75 @@ impl<'ui> Gui<'ui> {
                 omnigel.draw_raw_ui(self, "Omnigel");
             }
         }
+
+        // 2ème colonne
+        self.table_next_column();
+
+        // General
+        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("General") {
+                self.table_next_row();
+                difficulty.draw_raw_ui(self, "Difficulty");
+            }
+        }
+
+        // Gameplay
+        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Gameplay") {
+                self.table_next_row();
+                level.draw_raw_ui(self, "Level");
+                ui.same_line();
+                self.draw_help_marker("Classic mode (1 - 60)");
+
+                self.table_next_row();
+                current_xp.draw_raw_ui(self, "Current XP");
+                self.table_next_row();
+                talent_points.draw_raw_ui(self, "Talent Points");
+                self.table_next_row();
+                self.draw_me1_reset_talents("player", talent_points, complex_talents);
+            }
+        }
+
+        // Squad
+        if let Some(_t) = self.begin_table(im_str!("squad-table"), 1) {
+            self.table_next_row();
+            self.set_next_item_open(true);
+            if let Some(_t) = self.push_tree_node("Squad") {
+                for Henchman { tag, talent_points, complex_talents, .. } in squad {
+                    let character_name = match tag.to_str() {
+                        "hench_asari" => "Liara",
+                        "hench_humanfemale" => "Ashley",
+                        "hench_humanmale" => "Kaidan",
+                        "hench_krogan" => "Wrex",
+                        "hench_quarian" => "Tali'Zorah",
+                        "hench_turian" => "Garrus",
+                        _ => continue,
+                    };
+
+                    self.table_next_row();
+                    self.draw_me1_reset_talents(character_name, talent_points, complex_talents);
+                }
+            }
+        }
+
         Some(())
+    }
+
+    fn draw_me1_reset_talents(
+        &self, character_name: &str, talent_points: &mut i32, complex_talents: &mut [ComplexTalent],
+    ) {
+        let ui = self.ui;
+
+        if ui.button(&im_str!("Reset {} talents", character_name)) {
+            for talent in complex_talents {
+                *talent_points += talent.ranks;
+                talent.ranks = 0;
+            }
+        }
     }
 
     pub fn draw_mass_effect_1(

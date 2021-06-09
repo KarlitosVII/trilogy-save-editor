@@ -6,12 +6,12 @@ use super::player::{ComplexTalent, Item, SimpleTalent};
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Henchman {
-    tag: ImguiString,
+    pub tag: ImguiString,
     simple_talents: Vec<SimpleTalent>,
-    complex_talents: Vec<ComplexTalent>,
+    pub complex_talents: Vec<ComplexTalent>,
     equipped: Vec<Item>,
     quick_slots: Vec<Item>,
-    talent_points: i32,
+    pub talent_points: i32,
     _unknown1: Dummy<4>,
     auto_levelup_template_id: i32,
     localized_last_name: i32,
