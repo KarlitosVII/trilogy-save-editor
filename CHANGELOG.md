@@ -1,3 +1,6 @@
+## Unreleased
+- Fallback to DirectX 11 if backend panic on startup
+
 ## 1.8.3
 - Support for Cyrillic and Japanese characters
 - Fixed lag when moving the window (caused by frame limit in previous version)

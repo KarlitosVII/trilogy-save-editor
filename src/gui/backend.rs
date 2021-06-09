@@ -27,10 +27,10 @@ use imgui::{
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use std::{
-    thread,
+    panic, thread,
     time::{Duration, Instant},
 };
-use tokio::runtime::Runtime;
+use tokio::runtime::Handle;
 use wgpu::{Device, Queue, Surface, SwapChain};
 use winit::{
     dpi::{LogicalSize, PhysicalSize},
@@ -60,9 +60,24 @@ const MIN_HEIGHT: u32 = 270;
 
 // Backend
 pub fn init(title: &str, width: f64, height: f64) -> Backend {
-    let rt = Runtime::new().unwrap();
+    #[cfg(target_os = "windows")]
+    {
+        panic::catch_unwind(|| init_with_backend(title, width, height, wgpu::BackendBit::PRIMARY))
+            .unwrap_or_else(|_| {
+                eprintln!("Fallback to DirectX 11");
+                eprintln!("If it works for you, you can ignore this error");
+                init_with_backend(title, width, height, wgpu::BackendBit::DX11)
+            })
+    }
 
-    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY | wgpu::BackendBit::DX11);
+    #[cfg(not(target_os = "windows"))]
+    init_with_backend(title, width, height, wgpu::BackendBit::PRIMARY)
+}
+
+fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::BackendBit) -> Backend {
+    let rt = Handle::current();
+
+    let instance = wgpu::Instance::new(backend);
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
