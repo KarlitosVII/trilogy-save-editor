@@ -75,11 +75,18 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
         &args,
     );
 
+    // Open file from command line
     if let Some(path) = args.value_of("FILE") {
         let _ = event_addr.send(MainEvent::OpenSave(path.to_owned()));
     }
 
-    system.main_loop(move |run, ui| {
+    system.main_loop(move |run, ui, dropped_file| {
+        // Open file dropped into the window
+        if let Some(path) = dropped_file.take() {
+            let _ = event_addr.send(MainEvent::OpenSave(path));
+        }
+
+        // Manage events
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
                 state.error = Some(err);
@@ -163,8 +170,6 @@ impl<'ui> Gui<'ui> {
             }
             Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
         });
-
-        // TODO: Drag'n'drop file to open it
 
         // Window
         if let Some(_t) = window.begin(ui) {

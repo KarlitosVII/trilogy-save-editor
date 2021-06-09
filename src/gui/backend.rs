@@ -190,7 +190,7 @@ pub struct Backend {
 impl Backend {
     pub fn main_loop<F>(self, mut ui_builder: F)
     where
-        F: FnMut(&mut bool, &mut Ui) + 'static,
+        F: FnMut(&mut bool, &mut Ui, &mut Option<String>) + 'static,
     {
         let Backend {
             window,
@@ -211,6 +211,7 @@ impl Backend {
 
         let mut last_cursor = None;
         let mut run = true;
+        let mut dropped_file = None;
 
         event_loop.run(move |event, _, control_flow| {
             *control_flow = ControlFlow::Poll;
@@ -236,6 +237,9 @@ impl Backend {
                 }
                 Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
                     *control_flow = ControlFlow::Exit;
+                }
+                Event::WindowEvent { event: WindowEvent::DroppedFile(ref path), .. } => {
+                    dropped_file = Some(path.to_string_lossy().into());
                 }
                 Event::MainEventsCleared => window.request_redraw(),
                 Event::RedrawEventsCleared => {
@@ -281,7 +285,7 @@ impl Backend {
                         .expect("Failed to prepare frame");
 
                     let mut ui = imgui.frame();
-                    ui_builder(&mut run, &mut ui);
+                    ui_builder(&mut run, &mut ui, &mut dropped_file);
 
                     if !run {
                         *control_flow = ControlFlow::Exit;
