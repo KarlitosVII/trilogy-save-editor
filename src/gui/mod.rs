@@ -1,4 +1,5 @@
 use anyhow::Error;
+use clap::ArgMatches;
 use flume::{Receiver, Sender};
 use if_chain::if_chain;
 use imgui::{
@@ -61,7 +62,7 @@ pub enum UiEvent {
 }
 
 // UI
-pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
+pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatches) {
     let mut state = State::default();
 
     let _ = event_addr.send(MainEvent::LoadKnownPlots);
@@ -71,7 +72,13 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>) {
         &format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")),
         1000.0,
         670.0,
+        &args,
     );
+
+    if let Some(path) = args.value_of("FILE") {
+        let _ = event_addr.send(MainEvent::OpenSave(path.to_owned()));
+    }
+
     system.main_loop(move |run, ui| {
         rx.try_iter().for_each(|ui_event| match ui_event {
             UiEvent::Error(err) => {
@@ -156,6 +163,8 @@ impl<'ui> Gui<'ui> {
             }
             Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
         });
+
+        // TODO: Drag'n'drop file to open it
 
         // Window
         if let Some(_t) = window.begin(ui) {

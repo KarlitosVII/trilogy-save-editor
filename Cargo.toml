@@ -43,6 +43,7 @@ zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }
 unicase = "2.6"
 if_chain = "1.0"
 uuid = "0.8"
+clap = "2.0"
 # GUI
 tinyfiledialogs = "3.8"
 dirs = "3.0"

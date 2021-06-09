@@ -1,5 +1,6 @@
 ## Unreleased
 - Fallback to DirectX 11 if backend panic on startup
+- Added command line options (with the ability to choose the backend), additional help with the --help argument
 
 ## 1.8.3
 - Support for Cyrillic and Japanese characters

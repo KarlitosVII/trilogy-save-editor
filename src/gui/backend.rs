@@ -20,6 +20,7 @@
 
 // From https://github.com/Yatekii/imgui-wgpu-rs/blob/master/examples/hello_world.rs
 
+use clap::ArgMatches;
 use clipboard::{ClipboardContext, ClipboardProvider};
 use imgui::{
     ClipboardBackend, Context, FontConfig, FontGlyphRanges, FontSource, ImStr, ImString, Ui,
@@ -59,19 +60,32 @@ const MIN_WIDTH: u32 = 480;
 const MIN_HEIGHT: u32 = 270;
 
 // Backend
-pub fn init(title: &str, width: f64, height: f64) -> Backend {
+pub fn init(title: &str, width: f64, height: f64, args: &ArgMatches) -> Backend {
+    let backend = if args.is_present("directx12") {
+        wgpu::BackendBit::DX12
+    } else if args.is_present("directx11") {
+        wgpu::BackendBit::DX11
+    } else if args.is_present("metal") {
+        wgpu::BackendBit::METAL
+    } else if args.is_present("vulkan") {
+        wgpu::BackendBit::VULKAN
+    } else {
+        wgpu::BackendBit::PRIMARY
+    };
+
     #[cfg(target_os = "windows")]
     {
-        panic::catch_unwind(|| init_with_backend(title, width, height, wgpu::BackendBit::PRIMARY))
-            .unwrap_or_else(|_| {
+        panic::catch_unwind(|| init_with_backend(title, width, height, backend)).unwrap_or_else(
+            |_| {
                 eprintln!("Fallback to DirectX 11");
-                eprintln!("If it works for you, you can ignore this error");
+                eprintln!("If it works for you, you can ignore this error or run TSE with --dx11 argument");
                 init_with_backend(title, width, height, wgpu::BackendBit::DX11)
-            })
+            },
+        )
     }
 
     #[cfg(not(target_os = "windows"))]
-    init_with_backend(title, width, height, wgpu::BackendBit::PRIMARY)
+    init_with_backend(title, width, height, backend)
 }
 
 fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::BackendBit) -> Backend {
