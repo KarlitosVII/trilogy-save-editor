@@ -49,8 +49,8 @@ tinyfiledialogs = "3.8"
 dirs = "3.0"
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
-imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs" }
+imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs", default-features = false, features = ["winit-25"]}
 imgui-wgpu = { git = "https://github.com/KarlitosVII/imgui-wgpu-rs" }
 wgpu = "0.8"
-winit = "0.24"
+winit = "0.25"
 clipboard = "0.5"
