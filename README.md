@@ -18,6 +18,23 @@ The goal was to have an editor for all 3 games before the Legendary Edition was 
 ## Frequently Asked Questions
 You can read the [FAQ here](https://github.com/KarlitosVII/trilogy-save-editor/wiki/Frequently-Asked-Questions).
 
+## Command line usage
+```
+USAGE:
+    trilogy_save_editor(.exe) [FLAGS] [FILE]
+
+FLAGS:
+        --dx11       Use DirectX 11 backend (Windows)
+        --dx12       Use DirectX 12 backend (Windows)
+    -h, --help       Prints help information
+        --metal      Use Metal backend (Mac OS)
+    -V, --version    Prints version information
+        --vulkan     Use Vulkan backend
+
+ARGS:
+    <FILE>    Mass Effect save file
+```
+
 ## Acknowledgments
 
 - The whole ME3Explorer team (https://github.com/ME3Explorer/ME3Explorer)
