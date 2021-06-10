@@ -49,7 +49,7 @@ tinyfiledialogs = "3.8"
 dirs = "3.0"
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
-imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs", default-features = false, features = ["winit-25"]}
+imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs", features = ["winit-25"], default-features = false}
 imgui-wgpu = { git = "https://github.com/KarlitosVII/imgui-wgpu-rs" }
 wgpu = "0.8"
 winit = "0.25"

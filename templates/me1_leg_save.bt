@@ -447,8 +447,8 @@ struct {
     FSkip(177);
     PlayerController player_controller <bgcolor=0xaa33aa>;
     String map_name;
-    String maybe_sub_map_name;
-    FSkip(4);
+    String maybe_sub_map_name1;
+    String maybe_sub_map_name2;
     Vector location;
     Rotator rotation;
     struct {
