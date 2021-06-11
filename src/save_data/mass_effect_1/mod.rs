@@ -17,6 +17,7 @@ pub mod state;
 use self::state::*;
 
 pub mod data;
+pub mod item_db;
 pub mod plot_db;
 
 #[derive(Clone)]

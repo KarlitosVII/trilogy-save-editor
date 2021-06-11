@@ -27,7 +27,7 @@ pub struct Player {
     pub head_morph: HasHeadMorph,
     simple_talents: Vec<SimpleTalent>,
     pub complex_talents: Vec<ComplexTalent>,
-    inventory: Inventory,
+    pub inventory: Inventory,
     pub credits: i32,
     pub medigel: i32,
     pub grenades: f32,
@@ -65,9 +65,9 @@ pub struct ComplexTalent {
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
 pub struct Inventory {
-    equipped: Vec<Item>,
-    quick_slots: Vec<Item>,
-    inventory: Vec<Item>,
+    pub equipped: Vec<Item>,
+    pub quick_slots: Vec<Item>,
+    pub inventory: Vec<Item>,
     saved_backpack_items: Vec<Item>,
 }
 
@@ -95,9 +95,9 @@ impl Default for ItemLevel {
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
 pub struct Item {
-    item_id: i32,
-    item_level: ItemLevel,
-    manufacturer_id: i32,
+    pub item_id: i32,
+    pub item_level: ItemLevel,
+    pub manufacturer_id: i32,
     plot_conditional_id: i32,
     unknown_bool: bool,
     is_junk: bool,

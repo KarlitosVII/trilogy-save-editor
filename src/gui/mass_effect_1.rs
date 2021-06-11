@@ -16,11 +16,11 @@ use crate::save_data::{
     ImguiString, List, RawUi,
 };
 
-use super::{Gui, PlotDbsState};
+use super::{DatabasesState, Gui};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_1(
-        &self, save_game: &mut Me1SaveGame, plot_dbs: &PlotDbsState,
+        &self, save_game: &mut Me1SaveGame, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -46,7 +46,7 @@ impl<'ui> Gui<'ui> {
         // Plot
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_plot_db) = &plot_dbs.me1;
+            if let Some(me1_plot_db) = &databases.me1_plot_db;
             then {
                 self.draw_me1_plot_db(&mut save_game.state.plot, me1_plot_db);
             }

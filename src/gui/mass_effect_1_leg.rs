@@ -1,17 +1,26 @@
+use std::ops::IndexMut;
+
 use if_chain::if_chain;
-use imgui::{im_str, ChildWindow, ImStr, TabBar, TabItem};
+use imgui::{
+    im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
+};
 
 use crate::save_data::{
-    mass_effect_1_leg::{self, player::ComplexTalent, squad::Henchman, Me1LegSaveData},
+    mass_effect_1::item_db::{DbItem, Me1ItemDb},
+    mass_effect_1_leg::{
+        player::{ComplexTalent, Item, ItemLevel, Player},
+        squad::Henchman,
+        Me1LegSaveData,
+    },
     shared::player::{Notoriety, Origin},
     RawUi,
 };
 
-use super::{Gui, PlotDbsState};
+use super::{DatabasesState, Gui};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_1_leg(
-        &self, save_game: &mut Me1LegSaveData, plot_dbs: &PlotDbsState,
+        &self, save_game: &mut Me1LegSaveData, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -29,9 +38,18 @@ impl<'ui> Gui<'ui> {
         // Plot
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_plot_db) = &plot_dbs.me1;
+            if let Some(me1_plot_db) = &databases.me1_plot_db;
             then {
                 self.draw_me1_plot_db(&mut save_game.plot, me1_plot_db);
+            }
+        }
+        // Inventory
+        if_chain! {
+            if let Some(_t) = TabItem::new(im_str!("Inventory")).begin(ui);
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
+            if let Some(me1_item_db) = &databases.me1_item_db;
+            then {
+                self.draw_me1_le_inventory_tab(save_game, me1_item_db);
             }
         }
         // Head Morph
@@ -57,7 +75,7 @@ impl<'ui> Gui<'ui> {
     fn draw_me1_leg_general(&self, save_game: &mut Me1LegSaveData) -> Option<()> {
         let ui = self.ui;
         let Me1LegSaveData { plot, player, difficulty, squad, .. } = save_game;
-        let mass_effect_1_leg::player::Player {
+        let Player {
             is_female,
             level,
             current_xp,
@@ -221,7 +239,7 @@ impl<'ui> Gui<'ui> {
                 self.table_next_row();
                 talent_points.draw_raw_ui(self, "Talent Points");
                 self.table_next_row();
-                self.draw_me1_reset_talents("player", talent_points, complex_talents);
+                self.draw_me1_le_reset_talents("player", talent_points, complex_talents);
             }
         }
 
@@ -242,7 +260,7 @@ impl<'ui> Gui<'ui> {
                     };
 
                     self.table_next_row();
-                    self.draw_me1_reset_talents(character_name, talent_points, complex_talents);
+                    self.draw_me1_le_reset_talents(character_name, talent_points, complex_talents);
                 }
             }
         }
@@ -250,7 +268,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_reset_talents(
+    fn draw_me1_le_reset_talents(
         &self, character_name: &str, talent_points: &mut i32, complex_talents: &mut [ComplexTalent],
     ) {
         let ui = self.ui;
@@ -261,5 +279,191 @@ impl<'ui> Gui<'ui> {
                 talent.ranks = 0;
             }
         }
+    }
+
+    fn draw_me1_le_inventory_tab(
+        &self, savegame: &mut Me1LegSaveData, item_db: &Me1ItemDb,
+    ) -> Option<()> {
+        // 1ère colonne
+        let _t = self.begin_columns(2)?;
+        self.table_next_row();
+
+        let Me1LegSaveData { player, squad, .. } = savegame;
+        let Player { inventory, .. } = player;
+
+        // Player
+        self.draw_me1_le_equipped_items("Player Equipped", &mut inventory.equipped, item_db);
+        self.draw_me1_le_equipped_items("Player Quick Slots", &mut inventory.quick_slots, item_db);
+
+        // Squad
+
+        for Henchman { tag, equipped, quick_slots, .. } in squad {
+            let (character_equipped, character_quick_slots) = match tag.to_str() {
+                "hench_asari" => ("Liara Equipped", "Liara Quick Slots"),
+                "hench_humanfemale" => ("Ashley Equipped", "Ashley Quick Slots"),
+                "hench_humanmale" => ("Kaidan Equipped", "Kaidan Quick Slots"),
+                "hench_krogan" => ("Wrex Equipped", "Wrex Quick Slots"),
+                "hench_quarian" => ("Tali'Zorah Equipped", "Tali'Zorah Quick Slots"),
+                "hench_turian" => ("Garrus Equipped", "Garrus Quick Slots"),
+                _ => continue,
+            };
+
+            self.draw_me1_le_equipped_items(character_equipped, equipped, item_db);
+            self.draw_me1_le_equipped_items(character_quick_slots, quick_slots, item_db);
+        }
+
+        // 2ème colonne
+        self.table_next_column();
+
+        self.draw_me1_le_inventory(&mut inventory.inventory, item_db);
+
+        Some(())
+    }
+
+    fn draw_me1_le_equipped_items(
+        &self, label: &str, items: &mut Vec<Item>, item_db: &Me1ItemDb,
+    ) -> Option<()> {
+        let ui = self.ui;
+
+        let _t = self.begin_table(&im_str!("{}-table", label), 1)?;
+        self.table_next_row();
+        self.set_next_item_open(true);
+        let _t = self.push_tree_node(label)?;
+
+        if !items.is_empty() {
+            let mut clipper = ListClipper::new(items.len() as i32).begin(ui);
+            while clipper.step() {
+                for i in clipper.display_start()..clipper.display_end() {
+                    self.table_next_row();
+
+                    let current_item = items.index_mut(i as usize);
+
+                    let width = ui.push_item_width(375.0);
+                    self.draw_me1_le_item(i, current_item, item_db);
+                    width.pop(ui);
+                }
+            }
+        } else {
+            self.table_next_row();
+            ui.text("Empty");
+        }
+
+        Some(())
+    }
+
+    fn draw_me1_le_inventory(&self, inventory: &mut Vec<Item>, item_db: &Me1ItemDb) -> Option<()> {
+        let ui = self.ui;
+
+        let _t = self.begin_table(im_str!("inventory-table"), 1)?;
+        self.table_next_row();
+        self.set_next_item_open(true);
+        let _t = self.push_tree_node("Inventory")?;
+
+        if !inventory.is_empty() {
+            let mut clipper = ListClipper::new(inventory.len() as i32).begin(ui);
+            let mut remove = None;
+            while clipper.step() {
+                for i in clipper.display_start()..clipper.display_end() {
+                    self.table_next_row();
+
+                    ui.align_text_to_frame_padding();
+                    if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                        remove = Some(i);
+                    }
+                    ui.same_line();
+
+                    let current_item = inventory.index_mut(i as usize);
+
+                    let width = ui.push_item_width(318.0);
+                    self.draw_me1_le_item(i, current_item, item_db);
+                    width.pop(ui);
+                }
+            }
+
+            // Remove
+            if let Some(i) = remove {
+                inventory.remove(i as usize);
+            }
+        } else {
+            self.table_next_row();
+            ui.text("Empty");
+        }
+
+        // Add
+        self.table_next_row();
+        if ui.button(im_str!("add")) {
+            inventory.push(Item::default());
+        }
+        Some(())
+    }
+
+    fn draw_me1_le_item(&self, ident: i32, current_item: &mut Item, item_db: &Me1ItemDb) {
+        let ui = self.ui;
+
+        // Find name of item
+        let current_item_name: &str = item_db
+            .get(&DbItem {
+                item_id: current_item.item_id,
+                manufacturer_id: current_item.manufacturer_id,
+            })
+            .map(|i| i.as_str())
+            .unwrap_or("Unknown item");
+
+        // Item name
+        let label = im_str!("##item-name-{}", ident);
+        let preview_value = ImString::new(current_item_name);
+        let cb = ComboBox::new(&label).preview_value(&preview_value);
+
+        if let Some(_t) = cb.begin(ui) {
+            for (k, item_name) in item_db.iter() {
+                let text = ImString::new(item_name);
+                let selected = item_name == current_item_name;
+                if Selectable::new(&text).selected(selected).build(ui) {
+                    current_item.item_id = k.item_id;
+                    current_item.manufacturer_id = k.manufacturer_id;
+                }
+            }
+        }
+
+        ui.same_line();
+
+        // Item level
+        let mut item_level_idx = current_item.item_level.clone() as usize;
+        const ITEM_LEVEL_LIST: [&ImStr; 11] = [
+            im_str!("None"),
+            im_str!("I"),
+            im_str!("II"),
+            im_str!("III"),
+            im_str!("IV"),
+            im_str!("V"),
+            im_str!("VI"),
+            im_str!("VII"),
+            im_str!("VIII"),
+            im_str!("IX"),
+            im_str!("X"),
+        ];
+        let width = ui.push_item_width(60.0);
+        if ComboBox::new(&im_str!("##item-level-{}", ident)).build_simple_string(
+            ui,
+            &mut item_level_idx,
+            &ITEM_LEVEL_LIST,
+        ) {
+            // Enum
+            current_item.item_level = match item_level_idx {
+                0 => ItemLevel::None,
+                1 => ItemLevel::I,
+                2 => ItemLevel::II,
+                3 => ItemLevel::III,
+                4 => ItemLevel::IV,
+                5 => ItemLevel::V,
+                6 => ItemLevel::VI,
+                7 => ItemLevel::VII,
+                8 => ItemLevel::VIII,
+                9 => ItemLevel::IX,
+                10 => ItemLevel::X,
+                _ => unreachable!(),
+            };
+        }
+        width.pop(ui);
     }
 }

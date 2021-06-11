@@ -1,4 +1,5 @@
-## Unreleased
+## 1.10.0
+- ME1LE: Added `Inventory` tab
 - ME1LE: Fixed a rare `unexpected end of file...` error
 
 ## 1.9.0

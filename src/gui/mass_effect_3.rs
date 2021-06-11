@@ -24,11 +24,11 @@ use crate::{
     },
 };
 
-use super::{Gui, PlotDbsState, Theme};
+use super::{DatabasesState, Gui, Theme};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_3(
-        &self, save_game: &mut Me3SaveGame, plot_dbs: &PlotDbsState,
+        &self, save_game: &mut Me3SaveGame, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -45,7 +45,7 @@ impl<'ui> Gui<'ui> {
         }
         // Plot
         if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables, plot_dbs);
+            self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables, databases);
         }
         // Head Morph
         if_chain! {
@@ -490,10 +490,10 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me3_plot_db(
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
-        plot_dbs: &PlotDbsState,
+        databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
-        let me3_plot_db = plot_dbs.me3.as_ref()?;
+        let me3_plot_db = databases.me3_plot_db.as_ref()?;
 
         let Me3PlotDb {
             general,
@@ -573,7 +573,7 @@ impl<'ui> Gui<'ui> {
         }
 
         // Mass Effect 2
-        let me2_plot_db = plot_dbs.me2.as_ref()?;
+        let me2_plot_db = databases.me2_plot_db.as_ref()?;
 
         let _colors = self.style_colors(Theme::MassEffect2);
         if let Some(_t) = TabItem::new(im_str!("Mass Effect 2")).begin(ui) {

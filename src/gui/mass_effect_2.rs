@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use super::{Gui, PlotDbsState, Theme};
+use super::{DatabasesState, Gui, Theme};
 
 enum Me2Type<'a> {
     Vanilla(&'a mut Me2SaveGame),
@@ -30,7 +30,7 @@ enum Me2Type<'a> {
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_2(
-        &self, save_game: &mut Me2SaveGame, plot_dbs: &PlotDbsState,
+        &self, save_game: &mut Me2SaveGame, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -50,7 +50,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
-                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &plot_dbs);
+                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &databases);
             }
         }
         // Head Morph
@@ -74,7 +74,7 @@ impl<'ui> Gui<'ui> {
     }
 
     pub fn draw_mass_effect_2_leg(
-        &self, save_game: &mut Me2LegSaveGame, plot_dbs: &PlotDbsState,
+        &self, save_game: &mut Me2LegSaveGame, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -94,7 +94,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
-                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &plot_dbs);
+                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &databases);
             }
         }
         // Head Morph
@@ -519,10 +519,10 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me2_plot_db(
         &self, me2_plot_table: &mut PlotTable, me1_plot_table: &mut Me1PlotTable,
-        plot_dbs: &PlotDbsState,
+        databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
-        let me2_plot_db = plot_dbs.me2.as_ref()?;
+        let me2_plot_db = databases.me2_plot_db.as_ref()?;
 
         let Me2PlotDb {
             player,
@@ -618,7 +618,7 @@ impl<'ui> Gui<'ui> {
 
             if_chain! {
                 if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
-                if let Some(me1_plot_db) = &plot_dbs.me1;
+                if let Some(me1_plot_db) = &databases.me1_plot_db;
                 then {
                     if me1_plot_table.bool_variables.is_empty() {
                         ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");

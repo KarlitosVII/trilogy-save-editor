@@ -1,0 +1,1030 @@
+Me1ItemDb({
+    DbItem(
+        item_id: 0,
+        manufacturer_id: 0,
+    ): "None",
+    // Aldrin Labs
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 451,
+    ): "[Aldrin Labs] Agent (Turian Light Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 451,
+    ): "[Aldrin Labs] Agent (Turian Medium Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 374,
+    ): "[Aldrin Labs] Hydra (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 374,
+    ): "[Aldrin Labs] Hydra (Quarian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 374,
+    ): "[Aldrin Labs] Hydra (Human Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 374,
+    ): "[Aldrin Labs] Hydra (Human Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Quarian Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 383,
+    ): "[Aldrin Labs] Onyx (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 110,
+        manufacturer_id: 362,
+    ): "[Aldrin Labs] Bluewire Omni-Tool",
+    DbItem(
+        item_id: 10,
+        manufacturer_id: 341,
+    ): "[Aldrin Labs] Solaris Biotic Amp",
+    // Ariake Technologies
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 373,
+    ): "[Ariake Technologies] Mercenary (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 582,
+    ): "[Ariake Technologies] Tsunami Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 582,
+    ): "[Ariake Technologies] Katana Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 582,
+    ): "[Ariake Technologies] Raikou Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 582,
+    ): "[Ariake Technologies] Naginata Sniper Rifle",
+    DbItem(
+        item_id: 110,
+        manufacturer_id: 363,
+    ): "[Ariake Technologies] Logic Arrest Omni-Tool",
+    // Armax Arsenal
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator L (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator L (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator M (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator M (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator M (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator H (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 528,
+    ): "[Armax Arsenal] Predator H (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 324,
+    ): "[Armax Arsenal] Crossfire Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 324,
+    ): "[Armax Arsenal] Avalanche Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 324,
+    ): "[Armax Arsenal] Brawler Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 324,
+    ): "[Armax Arsenal] Punisher Sniper Rifle",
+    DbItem(
+        item_id: 10,
+        manufacturer_id: 343,
+    ): "[Armax Arsenal] Gemini Biotic Amp",
+    // Armali Council
+    DbItem(
+        item_id: 110,
+        manufacturer_id: 364,
+    ): "[Armali Council] Nexus Omni-Tool",
+    DbItem(
+        item_id: 10,
+        manufacturer_id: 342,
+    ): "[Armali Council] Prodigy Biotic Amp",
+    // Devlon Industries
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Quarian Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 377,
+    ): "[Devlon Industries] Explorer (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Quarian Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 378,
+    ): "[Devlon Industries] Liberator (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Quarian Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 376,
+    ): "[Devlon Industries] Survivor (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 580,
+    ): "[Devlon Industries] Thermal (Turian Light Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 580,
+    ): "[Devlon Industries] Thermal (Turian Medium Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 325,
+    ): "[Devlon Industries] Raptor Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 325,
+    ): "[Devlon Industries] Firestorm Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 325,
+    ): "[Devlon Industries] Stinger Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 325,
+    ): "[Devlon Industries] Striker Sniper Rifle",
+    // Elanus Risk Control
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 380,
+    ): "[Elanus Risk Control] Duelist (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 372,
+    ): "[Elanus Risk Control] Guardian (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 514,
+    ): "[Elanus Risk Control] Warlord (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 412,
+    ): "[Elanus Risk Control] Banshee Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 412,
+    ): "[Elanus Risk Control] Hurricane Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 412,
+    ): "[Elanus Risk Control] Striker Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 412,
+    ): "[Elanus Risk Control] Hammer Sniper Rifle",
+    // Elkoss Combine
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 381,
+    ): "[Elkoss Combine] Assassin (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 381,
+    ): "[Elkoss Combine] Assassin (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 381,
+    ): "[Elkoss Combine] Assassin (Human Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 381,
+    ): "[Elkoss Combine] Assassin (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 381,
+    ): "[Elkoss Combine] Assassin (Human Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 379,
+    ): "[Elkoss Combine] Gladiator (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 379,
+    ): "[Elkoss Combine] Gladiator (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 379,
+    ): "[Elkoss Combine] Gladiator (Human Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 379,
+    ): "[Elkoss Combine] Gladiator (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 379,
+    ): "[Elkoss Combine] Gladiator (Human Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 326,
+    ): "[Elkoss Combine] Avenger Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 326,
+    ): "[Elkoss Combine] Scimitar Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 326,
+    ): "[Elkoss Combine] Edge Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 326,
+    ): "[Elkoss Combine] Reaper Sniper Rifle",
+    DbItem(
+        item_id: 110,
+        manufacturer_id: 366,
+    ): "[Elkoss Combine] Cypher Omni-Tool",
+    // Geth Armory
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 515,
+    ): "[Geth Armory] Battlemaster (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 524,
+    ): "[Geth Armory] Berserker (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 523,
+    ): "[Geth Armory] Rage (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 435,
+        manufacturer_id: 436,
+    ): "[Geth Armory] Geth Pulse Rifle",
+    // Hahne-Kedar
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 581,
+    ): "[Hahne-Kedar] Silverback (Turian Light Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 581,
+    ): "[Hahne-Kedar] Silverback (Turian Medium Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 370,
+    ): "[Hahne-Kedar] Mantis (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 368,
+    ): "[Hahne-Kedar] Predator (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 367,
+    ): "[Hahne-Kedar] Scorpion (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 369,
+    ): "[Hahne-Kedar] Ursa (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 327,
+    ): "[Hahne-Kedar] Lancer Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 327,
+    ): "[Hahne-Kedar] Storm Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 327,
+    ): "[Hahne-Kedar] Kessler Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 327,
+    ): "[Hahne-Kedar] Avenger Sniper Rifle",
+    // Kassa Fabrication
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Quarian Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 409,
+    ): "[Kassa Fabrication] Colossus (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 584,
+    ): "[Kassa Fabrication] Breaker Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 584,
+    ): "[Kassa Fabrication] Armageddon Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 584,
+    ): "[Kassa Fabrication] Razer Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 584,
+    ): "[Kassa Fabrication] Harpoon Sniper Rifle",
+    DbItem(
+        item_id: 10,
+        manufacturer_id: 410,
+    ): "[Kassa Fabrication] Polaris Biotic Amp",
+    // Rosenkov Materials
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Human Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 382,
+    ): "[Rosenkov Materials] Titan (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 583,
+    ): "[Rosenkov Materials] Kovalyov Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 583,
+    ): "[Rosenkov Materials] Sokolov Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 583,
+    ): "[Rosenkov Materials] Karpov Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 583,
+    ): "[Rosenkov Materials] Volkov Sniper Rifle",
+    // Serrice Council
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 581,
+    ): "[Serrice Council] Phantom (Turian Light Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 581,
+    ): "[Serrice Council] Phantom (Turian Medium Armor)",
+    DbItem(
+        item_id: 110,
+        manufacturer_id: 411,
+    ): "[Serrice Council] Savant Omni-Tool",
+    DbItem(
+        item_id: 10,
+        manufacturer_id: 345,
+    ): "[Serrice Council] Savant Biotic Amp",
+    // Sirta Foundation
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Human Light Armor)",
+    DbItem(
+        item_id: 290,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Quarian Light Armor)",
+    DbItem(
+        item_id: 288,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Turian Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Human Medium Armor)",
+    DbItem(
+        item_id: 285,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Krogan Medium Armor)",
+    DbItem(
+        item_id: 284,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Turian Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Human Heavy Armor)",
+    DbItem(
+        item_id: 293,
+        manufacturer_id: 375,
+    ): "[Sirta Foundation] Phoenix (Krogan Heavy Armor)",
+    DbItem(
+        item_id: 110,
+        manufacturer_id: 527,
+    ): "[Sirta Foundation] Chameleon Omni-Tool",
+    DbItem(
+        item_id: 10,
+        manufacturer_id: 526,
+    ): "[Sirta Foundation] Unity Biotic Amp",
+    // Haliat Armory
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 525,
+    ): "[Haliat Armory] Thunder Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 525,
+    ): "[Haliat Armory] Tornado Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 525,
+    ): "[Haliat Armory] Stiletto Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 525,
+    ): "[Haliat Armory] Equalizer Sniper Rifle",
+    // Spectre Master Gear
+    DbItem(
+        item_id: 287,
+        manufacturer_id: 495,
+    ): "[Spectre Master Gear] HML (Human Light Armor)",
+    DbItem(
+        item_id: 249,
+        manufacturer_id: 495,
+    ): "[Spectre Master Gear] HMM (Human Medium Armor)",
+    DbItem(
+        item_id: 291,
+        manufacturer_id: 495,
+    ): "[Spectre Master Gear] HMH (Human Heavy Armor)",
+    DbItem(
+        item_id: 4,
+        manufacturer_id: 504,
+    ): "[Spectre Master Gear] HMWA Assault Rifle",
+    DbItem(
+        item_id: 5,
+        manufacturer_id: 504,
+    ): "[Spectre Master Gear] HMWSG Shotgun",
+    DbItem(
+        item_id: 3,
+        manufacturer_id: 504,
+    ): "[Spectre Master Gear] HMWP Pistol",
+    DbItem(
+        item_id: 52,
+        manufacturer_id: 504,
+    ): "[Spectre Master Gear] HMWSR Sniper Rifle",
+    // Armor Mods
+    DbItem(
+        item_id: 536,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Ablative Coating",
+    DbItem(
+        item_id: 308,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Armor Plating",
+    DbItem(
+        item_id: 541,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Combat Exoskeleton",
+    DbItem(
+        item_id: 544,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Energized Plating",
+    DbItem(
+        item_id: 537,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Energized Weave",
+    DbItem(
+        item_id: 538,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Exoskeleton",
+    DbItem(
+        item_id: 312,
+        manufacturer_id: -1,
+    ): "[Armor Mod] First Aid Interface",
+    DbItem(
+        item_id: 313,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Hardened Weave",
+    DbItem(
+        item_id: 604,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Hazard Seals",
+    DbItem(
+        item_id: 539,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Kinetic Buffer",
+    DbItem(
+        item_id: 542,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Kinetic Exoskeleton",
+    DbItem(
+        item_id: 543,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Medical Exoskeleton",
+    DbItem(
+        item_id: 579,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Medical Interface",
+    DbItem(
+        item_id: 532,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Motorized Joints",
+    DbItem(
+        item_id: 603,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Pressurized Seals",
+    DbItem(
+        item_id: 533,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Shield Battery",
+    DbItem(
+        item_id: 545,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Shield Interface",
+    DbItem(
+        item_id: 540,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Shield Modulator",
+    DbItem(
+        item_id: 311,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Shield Regenerator",
+    DbItem(
+        item_id: 534,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Shock Absorbers",
+    DbItem(
+        item_id: 535,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Stimulant Pack",
+    DbItem(
+        item_id: 310,
+        manufacturer_id: -1,
+    ): "[Armor Mod] Toxic Seals",
+    // Grenade Mods
+    DbItem(
+        item_id: 408,
+        manufacturer_id: -1,
+    ): "[Grenade Mod] Anti-Thorian Gas",
+    DbItem(
+        item_id: 416,
+        manufacturer_id: -1,
+    ): "[Grenade Mod] Cryo Explosive",
+    DbItem(
+        item_id: 431,
+        manufacturer_id: -1,
+    ): "[Grenade Mod] Fusion Explosive",
+    DbItem(
+        item_id: 432,
+        manufacturer_id: -1,
+    ): "[Grenade Mod] High Explosive",
+    DbItem(
+        item_id: 433,
+        manufacturer_id: -1,
+    ): "[Grenade Mod] Incendiary Explosive",
+    // Weapon Ammo Mods
+    DbItem(
+        item_id: 47,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Anti-Personnel Rounds",
+    DbItem(
+        item_id: 48,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Armor Piercing Rounds",
+    DbItem(
+        item_id: 50,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Chemical Rounds",
+    DbItem(
+        item_id: 113,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Cryo Rounds",
+    DbItem(
+        item_id: 51,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Hammerhead Rounds",
+    DbItem(
+        item_id: 602,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Harpoon Rounds",
+    DbItem(
+        item_id: 549,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] High Explosive Rounds",
+    DbItem(
+        item_id: 397,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Incendiary Rounds",
+    DbItem(
+        item_id: 550,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Inferno Rounds",
+    DbItem(
+        item_id: 111,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Phasic Rounds",
+    DbItem(
+        item_id: 398,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Polonium Rounds",
+    DbItem(
+        item_id: 546,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Proton Rounds",
+    DbItem(
+        item_id: 112,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Radioactive Rounds",
+    DbItem(
+        item_id: 547,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Shredder Rounds",
+    DbItem(
+        item_id: 551,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Sledgehammer Rounds",
+    DbItem(
+        item_id: 552,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Snowblind Rounds",
+    DbItem(
+        item_id: 548,
+        manufacturer_id: -1,
+    ): "[Weapon Ammo Mod] Tungsten Rounds",
+    // Weapon Mods
+    DbItem(
+        item_id: 553,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Combat Scanner",
+    DbItem(
+        item_id: 297,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Combat Sensor",
+    DbItem(
+        item_id: 557,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Combat Optics",
+    DbItem(
+        item_id: 558,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Frictionless Materials",
+    DbItem(
+        item_id: 299,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Heat Sink",
+    DbItem(
+        item_id: 301,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] High Caliber Barrel",
+    DbItem(
+        item_id: 606,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Hyper Rail",
+    DbItem(
+        item_id: 305,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Improved Sighting",
+    DbItem(
+        item_id: 559,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Kinetic Coil",
+    DbItem(
+        item_id: 554,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Kinetic Stabilizer",
+    DbItem(
+        item_id: 555,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Rail Extension",
+    DbItem(
+        item_id: 455,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Recoil Damper",
+    DbItem(
+        item_id: 560,
+        manufacturer_id: -1,
+    ): "[Weapon Mod] Scram Rail",
+    // Special
+    DbItem(
+        item_id: 399,
+        manufacturer_id: 508,
+    ): "[Grenade]",
+})

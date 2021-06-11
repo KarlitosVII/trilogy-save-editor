@@ -11,7 +11,7 @@ use tokio::{
 use crate::{
     gui::UiEvent,
     save_data::{
-        mass_effect_1::{plot_db::Me1PlotDb, Me1SaveGame},
+        mass_effect_1::{item_db::Me1ItemDb, plot_db::Me1PlotDb, Me1SaveGame},
         mass_effect_1_leg::Me1LegSaveGame,
         mass_effect_2::{
             plot_db::Me2PlotDb, Me2LegSaveGame, Me2LegVersion, Me2SaveGame, Me2Version,
@@ -25,7 +25,7 @@ use crate::{
 pub enum MainEvent {
     OpenSave(String),
     SaveSave(String, SaveGame),
-    LoadPlotDbs,
+    LoadDatabases,
     ImportHeadMorph(String),
     ExportHeadMorph(String, Box<HeadMorph>),
 }
@@ -48,15 +48,17 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
                 MainEvent::SaveSave(path, save_game) => {
                     tokio::spawn(save_save(path, save_game, ui_addr)).await?
                 }
-                MainEvent::LoadPlotDbs => {
-                    let me1_handle = tokio::spawn(load_me1_plot_db(Sender::clone(&ui_addr)));
+                MainEvent::LoadDatabases => {
+                    let me1_plot_handle = tokio::spawn(load_me1_plot_db(Sender::clone(&ui_addr)));
+                    let me1_item_handle = tokio::spawn(load_me1_item_db(Sender::clone(&ui_addr)));
                     let me2_handle = tokio::spawn(load_me2_plot_db(Sender::clone(&ui_addr)));
                     let me3_handle = tokio::spawn(load_me3_plot_db(ui_addr));
 
-                    let (me1_result, me2_result, me3_result) =
-                        tokio::join!(me1_handle, me2_handle, me3_handle);
+                    let (me1_plot_result, me1_item_result, me2_result, me3_result) =
+                        tokio::join!(me1_plot_handle, me1_item_handle, me2_handle, me3_handle);
 
-                    me1_result?.context("Failed to parse databases/me1_plot_db.ron")?;
+                    me1_plot_result?.context("Failed to parse databases/me1_plot_db.ron")?;
+                    me1_item_result?.context("Failed to parse databases/me1_item_db.ron")?;
                     me2_result?.context("Failed to parse databases/me2_plot_db.ron")?;
                     me3_result?.context("Failed to parse databases/me3_plot_db.ron")
                 }
@@ -191,6 +193,19 @@ async fn load_me1_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
     let me1_plot_db: Me1PlotDb = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe1PlotDb(me1_plot_db)).await;
+    Ok(())
+}
+
+async fn load_me1_item_db(ui_addr: Sender<UiEvent>) -> Result<()> {
+    let mut input = String::new();
+    {
+        let mut file = File::open("databases/me1_item_db.ron").await?;
+        file.read_to_string(&mut input).await?;
+    }
+
+    let me1_item_db: Me1ItemDb = ron::from_str(&input)?;
+
+    let _ = ui_addr.send_async(UiEvent::LoadedMe1ItemDb(me1_item_db)).await;
     Ok(())
 }
 
