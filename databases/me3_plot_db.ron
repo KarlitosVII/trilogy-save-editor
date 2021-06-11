@@ -1,4 +1,4 @@
-Me3KnownPlot(
+Me3PlotDb(
     general: PlotCategory(
         booleans: {
             22226: "Played Mass Effect 1",
@@ -849,7 +849,7 @@ Me3KnownPlot(
             variables: {},
         ),
     },
-    me1_imported: Me1KnownPlot(
+    me1_imported: Me1PlotDb(
         player_crew: {
             "Player": PlotCategory(
                 booleans: {

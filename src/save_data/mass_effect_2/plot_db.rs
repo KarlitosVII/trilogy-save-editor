@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::save_data::shared::plot::PlotCategory;
 
 #[derive(Deserialize)]
-pub struct Me2KnownPlot {
+pub struct Me2PlotDb {
     pub player: PlotCategory,
     pub crew: IndexMap<String, PlotCategory>,
     pub romance: IndexMap<String, PlotCategory>,
@@ -24,14 +24,14 @@ mod test {
     use super::*;
 
     #[test]
-    fn deserialize_know_plot() -> Result<()> {
+    fn deserialize_plot_db() -> Result<()> {
         let mut input = String::new();
         {
-            let mut file = File::open("plot/me2_known_plot.ron")?;
+            let mut file = File::open("databases/me2_plot_db.ron")?;
             file.read_to_string(&mut input)?;
         }
 
-        let _me2_known_plot: Me2KnownPlot = ron::from_str(&input)?;
+        let _me2_plot_db: Me2PlotDb = ron::from_str(&input)?;
 
         Ok(())
     }

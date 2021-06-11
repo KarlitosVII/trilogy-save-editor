@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::save_data::shared::plot::PlotCategory;
 
 #[derive(Deserialize)]
-pub struct Me1KnownPlot {
+pub struct Me1PlotDb {
     pub player_crew: IndexMap<String, PlotCategory>,
     pub missions: IndexMap<String, PlotCategory>,
 }
@@ -17,14 +17,14 @@ mod test {
     use super::*;
 
     #[test]
-    fn deserialize_know_plot() -> Result<()> {
+    fn deserialize_plot_db() -> Result<()> {
         let mut input = String::new();
         {
-            let mut file = File::open("plot/me1_known_plot.ron")?;
+            let mut file = File::open("databases/me1_item_db.ron")?;
             file.read_to_string(&mut input)?;
         }
 
-        let _me1_known_plot: Me1KnownPlot = ron::from_str(&input)?;
+        let _me1_plot_db: Me1PlotDb = ron::from_str(&input)?;
 
         Ok(())
     }

@@ -31,13 +31,13 @@ struct ChunkHeader {
 
 #[derive(Clone)]
 pub struct Me1LegSaveGame {
-    _magic_number: u32,
-    _block_size: u32,
-    _headers: List<ChunkHeader>,
+    magic_number: u32,
+    block_size: u32,
+    headers: List<ChunkHeader>,
     pub save_data: Me1LegSaveData,
-    _checksum: u32,
+    checksum: u32,
     _unknown: Dummy<4>,
-    _uncompressed_size: u32,
+    uncompressed_size: u32,
 }
 
 impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
@@ -57,8 +57,8 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
             where
                 A: de::SeqAccess<'de>,
             {
-                let _magic_number = seq.next_element()?.unwrap();
-                let _block_size = seq.next_element()?.unwrap();
+                let magic_number = seq.next_element()?.unwrap();
+                let block_size = seq.next_element()?.unwrap();
 
                 // Headers
                 let mut headers = Vec::new();
@@ -75,7 +75,7 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
                             compressed_size: seq.next_element()?.unwrap(),
                             uncompressed_size: seq.next_element()?.unwrap(),
                         };
-                        if header.uncompressed_size < _block_size {
+                        if header.uncompressed_size < block_size {
                             finished = true;
                         }
                         headers.push(header);
@@ -99,18 +99,18 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
                     unreal::Deserializer::from_bytes(&uncompressed).map_err(de::Error::custom)?
                 };
 
-                let _checksum = seq.next_element()?.unwrap();
+                let checksum = seq.next_element()?.unwrap();
                 let _unknown = seq.next_element()?.unwrap();
-                let _uncompressed_size = seq.next_element()?.unwrap();
+                let uncompressed_size = seq.next_element()?.unwrap();
 
                 Ok(Me1LegSaveGame {
-                    _magic_number,
-                    _block_size,
-                    _headers: headers.into(),
+                    magic_number,
+                    block_size,
+                    headers: headers.into(),
                     save_data,
-                    _checksum,
+                    checksum,
                     _unknown,
-                    _uncompressed_size,
+                    uncompressed_size,
                 })
             }
         }
@@ -124,13 +124,13 @@ impl serde::Serialize for Me1LegSaveGame {
         S: serde::Serializer,
     {
         let Me1LegSaveGame {
-            _magic_number,
-            _block_size,
-            _headers,
+            magic_number,
+            block_size,
+            headers: _,
             save_data,
-            _checksum,
+            checksum,
             _unknown,
-            _uncompressed_size,
+            uncompressed_size: _,
         } = self;
 
         let mut headers = Vec::new();
@@ -143,7 +143,7 @@ impl serde::Serialize for Me1LegSaveGame {
 
         // Compresse chaque chunk
         let mut compressed = Vec::new();
-        for chunk in uncompressed.chunks(*_block_size as usize) {
+        for chunk in uncompressed.chunks(*block_size as usize) {
             let uncompressed_size = chunk.len() as u32;
 
             let mut compressed_chunk = Vec::new();
@@ -163,13 +163,13 @@ impl serde::Serialize for Me1LegSaveGame {
         let save_data: List<u8> = compressed.into();
 
         let mut s = serializer.serialize_struct("Me1LegSaveGame", 4)?;
-        s.serialize_field("_magic_number", _magic_number)?;
-        s.serialize_field("_block_size", _block_size)?;
-        s.serialize_field("_headers", &headers)?;
+        s.serialize_field("magic_number", magic_number)?;
+        s.serialize_field("block_size", block_size)?;
+        s.serialize_field("headers", &headers)?;
         s.serialize_field("save_data", &save_data)?;
-        s.serialize_field("_checksum", _checksum)?;
+        s.serialize_field("checksum", checksum)?;
         s.serialize_field("_unknown", _unknown)?;
-        s.serialize_field("_uncompressed_size", &headers[0].uncompressed_size)?;
+        s.serialize_field("uncompressed_size", &headers[0].uncompressed_size)?;
         s.end()
     }
 }

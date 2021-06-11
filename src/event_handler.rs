@@ -11,12 +11,12 @@ use tokio::{
 use crate::{
     gui::UiEvent,
     save_data::{
-        mass_effect_1::{known_plot::Me1KnownPlot, Me1SaveGame},
+        mass_effect_1::{plot_db::Me1PlotDb, Me1SaveGame},
         mass_effect_1_leg::Me1LegSaveGame,
         mass_effect_2::{
-            known_plot::Me2KnownPlot, Me2LegSaveGame, Me2LegVersion, Me2SaveGame, Me2Version,
+            plot_db::Me2PlotDb, Me2LegSaveGame, Me2LegVersion, Me2SaveGame, Me2Version,
         },
-        mass_effect_3::{known_plot::Me3KnownPlot, Me3SaveGame},
+        mass_effect_3::{plot_db::Me3PlotDb, Me3SaveGame},
         shared::appearance::HeadMorph,
     },
     unreal,
@@ -25,7 +25,7 @@ use crate::{
 pub enum MainEvent {
     OpenSave(String),
     SaveSave(String, SaveGame),
-    LoadKnownPlots,
+    LoadPlotDbs,
     ImportHeadMorph(String),
     ExportHeadMorph(String, Box<HeadMorph>),
 }
@@ -48,17 +48,17 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
                 MainEvent::SaveSave(path, save_game) => {
                     tokio::spawn(save_save(path, save_game, ui_addr)).await?
                 }
-                MainEvent::LoadKnownPlots => {
-                    let me1_handle = tokio::spawn(load_me1_known_plot(Sender::clone(&ui_addr)));
-                    let me2_handle = tokio::spawn(load_me2_known_plot(Sender::clone(&ui_addr)));
-                    let me3_handle = tokio::spawn(load_me3_known_plot(ui_addr));
+                MainEvent::LoadPlotDbs => {
+                    let me1_handle = tokio::spawn(load_me1_plot_db(Sender::clone(&ui_addr)));
+                    let me2_handle = tokio::spawn(load_me2_plot_db(Sender::clone(&ui_addr)));
+                    let me3_handle = tokio::spawn(load_me3_plot_db(ui_addr));
 
                     let (me1_result, me2_result, me3_result) =
                         tokio::join!(me1_handle, me2_handle, me3_handle);
 
-                    me1_result?.context("Failed to parse plot/me1_known_plot.ron")?;
-                    me2_result?.context("Failed to parse plot/me2_known_plot.ron")?;
-                    me3_result?.context("Failed to parse plot/me3_known_plot.ron")
+                    me1_result?.context("Failed to parse databases/me1_plot_db.ron")?;
+                    me2_result?.context("Failed to parse databases/me2_plot_db.ron")?;
+                    me3_result?.context("Failed to parse databases/me3_plot_db.ron")
                 }
                 MainEvent::ImportHeadMorph(path) => {
                     tokio::spawn(import_head_morph(path, ui_addr)).await?
@@ -181,42 +181,42 @@ async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) 
     Ok(())
 }
 
-async fn load_me1_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
+async fn load_me1_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = String::new();
     {
-        let mut file = File::open("plot/me1_known_plot.ron").await?;
+        let mut file = File::open("databases/me1_plot_db.ron").await?;
         file.read_to_string(&mut input).await?;
     }
 
-    let me1_known_plot: Me1KnownPlot = ron::from_str(&input)?;
+    let me1_plot_db: Me1PlotDb = ron::from_str(&input)?;
 
-    let _ = ui_addr.send_async(UiEvent::LoadedMe1KnownPlot(me1_known_plot)).await;
+    let _ = ui_addr.send_async(UiEvent::LoadedMe1PlotDb(me1_plot_db)).await;
     Ok(())
 }
 
-async fn load_me2_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
+async fn load_me2_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = String::new();
     {
-        let mut file = File::open("plot/me2_known_plot.ron").await?;
+        let mut file = File::open("databases/me2_plot_db.ron").await?;
         file.read_to_string(&mut input).await?;
     }
 
-    let me2_known_plot: Me2KnownPlot = ron::from_str(&input)?;
+    let me2_plot_db: Me2PlotDb = ron::from_str(&input)?;
 
-    let _ = ui_addr.send_async(UiEvent::LoadedMe2KnownPlot(me2_known_plot)).await;
+    let _ = ui_addr.send_async(UiEvent::LoadedMe2PlotDb(me2_plot_db)).await;
     Ok(())
 }
 
-async fn load_me3_known_plot(ui_addr: Sender<UiEvent>) -> Result<()> {
+async fn load_me3_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
     let mut input = String::new();
     {
-        let mut file = File::open("plot/me3_known_plot.ron").await?;
+        let mut file = File::open("databases/me3_plot_db.ron").await?;
         file.read_to_string(&mut input).await?;
     }
 
-    let me3_known_plot: Me3KnownPlot = ron::from_str(&input)?;
+    let me3_plot_db: Me3PlotDb = ron::from_str(&input)?;
 
-    let _ = ui_addr.send_async(UiEvent::LoadedMe3KnownPlot(me3_known_plot)).await;
+    let _ = ui_addr.send_async(UiEvent::LoadedMe3PlotDb(me3_plot_db)).await;
     Ok(())
 }
 

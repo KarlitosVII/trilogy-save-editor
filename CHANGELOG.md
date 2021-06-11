@@ -1,3 +1,6 @@
+## Unreleased
+- ME1LE: Fixed a rare `unexpected end of file...` error
+
 ## 1.9.0
 - ME1LE: Added player and squad talent reset
 - Fallback to DirectX 11 if backend panic on startup

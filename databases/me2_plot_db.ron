@@ -1,4 +1,4 @@
-Me2KnownPlot(
+Me2PlotDb(
     player: PlotCategory(
         booleans: {
             2279: "[General] Played Mass Effect 1",

@@ -7,7 +7,7 @@ use crate::{
     event_handler::MainEvent,
     save_data::{
         mass_effect_2::{
-            known_plot::Me2KnownPlot,
+            plot_db::Me2PlotDb,
             player::{Player, Power},
             plot::PlotTable,
             Me2LegSaveGame, Me2SaveGame,
@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use super::{Gui, KnownPlotsState, Theme};
+use super::{Gui, PlotDbsState, Theme};
 
 enum Me2Type<'a> {
     Vanilla(&'a mut Me2SaveGame),
@@ -30,7 +30,7 @@ enum Me2Type<'a> {
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_2(
-        &self, save_game: &mut Me2SaveGame, known_plots: &KnownPlotsState,
+        &self, save_game: &mut Me2SaveGame, plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -50,7 +50,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
-                self.draw_me2_known_plot(&mut save_game.plot, &mut save_game.me1_plot, &known_plots);
+                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &plot_dbs);
             }
         }
         // Head Morph
@@ -74,7 +74,7 @@ impl<'ui> Gui<'ui> {
     }
 
     pub fn draw_mass_effect_2_leg(
-        &self, save_game: &mut Me2LegSaveGame, known_plots: &KnownPlotsState,
+        &self, save_game: &mut Me2LegSaveGame, plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -94,7 +94,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
-                self.draw_me2_known_plot(&mut save_game.plot, &mut save_game.me1_plot, &known_plots);
+                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &plot_dbs);
             }
         }
         // Head Morph
@@ -517,14 +517,14 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me2_known_plot(
+    fn draw_me2_plot_db(
         &self, me2_plot_table: &mut PlotTable, me1_plot_table: &mut Me1PlotTable,
-        known_plots: &KnownPlotsState,
+        plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
-        let me2_known_plot = known_plots.me2.as_ref()?;
+        let me2_plot_db = plot_dbs.me2.as_ref()?;
 
-        let Me2KnownPlot {
+        let Me2PlotDb {
             player,
             crew,
             romance,
@@ -534,7 +534,7 @@ impl<'ui> Gui<'ui> {
             rewards,
             captains_cabin,
             imported_me1,
-        } = me2_known_plot;
+        } = me2_plot_db;
 
         // Player
         if_chain! {
@@ -559,11 +559,11 @@ impl<'ui> Gui<'ui> {
                 if let Some(_t) = TabItem::new(title).begin(ui);
                 if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
                 then {
-                    for (category_name, known_plot) in plot_map.iter() {
+                    for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me2_plot_category(me2_plot_table, known_plot);
+                                self.draw_me2_plot_category(me2_plot_table, plot_db);
                             }
                         }
                     }
@@ -605,11 +605,11 @@ impl<'ui> Gui<'ui> {
                          - Only works if you didn't talk to Aethyta"
                     );
                     ui.separator();
-                    for (category_name, known_plot) in imported_me1.iter() {
+                    for (category_name, plot_db) in imported_me1.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me2_plot_category(me2_plot_table, known_plot);
+                                self.draw_me2_plot_category(me2_plot_table, plot_db);
                             }
                         }
                     }
@@ -618,7 +618,7 @@ impl<'ui> Gui<'ui> {
 
             if_chain! {
                 if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
-                if let Some(me1_known_plot) = &known_plots.me1;
+                if let Some(me1_plot_db) = &plot_dbs.me1;
                 then {
                     if me1_plot_table.bool_variables.is_empty() {
                         ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
@@ -627,7 +627,7 @@ impl<'ui> Gui<'ui> {
                         ui.same_line();
                         self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.\nOr you can start a New Game +.");
                         ui.separator();
-                        self.draw_me1_known_plot(me1_plot_table, me1_known_plot);
+                        self.draw_me1_plot_db(me1_plot_table, me1_plot_db);
                     }
                 }
             }
@@ -635,9 +635,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me2_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {
+    fn draw_me2_plot_category(&self, plot_table: &mut PlotTable, plot_db: &PlotCategory) {
         let ui = self.ui;
-        let PlotCategory { booleans, ints } = known_plot;
+        let PlotCategory { booleans, ints } = plot_db;
 
         if booleans.is_empty() && ints.is_empty() {
             return;

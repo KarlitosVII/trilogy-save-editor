@@ -11,9 +11,9 @@ use std::path::PathBuf;
 use crate::{
     event_handler::{MainEvent, SaveGame},
     save_data::{
-        mass_effect_1::known_plot::Me1KnownPlot,
-        mass_effect_2::known_plot::Me2KnownPlot,
-        mass_effect_3::known_plot::Me3KnownPlot,
+        mass_effect_1::plot_db::Me1PlotDb,
+        mass_effect_2::plot_db::Me2PlotDb,
+        mass_effect_3::plot_db::Me3PlotDb,
         shared::appearance::{HasHeadMorph, HeadMorph},
     },
 };
@@ -36,10 +36,10 @@ struct NotificationState {
 }
 
 #[derive(Default)]
-pub struct KnownPlotsState {
-    me1: Option<Me1KnownPlot>,
-    me2: Option<Me2KnownPlot>,
-    me3: Option<Me3KnownPlot>,
+pub struct PlotDbsState {
+    me1: Option<Me1PlotDb>,
+    me2: Option<Me2PlotDb>,
+    me3: Option<Me3PlotDb>,
 }
 
 #[derive(Default)]
@@ -47,7 +47,7 @@ struct State {
     save_game: Option<SaveGame>,
     error: Option<Error>,
     notification: Option<NotificationState>,
-    known_plots: KnownPlotsState,
+    plot_dbs: PlotDbsState,
 }
 
 // Events
@@ -55,9 +55,9 @@ pub enum UiEvent {
     Error(Error),
     Notification(&'static str),
     OpenedSave(SaveGame),
-    LoadedMe1KnownPlot(Me1KnownPlot),
-    LoadedMe2KnownPlot(Me2KnownPlot),
-    LoadedMe3KnownPlot(Me3KnownPlot),
+    LoadedMe1PlotDb(Me1PlotDb),
+    LoadedMe2PlotDb(Me2PlotDb),
+    LoadedMe3PlotDb(Me3PlotDb),
     ImportedHeadMorph(HeadMorph),
 }
 
@@ -65,7 +65,7 @@ pub enum UiEvent {
 pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatches) {
     let mut state = State::default();
 
-    let _ = event_addr.send(MainEvent::LoadKnownPlots);
+    let _ = event_addr.send(MainEvent::LoadPlotDbs);
 
     // UI
     let system = backend::init(
@@ -100,14 +100,14 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
             UiEvent::OpenedSave(opened_save_game) => {
                 state.save_game = Some(opened_save_game);
             }
-            UiEvent::LoadedMe1KnownPlot(me1_known_plot) => {
-                state.known_plots.me1 = Some(me1_known_plot)
+            UiEvent::LoadedMe1PlotDb(me1_plot_db) => {
+                state.plot_dbs.me1 = Some(me1_plot_db)
             }
-            UiEvent::LoadedMe2KnownPlot(me2_known_plot) => {
-                state.known_plots.me2 = Some(me2_known_plot)
+            UiEvent::LoadedMe2PlotDb(me2_plot_db) => {
+                state.plot_dbs.me2 = Some(me2_plot_db)
             }
-            UiEvent::LoadedMe3KnownPlot(me3_known_plot) => {
-                state.known_plots.me3 = Some(me3_known_plot)
+            UiEvent::LoadedMe3PlotDb(me3_plot_db) => {
+                state.plot_dbs.me3 = Some(me3_plot_db)
             }
             UiEvent::ImportedHeadMorph(head_morph) => {
                 let has_head_morph =
@@ -198,19 +198,19 @@ impl<'ui> Gui<'ui> {
             match &mut state.save_game {
                 None => self.draw_change_log(),
                 Some(SaveGame::MassEffect1 { save_game, .. }) => {
-                    self.draw_mass_effect_1(save_game, &state.known_plots)
+                    self.draw_mass_effect_1(save_game, &state.plot_dbs)
                 }
                 Some(SaveGame::MassEffect1Leg { save_game, .. }) => {
-                    self.draw_mass_effect_1_leg(&mut save_game.save_data, &state.known_plots)
+                    self.draw_mass_effect_1_leg(&mut save_game.save_data, &state.plot_dbs)
                 }
                 Some(SaveGame::MassEffect2 { save_game, .. }) => {
-                    self.draw_mass_effect_2(save_game, &state.known_plots)
+                    self.draw_mass_effect_2(save_game, &state.plot_dbs)
                 }
                 Some(SaveGame::MassEffect2Leg { save_game, .. }) => {
-                    self.draw_mass_effect_2_leg(save_game, &state.known_plots)
+                    self.draw_mass_effect_2_leg(save_game, &state.plot_dbs)
                 }
                 Some(SaveGame::MassEffect3 { save_game, .. }) => {
-                    self.draw_mass_effect_3(save_game, &state.known_plots)
+                    self.draw_mass_effect_3(save_game, &state.plot_dbs)
                 }
             };
         }

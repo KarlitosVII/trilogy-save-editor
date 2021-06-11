@@ -16,7 +16,7 @@ use squad::*;
 pub mod plot;
 use plot::*;
 
-pub mod known_plot;
+pub mod plot_db;
 
 mod galaxy_map;
 use galaxy_map::*;

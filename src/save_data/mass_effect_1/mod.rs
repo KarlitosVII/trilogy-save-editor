@@ -17,7 +17,7 @@ pub mod state;
 use self::state::*;
 
 pub mod data;
-pub mod known_plot;
+pub mod plot_db;
 
 #[derive(Clone)]
 pub struct Me1SaveGame {

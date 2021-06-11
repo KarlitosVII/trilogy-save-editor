@@ -7,10 +7,10 @@ use indexmap::IndexMap;
 use crate::{
     event_handler::MainEvent,
     save_data::{
-        mass_effect_1::known_plot::Me1KnownPlot,
-        mass_effect_2::known_plot::Me2KnownPlot,
+        mass_effect_1::plot_db::Me1PlotDb,
+        mass_effect_2::plot_db::Me2PlotDb,
         mass_effect_3::{
-            known_plot::{Me3KnownPlot, PlotVariable},
+            plot_db::{Me3PlotDb, PlotVariable},
             player::{Player, Power},
             plot::PlotTable,
             Me3SaveGame,
@@ -24,11 +24,11 @@ use crate::{
     },
 };
 
-use super::{Gui, KnownPlotsState, Theme};
+use super::{Gui, PlotDbsState, Theme};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_3(
-        &self, save_game: &mut Me3SaveGame, known_plots: &KnownPlotsState,
+        &self, save_game: &mut Me3SaveGame, plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -45,10 +45,10 @@ impl<'ui> Gui<'ui> {
         }
         // Plot
         if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            self.draw_me3_known_plot(
+            self.draw_me3_plot_db(
                 &mut save_game.plot,
                 &mut save_game.player_variables,
-                known_plots,
+                plot_dbs,
             );
         }
         // Head Morph
@@ -492,14 +492,14 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me3_known_plot(
+    fn draw_me3_plot_db(
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
-        known_plots: &KnownPlotsState,
+        plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
-        let me3_known_plot = known_plots.me3.as_ref()?;
+        let me3_plot_db = plot_dbs.me3.as_ref()?;
 
-        let Me3KnownPlot {
+        let Me3PlotDb {
             general,
             appearances,
             crew,
@@ -510,7 +510,7 @@ impl<'ui> Gui<'ui> {
             normandy,
             weapons_powers,
             me1_imported,
-        } = me3_known_plot;
+        } = me3_plot_db;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -539,11 +539,11 @@ impl<'ui> Gui<'ui> {
                 if let Some(_t) = TabItem::new(title).begin(ui);
                 if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
                 then {
-                    for (category_name, known_plot) in plot_map.iter() {
+                    for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me3_plot_category(plot_table, known_plot);
+                                self.draw_me3_plot_category(plot_table, plot_db);
                             }
                         }
                     }
@@ -565,11 +565,11 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Weapons / Powers")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
-                for (category_name, known_plot) in weapons_powers {
+                for (category_name, plot_db) in weapons_powers {
                     if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                         self.table_next_row();
                         if let Some(_t) = self.push_tree_node(category_name) {
-                            self.draw_me3_plot_variable(plot_table, player_variables, known_plot);
+                            self.draw_me3_plot_variable(plot_table, player_variables, plot_db);
                         }
                     }
                 }
@@ -577,27 +577,27 @@ impl<'ui> Gui<'ui> {
         }
 
         // Mass Effect 2
-        let me2_known_plot = known_plots.me2.as_ref()?;
+        let me2_plot_db = plot_dbs.me2.as_ref()?;
 
         let _colors = self.style_colors(Theme::MassEffect2);
         if let Some(_t) = TabItem::new(im_str!("Mass Effect 2")).begin(ui) {
-            self.draw_me2_imported_known_plot(plot_table, me2_known_plot);
+            self.draw_me2_imported_plot_db(plot_table, me2_plot_db);
         }
         // Mass Effect 1
         {
             let _colors = self.style_colors(Theme::MassEffect1);
             if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui) {
-                self.draw_me1_imported_known_plot(plot_table, me1_imported);
+                self.draw_me1_imported_plot_db(plot_table, me1_imported);
             }
         }
         Some(())
     }
 
-    pub fn draw_me2_imported_known_plot(
-        &self, me3_plot_table: &mut PlotTable, me2_known_plot: &Me2KnownPlot,
+    pub fn draw_me2_imported_plot_db(
+        &self, me3_plot_table: &mut PlotTable, me2_plot_db: &Me2PlotDb,
     ) -> Option<()> {
         let ui = self.ui;
-        let Me2KnownPlot {
+        let Me2PlotDb {
             player,
             crew,
             romance,
@@ -607,7 +607,7 @@ impl<'ui> Gui<'ui> {
             rewards,
             captains_cabin,
             imported_me1: _,
-        } = me2_known_plot;
+        } = me2_plot_db;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -635,11 +635,11 @@ impl<'ui> Gui<'ui> {
                 if let Some(_t) = TabItem::new(title).begin(ui);
                 if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
                 then {
-                    for (category_name, known_plot) in plot_map.iter() {
+                    for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me3_plot_category(me3_plot_table, known_plot);
+                                self.draw_me3_plot_category(me3_plot_table, plot_db);
                             }
                         }
                     }
@@ -669,11 +669,11 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    pub fn draw_me1_imported_known_plot(
-        &self, me1_plot_table: &mut PlotTable, me1_imported: &Me1KnownPlot,
+    pub fn draw_me1_imported_plot_db(
+        &self, me1_plot_table: &mut PlotTable, me1_imported: &Me1PlotDb,
     ) -> Option<()> {
         let ui = self.ui;
-        let Me1KnownPlot { player_crew, missions } = me1_imported;
+        let Me1PlotDb { player_crew, missions } = me1_imported;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -685,11 +685,11 @@ impl<'ui> Gui<'ui> {
                 if let Some(_t) = TabItem::new(title).begin(ui);
                 if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
                 then {
-                    for (category_name, known_plot) in plot_map.iter() {
+                    for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me3_plot_category(me1_plot_table, known_plot);
+                                self.draw_me3_plot_category(me1_plot_table, plot_db);
                             }
                         }
                     }
@@ -699,9 +699,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me3_plot_category(&self, plot_table: &mut PlotTable, known_plot: &PlotCategory) {
+    fn draw_me3_plot_category(&self, plot_table: &mut PlotTable, plot_db: &PlotCategory) {
         let ui = self.ui;
-        let PlotCategory { booleans, ints } = known_plot;
+        let PlotCategory { booleans, ints } = plot_db;
 
         if booleans.is_empty() && ints.is_empty() {
             return;
@@ -734,10 +734,10 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me3_plot_variable(
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
-        known_plot: &PlotVariable,
+        plot_db: &PlotVariable,
     ) {
         let ui = self.ui;
-        let PlotVariable { booleans, variables } = known_plot;
+        let PlotVariable { booleans, variables } = plot_db;
 
         if booleans.is_empty() && player_variables.is_empty() {
             return;

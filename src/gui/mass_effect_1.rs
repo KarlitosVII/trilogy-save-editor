@@ -8,7 +8,7 @@ use std::{
 use crate::save_data::{
     mass_effect_1::{
         data::{ArrayType, Data, Property, StructType},
-        known_plot::Me1KnownPlot,
+        plot_db::Me1PlotDb,
         player::{Name, Player},
         Me1SaveGame,
     },
@@ -20,11 +20,11 @@ use crate::save_data::{
     ImguiString, List, RawUi,
 };
 
-use super::{Gui, KnownPlotsState};
+use super::{Gui, PlotDbsState};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_1_leg(
-        &self, save_game: &mut Me1LegSaveData, known_plots: &KnownPlotsState,
+        &self, save_game: &mut Me1LegSaveData, plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -42,9 +42,9 @@ impl<'ui> Gui<'ui> {
         // Plot
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_known_plot) = &known_plots.me1;
+            if let Some(me1_plot_db) = &plot_dbs.me1;
             then {
-                self.draw_me1_known_plot(&mut save_game.plot, me1_known_plot);
+                self.draw_me1_plot_db(&mut save_game.plot, me1_plot_db);
             }
         }
         // Head Morph
@@ -277,7 +277,7 @@ impl<'ui> Gui<'ui> {
     }
 
     pub fn draw_mass_effect_1(
-        &self, save_game: &mut Me1SaveGame, known_plots: &KnownPlotsState,
+        &self, save_game: &mut Me1SaveGame, plot_dbs: &PlotDbsState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -303,9 +303,9 @@ impl<'ui> Gui<'ui> {
         // Plot
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_known_plot) = &known_plots.me1;
+            if let Some(me1_plot_db) = &plot_dbs.me1;
             then {
-                self.draw_me1_known_plot(&mut save_game.state.plot, me1_known_plot);
+                self.draw_me1_plot_db(&mut save_game.state.plot, me1_plot_db);
             }
         }
         // Raw
@@ -644,11 +644,11 @@ impl<'ui> Gui<'ui> {
         })
     }
 
-    pub fn draw_me1_known_plot(
-        &self, me1_plot_table: &mut Me1PlotTable, me1_known_plot: &Me1KnownPlot,
+    pub fn draw_me1_plot_db(
+        &self, me1_plot_table: &mut Me1PlotTable, me1_plot_db: &Me1PlotDb,
     ) -> Option<()> {
         let ui = self.ui;
-        let Me1KnownPlot { player_crew, missions } = me1_known_plot;
+        let Me1PlotDb { player_crew, missions } = me1_plot_db;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -660,11 +660,11 @@ impl<'ui> Gui<'ui> {
                 if let Some(_t) = TabItem::new(title).begin(ui);
                 if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
                 then {
-                    for (category_name, known_plot) in plot_map.iter() {
+                    for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
                             if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me1_plot_category(me1_plot_table, known_plot);
+                                self.draw_me1_plot_category(me1_plot_table, plot_db);
                             }
                         }
                     }
@@ -675,9 +675,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_plot_category(&self, plot_table: &mut Me1PlotTable, known_plot: &PlotCategory) {
+    fn draw_me1_plot_category(&self, plot_table: &mut Me1PlotTable, plot_db: &PlotCategory) {
         let ui = self.ui;
-        let PlotCategory { booleans, ints } = known_plot;
+        let PlotCategory { booleans, ints } = plot_db;
 
         if booleans.is_empty() && ints.is_empty() {
             return;
