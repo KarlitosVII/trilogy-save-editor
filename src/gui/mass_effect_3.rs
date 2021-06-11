@@ -10,9 +10,9 @@ use crate::{
         mass_effect_1::plot_db::Me1PlotDb,
         mass_effect_2::plot_db::Me2PlotDb,
         mass_effect_3::{
-            plot_db::{Me3PlotDb, PlotVariable},
             player::{Player, Power},
             plot::PlotTable,
+            plot_db::{Me3PlotDb, PlotVariable},
             Me3SaveGame,
         },
         shared::{
@@ -45,11 +45,7 @@ impl<'ui> Gui<'ui> {
         }
         // Plot
         if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            self.draw_me3_plot_db(
-                &mut save_game.plot,
-                &mut save_game.player_variables,
-                plot_dbs,
-            );
+            self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables, plot_dbs);
         }
         // Head Morph
         if_chain! {

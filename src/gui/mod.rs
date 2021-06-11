@@ -22,6 +22,7 @@ mod backend;
 mod changelog;
 mod imgui_utils;
 mod mass_effect_1;
+mod mass_effect_1_leg;
 mod mass_effect_2;
 mod mass_effect_3;
 mod raw_ui;
@@ -100,15 +101,9 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
             UiEvent::OpenedSave(opened_save_game) => {
                 state.save_game = Some(opened_save_game);
             }
-            UiEvent::LoadedMe1PlotDb(me1_plot_db) => {
-                state.plot_dbs.me1 = Some(me1_plot_db)
-            }
-            UiEvent::LoadedMe2PlotDb(me2_plot_db) => {
-                state.plot_dbs.me2 = Some(me2_plot_db)
-            }
-            UiEvent::LoadedMe3PlotDb(me3_plot_db) => {
-                state.plot_dbs.me3 = Some(me3_plot_db)
-            }
+            UiEvent::LoadedMe1PlotDb(me1_plot_db) => state.plot_dbs.me1 = Some(me1_plot_db),
+            UiEvent::LoadedMe2PlotDb(me2_plot_db) => state.plot_dbs.me2 = Some(me2_plot_db),
+            UiEvent::LoadedMe3PlotDb(me3_plot_db) => state.plot_dbs.me3 = Some(me3_plot_db),
             UiEvent::ImportedHeadMorph(head_morph) => {
                 let has_head_morph =
                     HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };

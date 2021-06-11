@@ -7,9 +7,9 @@ use crate::{
     event_handler::MainEvent,
     save_data::{
         mass_effect_2::{
-            plot_db::Me2PlotDb,
             player::{Player, Power},
             plot::PlotTable,
+            plot_db::Me2PlotDb,
             Me2LegSaveGame, Me2SaveGame,
         },
         shared::{
