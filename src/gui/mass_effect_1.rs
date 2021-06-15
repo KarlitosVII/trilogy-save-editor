@@ -5,23 +5,24 @@ use std::{
     cmp::Ordering,
 };
 
-use crate::save_data::{
-    mass_effect_1::{
-        data::{ArrayType, Data, Property, StructType},
-        player::{Name, Player},
-        plot_db::Me1PlotDb,
-        Me1SaveGame,
+use crate::{
+    databases::Database,
+    save_data::{
+        mass_effect_1::{
+            data::{ArrayType, Data, Property, StructType},
+            player::{Name, Player},
+            plot_db::Me1PlotDb,
+            Me1SaveGame,
+        },
+        shared::plot::{Me1PlotTable, PlotCategory},
+        ImguiString, List, RawUi,
     },
-    shared::plot::{Me1PlotTable, PlotCategory},
-    ImguiString, List, RawUi,
 };
 
-use super::{DatabasesState, Gui};
+use super::Gui;
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_1(
-        &self, save_game: &mut Me1SaveGame, databases: &DatabasesState,
-    ) -> Option<()> {
+    pub fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame) -> Option<()> {
         let ui = self.ui;
 
         // Ajoute un Name dupliqué à la liste
@@ -43,14 +44,12 @@ impl<'ui> Gui<'ui> {
                 self.draw_me1_general(save_game);
             }
         }
+
         // Plot
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_plot_db) = &databases.me1_plot_db;
-            then {
-                self.draw_me1_plot_db(&mut save_game.state.plot, me1_plot_db);
-            }
+        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+            self.draw_me1_plot_db(&mut save_game.state.plot);
         }
+
         // Raw
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
@@ -65,7 +64,6 @@ impl<'ui> Gui<'ui> {
 
             }
         }
-
         Some(())
     }
 
@@ -387,11 +385,9 @@ impl<'ui> Gui<'ui> {
         })
     }
 
-    pub fn draw_me1_plot_db(
-        &self, me1_plot_table: &mut Me1PlotTable, me1_plot_db: &Me1PlotDb,
-    ) -> Option<()> {
+    pub fn draw_me1_plot_db(&self, me1_plot_table: &mut Me1PlotTable) -> Option<()> {
         let ui = self.ui;
-        let Me1PlotDb { player_crew, missions } = me1_plot_db;
+        let Me1PlotDb { player_crew, missions } = Database::me1_plot()?;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;

@@ -9,13 +9,9 @@ use imgui::{
 use std::path::PathBuf;
 
 use crate::{
+    databases,
     event_handler::{MainEvent, SaveGame},
-    save_data::{
-        mass_effect_1::{item_db::Me1ItemDb, plot_db::Me1PlotDb},
-        mass_effect_2::plot_db::Me2PlotDb,
-        mass_effect_3::plot_db::Me3PlotDb,
-        shared::appearance::{HasHeadMorph, HeadMorph},
-    },
+    save_data::shared::appearance::{HasHeadMorph, HeadMorph},
 };
 
 mod backend;
@@ -37,19 +33,10 @@ struct NotificationState {
 }
 
 #[derive(Default)]
-pub struct DatabasesState {
-    me1_plot_db: Option<Me1PlotDb>,
-    me1_item_db: Option<Me1ItemDb>,
-    me2_plot_db: Option<Me2PlotDb>,
-    me3_plot_db: Option<Me3PlotDb>,
-}
-
-#[derive(Default)]
 struct State {
     save_game: Option<SaveGame>,
     error: Option<Error>,
     notification: Option<NotificationState>,
-    databases: DatabasesState,
 }
 
 // Events
@@ -57,18 +44,16 @@ pub enum UiEvent {
     Error(Error),
     Notification(&'static str),
     OpenedSave(SaveGame),
-    LoadedMe1PlotDb(Me1PlotDb),
-    LoadedMe1ItemDb(Me1ItemDb),
-    LoadedMe2PlotDb(Me2PlotDb),
-    LoadedMe3PlotDb(Me3PlotDb),
-    ImportedHeadMorph(HeadMorph),
+    ImportedHeadMorph(Box<HeadMorph>),
 }
 
 // UI
 pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatches) {
     let mut state = State::default();
 
-    let _ = event_addr.send(MainEvent::LoadDatabases);
+    if let Err(err) = databases::initialize() {
+        state.error = Some(err);
+    }
 
     // UI
     let system = backend::init(
@@ -103,21 +88,9 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
             UiEvent::OpenedSave(opened_save_game) => {
                 state.save_game = Some(opened_save_game);
             }
-            UiEvent::LoadedMe1PlotDb(me1_plot_db) => {
-                state.databases.me1_plot_db = Some(me1_plot_db)
-            }
-            UiEvent::LoadedMe1ItemDb(me1_item_db) => {
-                state.databases.me1_item_db = Some(me1_item_db)
-            }
-            UiEvent::LoadedMe2PlotDb(me2_plot_db) => {
-                state.databases.me2_plot_db = Some(me2_plot_db)
-            }
-            UiEvent::LoadedMe3PlotDb(me3_plot_db) => {
-                state.databases.me3_plot_db = Some(me3_plot_db)
-            }
             UiEvent::ImportedHeadMorph(head_morph) => {
                 let has_head_morph =
-                    HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };
+                    HasHeadMorph { has_head_morph: true, head_morph: Some(*head_morph) };
                 match state.save_game.as_mut() {
                     Some(SaveGame::MassEffect1Le { save_game, .. }) => {
                         save_game.save_data.player.head_morph = has_head_morph
@@ -203,21 +176,15 @@ impl<'ui> Gui<'ui> {
             // Game
             match &mut state.save_game {
                 None => self.draw_change_log(),
-                Some(SaveGame::MassEffect1 { save_game, .. }) => {
-                    self.draw_mass_effect_1(save_game, &state.databases)
-                }
+                Some(SaveGame::MassEffect1 { save_game, .. }) => self.draw_mass_effect_1(save_game),
                 Some(SaveGame::MassEffect1Le { save_game, .. }) => {
-                    self.draw_mass_effect_1_le(&mut save_game.save_data, &state.databases)
+                    self.draw_mass_effect_1_le(&mut save_game.save_data)
                 }
-                Some(SaveGame::MassEffect2 { save_game, .. }) => {
-                    self.draw_mass_effect_2(save_game, &state.databases)
-                }
+                Some(SaveGame::MassEffect2 { save_game, .. }) => self.draw_mass_effect_2(save_game),
                 Some(SaveGame::MassEffect2Le { save_game, .. }) => {
-                    self.draw_mass_effect_2_le(save_game, &state.databases)
+                    self.draw_mass_effect_2_le(save_game)
                 }
-                Some(SaveGame::MassEffect3 { save_game, .. }) => {
-                    self.draw_mass_effect_3(save_game, &state.databases)
-                }
+                Some(SaveGame::MassEffect3 { save_game, .. }) => self.draw_mass_effect_3(save_game),
             };
         }
     }

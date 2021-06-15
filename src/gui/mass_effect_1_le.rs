@@ -5,23 +5,24 @@ use imgui::{
     im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
 };
 
-use crate::save_data::{
-    mass_effect_1::item_db::{DbItem, Me1ItemDb},
-    mass_effect_1_le::{
-        player::{ComplexTalent, Item, ItemLevel, Player},
-        squad::Henchman,
-        Me1LeSaveData,
+use crate::{
+    databases::Database,
+    save_data::{
+        mass_effect_1::item_db::DbItem,
+        mass_effect_1_le::{
+            player::{ComplexTalent, Item, ItemLevel, Player},
+            squad::Henchman,
+            Me1LeSaveData,
+        },
+        shared::player::{Notoriety, Origin},
+        RawUi,
     },
-    shared::player::{Notoriety, Origin},
-    RawUi,
 };
 
-use super::{DatabasesState, Gui};
+use super::Gui;
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_1_le(
-        &self, save_game: &mut Me1LeSaveData, databases: &DatabasesState,
-    ) -> Option<()> {
+    pub fn draw_mass_effect_1_le(&self, save_game: &mut Me1LeSaveData) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
@@ -35,21 +36,18 @@ impl<'ui> Gui<'ui> {
                 self.draw_me1_le_general(save_game);
             }
         }
+
         // Plot
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(me1_plot_db) = &databases.me1_plot_db;
-            then {
-                self.draw_me1_plot_db(&mut save_game.plot, me1_plot_db);
-            }
+        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+            self.draw_me1_plot_db(&mut save_game.plot);
         }
+
         // Inventory
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("Inventory")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            if let Some(me1_item_db) = &databases.me1_item_db;
             then {
-                self.draw_me1_le_inventory_tab(save_game, me1_item_db);
+                self.draw_me1_le_inventory_tab(save_game);
             }
         }
         // Head Morph
@@ -281,9 +279,7 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_me1_le_inventory_tab(
-        &self, savegame: &mut Me1LeSaveData, item_db: &Me1ItemDb,
-    ) -> Option<()> {
+    fn draw_me1_le_inventory_tab(&self, savegame: &mut Me1LeSaveData) -> Option<()> {
         // 1ère colonne
         let _t = self.begin_columns(2)?;
         self.table_next_row();
@@ -292,8 +288,8 @@ impl<'ui> Gui<'ui> {
         let Player { inventory, .. } = player;
 
         // Player
-        self.draw_me1_le_equipped_items("Player Equipped", &mut inventory.equipped, item_db);
-        self.draw_me1_le_equipped_items("Player Quick Slots", &mut inventory.quick_slots, item_db);
+        self.draw_me1_le_equipped_items("Player Equipped", &mut inventory.equipped);
+        self.draw_me1_le_equipped_items("Player Quick Slots", &mut inventory.quick_slots);
 
         // Squad
 
@@ -308,21 +304,19 @@ impl<'ui> Gui<'ui> {
                 _ => continue,
             };
 
-            self.draw_me1_le_equipped_items(character_equipped, equipped, item_db);
-            self.draw_me1_le_equipped_items(character_quick_slots, quick_slots, item_db);
+            self.draw_me1_le_equipped_items(character_equipped, equipped);
+            self.draw_me1_le_equipped_items(character_quick_slots, quick_slots);
         }
 
         // 2ème colonne
         self.table_next_column();
 
-        self.draw_me1_le_inventory(&mut inventory.inventory, item_db);
+        self.draw_me1_le_inventory(&mut inventory.inventory);
 
         Some(())
     }
 
-    fn draw_me1_le_equipped_items(
-        &self, label: &str, items: &mut Vec<Item>, item_db: &Me1ItemDb,
-    ) -> Option<()> {
+    fn draw_me1_le_equipped_items(&self, label: &str, items: &mut Vec<Item>) -> Option<()> {
         let ui = self.ui;
 
         let _t = self.begin_table(&im_str!("{}-table", label), 1)?;
@@ -339,7 +333,7 @@ impl<'ui> Gui<'ui> {
                     let current_item = items.index_mut(i as usize);
 
                     let width = ui.push_item_width(375.0);
-                    self.draw_me1_le_item(i, current_item, item_db);
+                    self.draw_me1_le_item(i, current_item);
                     width.pop(ui);
                 }
             }
@@ -351,7 +345,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_le_inventory(&self, inventory: &mut Vec<Item>, item_db: &Me1ItemDb) -> Option<()> {
+    fn draw_me1_le_inventory(&self, inventory: &mut Vec<Item>) -> Option<()> {
         let ui = self.ui;
 
         let _t = self.begin_table(im_str!("inventory-table"), 1)?;
@@ -375,7 +369,7 @@ impl<'ui> Gui<'ui> {
                     let current_item = inventory.index_mut(i as usize);
 
                     let width = ui.push_item_width(318.0);
-                    self.draw_me1_le_item(i, current_item, item_db);
+                    self.draw_me1_le_item(i, current_item);
                     width.pop(ui);
                 }
             }
@@ -397,8 +391,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_le_item(&self, ident: i32, current_item: &mut Item, item_db: &Me1ItemDb) {
+    fn draw_me1_le_item(&self, ident: i32, current_item: &mut Item) -> Option<()> {
         let ui = self.ui;
+        let item_db = Database::me1_item()?;
 
         // Find name of item
         let current_item_name: &str = item_db
@@ -465,5 +460,7 @@ impl<'ui> Gui<'ui> {
             };
         }
         width.pop(ui);
+
+        Some(())
     }
 }

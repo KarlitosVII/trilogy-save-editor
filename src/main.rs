@@ -11,6 +11,7 @@ use tokio::task;
 #[macro_use]
 extern crate raw_ui_derive;
 
+mod databases;
 mod event_handler;
 mod gui;
 mod save_data;

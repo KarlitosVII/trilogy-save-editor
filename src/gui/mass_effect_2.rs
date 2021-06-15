@@ -4,6 +4,7 @@ use imgui::{
 };
 
 use crate::{
+    databases::Database,
     event_handler::MainEvent,
     save_data::{
         mass_effect_2::{
@@ -21,7 +22,7 @@ use crate::{
     },
 };
 
-use super::{DatabasesState, Gui, Theme};
+use super::{Gui, Theme};
 
 enum Me2Type<'a> {
     Vanilla(&'a mut Me2SaveGame),
@@ -29,9 +30,7 @@ enum Me2Type<'a> {
 }
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_2(
-        &self, save_game: &mut Me2SaveGame, databases: &DatabasesState,
-    ) -> Option<()> {
+    pub fn draw_mass_effect_2(&self, save_game: &mut Me2SaveGame) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
@@ -50,7 +49,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
-                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &databases);
+                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
             }
         }
         // Head Morph
@@ -73,9 +72,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    pub fn draw_mass_effect_2_le(
-        &self, save_game: &mut Me2LeSaveGame, databases: &DatabasesState,
-    ) -> Option<()> {
+    pub fn draw_mass_effect_2_le(&self, save_game: &mut Me2LeSaveGame) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
@@ -94,7 +91,7 @@ impl<'ui> Gui<'ui> {
             if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
             if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
             then {
-                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot, &databases);
+                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
             }
         }
         // Head Morph
@@ -519,10 +516,8 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me2_plot_db(
         &self, me2_plot_table: &mut PlotTable, me1_plot_table: &mut Me1PlotTable,
-        databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
-        let me2_plot_db = databases.me2_plot_db.as_ref()?;
 
         let Me2PlotDb {
             player,
@@ -534,7 +529,7 @@ impl<'ui> Gui<'ui> {
             rewards,
             captains_cabin,
             imported_me1,
-        } = me2_plot_db;
+        } = Database::me2_plot()?;
 
         // Player
         if_chain! {
@@ -616,19 +611,17 @@ impl<'ui> Gui<'ui> {
                 }
             }
 
-            if_chain! {
-                if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui);
-                if let Some(me1_plot_db) = &databases.me1_plot_db;
-                then {
-                    if me1_plot_table.bool_variables.is_empty() {
-                        ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
-                    } else {
-                        ui.text("If you change these plots this will ONLY take effect after an import.");
-                        ui.same_line();
-                        self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.\nOr you can start a New Game +.");
-                        ui.separator();
-                        self.draw_me1_plot_db(me1_plot_table, me1_plot_db);
-                    }
+            if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui) {
+                if me1_plot_table.bool_variables.is_empty() {
+                    ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
+                } else {
+                    ui.text(
+                        "If you change these plots this will ONLY take effect after an import.",
+                    );
+                    ui.same_line();
+                    self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.\nOr you can start a New Game +.");
+                    ui.separator();
+                    self.draw_me1_plot_db(me1_plot_table);
                 }
             }
         }

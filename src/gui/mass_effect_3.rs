@@ -5,6 +5,7 @@ use imgui::{
 use indexmap::IndexMap;
 
 use crate::{
+    databases::Database,
     event_handler::MainEvent,
     save_data::{
         mass_effect_1::plot_db::Me1PlotDb,
@@ -24,12 +25,10 @@ use crate::{
     },
 };
 
-use super::{DatabasesState, Gui, Theme};
+use super::{Gui, Theme};
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_3(
-        &self, save_game: &mut Me3SaveGame, databases: &DatabasesState,
-    ) -> Option<()> {
+    pub fn draw_mass_effect_3(&self, save_game: &mut Me3SaveGame) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
@@ -45,7 +44,7 @@ impl<'ui> Gui<'ui> {
         }
         // Plot
         if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables, databases);
+            self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables);
         }
         // Head Morph
         if_chain! {
@@ -490,10 +489,8 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me3_plot_db(
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
-        databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
-        let me3_plot_db = databases.me3_plot_db.as_ref()?;
 
         let Me3PlotDb {
             general,
@@ -506,7 +503,7 @@ impl<'ui> Gui<'ui> {
             normandy,
             weapons_powers,
             me1_imported,
-        } = me3_plot_db;
+        } = Database::me3_plot()?;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -573,11 +570,9 @@ impl<'ui> Gui<'ui> {
         }
 
         // Mass Effect 2
-        let me2_plot_db = databases.me2_plot_db.as_ref()?;
-
         let _colors = self.style_colors(Theme::MassEffect2);
         if let Some(_t) = TabItem::new(im_str!("Mass Effect 2")).begin(ui) {
-            self.draw_me2_imported_plot_db(plot_table, me2_plot_db);
+            self.draw_me2_imported_plot_db(plot_table);
         }
         // Mass Effect 1
         {
@@ -589,9 +584,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    pub fn draw_me2_imported_plot_db(
-        &self, me3_plot_table: &mut PlotTable, me2_plot_db: &Me2PlotDb,
-    ) -> Option<()> {
+    pub fn draw_me2_imported_plot_db(&self, me3_plot_table: &mut PlotTable) -> Option<()> {
         let ui = self.ui;
         let Me2PlotDb {
             player,
@@ -603,7 +596,7 @@ impl<'ui> Gui<'ui> {
             rewards,
             captains_cabin,
             imported_me1: _,
-        } = me2_plot_db;
+        } = Database::me2_plot()?;
 
         // Tab bar
         let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
