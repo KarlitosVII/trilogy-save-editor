@@ -56,7 +56,7 @@ mod test {
     use anyhow::Result;
     use std::{
         convert::TryInto,
-        fs::File,
+        fs,
         io::{Cursor, Read},
     };
     use zip::ZipArchive;
@@ -67,11 +67,7 @@ mod test {
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
-        let mut input = Vec::new();
-        {
-            let mut file = File::open("test/Clare00_AutoSave.MassEffectSave")?;
-            file.read_to_end(&mut input)?;
-        }
+        let input = fs::read("test/Clare00_AutoSave.MassEffectSave")?;
 
         let state_data = {
             let zip_offset = <u32>::from_le_bytes((&input[8..12]).try_into()?);

@@ -165,10 +165,7 @@ pub(super) struct WorldSavePackage {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use std::{
-        time::Instant,
-        {fs::File, io::Read},
-    };
+    use std::{fs, time::Instant};
 
     use crate::unreal;
 
@@ -182,11 +179,7 @@ mod test {
         ];
 
         for file in &files {
-            let mut input = Vec::new();
-            {
-                let mut file = File::open(file)?;
-                file.read_to_end(&mut input)?;
-            }
+            let input = fs::read(file)?;
 
             let now = Instant::now();
 

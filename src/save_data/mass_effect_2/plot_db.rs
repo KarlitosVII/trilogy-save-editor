@@ -19,18 +19,13 @@ pub struct Me2PlotDb {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use std::{fs::File, io::Read};
+    use std::fs;
 
     use super::*;
 
     #[test]
     fn deserialize_plot_db() -> Result<()> {
-        let mut input = String::new();
-        {
-            let mut file = File::open("databases/me2_plot_db.ron")?;
-            file.read_to_string(&mut input)?;
-        }
-
+        let input = fs::read_to_string("databases/me2_plot_db.ron")?;
         let _me2_plot_db: Me2PlotDb = ron::from_str(&input)?;
 
         Ok(())

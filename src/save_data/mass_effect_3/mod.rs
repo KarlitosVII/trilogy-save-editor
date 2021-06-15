@@ -153,10 +153,7 @@ impl Default for ObjectiveMarkerIconType {
 mod test {
     use anyhow::Result;
     use crc::{Crc, CRC_32_BZIP2};
-    use std::{
-        time::Instant,
-        {fs::File, io::Read},
-    };
+    use std::{fs, time::Instant};
 
     use crate::unreal;
 
@@ -164,11 +161,7 @@ mod test {
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
-        let mut input = Vec::new();
-        {
-            let mut file = File::open("test/ME3Save.pcsav")?;
-            file.read_to_end(&mut input)?;
-        }
+        let input = fs::read("test/ME3Save.pcsav")?;
 
         let now = Instant::now();
 

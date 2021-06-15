@@ -3,10 +3,7 @@ use crc::{Crc, CRC_32_BZIP2};
 use flume::{Receiver, Sender};
 use ron::ser::PrettyConfig;
 use std::path::{Path, PathBuf};
-use tokio::{
-    fs::{self, File},
-    io::{AsyncReadExt, AsyncWriteExt},
-};
+use tokio::fs;
 
 use crate::{
     gui::UiEvent,
@@ -76,13 +73,9 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
 }
 
 async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut input = Vec::new();
-    {
-        let mut file = File::open(&file_path).await?;
-        file.read_to_end(&mut input).await?;
-    }
-
     if let Some(ext) = Path::new(&file_path).extension() {
+        let input = fs::read(&file_path).await?;
+
         let save_game = if unicase::eq(ext.to_string_lossy().to_string().as_str(), "MassEffectSave")
         {
             // ME1
@@ -174,20 +167,14 @@ async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) 
         }
     }
 
-    let mut file = File::create(&path).await?;
-    file.write_all(&output).await?;
+    fs::write(&path, &output).await?;
 
     let _ = ui_addr.send_async(UiEvent::Notification("Saved")).await;
     Ok(())
 }
 
 async fn load_me1_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut input = String::new();
-    {
-        let mut file = File::open("databases/me1_plot_db.ron").await?;
-        file.read_to_string(&mut input).await?;
-    }
-
+    let input = fs::read_to_string("databases/me1_plot_db.ron").await?;
     let me1_plot_db: Me1PlotDb = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe1PlotDb(me1_plot_db)).await;
@@ -195,12 +182,7 @@ async fn load_me1_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
 }
 
 async fn load_me1_item_db(ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut input = String::new();
-    {
-        let mut file = File::open("databases/me1_item_db.ron").await?;
-        file.read_to_string(&mut input).await?;
-    }
-
+    let input = fs::read_to_string("databases/me1_item_db.ron").await?;
     let me1_item_db: Me1ItemDb = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe1ItemDb(me1_item_db)).await;
@@ -208,12 +190,7 @@ async fn load_me1_item_db(ui_addr: Sender<UiEvent>) -> Result<()> {
 }
 
 async fn load_me2_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut input = String::new();
-    {
-        let mut file = File::open("databases/me2_plot_db.ron").await?;
-        file.read_to_string(&mut input).await?;
-    }
-
+    let input = fs::read_to_string("databases/me2_plot_db.ron").await?;
     let me2_plot_db: Me2PlotDb = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe2PlotDb(me2_plot_db)).await;
@@ -221,12 +198,7 @@ async fn load_me2_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
 }
 
 async fn load_me3_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut input = String::new();
-    {
-        let mut file = File::open("databases/me3_plot_db.ron").await?;
-        file.read_to_string(&mut input).await?;
-    }
-
+    let input = fs::read_to_string("databases/me3_plot_db.ron").await?;
     let me3_plot_db: Me3PlotDb = ron::from_str(&input)?;
 
     let _ = ui_addr.send_async(UiEvent::LoadedMe3PlotDb(me3_plot_db)).await;
@@ -234,12 +206,7 @@ async fn load_me3_plot_db(ui_addr: Sender<UiEvent>) -> Result<()> {
 }
 
 async fn import_head_morph(path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
-    let mut import = String::new();
-    {
-        let mut file = File::open(&path).await?;
-        file.read_to_string(&mut import).await?;
-    }
-
+    let import = fs::read_to_string(&path).await?;
     let head_morph: HeadMorph = ron::from_str(&import)?;
 
     let _ = ui_addr.send_async(UiEvent::ImportedHeadMorph(head_morph)).await;
@@ -254,10 +221,7 @@ async fn export_head_morph(
         PrettyConfig::new().with_enumerate_arrays(true).with_new_line(String::from('\n'));
 
     let export = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
-    {
-        let mut file = File::create(&path).await?;
-        file.write_all(export.as_bytes()).await?;
-    }
+    fs::write(&path, export.as_bytes()).await?;
 
     let _ = ui_addr.send_async(UiEvent::Notification("Exported")).await;
     Ok(())

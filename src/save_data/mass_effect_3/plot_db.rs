@@ -26,18 +26,13 @@ pub struct PlotVariable {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use std::{fs::File, io::Read};
+    use std::fs;
 
     use super::*;
 
     #[test]
     fn deserialize_plot_db() -> Result<()> {
-        let mut input = String::new();
-        {
-            let mut file = File::open("databases/me3_plot_db.ron")?;
-            file.read_to_string(&mut input)?;
-        }
-
+        let input = fs::read_to_string("databases/me3_plot_db.ron")?;
         let _me3_plot_db: Me3PlotDb = ron::from_str(&input)?;
 
         Ok(())

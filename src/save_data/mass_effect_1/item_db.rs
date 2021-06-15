@@ -14,18 +14,13 @@ pub struct Me1ItemDb(IndexMap<DbItem, String>);
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use std::{fs::File, io::Read};
+    use std::fs;
 
     use super::*;
 
     #[test]
     fn deserialize_item_db() -> Result<()> {
-        let mut input = String::new();
-        {
-            let mut file = File::open("databases/me1_item_db.ron")?;
-            file.read_to_string(&mut input)?;
-        }
-
+        let input = fs::read_to_string("databases/me1_item_db.ron")?;
         let _me1_item_db: Me1ItemDb = ron::from_str(&input)?;
 
         Ok(())

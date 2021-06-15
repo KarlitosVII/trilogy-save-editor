@@ -285,7 +285,7 @@ struct Hotkey {
 mod test {
     use anyhow::Result;
     use crc::{Crc, CRC_32_BZIP2};
-    use std::{fs::File, time::Instant};
+    use std::{fs, time::Instant};
 
     use crate::unreal;
 
@@ -293,11 +293,7 @@ mod test {
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
-        let mut input = Vec::new();
-        {
-            let mut file = File::open("test/ME1Le00_QuickSave.pcsav")?;
-            file.read_to_end(&mut input)?;
-        }
+        let input = fs::read("test/ME1Le00_QuickSave.pcsav")?;
 
         let now = Instant::now();
 
@@ -361,20 +357,11 @@ mod test {
 
     // #[test]
     // fn uncompress() -> Result<()> {
-    //     let mut input = Vec::new();
-    //     {
-    //         let mut file = File::open("test/Clare00_QuickSave.pcsav")?;
-    //         file.read_to_end(&mut input)?;
-    //     }
-
+    //     let input = fs::read("test/Clare00_QuickSave.pcsav")?;
     //     let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
     //     let output = unreal::Serializer::to_byte_buf(&me1_save_game.save_data)?;
-    //     {
-    //         let mut file = File::create("test/Clare00_QuickSave.uncompressed")?;
-    //         use std::io::Write;
-    //         file.write_all(&output)?;
-    //     }
+    //     fs::write("test/Clare00_QuickSave.uncompressed", &output)?;
 
     //     Ok(())
     // }
