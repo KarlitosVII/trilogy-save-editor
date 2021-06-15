@@ -37,34 +37,29 @@ impl<'ui> Gui<'ui> {
         let _t = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
 
         // General
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me2_general(Me2Type::Vanilla(save_game));
             }
         }
         // Plot
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
                 self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
             }
         }
         // Head Morph
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
-                self.draw_me2_head_morph(&mut save_game.player.appearance.head_morph, save_game.player.is_female);
+        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
+                self.draw_me2_head_morph(
+                    &mut save_game.player.appearance.head_morph,
+                    save_game.player.is_female,
+                );
             }
         }
         // Raw
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 2");
             }
@@ -79,34 +74,26 @@ impl<'ui> Gui<'ui> {
         let _t = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
 
         // General
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me2_general(Me2Type::Legendary(save_game));
             }
         }
         // Plot
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui);
-            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
                 self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
             }
         }
         // Head Morph
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me3_and_le_head_morph(&mut save_game.player.appearance.head_morph);
             }
         }
         // Raw
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 2");
             }
@@ -550,10 +537,8 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if_chain! {
-                if let Some(_t) = TabItem::new(title).begin(ui);
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-                then {
+            if let Some(_t) = TabItem::new(title).begin(ui) {
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                     for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
@@ -588,16 +573,15 @@ impl<'ui> Gui<'ui> {
         // Mass Effect 1
         {
             let _colors = self.style_colors(Theme::MassEffect1);
-            if_chain! {
-                if let Some(_t) = TabItem::new(im_str!("Imported ME1")).begin(ui);
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-                then {
+
+            if let Some(_t) = TabItem::new(im_str!("Imported ME1")).begin(ui) {
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                     ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner bugfix :");
                     ui.same_line();
                     self.draw_help_marker(
                         "- Untick `[The Fan] Intimidated him`\n\
                          - Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
-                         - Only works if you didn't talk to Aethyta"
+                         - Only works if you didn't talk to Aethyta",
                     );
                     ui.separator();
                     for (category_name, plot_db) in imported_me1.iter() {

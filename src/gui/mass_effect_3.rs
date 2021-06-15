@@ -35,10 +35,8 @@ impl<'ui> Gui<'ui> {
         let _t = TabBar::new(im_str!("mass_effect_3")).begin(ui)?;
 
         // General
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me3_general(save_game);
             }
         }
@@ -47,18 +45,14 @@ impl<'ui> Gui<'ui> {
             self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables);
         }
         // Head Morph
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me3_and_le_head_morph(&mut save_game.player.appearance.head_morph);
             }
         }
         // Raw
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 3");
             }
@@ -528,10 +522,8 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if_chain! {
-                if let Some(_t) = TabItem::new(title).begin(ui);
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-                then {
+            if let Some(_t) = TabItem::new(title).begin(ui) {
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                     for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
@@ -554,10 +546,8 @@ impl<'ui> Gui<'ui> {
         }
 
         // Weapons / Powers
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Weapons / Powers")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Weapons / Powers")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 for (category_name, plot_db) in weapons_powers {
                     if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                         self.table_next_row();
@@ -620,10 +610,8 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if_chain! {
-                if let Some(_t) = TabItem::new(title).begin(ui);
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-                then {
+            if let Some(_t) = TabItem::new(title).begin(ui) {
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                     for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
@@ -670,10 +658,8 @@ impl<'ui> Gui<'ui> {
         let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
 
         for (title, plot_map) in &categories {
-            if_chain! {
-                if let Some(_t) = TabItem::new(title).begin(ui);
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-                then {
+            if let Some(_t) = TabItem::new(title).begin(ui) {
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                     for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();

@@ -1,7 +1,6 @@
 use anyhow::Error;
 use clap::ArgMatches;
 use flume::{Receiver, Sender};
-use if_chain::if_chain;
 use imgui::{
     im_str, ChildWindow, ColorStackToken, Condition, ImString, PopupModal, ProgressBar, StyleColor,
     TabBar, TabItem, Ui, Window,
@@ -267,21 +266,15 @@ impl<'ui> Gui<'ui> {
         ui.separator();
         ui.text(im_str!("(C) 2021 Karlitos"));
         ui.separator();
-        if_chain! {
-            if let Some(_t) = ui.begin_menu(im_str!("License"));
-            if let Some(_t) = TabBar::new(im_str!("tabs")).begin(ui);
-            then {
-                if_chain! {
-                    if let Some(_t) = TabItem::new(im_str!("English")).begin(ui);
-                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
-                    then {
+        if let Some(_t) = ui.begin_menu(im_str!("License")) {
+            if let Some(_t) = TabBar::new(im_str!("tabs")).begin(ui) {
+                if let Some(_t) = TabItem::new(im_str!("English")).begin(ui) {
+                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui) {
                         ui.text(include_str!("../../License_CeCILL_V2.1-en.txt"));
                     }
                 }
-                if_chain! {
-                    if let Some(_t) = TabItem::new(im_str!("French")).begin(ui);
-                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui);
-                    then {
+                if let Some(_t) = TabItem::new(im_str!("French")).begin(ui) {
+                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui) {
                         ui.text(include_str!("../../Licence_CeCILL_V2.1-fr.txt"));
                     }
                 }

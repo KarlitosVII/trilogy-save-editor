@@ -1,4 +1,3 @@
-use if_chain::if_chain;
 use imgui::{im_str, ChildWindow, ImStr, ImString, ListClipper, TabBar, TabItem};
 use std::{
     cell::{RefCell, RefMut},
@@ -37,10 +36,8 @@ impl<'ui> Gui<'ui> {
         let _t = TabBar::new(im_str!("mass_effect_1")).begin(ui)?;
 
         // General
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me1_general(save_game);
             }
         }
@@ -51,17 +48,14 @@ impl<'ui> Gui<'ui> {
         }
 
         // Raw
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 // Player
                 self.set_next_item_open(true);
                 self.draw_raw_player(&save_game.player);
                 // State
                 self.set_next_item_open(true);
                 save_game.state.draw_raw_ui(self, "State");
-
             }
         }
         Some(())
@@ -395,10 +389,8 @@ impl<'ui> Gui<'ui> {
         let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
 
         for (title, plot_map) in &categories {
-            if_chain! {
-                if let Some(_t) = TabItem::new(title).begin(ui);
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-                then {
+            if let Some(_t) = TabItem::new(title).begin(ui) {
+                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                     for (category_name, plot_db) in plot_map.iter() {
                         if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
                             self.table_next_row();
@@ -470,10 +462,8 @@ impl<'ui> Gui<'ui> {
             Option::None => object_name.to_owned(),
         };
 
-        if_chain! {
-            if let Some(_t) = self.push_tree_node(&format!("{}##{}", property_name, ident));
-            if let Some(_t) = self.begin_table(im_str!("object-table"), 1);
-            then {
+        if let Some(_t) = self.push_tree_node(&format!("{}##{}", property_name, ident)) {
+            if let Some(_t) = self.begin_table(im_str!("object-table"), 1) {
                 let mut data = player.get_data(object_id).borrow_mut();
                 for (i, property) in data.iter_mut().enumerate() {
                     self.draw_property(player, i, property);
@@ -620,10 +610,8 @@ impl<'ui> Gui<'ui> {
                     string.draw_raw_ui(self, im_str!("##string-{}", i).to_str())
                 }
                 ArrayType::Properties(properties) => {
-                    if_chain! {
-                        if let Some(_t) = self.push_tree_node(&i.to_string());
-                        if let Some(_t) = self.begin_table(im_str!("array-properties-table"), 1);
-                        then {
+                    if let Some(_t) = self.push_tree_node(&i.to_string()) {
+                        if let Some(_t) = self.begin_table(im_str!("array-properties-table"), 1) {
                             for (j, property) in properties.iter_mut().enumerate() {
                                 self.draw_property(player, j, property);
                             }
@@ -649,10 +637,8 @@ impl<'ui> Gui<'ui> {
                 rotator.draw_raw_ui(self, &format!("{}##rotator-{}", label, ident))
             }
             StructType::Properties(properties) => {
-                if_chain! {
-                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", label, ident));
-                    if let Some(_t) = self.begin_table(im_str!("struct-properties-table"), 1);
-                    then {
+                if let Some(_t) = self.push_tree_node(&format!("{}##{}", label, ident)) {
+                    if let Some(_t) = self.begin_table(im_str!("struct-properties-table"), 1) {
                         for (i, property) in properties.iter_mut().enumerate() {
                             self.draw_property(player, i, property);
                         }

@@ -1,9 +1,7 @@
-use std::ops::IndexMut;
-
-use if_chain::if_chain;
 use imgui::{
     im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
 };
+use std::ops::IndexMut;
 
 use crate::{
     databases::Database,
@@ -29,10 +27,8 @@ impl<'ui> Gui<'ui> {
         let _t = TabBar::new(im_str!("mass_effect_1_le")).begin(ui)?;
 
         // General
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me1_le_general(save_game);
             }
         }
@@ -43,26 +39,20 @@ impl<'ui> Gui<'ui> {
         }
 
         // Inventory
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Inventory")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Inventory")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me1_le_inventory_tab(save_game);
             }
         }
         // Head Morph
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.draw_me3_and_le_head_morph(&mut save_game.player.head_morph);
             }
         }
         // Raw
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            then {
+        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
+            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
                 self.set_next_item_open(true);
                 save_game.draw_raw_ui(self, "Mass Effect 1");
             }
