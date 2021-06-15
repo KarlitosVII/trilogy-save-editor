@@ -1,6 +1,8 @@
 use imgui::{im_str, ChildWindow};
 use lazy_static::lazy_static;
 
+use crate::gui::imgui_utils::{Table, TreeNode};
+
 use super::Gui;
 
 lazy_static! {
@@ -30,26 +32,26 @@ impl<'ui> Gui<'ui> {
     pub fn draw_change_log(&self) -> Option<()> {
         let ui = self.ui;
 
-        let _t = ChildWindow::new("scroll").begin(ui)?;
+        let _scroll = ChildWindow::new("scroll").begin(ui)?;
 
         ui.text("Changelog");
         ui.separator();
 
         let mut first = true;
         for (version, changes) in CHANGELOG.iter() {
-            if let Some(_t) = self.begin_table(&im_str!("{}-table", version), 1) {
-                self.table_next_row();
+            Table::new(&im_str!("{}-table", version), 1).build(ui, || {
+                Table::next_row();
                 if first {
                     self.set_next_item_open(true);
                     first = false;
                 }
-                if let Some(_t) = self.push_tree_node(version) {
+                TreeNode::new(version).build(ui, || {
                     for change in changes {
-                        self.table_next_row();
+                        Table::next_row();
                         ui.text(change);
                     }
-                }
-            }
+                });
+            });
         }
         Some(())
     }

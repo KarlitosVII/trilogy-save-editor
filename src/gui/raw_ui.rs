@@ -1,17 +1,18 @@
-use if_chain::if_chain;
 use imgui::{
     im_str, ColorEdit, ComboBox, Condition, ImStr, ImString, InputFloat, InputInt, ListClipper,
-    TreeNode,
 };
 use indexmap::IndexMap;
 use std::{any::Any, fmt::Display, hash::Hash};
 
-use crate::save_data::{
-    shared::{plot::BoolSlice, Guid},
-    RawUi,
+use crate::{
+    gui::imgui_utils::Table,
+    save_data::{
+        shared::{plot::BoolSlice, Guid},
+        RawUi,
+    },
 };
 
-use super::Gui;
+use super::{imgui_utils::TreeNode, Gui};
 
 impl<'ui> Gui<'ui> {
     // Edit boxes
@@ -114,26 +115,27 @@ impl<'ui> Gui<'ui> {
 
     // View widgets
     pub fn draw_struct(&self, ident: &str, fields: &mut [(&mut dyn RawUi, &str)]) {
-        if let Some(_t) = self.push_tree_node(ident) {
-            if let Some(_t) = self.begin_table(&ImString::new(ident), 1) {
+        let ui = self.ui;
+        TreeNode::new(ident).build(ui, || {
+            Table::new(&ImString::new(ident), 1).build(ui, || {
                 for (field, ident) in fields {
-                    self.table_next_row();
+                    Table::next_row();
                     field.draw_raw_ui(self, ident);
                 }
-            }
-        }
+            });
+        });
     }
 
     pub fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
         let ui = self.ui;
         // Tree node
-        let _t = match self.push_tree_node(ident) {
+        let _tree_node = match TreeNode::new(ident).push(ui) {
             Some(t) => t,
             None => return,
         };
 
         // Table
-        let _t = match self.begin_table(&ImString::new(ident), 1) {
+        let _table = match Table::new(&ImString::new(ident), 1).begin(ui) {
             Some(t) => t,
             None => return,
         };
@@ -142,12 +144,12 @@ impl<'ui> Gui<'ui> {
             let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
             while clipper.step() {
                 for i in clipper.display_start()..clipper.display_end() {
-                    self.table_next_row();
+                    Table::next_row();
                     list.get_mut(i as usize).unwrap().draw_raw_ui(self, &i.to_string());
                 }
             }
         } else {
-            self.table_next_row();
+            Table::next_row();
             ui.text("Empty");
         }
     }
@@ -159,13 +161,13 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         // Tree node
-        let _t = match self.push_tree_node(ident) {
+        let _tree_node = match TreeNode::new(ident).push(ui) {
             Some(t) => t,
             None => return,
         };
 
         // Table
-        let _t = match self.begin_table(&ImString::new(ident), 1) {
+        let _table = match Table::new(&ImString::new(ident), 1).begin(ui) {
             Some(t) => t,
             None => return,
         };
@@ -174,7 +176,7 @@ impl<'ui> Gui<'ui> {
             // Item
             let mut remove = None;
             for (i, item) in list.iter_mut().enumerate() {
-                self.table_next_row();
+                Table::next_row();
                 ui.align_text_to_frame_padding();
                 if ui.small_button(&im_str!("remove##remove-{}", i)) {
                     remove = Some(i);
@@ -188,17 +190,17 @@ impl<'ui> Gui<'ui> {
                 list.remove(i);
             }
         } else {
-            self.table_next_row();
+            Table::next_row();
             ui.text("Empty");
         }
 
         // Add
-        self.table_next_row();
+        Table::next_row();
         if ui.button(im_str!("add")) {
             // Ça ouvre automatiquement le tree node de l'élément ajouté
-            TreeNode::new(&im_str!("{}", list.len()))
+            imgui::TreeNode::new(&im_str!("{}", list.len()))
                 .opened(true, Condition::Always)
-                .build(ui, || {});
+                .push(ui);
 
             list.push(T::default());
         }
@@ -212,13 +214,13 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         // Tree node
-        let _t = match self.push_tree_node(ident) {
+        let _tree_node = match TreeNode::new(ident).push(ui) {
             Some(t) => t,
             None => return,
         };
 
         // Table
-        let _t = match self.begin_table(&ImString::new(ident), 1) {
+        let _table = match Table::new(&ImString::new(ident), 1).begin(ui) {
             Some(t) => t,
             None => return,
         };
@@ -227,23 +229,22 @@ impl<'ui> Gui<'ui> {
             // Item
             let mut remove = None;
             for i in 0..list.len() {
-                self.table_next_row();
+                Table::next_row();
                 ui.align_text_to_frame_padding();
                 if ui.small_button(&im_str!("remove##remove-{}", i)) {
                     remove = Some(i);
                 }
                 ui.same_line();
 
-                if_chain! {
-                    if let Some((key, value)) = list.get_index_mut(i);
-                    if let Some(_t) = self.push_tree_node(&format!("{}##{}", key, i));
-                    if let Some(_t) = self.begin_table(&im_str!("table-{}", i), 1);
-                    then {
-                        self.table_next_row();
-                        key.draw_raw_ui(self, "id##key");
-                        self.table_next_row();
-                        value.draw_raw_ui(self, "value##value");
-                    }
+                if let Some((key, value)) = list.get_index_mut(i) {
+                    TreeNode::new(&format!("{}##{}", key, i)).build(ui, || {
+                        Table::new(&im_str!("table-{}", i), 1).build(ui, || {
+                            Table::next_row();
+                            key.draw_raw_ui(self, "id##key");
+                            Table::next_row();
+                            value.draw_raw_ui(self, "value##value");
+                        });
+                    });
                 }
             }
 
@@ -252,12 +253,12 @@ impl<'ui> Gui<'ui> {
                 list.shift_remove_index(i);
             }
         } else {
-            self.table_next_row();
+            Table::next_row();
             ui.text("Empty");
         }
 
         // Add
-        self.table_next_row();
+        Table::next_row();
         if ui.button(im_str!("add")) {
             let mut new_k = K::default();
 
@@ -267,10 +268,9 @@ impl<'ui> Gui<'ui> {
             }
 
             // Ça ouvre automatiquement le tree node de l'élément ajouté
-            TreeNode::new(&im_str!("{}", list.len()))
-                .label(&ImString::new(new_k.to_string()))
+            imgui::TreeNode::new(&im_str!("{}", list.len()))
                 .opened(true, Condition::Always)
-                .build(ui, || {});
+                .push(ui);
 
             list.entry(new_k).or_default();
         }

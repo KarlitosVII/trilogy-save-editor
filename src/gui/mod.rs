@@ -150,9 +150,9 @@ impl<'ui> Gui<'ui> {
         });
 
         // Window
-        if let Some(_t) = window.begin(ui) {
+        window.build(ui, || {
             // Main menu bar
-            if let Some(_t) = ui.begin_menu_bar() {
+            ui.menu_bar(|| {
                 if ui.button(im_str!("Open")) {
                     self.open_dialog();
                 }
@@ -161,10 +161,10 @@ impl<'ui> Gui<'ui> {
                         self.save_dialog(save_game);
                     }
                 }
-                if let Some(_t) = ui.begin_menu(im_str!("About")) {
+                ui.menu(im_str!("About"), || {
                     self.draw_about();
-                }
-            }
+                });
+            });
 
             // Error popup
             self.draw_error(&mut state.error);
@@ -185,7 +185,7 @@ impl<'ui> Gui<'ui> {
                 }
                 Some(SaveGame::MassEffect3 { save_game, .. }) => self.draw_mass_effect_3(save_game),
             };
-        }
+        });
     }
 
     #[cfg(target_os = "windows")]
@@ -266,20 +266,20 @@ impl<'ui> Gui<'ui> {
         ui.separator();
         ui.text(im_str!("(C) 2021 Karlitos"));
         ui.separator();
-        if let Some(_t) = ui.begin_menu(im_str!("License")) {
-            if let Some(_t) = TabBar::new(im_str!("tabs")).begin(ui) {
-                if let Some(_t) = TabItem::new(im_str!("English")).begin(ui) {
-                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui) {
+        ui.menu(im_str!("License"), || {
+            TabBar::new(im_str!("tabs")).build(ui, || {
+                TabItem::new(im_str!("English")).build(ui, || {
+                    ChildWindow::new("scroll").size([540.0, 500.0]).build(ui, || {
                         ui.text(include_str!("../../License_CeCILL_V2.1-en.txt"));
-                    }
-                }
-                if let Some(_t) = TabItem::new(im_str!("French")).begin(ui) {
-                    if let Some(_t) = ChildWindow::new("scroll").size([540.0, 500.0]).begin(ui) {
+                    });
+                });
+                TabItem::new(im_str!("French")).build(ui, || {
+                    ChildWindow::new("scroll").size([540.0, 500.0]).build(ui, || {
                         ui.text(include_str!("../../Licence_CeCILL_V2.1-fr.txt"));
-                    }
-                }
-            }
-        }
+                    });
+                });
+            });
+        });
     }
 
     fn draw_error(&self, option_error: &mut Option<Error>) {
@@ -288,7 +288,7 @@ impl<'ui> Gui<'ui> {
         if let Some(error) = option_error {
             ui.open_popup(im_str!("Error###error"));
 
-            if let Some(_t) =
+            if let Some(_modal) =
                 PopupModal::new(im_str!("Error###error")).always_auto_resize(true).begin_popup(ui)
             {
                 ui.text(error.to_string());
@@ -323,7 +323,7 @@ impl<'ui> Gui<'ui> {
                 .movable(false)
                 .always_auto_resize(true);
 
-            if let Some(_t) = window.begin(ui) {
+            window.build(ui, || {
                 ui.text(&string);
 
                 let remaining = (*close_time - time) / NOTIFICATION_TIME;
@@ -331,7 +331,7 @@ impl<'ui> Gui<'ui> {
                     .overlay_text(im_str!("time_bar"))
                     .size([-0.000001, 2.0])
                     .build(ui);
-            }
+            });
 
             if *close_time < time {
                 *notification = None;
@@ -344,8 +344,7 @@ impl<'ui> Gui<'ui> {
 
         ui.text_disabled(im_str!("(?)"));
         if ui.is_item_hovered() {
-            let _t = ui.begin_tooltip();
-            ui.text(desc);
+            ui.tooltip(|| ui.text(desc));
         }
     }
 

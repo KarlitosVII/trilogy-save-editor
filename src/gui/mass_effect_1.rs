@@ -1,4 +1,4 @@
-use imgui::{im_str, ChildWindow, ImStr, ImString, ListClipper, TabBar, TabItem};
+use imgui::{im_str, ImStr, ImString, ListClipper, TabBar, TabItem};
 use std::{
     cell::{RefCell, RefMut},
     cmp::Ordering,
@@ -18,7 +18,10 @@ use crate::{
     },
 };
 
-use super::Gui;
+use super::{
+    imgui_utils::{TabScroll, Table, TreeNode},
+    Gui,
+};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame) -> Option<()> {
@@ -33,35 +36,32 @@ impl<'ui> Gui<'ui> {
         }
 
         // Tab bar
-        let _t = TabBar::new(im_str!("mass_effect_1")).begin(ui)?;
+        let _tab_bar = TabBar::new(im_str!("mass_effect_1")).begin(ui)?;
 
         // General
-        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me1_general(save_game);
-            }
-        }
+        TabScroll::new(im_str!("General")).build(ui, || {
+            self.draw_me1_general(save_game);
+        });
 
         // Plot
-        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+        TabItem::new(im_str!("Plot")).build(ui, || {
             self.draw_me1_plot_db(&mut save_game.state.plot);
-        }
+        });
 
         // Raw
-        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                // Player
-                self.set_next_item_open(true);
-                self.draw_raw_player(&save_game.player);
-                // State
-                self.set_next_item_open(true);
-                save_game.state.draw_raw_ui(self, "State");
-            }
-        }
+        TabScroll::new(im_str!("Raw")).build(ui, || {
+            // Player
+            self.set_next_item_open(true);
+            self.draw_raw_player(&save_game.player);
+            // State
+            self.set_next_item_open(true);
+            save_game.state.draw_raw_ui(self, "State");
+        });
         Some(())
     }
 
     fn draw_me1_general(&self, save_game: &mut Me1SaveGame) -> Option<()> {
+        let ui = self.ui;
         let player = &mut save_game.player;
         let plot = &mut save_game.state.plot;
 
@@ -89,19 +89,19 @@ impl<'ui> Gui<'ui> {
             Self::me1_find_object_property(player, &m_squad.properties, "m_Inventory")?;
 
         // 1ère colonne
-        let _t = self.begin_columns(2)?;
-        self.table_next_row();
+        let _columns = Table::begin_columns(2, ui)?;
+        Table::next_row();
 
         // Role Play
-        if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("role-play-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Role-Play") {
+            TreeNode::new("Role-Play").build(ui, || {
                 // Name
                 if let Some(name) =
                     Self::me1_find_str_property(player, &mut m_player.properties, "m_FirstName")
                 {
-                    self.table_next_row();
+                    Table::next_row();
                     name.draw_raw_ui(self, "Name");
                 }
 
@@ -109,7 +109,7 @@ impl<'ui> Gui<'ui> {
                 if let Some(gender) =
                     Self::me1_find_name_property(player, &m_player.properties, "m_Gender")
                 {
-                    self.table_next_row();
+                    Table::next_row();
                     let text = ImString::new(
                         gender.borrow().to_str().trim_start_matches("BIO_ATTRIBUTE_PAWN_GENDER_"),
                     );
@@ -120,7 +120,7 @@ impl<'ui> Gui<'ui> {
                 if let Some(origin) =
                     Self::me1_find_name_property(player, &m_player.properties, "m_BackgroundOrigin")
                 {
-                    self.table_next_row();
+                    Table::next_row();
                     let text = ImString::new(
                         origin
                             .borrow()
@@ -136,7 +136,7 @@ impl<'ui> Gui<'ui> {
                     &m_player.properties,
                     "m_BackgroundNotoriety",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     let text = ImString::new(
                         notoriety
                             .borrow()
@@ -145,19 +145,19 @@ impl<'ui> Gui<'ui> {
                     );
                     self.draw_text(&text, Some(im_str!("Notoriety")));
                 }
-            }
-        }
+            });
+        });
 
         // Gameplay
-        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("gameplay-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Gameplay") {
+            TreeNode::new("Gameplay").build(ui, || {
                 // Class
                 if let Some(class) =
                     Self::me1_find_name_property(player, &m_player.properties, "m_ClassBase")
                 {
-                    self.table_next_row();
+                    Table::next_row();
                     let text = ImString::new(
                         class.borrow().to_str().trim_start_matches("BIO_PARTY_MEMBER_CLASS_BASE_"),
                     );
@@ -168,7 +168,7 @@ impl<'ui> Gui<'ui> {
                 if let Some(level) =
                     Self::me1_find_int_property(player, &mut m_player.properties, "m_XPLevel")
                 {
-                    self.table_next_row();
+                    Table::next_row();
                     level.draw_raw_ui(self, "Level");
                 }
 
@@ -178,42 +178,42 @@ impl<'ui> Gui<'ui> {
                     &mut m_squad.properties,
                     "m_nSquadExperience",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     current_xp.draw_raw_ui(self, "Current XP");
                 }
-            }
-        }
+            });
+        });
 
         // Morality
-        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("morality-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Morality") {
+            TreeNode::new("Morality").build(ui, || {
                 if let Some(paragon) = plot.int_variables.get_mut(47) {
-                    self.table_next_row();
+                    Table::next_row();
                     paragon.draw_raw_ui(self, "Paragon");
                 }
 
                 if let Some(renegade) = plot.int_variables.get_mut(46) {
-                    self.table_next_row();
+                    Table::next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }
-            }
-        }
+            });
+        });
 
         // 2ème colonne
-        self.table_next_column();
+        Table::next_column();
 
         // General
-        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
-            self.table_next_row();
+        if let Some(_table) = Table::new(im_str!("general-table"), 1).begin(ui) {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("General") {
+            if let Some(_tree_node) = TreeNode::new("General").push(ui) {
                 // Difficulty
                 if let Some(difficulty) =
                     Self::me1_find_int_property(player, m_game_options, "m_nCombatDifficulty")
                 {
-                    self.table_next_row();
+                    Table::next_row();
                     const DIFFICULTY_LIST: [&ImStr; 5] = [
                         im_str!("Casual"),
                         im_str!("Normal"),
@@ -234,24 +234,24 @@ impl<'ui> Gui<'ui> {
                     &mut current_game.properties,
                     "m_bSecondPlaythrough",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     new_game_plus.draw_raw_ui(self, "New Game +");
                 }
             }
         }
 
         // Resources
-        if let Some(_t) = self.begin_table(im_str!("resources-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("resources-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Resources") {
+            TreeNode::new("Resources").build(ui, || {
                 // Credits
                 if let Some(credits) = Self::me1_find_int_property(
                     player,
                     &mut m_inventory.properties,
                     "m_nResourceCredits",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     credits.draw_raw_ui(self, "Credits");
                 }
 
@@ -261,7 +261,7 @@ impl<'ui> Gui<'ui> {
                     &mut m_inventory.properties,
                     "m_fResourceMedigel",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     medigel.draw_raw_ui(self, "Medigel");
                 }
 
@@ -271,7 +271,7 @@ impl<'ui> Gui<'ui> {
                     &mut m_inventory.properties,
                     "m_nResourceGrenades",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     grenades.draw_raw_ui(self, "Grenades");
                 }
 
@@ -281,11 +281,11 @@ impl<'ui> Gui<'ui> {
                     &mut m_inventory.properties,
                     "m_fResourceSalvage",
                 ) {
-                    self.table_next_row();
+                    Table::next_row();
                     omnigel.draw_raw_ui(self, "Omnigel");
                 }
-            }
-        }
+            });
+        });
 
         Some(())
     }
@@ -384,23 +384,21 @@ impl<'ui> Gui<'ui> {
         let Me1PlotDb { player_crew, missions } = Database::me1_plot()?;
 
         // Tab bar
-        let _t = TabBar::new(im_str!("plot-tab")).begin(ui)?;
+        let _tab_bar = TabBar::new(im_str!("plot-tab")).begin(ui)?;
 
         let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
 
         for (title, plot_map) in &categories {
-            if let Some(_t) = TabItem::new(title).begin(ui) {
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                    for (category_name, plot_db) in plot_map.iter() {
-                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                            self.table_next_row();
-                            if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me1_plot_category(me1_plot_table, plot_db);
-                            }
-                        }
-                    }
+            TabScroll::new(title).build(ui, || {
+                for (category_name, plot_db) in plot_map.iter() {
+                    Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
+                        Table::next_row();
+                        TreeNode::new(category_name).build(ui, || {
+                            self.draw_me1_plot_category(me1_plot_table, plot_db);
+                        });
+                    });
                 }
-            }
+            });
         }
 
         Some(())
@@ -421,7 +419,7 @@ impl<'ui> Gui<'ui> {
                 let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
                 let plot = plot_table.bool_variables.get_mut(*plot_id);
                 if let Some(mut plot) = plot {
-                    self.table_next_row();
+                    Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
                 }
             }
@@ -434,7 +432,7 @@ impl<'ui> Gui<'ui> {
                 let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
                 let plot = plot_table.int_variables.get_mut(*plot_id);
                 if let Some(plot) = plot {
-                    self.table_next_row();
+                    Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
                 }
             }
@@ -454,6 +452,7 @@ impl<'ui> Gui<'ui> {
     fn draw_object(
         &self, player: &Player, ident: usize, property_name: Option<&ImStr>, object_id: i32,
     ) {
+        let ui = self.ui;
         let object = player.get_object(object_id);
         let object_name: &ImStr = &*player.get_name(object.object_name_id).borrow();
 
@@ -462,21 +461,21 @@ impl<'ui> Gui<'ui> {
             Option::None => object_name.to_owned(),
         };
 
-        if let Some(_t) = self.push_tree_node(&format!("{}##{}", property_name, ident)) {
-            if let Some(_t) = self.begin_table(im_str!("object-table"), 1) {
+        TreeNode::new(&format!("{}##{}", property_name, ident)).build(ui, || {
+            Table::new(im_str!("object-table"), 1).build(ui, || {
                 let mut data = player.get_data(object_id).borrow_mut();
                 for (i, property) in data.iter_mut().enumerate() {
                     self.draw_property(player, i, property);
                 }
-            }
-        }
+            });
+        });
     }
 
     fn draw_property(&self, player: &Player, ident: usize, property: &mut Property) -> Option<()> {
         match property {
             Property::Byte { .. } | Property::None { .. } => return None,
             _ => {
-                self.table_next_row();
+                Table::next_row();
             }
         }
 
@@ -579,19 +578,19 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         // Tree node
-        let _t = self.push_tree_node(ident)?;
+        let _tree_node = TreeNode::new(ident).push(ui)?;
 
         // Table
-        let _t = self.begin_table(im_str!("array-table"), 1)?;
+        let _table = Table::new(im_str!("array-table"), 1).begin(ui)?;
 
         if array.is_empty() {
-            self.table_next_row();
+            Table::next_row();
             ui.text("Empty");
             return None;
         }
 
         for (i, property) in array.iter_mut().enumerate() {
-            self.table_next_row();
+            Table::next_row();
             match property {
                 ArrayType::Int(int) => int.draw_raw_ui(self, im_str!("{}##int-{}", i, i).to_str()),
                 ArrayType::Object(object_id) => {
@@ -610,13 +609,13 @@ impl<'ui> Gui<'ui> {
                     string.draw_raw_ui(self, im_str!("##string-{}", i).to_str())
                 }
                 ArrayType::Properties(properties) => {
-                    if let Some(_t) = self.push_tree_node(&i.to_string()) {
-                        if let Some(_t) = self.begin_table(im_str!("array-properties-table"), 1) {
+                    TreeNode::new(&i.to_string()).build(ui, || {
+                        Table::new(im_str!("array-properties-table"), 1).build(ui, || {
                             for (j, property) in properties.iter_mut().enumerate() {
                                 self.draw_property(player, j, property);
                             }
-                        }
-                    }
+                        });
+                    });
                 }
             }
         }
@@ -637,13 +636,14 @@ impl<'ui> Gui<'ui> {
                 rotator.draw_raw_ui(self, &format!("{}##rotator-{}", label, ident))
             }
             StructType::Properties(properties) => {
-                if let Some(_t) = self.push_tree_node(&format!("{}##{}", label, ident)) {
-                    if let Some(_t) = self.begin_table(im_str!("struct-properties-table"), 1) {
+                let ui = self.ui;
+                TreeNode::new(&format!("{}##{}", label, ident)).build(ui, || {
+                    Table::new(im_str!("struct-properties-table"), 1).build(ui, || {
                         for (i, property) in properties.iter_mut().enumerate() {
                             self.draw_property(player, i, property);
                         }
-                    }
-                }
+                    });
+                });
             }
         }
     }

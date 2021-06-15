@@ -1,6 +1,4 @@
-use imgui::{
-    im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
-};
+use imgui::{im_str, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem};
 use std::ops::IndexMut;
 
 use crate::{
@@ -17,46 +15,43 @@ use crate::{
     },
 };
 
-use super::Gui;
+use super::{
+    imgui_utils::{TabScroll, Table, TreeNode},
+    Gui,
+};
 
 impl<'ui> Gui<'ui> {
     pub fn draw_mass_effect_1_le(&self, save_game: &mut Me1LeSaveData) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = TabBar::new(im_str!("mass_effect_1_le")).begin(ui)?;
+        let _tab_bar = TabBar::new(im_str!("mass_effect_1_le")).begin(ui)?;
 
         // General
-        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me1_le_general(save_game);
-            }
-        }
+        TabScroll::new(im_str!("General")).build(ui, || {
+            self.draw_me1_le_general(save_game);
+        });
 
         // Plot
-        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
+        TabItem::new(im_str!("Plot")).build(ui, || {
             self.draw_me1_plot_db(&mut save_game.plot);
-        }
+        });
 
         // Inventory
-        if let Some(_t) = TabItem::new(im_str!("Inventory")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me1_le_inventory_tab(save_game);
-            }
-        }
+        TabScroll::new(im_str!("Inventory")).build(ui, || {
+            self.draw_me1_le_inventory_tab(save_game);
+        });
+
         // Head Morph
-        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me3_and_le_head_morph(&mut save_game.player.head_morph);
-            }
-        }
+        TabScroll::new(im_str!("Head Morph")).build(ui, || {
+            self.draw_me3_and_le_head_morph(&mut save_game.player.head_morph);
+        });
+
         // Raw
-        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.set_next_item_open(true);
-                save_game.draw_raw_ui(self, "Mass Effect 1");
-            }
-        }
+        TabScroll::new(im_str!("Raw")).build(ui, || {
+            self.set_next_item_open(true);
+            save_game.draw_raw_ui(self, "Mass Effect 1");
+        });
         Some(())
     }
 
@@ -81,161 +76,157 @@ impl<'ui> Gui<'ui> {
         } = player;
 
         // 1ère colonne
-        let _t = self.begin_columns(2)?;
-        self.table_next_row();
+        let _columns = Table::begin_columns(2, ui)?;
+        Table::next_row();
 
         // Role Play
-        if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("role-play-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Role-Play") {
-                self.table_next_row();
+            TreeNode::new("Role-Play").build(ui, || {
+                Table::next_row();
                 first_name.draw_raw_ui(self, "Name");
 
                 // Gender
-                self.table_next_row();
-                let mut gender = *is_female as usize;
+                Table::next_row();
                 const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
-                {
-                    if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
-                        *is_female = gender != 0;
-                    }
+                let mut gender = *is_female as usize;
+                if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
+                    *is_female = gender != 0;
+                }
 
-                    ui.same_line();
-                    self.draw_help_marker(
+                ui.same_line();
+                self.draw_help_marker(
                         "If you change your gender, disable the head morph or import an appropriate one.\n\
                         Otherwise, Saren and his Geths will be the least of your worries..."
                     );
-                }
 
-                self.table_next_row();
-                let mut origin_idx = origin.clone() as usize;
+                // Origin
+                Table::next_row();
                 const ORIGIN_LIST: [&ImStr; 4] =
                     [im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
-                {
-                    if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
-                        // Enum
-                        *origin = match origin_idx {
-                            0 => Origin::None,
-                            1 => Origin::Spacer,
-                            2 => Origin::Colonist,
-                            3 => Origin::Earthborn,
-                            _ => unreachable!(),
-                        };
+                let mut origin_idx = origin.clone() as usize;
+                if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                    // Enum
+                    *origin = match origin_idx {
+                        0 => Origin::None,
+                        1 => Origin::Spacer,
+                        2 => Origin::Colonist,
+                        3 => Origin::Earthborn,
+                        _ => unreachable!(),
+                    };
 
-                        // ME1 plot
-                        if let Some(me1_origin) = plot.int_variables.get_mut(1) {
-                            *me1_origin = origin_idx as i32;
-                        }
+                    // ME1 plot
+                    if let Some(me1_origin) = plot.int_variables.get_mut(1) {
+                        *me1_origin = origin_idx as i32;
                     }
                 }
 
-                self.table_next_row();
-                let mut notoriety_idx = notoriety.clone() as usize;
+                // Notoriety
+                Table::next_row();
                 const NOTORIETY_LIST: [&ImStr; 4] = [
                     im_str!("None"),
                     im_str!("Survivor"),
                     im_str!("War Hero"),
                     im_str!("Ruthless"),
                 ];
-                {
-                    if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
-                        // Enum
-                        *notoriety = match notoriety_idx {
-                            0 => Notoriety::None,
-                            1 => Notoriety::Survivor,
-                            2 => Notoriety::Warhero,
-                            3 => Notoriety::Ruthless,
-                            _ => unreachable!(),
-                        };
+                let mut notoriety_idx = notoriety.clone() as usize;
+                if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                    // Enum
+                    *notoriety = match notoriety_idx {
+                        0 => Notoriety::None,
+                        1 => Notoriety::Survivor,
+                        2 => Notoriety::Warhero,
+                        3 => Notoriety::Ruthless,
+                        _ => unreachable!(),
+                    };
 
-                        // ME1 plot
-                        if let Some(me1_notoriety) = plot.int_variables.get_mut(2) {
-                            *me1_notoriety = notoriety_idx as i32;
-                        }
+                    // ME1 plot
+                    if let Some(me1_notoriety) = plot.int_variables.get_mut(2) {
+                        *me1_notoriety = notoriety_idx as i32;
                     }
                 }
 
-                self.table_next_row();
+                Table::next_row();
                 face_code.draw_raw_ui(self, "Identity Code");
                 ui.same_line();
                 self.draw_help_marker(
                     "If you change this you can display whatever you want in the menus\n\
                     in place of your `Identity Code`, which is pretty cool !",
                 );
-            }
-        }
+            });
+        });
 
         // Morality
-        if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("morality-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Morality") {
+            TreeNode::new("Morality").build(ui, || {
                 if let Some(paragon) = plot.int_variables.get_mut(47) {
-                    self.table_next_row();
+                    Table::next_row();
                     paragon.draw_raw_ui(self, "Paragon");
                 }
 
                 if let Some(renegade) = plot.int_variables.get_mut(46) {
-                    self.table_next_row();
+                    Table::next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }
-            }
-        }
+            });
+        });
 
         // Resources
-        if let Some(_t) = self.begin_table(im_str!("resources-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("resources-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Resources") {
-                self.table_next_row();
+            TreeNode::new("Resources").build(ui, || {
+                Table::next_row();
                 credits.draw_raw_ui(self, "Credits");
-                self.table_next_row();
+                Table::next_row();
                 medigel.draw_raw_ui(self, "Medigel");
-                self.table_next_row();
+                Table::next_row();
                 grenades.draw_raw_ui(self, "Grenades");
-                self.table_next_row();
+                Table::next_row();
                 omnigel.draw_raw_ui(self, "Omnigel");
-            }
-        }
+            });
+        });
 
         // 2ème colonne
-        self.table_next_column();
+        Table::next_column();
 
         // General
-        if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("general-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("General") {
-                self.table_next_row();
+            TreeNode::new("General").build(ui, || {
+                Table::next_row();
                 difficulty.draw_raw_ui(self, "Difficulty");
-            }
-        }
+            });
+        });
 
         // Gameplay
-        if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("gameplay-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Gameplay") {
-                self.table_next_row();
+            TreeNode::new("Gameplay").build(ui, || {
+                Table::next_row();
                 level.draw_raw_ui(self, "Level");
                 ui.same_line();
                 self.draw_help_marker("Classic mode (1 - 60)");
 
-                self.table_next_row();
+                Table::next_row();
                 current_xp.draw_raw_ui(self, "Current XP");
-                self.table_next_row();
+                Table::next_row();
                 talent_points.draw_raw_ui(self, "Talent Points");
-                self.table_next_row();
+                Table::next_row();
                 self.draw_me1_le_reset_talents("player", talent_points, complex_talents);
-            }
-        }
+            });
+        });
 
         // Squad
-        if let Some(_t) = self.begin_table(im_str!("squad-table"), 1) {
-            self.table_next_row();
+        Table::new(im_str!("squad-table"), 1).build(ui, || {
+            Table::next_row();
             self.set_next_item_open(true);
-            if let Some(_t) = self.push_tree_node("Squad") {
+            TreeNode::new("Squad").build(ui, || {
                 for Henchman { tag, talent_points, complex_talents, .. } in squad {
                     let character_name = match tag.to_str() {
                         "hench_asari" => "Liara",
@@ -247,12 +238,11 @@ impl<'ui> Gui<'ui> {
                         _ => continue,
                     };
 
-                    self.table_next_row();
+                    Table::next_row();
                     self.draw_me1_le_reset_talents(character_name, talent_points, complex_talents);
                 }
-            }
-        }
-
+            });
+        });
         Some(())
     }
 
@@ -271,8 +261,8 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me1_le_inventory_tab(&self, savegame: &mut Me1LeSaveData) -> Option<()> {
         // 1ère colonne
-        let _t = self.begin_columns(2)?;
-        self.table_next_row();
+        let _columns = Table::begin_columns(2, self.ui)?;
+        Table::next_row();
 
         let Me1LeSaveData { player, squad, .. } = savegame;
         let Player { inventory, .. } = player;
@@ -299,7 +289,7 @@ impl<'ui> Gui<'ui> {
         }
 
         // 2ème colonne
-        self.table_next_column();
+        Table::next_column();
 
         self.draw_me1_le_inventory(&mut inventory.inventory);
 
@@ -309,16 +299,16 @@ impl<'ui> Gui<'ui> {
     fn draw_me1_le_equipped_items(&self, label: &str, items: &mut Vec<Item>) -> Option<()> {
         let ui = self.ui;
 
-        let _t = self.begin_table(&im_str!("{}-table", label), 1)?;
-        self.table_next_row();
+        let _table = Table::new(&im_str!("{}-table", label), 1).begin(ui)?;
+        Table::next_row();
         self.set_next_item_open(true);
-        let _t = self.push_tree_node(label)?;
+        let _tree_node = TreeNode::new(label).push(ui)?;
 
         if !items.is_empty() {
             let mut clipper = ListClipper::new(items.len() as i32).begin(ui);
             while clipper.step() {
                 for i in clipper.display_start()..clipper.display_end() {
-                    self.table_next_row();
+                    Table::next_row();
 
                     let current_item = items.index_mut(i as usize);
 
@@ -328,7 +318,7 @@ impl<'ui> Gui<'ui> {
                 }
             }
         } else {
-            self.table_next_row();
+            Table::next_row();
             ui.text("Empty");
         }
 
@@ -338,17 +328,17 @@ impl<'ui> Gui<'ui> {
     fn draw_me1_le_inventory(&self, inventory: &mut Vec<Item>) -> Option<()> {
         let ui = self.ui;
 
-        let _t = self.begin_table(im_str!("inventory-table"), 1)?;
-        self.table_next_row();
+        let _table = Table::new(im_str!("inventory-table"), 1).begin(ui)?;
+        Table::next_row();
         self.set_next_item_open(true);
-        let _t = self.push_tree_node("Inventory")?;
+        let _tree_node = TreeNode::new("Inventory").push(ui)?;
 
         if !inventory.is_empty() {
             let mut clipper = ListClipper::new(inventory.len() as i32).begin(ui);
             let mut remove = None;
             while clipper.step() {
                 for i in clipper.display_start()..clipper.display_end() {
-                    self.table_next_row();
+                    Table::next_row();
 
                     ui.align_text_to_frame_padding();
                     if ui.small_button(&im_str!("remove##remove-{}", i)) {
@@ -369,12 +359,12 @@ impl<'ui> Gui<'ui> {
                 inventory.remove(i as usize);
             }
         } else {
-            self.table_next_row();
+            Table::next_row();
             ui.text("Empty");
         }
 
         // Add
-        self.table_next_row();
+        Table::next_row();
         if ui.button(im_str!("add")) {
             inventory.push(Item::default());
         }
@@ -397,9 +387,7 @@ impl<'ui> Gui<'ui> {
         // Item name
         let label = im_str!("##item-name-{}", ident);
         let preview_value = ImString::new(current_item_name);
-        let cb = ComboBox::new(&label).preview_value(&preview_value);
-
-        if let Some(_t) = cb.begin(ui) {
+        ComboBox::new(&label).preview_value(&preview_value).build(ui, || {
             for (k, item_name) in item_db.iter() {
                 let text = ImString::new(item_name);
                 let selected = item_name == current_item_name;
@@ -408,7 +396,7 @@ impl<'ui> Gui<'ui> {
                     current_item.manufacturer_id = k.manufacturer_id;
                 }
             }
-        }
+        });
 
         ui.same_line();
 

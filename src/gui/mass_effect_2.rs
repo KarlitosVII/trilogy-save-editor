@@ -1,7 +1,4 @@
-use if_chain::if_chain;
-use imgui::{
-    im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
-};
+use imgui::{im_str, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem};
 
 use crate::{
     databases::Database,
@@ -22,7 +19,10 @@ use crate::{
     },
 };
 
-use super::{Gui, Theme};
+use super::{
+    imgui_utils::{TabScroll, Table, TreeNode},
+    Gui, Theme,
+};
 
 enum Me2Type<'a> {
     Vanilla(&'a mut Me2SaveGame),
@@ -34,36 +34,33 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
+        let _tab_bar = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
 
         // General
-        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me2_general(Me2Type::Vanilla(save_game));
-            }
-        }
+        TabScroll::new(im_str!("General")).build(ui, || {
+            self.draw_me2_general(Me2Type::Vanilla(save_game));
+        });
+
         // Plot
-        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
+        TabItem::new(im_str!("Plot")).build(ui, || {
+            TabBar::new(im_str!("plot-tab")).build(ui, || {
                 self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
-            }
-        }
+            });
+        });
+
         // Head Morph
-        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me2_head_morph(
-                    &mut save_game.player.appearance.head_morph,
-                    save_game.player.is_female,
-                );
-            }
-        }
+        TabScroll::new(im_str!("Head Morph")).build(ui, || {
+            self.draw_me2_head_morph(
+                &mut save_game.player.appearance.head_morph,
+                save_game.player.is_female,
+            );
+        });
+
         // Raw
-        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.set_next_item_open(true);
-                save_game.draw_raw_ui(self, "Mass Effect 2");
-            }
-        }
+        TabScroll::new(im_str!("Raw")).build(ui, || {
+            self.set_next_item_open(true);
+            save_game.draw_raw_ui(self, "Mass Effect 2");
+        });
         Some(())
     }
 
@@ -71,40 +68,37 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = TabBar::new(im_str!("mass_effect_2")).begin(ui)?;
+        let _tab_bar = TabBar::new(im_str!("mass_effect_2_le")).begin(ui)?;
 
         // General
-        if let Some(_t) = TabItem::new(im_str!("General")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me2_general(Me2Type::Legendary(save_game));
-            }
-        }
+        TabScroll::new(im_str!("General")).build(ui, || {
+            self.draw_me2_general(Me2Type::Legendary(save_game));
+        });
+
         // Plot
-        if let Some(_t) = TabItem::new(im_str!("Plot")).begin(ui) {
-            if let Some(_t) = TabBar::new(im_str!("plot-tab")).begin(ui) {
+        TabItem::new(im_str!("Plot")).build(ui, || {
+            TabBar::new(im_str!("plot-tab")).build(ui, || {
                 self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
-            }
-        }
+            });
+        });
+
         // Head Morph
-        if let Some(_t) = TabItem::new(im_str!("Head Morph")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.draw_me3_and_le_head_morph(&mut save_game.player.appearance.head_morph);
-            }
-        }
+        TabScroll::new(im_str!("Head Morph")).build(ui, || {
+            self.draw_me3_and_le_head_morph(&mut save_game.player.appearance.head_morph);
+        });
+
         // Raw
-        if let Some(_t) = TabItem::new(im_str!("Raw")).begin(ui) {
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                self.set_next_item_open(true);
-                save_game.draw_raw_ui(self, "Mass Effect 2");
-            }
-        }
+        TabScroll::new(im_str!("Raw")).build(ui, || {
+            self.set_next_item_open(true);
+            save_game.draw_raw_ui(self, "Mass Effect 2");
+        });
         Some(())
     }
 
     fn draw_me2_general(&self, save_game: Me2Type) -> Option<()> {
         let ui = self.ui;
 
-        match save_game {
+        let (difficulty, end_game_state, player, plot, me1_plot) = match save_game {
             Me2Type::Vanilla(Me2SaveGame {
                 difficulty,
                 end_game_state,
@@ -120,281 +114,276 @@ impl<'ui> Gui<'ui> {
                 plot,
                 me1_plot,
                 ..
-            }) => {
-                let Player {
-                    is_female,
-                    class_name,
-                    level,
-                    current_xp,
-                    first_name,
-                    origin,
-                    notoriety,
-                    talent_points,
-                    powers,
-                    credits,
-                    medigel,
-                    eezo,
-                    iridium,
-                    palladium,
-                    platinum,
-                    probes,
-                    current_fuel,
-                    face_code,
-                    ..
-                } = player;
+            }) => (difficulty, end_game_state, player, plot, me1_plot),
+        };
 
-                // 1ère colonne
-                let _t = self.begin_columns(2)?;
-                self.table_next_row();
+        let Player {
+            is_female,
+            class_name,
+            level,
+            current_xp,
+            first_name,
+            origin,
+            notoriety,
+            talent_points,
+            powers,
+            credits,
+            medigel,
+            eezo,
+            iridium,
+            palladium,
+            platinum,
+            probes,
+            current_fuel,
+            face_code,
+            ..
+        } = player;
 
-                // Role Play
-                if let Some(_t) = self.begin_table(im_str!("role-play-table"), 1) {
-                    self.table_next_row();
-                    self.set_next_item_open(true);
-                    if let Some(_t) = self.push_tree_node("Role-Play") {
-                        self.table_next_row();
-                        first_name.draw_raw_ui(self, "Name");
+        // 1ère colonne
+        let _columns = Table::begin_columns(2, ui)?;
+        Table::next_row();
 
-                        // Gender
-                        self.table_next_row();
-                        let mut gender = *is_female as usize;
-                        const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
-                        {
-                            if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
-                                *is_female = gender != 0;
-                            }
+        // Role Play
+        Table::new(im_str!("role-play-table"), 1).build(ui, || {
+            Table::next_row();
+            self.set_next_item_open(true);
+            TreeNode::new("Role-Play").build(ui, || {
+                Table::next_row();
+                first_name.draw_raw_ui(self, "Name");
 
-                            ui.same_line();
-                            self.draw_help_marker(
+                // Gender
+                Table::next_row();
+                const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
+                let mut gender = *is_female as usize;
+                if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
+                    *is_female = gender != 0;
+                }
+
+                ui.same_line();
+                self.draw_help_marker(
                                 "If you change your gender, disable the head morph or import an appropriate one.\n\
                                 Otherwise, the Collectors will be the least of your worries..."
                             );
-                        }
 
-                        self.table_next_row();
-                        let mut origin_idx = origin.clone() as usize;
-                        const ORIGIN_LIST: [&ImStr; 4] = [
-                            im_str!("None"),
-                            im_str!("Spacer"),
-                            im_str!("Colonist"),
-                            im_str!("Earthborn"),
-                        ];
+                // Origin
+                Table::next_row();
+                const ORIGIN_LIST: [&ImStr; 4] =
+                    [im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
+                let mut origin_idx = origin.clone() as usize;
+                if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                    // Enum
+                    *origin = match origin_idx {
+                        0 => Origin::None,
+                        1 => Origin::Spacer,
+                        2 => Origin::Colonist,
+                        3 => Origin::Earthborn,
+                        _ => unreachable!(),
+                    };
 
-                        if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
-                            // Enum
-                            *origin = match origin_idx {
-                                0 => Origin::None,
-                                1 => Origin::Spacer,
-                                2 => Origin::Colonist,
-                                3 => Origin::Earthborn,
-                                _ => unreachable!(),
-                            };
-
-                            // ME1 imported
-                            match origin {
-                                Origin::None => {}
-                                Origin::Spacer => {
-                                    if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
-                                        *spacer = true;
-                                    }
-                                    if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
-                                        *colonist = false;
-                                    }
-                                    if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
-                                        *eathborn = false;
-                                    }
-                                }
-                                Origin::Colonist => {
-                                    if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
-                                        *spacer = false;
-                                    }
-                                    if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
-                                        *colonist = true;
-                                    }
-                                    if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
-                                        *eathborn = false;
-                                    }
-                                }
-                                Origin::Earthborn => {
-                                    if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
-                                        *spacer = false;
-                                    }
-                                    if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
-                                        *colonist = false;
-                                    }
-                                    if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
-                                        *eathborn = true;
-                                    }
-                                }
+                    // ME1 imported
+                    match origin {
+                        Origin::None => {}
+                        Origin::Spacer => {
+                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                *spacer = true;
                             }
-
-                            // ME1 plot
-                            if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
-                                *me1_origin = origin_idx as i32;
+                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                *colonist = false;
+                            }
+                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                *eathborn = false;
                             }
                         }
-
-                        self.table_next_row();
-                        let mut notoriety_idx = notoriety.clone() as usize;
-                        const NOTORIETY_LIST: [&ImStr; 4] = [
-                            im_str!("None"),
-                            im_str!("Survivor"),
-                            im_str!("War Hero"),
-                            im_str!("Ruthless"),
-                        ];
-
-                        if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
-                            // Enum
-                            *notoriety = match notoriety_idx {
-                                0 => Notoriety::None,
-                                1 => Notoriety::Survivor,
-                                2 => Notoriety::Warhero,
-                                3 => Notoriety::Ruthless,
-                                _ => unreachable!(),
-                            };
-
-                            // ME1 imported
-                            match notoriety {
-                                Notoriety::None => {}
-                                Notoriety::Survivor => {
-                                    if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
-                                        *survivor = true;
-                                    }
-                                    if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
-                                        *war_hero = false;
-                                    }
-                                    if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
-                                        *ruthless = false;
-                                    }
-                                }
-                                Notoriety::Warhero => {
-                                    if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
-                                        *survivor = false;
-                                    }
-                                    if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
-                                        *war_hero = true;
-                                    }
-                                    if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
-                                        *ruthless = false;
-                                    }
-                                }
-                                Notoriety::Ruthless => {
-                                    if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
-                                        *survivor = false;
-                                    }
-                                    if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
-                                        *war_hero = false;
-                                    }
-                                    if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
-                                        *ruthless = true;
-                                    }
-                                }
+                        Origin::Colonist => {
+                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                *spacer = false;
                             }
-
-                            // ME1 plot
-                            if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
-                                *me1_notoriety = notoriety_idx as i32;
+                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                *colonist = true;
+                            }
+                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                *eathborn = false;
                             }
                         }
-
-                        self.table_next_row();
-                        face_code.draw_raw_ui(self, "Identity Code");
-                        ui.same_line();
-                        self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
-                    }
-                }
-
-                // Morality
-                if let Some(_t) = self.begin_table(im_str!("morality-table"), 1) {
-                    self.table_next_row();
-                    self.set_next_item_open(true);
-                    if let Some(_t) = self.push_tree_node("Morality") {
-                        if let Some(paragon) = plot.int_variables.get_mut(2) {
-                            self.table_next_row();
-                            paragon.draw_raw_ui(self, "Paragon");
-                        }
-
-                        if let Some(renegade) = plot.int_variables.get_mut(3) {
-                            self.table_next_row();
-                            renegade.draw_raw_ui(self, "Renegade");
+                        Origin::Earthborn => {
+                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                                *spacer = false;
+                            }
+                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                                *colonist = false;
+                            }
+                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                                *eathborn = true;
+                            }
                         }
                     }
-                }
 
-                // Gameplay
-                if let Some(_t) = self.begin_table(im_str!("gameplay-table"), 1) {
-                    self.table_next_row();
-                    self.set_next_item_open(true);
-                    if let Some(_t) = self.push_tree_node("Gameplay") {
-                        self.table_next_row();
-                        self.draw_me2_class(class_name);
-
-                        self.table_next_row();
-                        level.draw_raw_ui(self, "Level");
-
-                        self.table_next_row();
-                        current_xp.draw_raw_ui(self, "Current XP");
-
-                        self.table_next_row();
-                        talent_points.draw_raw_ui(self, "Talent Points");
-
-                        self.table_next_row();
-                        credits.draw_raw_ui(self, "Credits");
-
-                        self.table_next_row();
-                        medigel.draw_raw_ui(self, "Medi-gel");
+                    // ME1 plot
+                    if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
+                        *me1_origin = origin_idx as i32;
                     }
                 }
 
-                // Resources
-                if let Some(_t) = self.begin_table(im_str!("resources-table"), 1) {
-                    self.table_next_row();
-                    self.set_next_item_open(true);
-                    if let Some(_t) = self.push_tree_node("Resources") {
-                        self.table_next_row();
-                        eezo.draw_raw_ui(self, "Eezo");
+                // Notoriety
+                Table::next_row();
+                const NOTORIETY_LIST: [&ImStr; 4] = [
+                    im_str!("None"),
+                    im_str!("Survivor"),
+                    im_str!("War Hero"),
+                    im_str!("Ruthless"),
+                ];
+                let mut notoriety_idx = notoriety.clone() as usize;
+                if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                    // Enum
+                    *notoriety = match notoriety_idx {
+                        0 => Notoriety::None,
+                        1 => Notoriety::Survivor,
+                        2 => Notoriety::Warhero,
+                        3 => Notoriety::Ruthless,
+                        _ => unreachable!(),
+                    };
 
-                        self.table_next_row();
-                        iridium.draw_raw_ui(self, "Iridium");
+                    // ME1 imported
+                    match notoriety {
+                        Notoriety::None => {}
+                        Notoriety::Survivor => {
+                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                *survivor = true;
+                            }
+                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                *war_hero = false;
+                            }
+                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                *ruthless = false;
+                            }
+                        }
+                        Notoriety::Warhero => {
+                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                *survivor = false;
+                            }
+                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                *war_hero = true;
+                            }
+                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                *ruthless = false;
+                            }
+                        }
+                        Notoriety::Ruthless => {
+                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                                *survivor = false;
+                            }
+                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                                *war_hero = false;
+                            }
+                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                                *ruthless = true;
+                            }
+                        }
+                    }
 
-                        self.table_next_row();
-                        palladium.draw_raw_ui(self, "Palladium");
-
-                        self.table_next_row();
-                        platinum.draw_raw_ui(self, "Platinum");
-
-                        self.table_next_row();
-                        probes.draw_raw_ui(self, "Probes");
-
-                        self.table_next_row();
-                        current_fuel.draw_raw_ui(self, "Current Fuel");
+                    // ME1 plot
+                    if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
+                        *me1_notoriety = notoriety_idx as i32;
                     }
                 }
 
-                // 2ème colonne
-                self.table_next_column();
+                Table::next_row();
+                face_code.draw_raw_ui(self, "Identity Code");
+                ui.same_line();
+                self.draw_help_marker("If you change this you can display whatever you want in the menus\nin place of your `Identity Code`, which is pretty cool !");
+            });
+        });
 
-                // General
-                if let Some(_t) = self.begin_table(im_str!("general-table"), 1) {
-                    self.table_next_row();
-                    self.set_next_item_open(true);
-                    if let Some(_t) = self.push_tree_node("General") {
-                        self.table_next_row();
-                        difficulty.draw_raw_ui(self, "Difficulty");
-                        self.table_next_row();
-                        end_game_state.draw_raw_ui(self, "End Game State");
-                    }
+        // Morality
+        Table::new(im_str!("morality-table"), 1).build(ui, || {
+            Table::next_row();
+            self.set_next_item_open(true);
+            TreeNode::new("Morality").build(ui, || {
+                if let Some(paragon) = plot.int_variables.get_mut(2) {
+                    Table::next_row();
+                    paragon.draw_raw_ui(self, "Paragon");
                 }
 
-                // Bonus Powers
-                self.set_next_item_open(true);
-                self.draw_me2_bonus_powers(powers)
-            }
-        }
+                if let Some(renegade) = plot.int_variables.get_mut(3) {
+                    Table::next_row();
+                    renegade.draw_raw_ui(self, "Renegade");
+                }
+            });
+        });
+
+        // Gameplay
+        Table::new(im_str!("gameplay-table"), 1).build(ui, || {
+            Table::next_row();
+            self.set_next_item_open(true);
+            TreeNode::new("Gameplay").build(ui, || {
+                Table::next_row();
+                self.draw_me2_class(class_name);
+
+                Table::next_row();
+                level.draw_raw_ui(self, "Level");
+
+                Table::next_row();
+                current_xp.draw_raw_ui(self, "Current XP");
+
+                Table::next_row();
+                talent_points.draw_raw_ui(self, "Talent Points");
+
+                Table::next_row();
+                credits.draw_raw_ui(self, "Credits");
+
+                Table::next_row();
+                medigel.draw_raw_ui(self, "Medi-gel");
+            });
+        });
+
+        // Resources
+        Table::new(im_str!("resources-table"), 1).build(ui, || {
+            Table::next_row();
+            self.set_next_item_open(true);
+            TreeNode::new("Resources").build(ui, || {
+                Table::next_row();
+                eezo.draw_raw_ui(self, "Eezo");
+
+                Table::next_row();
+                iridium.draw_raw_ui(self, "Iridium");
+
+                Table::next_row();
+                palladium.draw_raw_ui(self, "Palladium");
+
+                Table::next_row();
+                platinum.draw_raw_ui(self, "Platinum");
+
+                Table::next_row();
+                probes.draw_raw_ui(self, "Probes");
+
+                Table::next_row();
+                current_fuel.draw_raw_ui(self, "Current Fuel");
+            });
+        });
+
+        // 2ème colonne
+        Table::next_column();
+
+        // General
+        Table::new(im_str!("general-table"), 1).build(ui, || {
+            Table::next_row();
+            self.set_next_item_open(true);
+            TreeNode::new("General").build(ui, || {
+                Table::next_row();
+                difficulty.draw_raw_ui(self, "Difficulty");
+                Table::next_row();
+                end_game_state.draw_raw_ui(self, "End Game State");
+            });
+        });
+
+        // Bonus Powers
+        self.set_next_item_open(true);
+        self.draw_me2_bonus_powers(powers)
     }
 
     fn draw_me2_class(&self, class_name: &mut ImString) {
         let ui = self.ui;
+
         const CLASS_LIST: [(&ImStr, &ImStr); 6] = [
             (im_str!("SFXGame.SFXPawn_PlayerAdept"), im_str!("Adept")),
             (im_str!("SFXGame.SFXPawn_PlayerEngineer"), im_str!("Engineer")),
@@ -428,11 +417,11 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         // Table
-        let _t = self.begin_table(im_str!("gameplay-table"), 1)?;
+        let _table = Table::new(im_str!("gameplay-table"), 1).begin(ui)?;
 
         // Tree node
-        self.table_next_row();
-        let _t = self.push_tree_node("Bonus Powers")?;
+        Table::next_row();
+        let _tree_node = TreeNode::new("Bonus Powers").push(ui)?;
         ui.same_line();
         self.draw_help_marker(
             "You can use as many bonus powers as you want and customize your\n\
@@ -484,7 +473,7 @@ impl<'ui> Gui<'ui> {
                 .iter()
                 .any(|power| unicase::eq(power.power_class_name.as_ref(), power_class_name));
 
-            self.table_next_row();
+            Table::next_row();
             ui.align_text_to_frame_padding();
             if Selectable::new(power_name).build_with_ref(ui, &mut selected) {
                 if selected {
@@ -519,14 +508,11 @@ impl<'ui> Gui<'ui> {
         } = Database::me2_plot()?;
 
         // Player
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Player")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
-            then {
+        TabScroll::new(im_str!("Player")).build(ui, || {
+            Table::new(im_str!("plot-table"), 1).build(ui, || {
                 self.draw_me2_plot_category(me2_plot_table, player);
-            }
-        }
+            });
+        });
 
         let categories = [
             (im_str!("Crew"), crew),
@@ -537,65 +523,55 @@ impl<'ui> Gui<'ui> {
         ];
 
         for (title, plot_map) in &categories {
-            if let Some(_t) = TabItem::new(title).begin(ui) {
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                    for (category_name, plot_db) in plot_map.iter() {
-                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                            self.table_next_row();
-                            if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me2_plot_category(me2_plot_table, plot_db);
-                            }
-                        }
-                    }
+            TabScroll::new(title).build(ui, || {
+                for (category_name, plot_db) in plot_map.iter() {
+                    Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
+                        Table::next_row();
+                        TreeNode::new(category_name).build(ui, || {
+                            self.draw_me2_plot_category(me2_plot_table, plot_db);
+                        });
+                    });
                 }
-            }
+            });
         }
 
         // Rewards
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Rewards")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
-            then {
+        TabScroll::new(im_str!("Rewards")).build(ui, || {
+            Table::new(im_str!("plot-table"), 1).build(ui, || {
                 self.draw_me2_plot_category(me2_plot_table, rewards);
-            }
-        }
+            });
+        });
         // Captain's cabin
-        if_chain! {
-            if let Some(_t) = TabItem::new(im_str!("Captain's cabin")).begin(ui);
-            if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
-            if let Some(_t) = self.begin_table(im_str!("plot-table"), 1);
-            then {
+        TabScroll::new(im_str!("Captain's cabin")).build(ui, || {
+            Table::new(im_str!("plot-table"), 1).build(ui, || {
                 self.draw_me2_plot_category(me2_plot_table, captains_cabin);
-            }
-        }
+            });
+        });
 
         // Mass Effect 1
         {
             let _colors = self.style_colors(Theme::MassEffect1);
 
-            if let Some(_t) = TabItem::new(im_str!("Imported ME1")).begin(ui) {
-                if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui) {
-                    ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner bugfix :");
-                    ui.same_line();
-                    self.draw_help_marker(
-                        "- Untick `[The Fan] Intimidated him`\n\
-                         - Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
-                         - Only works if you didn't talk to Aethyta",
-                    );
-                    ui.separator();
-                    for (category_name, plot_db) in imported_me1.iter() {
-                        if let Some(_t) = self.begin_table(&im_str!("{}-table", category_name), 1) {
-                            self.table_next_row();
-                            if let Some(_t) = self.push_tree_node(category_name) {
-                                self.draw_me2_plot_category(me2_plot_table, plot_db);
-                            }
-                        }
-                    }
+            TabScroll::new(im_str!("Imported ME1")).build(ui, || {
+                ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner bugfix :");
+                ui.same_line();
+                self.draw_help_marker(
+                    "- Untick `[The Fan] Intimidated him`\n\
+                        - Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
+                        - Only works if you didn't talk to Aethyta",
+                );
+                ui.separator();
+                for (category_name, plot_db) in imported_me1.iter() {
+                    Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
+                        Table::next_row();
+                        TreeNode::new(category_name).build(ui, || {
+                            self.draw_me2_plot_category(me2_plot_table, plot_db);
+                        });
+                    });
                 }
-            }
+            });
 
-            if let Some(_t) = TabItem::new(im_str!("Mass Effect 1")).begin(ui) {
+            TabItem::new(im_str!("Mass Effect 1")).build(ui, ||  {
                 if me1_plot_table.bool_variables.is_empty() {
                     ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
                 } else {
@@ -607,7 +583,7 @@ impl<'ui> Gui<'ui> {
                     ui.separator();
                     self.draw_me1_plot_db(me1_plot_table);
                 }
-            }
+            });
         }
         Some(())
     }
@@ -627,7 +603,7 @@ impl<'ui> Gui<'ui> {
                 let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
                 let plot = plot_table.bool_variables.get_mut(*plot_id);
                 if let Some(mut plot) = plot {
-                    self.table_next_row();
+                    Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
                 }
             }
@@ -639,7 +615,7 @@ impl<'ui> Gui<'ui> {
                 let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
                 let plot = plot_table.int_variables.get_mut(*plot_id);
                 if let Some(plot) = plot {
-                    self.table_next_row();
+                    Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
                 }
             }
@@ -659,78 +635,77 @@ impl<'ui> Gui<'ui> {
                 let _ = self.event_addr.send(MainEvent::ImportHeadMorph(path));
             }
         }
-        match head_morph {
-            Some(head_morph) => {
-                // Export
-                ui.same_line();
-                if ui.button(im_str!("Export")) {
-                    let file = tinyfiledialogs::save_file_dialog_with_filter(
-                        "",
-                        "",
-                        &["*.ron"],
-                        "Head Morph (*.ron)",
-                    );
+        if let Some(head_morph) = head_morph {
+            // Export
+            ui.same_line();
+            if ui.button(im_str!("Export")) {
+                let file = tinyfiledialogs::save_file_dialog_with_filter(
+                    "",
+                    "",
+                    &["*.ron"],
+                    "Head Morph (*.ron)",
+                );
 
-                    if let Some(path) = file {
-                        let _ = self
-                            .event_addr
-                            .send(MainEvent::ExportHeadMorph(path, Box::new(head_morph.clone())));
-                    }
-                }
-                // Toggle head morph
-                if !is_female {
-                    ui.same_line();
-                    has_head_morph.draw_raw_ui(self, "Enable head morph");
-                }
-                ui.separator();
-
-                // Raw
-                if *has_head_morph {
-                    let HeadMorph {
-                        hair_mesh,
-                        accessory_mesh,
-                        morph_features,
-                        offset_bones,
-                        lod0_vertices,
-                        lod1_vertices,
-                        lod2_vertices,
-                        lod3_vertices,
-                        scalar_parameters,
-                        vector_parameters,
-                        texture_parameters,
-                    } = head_morph;
-
-                    if let Some(_t) = self.begin_table(im_str!("plot-table"), 1) {
-                        self.table_next_row();
-                        self.set_next_item_open(true);
-                        if let Some(_t) = self.push_tree_node("Raw") {
-                            self.table_next_row();
-                            hair_mesh.draw_raw_ui(self, "Hair Mesh");
-                            self.table_next_row();
-                            accessory_mesh.draw_raw_ui(self, "Accessory Mesh");
-                            self.table_next_row();
-                            morph_features.draw_raw_ui(self, "Morph Features");
-                            self.table_next_row();
-                            offset_bones.draw_raw_ui(self, "Offset Bones");
-                            self.table_next_row();
-                            lod0_vertices.draw_raw_ui(self, "Lod0 Vertices");
-                            self.table_next_row();
-                            lod1_vertices.draw_raw_ui(self, "Lod1 Vertices");
-                            self.table_next_row();
-                            lod2_vertices.draw_raw_ui(self, "Lod2 Vertices");
-                            self.table_next_row();
-                            lod3_vertices.draw_raw_ui(self, "Lod3 Vertices");
-                            self.table_next_row();
-                            scalar_parameters.draw_raw_ui(self, "Scalar Parameters");
-                            self.table_next_row();
-                            vector_parameters.draw_raw_ui(self, "Vector Parameters");
-                            self.table_next_row();
-                            texture_parameters.draw_raw_ui(self, "Texture Parameters");
-                        }
-                    }
+                if let Some(path) = file {
+                    let _ = self
+                        .event_addr
+                        .send(MainEvent::ExportHeadMorph(path, Box::new(head_morph.clone())));
                 }
             }
-            None => ui.separator(),
+            // Toggle head morph
+            if !is_female {
+                ui.same_line();
+                has_head_morph.draw_raw_ui(self, "Enable head morph");
+            }
+            ui.separator();
+
+            // Raw
+            if *has_head_morph {
+                let HeadMorph {
+                    hair_mesh,
+                    accessory_mesh,
+                    morph_features,
+                    offset_bones,
+                    lod0_vertices,
+                    lod1_vertices,
+                    lod2_vertices,
+                    lod3_vertices,
+                    scalar_parameters,
+                    vector_parameters,
+                    texture_parameters,
+                } = head_morph;
+
+                Table::new(im_str!("head-morph-table"), 1).build(ui, || {
+                    Table::next_row();
+                    self.set_next_item_open(true);
+                    TreeNode::new("Raw").build(ui, || {
+                        Table::next_row();
+                        hair_mesh.draw_raw_ui(self, "Hair Mesh");
+                        Table::next_row();
+                        accessory_mesh.draw_raw_ui(self, "Accessory Mesh");
+                        Table::next_row();
+                        morph_features.draw_raw_ui(self, "Morph Features");
+                        Table::next_row();
+                        offset_bones.draw_raw_ui(self, "Offset Bones");
+                        Table::next_row();
+                        lod0_vertices.draw_raw_ui(self, "Lod0 Vertices");
+                        Table::next_row();
+                        lod1_vertices.draw_raw_ui(self, "Lod1 Vertices");
+                        Table::next_row();
+                        lod2_vertices.draw_raw_ui(self, "Lod2 Vertices");
+                        Table::next_row();
+                        lod3_vertices.draw_raw_ui(self, "Lod3 Vertices");
+                        Table::next_row();
+                        scalar_parameters.draw_raw_ui(self, "Scalar Parameters");
+                        Table::next_row();
+                        vector_parameters.draw_raw_ui(self, "Vector Parameters");
+                        Table::next_row();
+                        texture_parameters.draw_raw_ui(self, "Texture Parameters");
+                    });
+                });
+            }
+        } else {
+            ui.separator()
         }
     }
 }
