@@ -7,10 +7,10 @@ use imgui::{
 
 use crate::save_data::{
     mass_effect_1::item_db::{DbItem, Me1ItemDb},
-    mass_effect_1_leg::{
+    mass_effect_1_le::{
         player::{ComplexTalent, Item, ItemLevel, Player},
         squad::Henchman,
-        Me1LegSaveData,
+        Me1LeSaveData,
     },
     shared::player::{Notoriety, Origin},
     RawUi,
@@ -19,20 +19,20 @@ use crate::save_data::{
 use super::{DatabasesState, Gui};
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_1_leg(
-        &self, save_game: &mut Me1LegSaveData, databases: &DatabasesState,
+    pub fn draw_mass_effect_1_le(
+        &self, save_game: &mut Me1LeSaveData, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
-        let _t = TabBar::new(im_str!("mass_effect_1_leg")).begin(ui)?;
+        let _t = TabBar::new(im_str!("mass_effect_1_le")).begin(ui)?;
 
         // General
         if_chain! {
             if let Some(_t) = TabItem::new(im_str!("General")).begin(ui);
             if let Some(_t) = ChildWindow::new(im_str!("scroll")).begin(ui);
             then {
-                self.draw_me1_leg_general(save_game);
+                self.draw_me1_le_general(save_game);
             }
         }
         // Plot
@@ -72,9 +72,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_leg_general(&self, save_game: &mut Me1LegSaveData) -> Option<()> {
+    fn draw_me1_le_general(&self, save_game: &mut Me1LeSaveData) -> Option<()> {
         let ui = self.ui;
-        let Me1LegSaveData { plot, player, difficulty, squad, .. } = save_game;
+        let Me1LeSaveData { plot, player, difficulty, squad, .. } = save_game;
         let Player {
             is_female,
             level,
@@ -282,13 +282,13 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me1_le_inventory_tab(
-        &self, savegame: &mut Me1LegSaveData, item_db: &Me1ItemDb,
+        &self, savegame: &mut Me1LeSaveData, item_db: &Me1ItemDb,
     ) -> Option<()> {
         // 1ère colonne
         let _t = self.begin_columns(2)?;
         self.table_next_row();
 
-        let Me1LegSaveData { player, squad, .. } = savegame;
+        let Me1LeSaveData { player, squad, .. } = savegame;
         let Player { inventory, .. } = player;
 
         // Player

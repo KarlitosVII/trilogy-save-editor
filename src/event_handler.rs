@@ -12,10 +12,8 @@ use crate::{
     gui::UiEvent,
     save_data::{
         mass_effect_1::{item_db::Me1ItemDb, plot_db::Me1PlotDb, Me1SaveGame},
-        mass_effect_1_leg::Me1LegSaveGame,
-        mass_effect_2::{
-            plot_db::Me2PlotDb, Me2LegSaveGame, Me2LegVersion, Me2SaveGame, Me2Version,
-        },
+        mass_effect_1_le::Me1LeSaveGame,
+        mass_effect_2::{plot_db::Me2PlotDb, Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
         mass_effect_3::{plot_db::Me3PlotDb, Me3SaveGame},
         shared::appearance::HeadMorph,
     },
@@ -33,9 +31,9 @@ pub enum MainEvent {
 #[derive(Clone)]
 pub enum SaveGame {
     MassEffect1 { file_path: String, save_game: Box<Me1SaveGame> },
-    MassEffect1Leg { file_path: String, save_game: Box<Me1LegSaveGame> },
+    MassEffect1Le { file_path: String, save_game: Box<Me1LeSaveGame> },
     MassEffect2 { file_path: String, save_game: Box<Me2SaveGame> },
-    MassEffect2Leg { file_path: String, save_game: Box<Me2LegSaveGame> },
+    MassEffect2Le { file_path: String, save_game: Box<Me2LeSaveGame> },
     MassEffect3 { file_path: String, save_game: Box<Me3SaveGame> },
 }
 
@@ -94,7 +92,7 @@ async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
             }
         } else if input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
             // ME1 Legendary
-            SaveGame::MassEffect1Leg {
+            SaveGame::MassEffect1Le {
                 file_path,
                 save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
             }
@@ -104,9 +102,9 @@ async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
                 file_path,
                 save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
             }
-        } else if unreal::Deserializer::from_bytes::<Me2LegVersion>(&input).is_ok() {
+        } else if unreal::Deserializer::from_bytes::<Me2LeVersion>(&input).is_ok() {
             // ME2 Legendary
-            SaveGame::MassEffect2Leg {
+            SaveGame::MassEffect2Le {
                 file_path,
                 save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
             }
@@ -128,7 +126,7 @@ async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
 async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) -> Result<()> {
     let output = match save_game {
         SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_byte_buf(&save_game)?,
-        SaveGame::MassEffect1Leg { save_game, .. } => {
+        SaveGame::MassEffect1Le { save_game, .. } => {
             let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 
             // Checksum
@@ -149,7 +147,7 @@ async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) 
             output.extend(&u32::to_le_bytes(checksum));
             output
         }
-        SaveGame::MassEffect2Leg { save_game, .. } => {
+        SaveGame::MassEffect2Le { save_game, .. } => {
             let mut output = unreal::Serializer::to_byte_buf(&save_game)?;
 
             let crc = Crc::<u32>::new(&CRC_32_BZIP2);

@@ -22,7 +22,7 @@ mod backend;
 mod changelog;
 mod imgui_utils;
 mod mass_effect_1;
-mod mass_effect_1_leg;
+mod mass_effect_1_le;
 mod mass_effect_2;
 mod mass_effect_3;
 mod raw_ui;
@@ -119,13 +119,13 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
                 let has_head_morph =
                     HasHeadMorph { has_head_morph: true, head_morph: Some(head_morph) };
                 match state.save_game.as_mut() {
-                    Some(SaveGame::MassEffect1Leg { save_game, .. }) => {
+                    Some(SaveGame::MassEffect1Le { save_game, .. }) => {
                         save_game.save_data.player.head_morph = has_head_morph
                     }
                     Some(SaveGame::MassEffect2 { save_game, .. }) => {
                         save_game.player.appearance.head_morph = has_head_morph
                     }
-                    Some(SaveGame::MassEffect2Leg { save_game, .. }) => {
+                    Some(SaveGame::MassEffect2Le { save_game, .. }) => {
                         save_game.player.appearance.head_morph = has_head_morph
                     }
                     Some(SaveGame::MassEffect3 { save_game, .. }) => {
@@ -168,10 +168,10 @@ impl<'ui> Gui<'ui> {
         // Pop on drop
         let _colors = self.style_colors(match state.save_game {
             None => Theme::MassEffect3,
-            Some(SaveGame::MassEffect1 { .. }) | Some(SaveGame::MassEffect1Leg { .. }) => {
+            Some(SaveGame::MassEffect1 { .. }) | Some(SaveGame::MassEffect1Le { .. }) => {
                 Theme::MassEffect1
             }
-            Some(SaveGame::MassEffect2 { .. }) | Some(SaveGame::MassEffect2Leg { .. }) => {
+            Some(SaveGame::MassEffect2 { .. }) | Some(SaveGame::MassEffect2Le { .. }) => {
                 Theme::MassEffect2
             }
             Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
@@ -206,14 +206,14 @@ impl<'ui> Gui<'ui> {
                 Some(SaveGame::MassEffect1 { save_game, .. }) => {
                     self.draw_mass_effect_1(save_game, &state.databases)
                 }
-                Some(SaveGame::MassEffect1Leg { save_game, .. }) => {
-                    self.draw_mass_effect_1_leg(&mut save_game.save_data, &state.databases)
+                Some(SaveGame::MassEffect1Le { save_game, .. }) => {
+                    self.draw_mass_effect_1_le(&mut save_game.save_data, &state.databases)
                 }
                 Some(SaveGame::MassEffect2 { save_game, .. }) => {
                     self.draw_mass_effect_2(save_game, &state.databases)
                 }
-                Some(SaveGame::MassEffect2Leg { save_game, .. }) => {
-                    self.draw_mass_effect_2_leg(save_game, &state.databases)
+                Some(SaveGame::MassEffect2Le { save_game, .. }) => {
+                    self.draw_mass_effect_2_le(save_game, &state.databases)
                 }
                 Some(SaveGame::MassEffect3 { save_game, .. }) => {
                     self.draw_mass_effect_3(save_game, &state.databases)
@@ -275,11 +275,10 @@ impl<'ui> Gui<'ui> {
             SaveGame::MassEffect1 { file_path, .. } => {
                 (file_path, "Mass Effect 1 Save (*.MassEffectSave)", "*.MassEffectSave")
             }
-            SaveGame::MassEffect1Leg { file_path, .. } => {
+            SaveGame::MassEffect1Le { file_path, .. } => {
                 (file_path, "Mass Effect 1 Legendary Save (*.pcsav)", "*.pcsav")
             }
-            SaveGame::MassEffect2 { file_path, .. }
-            | SaveGame::MassEffect2Leg { file_path, .. } => {
+            SaveGame::MassEffect2 { file_path, .. } | SaveGame::MassEffect2Le { file_path, .. } => {
                 (file_path, "Mass Effect 2 Save (*.pcsav)", "*.pcsav")
             }
             SaveGame::MassEffect3 { file_path, .. } => {

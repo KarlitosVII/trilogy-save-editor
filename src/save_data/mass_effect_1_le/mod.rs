@@ -30,24 +30,24 @@ struct ChunkHeader {
 }
 
 #[derive(Clone)]
-pub struct Me1LegSaveGame {
+pub struct Me1LeSaveGame {
     magic_number: u32,
     block_size: u32,
     headers: List<ChunkHeader>,
-    pub save_data: Me1LegSaveData,
+    pub save_data: Me1LeSaveData,
     checksum: u32,
     _unknown: Dummy<4>,
     uncompressed_size: u32,
 }
 
-impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
+impl<'de> serde::Deserialize<'de> for Me1LeSaveGame {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        struct Me1LegSaveGameVisitor;
-        impl<'de> de::Visitor<'de> for Me1LegSaveGameVisitor {
-            type Value = Me1LegSaveGame;
+        struct Me1LeSaveGameVisitor;
+        impl<'de> de::Visitor<'de> for Me1LeSaveGameVisitor {
+            type Value = Me1LeSaveGame;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("a seq")
@@ -83,7 +83,7 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
                 }
 
                 // Save data
-                let save_data: Me1LegSaveData = {
+                let save_data: Me1LeSaveData = {
                     let mut uncompressed = Vec::new();
 
                     for header in &headers[1..] {
@@ -103,7 +103,7 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
                 let _unknown = seq.next_element()?.unwrap();
                 let uncompressed_size = seq.next_element()?.unwrap();
 
-                Ok(Me1LegSaveGame {
+                Ok(Me1LeSaveGame {
                     magic_number,
                     block_size,
                     headers: headers.into(),
@@ -114,16 +114,16 @@ impl<'de> serde::Deserialize<'de> for Me1LegSaveGame {
                 })
             }
         }
-        deserializer.deserialize_tuple_struct("Me1LegSaveGame", usize::MAX, Me1LegSaveGameVisitor)
+        deserializer.deserialize_tuple_struct("Me1LeSaveGame", usize::MAX, Me1LeSaveGameVisitor)
     }
 }
 
-impl serde::Serialize for Me1LegSaveGame {
+impl serde::Serialize for Me1LeSaveGame {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let Me1LegSaveGame {
+        let Me1LeSaveGame {
             magic_number,
             block_size,
             headers: _,
@@ -162,7 +162,7 @@ impl serde::Serialize for Me1LegSaveGame {
         let headers: List<_> = headers.into();
         let save_data: List<u8> = compressed.into();
 
-        let mut s = serializer.serialize_struct("Me1LegSaveGame", 4)?;
+        let mut s = serializer.serialize_struct("Me1LeSaveGame", 4)?;
         s.serialize_field("magic_number", magic_number)?;
         s.serialize_field("block_size", block_size)?;
         s.serialize_field("headers", &headers)?;
@@ -175,8 +175,8 @@ impl serde::Serialize for Me1LegSaveGame {
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
-pub struct Me1LegSaveData {
-    _version: Me1LegVersion,
+pub struct Me1LeSaveData {
+    _version: Me1LeVersion,
     character_id: ImguiString,
     character_creation_date: SaveTimeStamp,
     pub plot: Me1PlotTable,
@@ -203,9 +203,9 @@ pub struct Me1LegSaveData {
 }
 
 #[derive(Serialize, Clone)]
-pub struct Me1LegVersion(i32);
+pub struct Me1LeVersion(i32);
 
-impl<'de> serde::Deserialize<'de> for Me1LegVersion {
+impl<'de> serde::Deserialize<'de> for Me1LeVersion {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -295,14 +295,14 @@ mod test {
     fn deserialize_serialize() -> Result<()> {
         let mut input = Vec::new();
         {
-            let mut file = File::open("test/ME1Leg00_QuickSave.pcsav")?;
+            let mut file = File::open("test/ME1Le00_QuickSave.pcsav")?;
             file.read_to_end(&mut input)?;
         }
 
         let now = Instant::now();
 
         // Deserialize
-        let me1_save_game: Me1LegSaveGame = unreal::Deserializer::from_bytes(&input)?;
+        let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
         println!("Deserialize 1 : {:?}", Instant::now().saturating_duration_since(now));
         let now = Instant::now();
@@ -325,7 +325,7 @@ mod test {
         let now = Instant::now();
 
         // Deserialize (again)
-        let me1_save_game: Me1LegSaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
+        let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
 
         println!("Deserialize 2 : {:?}", Instant::now().saturating_duration_since(now));
         let now = Instant::now();
@@ -367,7 +367,7 @@ mod test {
     //         file.read_to_end(&mut input)?;
     //     }
 
-    //     let me1_save_game: Me1LegSaveGame = unreal::Deserializer::from_bytes(&input)?;
+    //     let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
     //     let output = unreal::Serializer::to_byte_buf(&me1_save_game.save_data)?;
     //     {

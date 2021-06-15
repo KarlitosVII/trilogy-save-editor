@@ -10,7 +10,7 @@ use crate::{
             player::{Player, Power},
             plot::PlotTable,
             plot_db::Me2PlotDb,
-            Me2LegSaveGame, Me2SaveGame,
+            Me2LeSaveGame, Me2SaveGame,
         },
         shared::{
             appearance::{HasHeadMorph, HeadMorph},
@@ -25,7 +25,7 @@ use super::{DatabasesState, Gui, Theme};
 
 enum Me2Type<'a> {
     Vanilla(&'a mut Me2SaveGame),
-    Legendary(&'a mut Me2LegSaveGame),
+    Legendary(&'a mut Me2LeSaveGame),
 }
 
 impl<'ui> Gui<'ui> {
@@ -73,8 +73,8 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    pub fn draw_mass_effect_2_leg(
-        &self, save_game: &mut Me2LegSaveGame, databases: &DatabasesState,
+    pub fn draw_mass_effect_2_le(
+        &self, save_game: &mut Me2LeSaveGame, databases: &DatabasesState,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -129,7 +129,7 @@ impl<'ui> Gui<'ui> {
                 me1_plot,
                 ..
             })
-            | Me2Type::Legendary(Me2LegSaveGame {
+            | Me2Type::Legendary(Me2LeSaveGame {
                 difficulty,
                 end_game_state,
                 player,

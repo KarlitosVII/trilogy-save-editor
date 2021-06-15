@@ -11,7 +11,7 @@ use std::{
 use crate::gui::Gui;
 
 pub mod mass_effect_1;
-pub mod mass_effect_1_leg;
+pub mod mass_effect_1_le;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
 pub mod shared;

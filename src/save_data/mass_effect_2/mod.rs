@@ -71,8 +71,8 @@ impl<'de> serde::Deserialize<'de> for Me2Version {
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
-pub struct Me2LegSaveGame {
-    _version: Me2LegVersion,
+pub struct Me2LeSaveGame {
+    _version: Me2LeVersion,
     debug_name: ImguiString,
     seconds_played: f32,
     disc: i32,
@@ -98,9 +98,9 @@ pub struct Me2LegSaveGame {
 }
 
 #[derive(Serialize, Clone)]
-pub struct Me2LegVersion(i32);
+pub struct Me2LeVersion(i32);
 
-impl<'de> serde::Deserialize<'de> for Me2LegVersion {
+impl<'de> serde::Deserialize<'de> for Me2LeVersion {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -228,14 +228,14 @@ mod test {
     fn deserialize_serialize_legendary() -> Result<()> {
         let mut input = Vec::new();
         {
-            let mut file = File::open("test/ME2LegSave.pcsav")?;
+            let mut file = File::open("test/ME2LeSave.pcsav")?;
             file.read_to_end(&mut input)?;
         }
 
         let now = Instant::now();
 
         // Deserialize
-        let me2_save_game: Me2LegSaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
+        let me2_save_game: Me2LeSaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
 
         println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
         let now = Instant::now();
