@@ -193,7 +193,7 @@ Me2PlotDb(
                 3349: "Had casualties",
             },
             integers: {
-                166: "Number of missions after crew abducted (1-3 = half crew dead / 4 = all crew dead)",
+                23: "Number of missions after crew abducted (1-3 = half crew dead / 4 = all crew dead)",
             },
         ),
     },
