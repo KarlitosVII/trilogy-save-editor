@@ -4,9 +4,9 @@ use crate::save_data::shared::plot::{BoolVec, PlotCodex};
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct PlotTable {
-    pub bool_variables: BoolVec,
-    pub int_variables: Vec<i32>,
-    pub float_variables: Vec<f32>,
+    pub booleans: BoolVec,
+    pub integers: Vec<i32>,
+    pub floats: Vec<f32>,
     quest_progress_counter: i32,
     quest_progress: Vec<PlotQuest>,
     quest_ids: Vec<i32>,

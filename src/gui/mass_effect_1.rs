@@ -189,12 +189,12 @@ impl<'ui> Gui<'ui> {
             Table::next_row();
             self.set_next_item_open(true);
             TreeNode::new("Morality").build(ui, || {
-                if let Some(paragon) = plot.int_variables.get_mut(47) {
+                if let Some(paragon) = plot.integers.get_mut(47) {
                     Table::next_row();
                     paragon.draw_raw_ui(self, "Paragon");
                 }
 
-                if let Some(renegade) = plot.int_variables.get_mut(46) {
+                if let Some(renegade) = plot.integers.get_mut(46) {
                     Table::next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }
@@ -417,7 +417,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                let plot = plot_table.booleans.get_mut(*plot_id);
                 if let Some(mut plot) = plot {
                     Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
@@ -430,7 +430,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
-                let plot = plot_table.int_variables.get_mut(*plot_id);
+                let plot = plot_table.integers.get_mut(*plot_id);
                 if let Some(plot) = plot {
                     Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));

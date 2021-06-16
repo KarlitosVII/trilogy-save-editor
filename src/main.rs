@@ -5,12 +5,16 @@
 extern crate derive_more;
 
 use clap::{Arg, ArgMatches};
-use std::panic::{self, PanicInfo};
+use std::{
+    panic::{self, PanicInfo},
+    process,
+};
 use tokio::task;
 
 #[macro_use]
 extern crate raw_ui_derive;
 
+mod compare;
 mod databases;
 mod event_handler;
 mod gui;
@@ -24,6 +28,7 @@ fn parse_args() -> ArgMatches<'static> {
         .about("A save editor for Mass Effect Trilogy (and Legendary)")
         .arg(Arg::with_name("Vulkan").long("vulkan").help("Use Vulkan backend"));
 
+    // Backends
     #[cfg(target_os = "windows")]
     let app = app
         .arg(Arg::with_name("DirectX12").long("dx12").help("Use DirectX 12 backend"))
@@ -32,7 +37,18 @@ fn parse_args() -> ArgMatches<'static> {
     #[cfg(target_os = "macos")]
     let app = app.arg(Arg::with_name("Metal").long("metal").help("Use Metal backend"));
 
-    let app = app.arg(Arg::with_name("FILE").help("Mass Effect save file"));
+    // Compare
+    let app = app.arg(
+        Arg::with_name("Compare")
+            .short("c")
+            .long("compare")
+            .value_name("OTHER_SAVE")
+            .requires("SAVE")
+            .help("Compare `SAVE` and `OTHER_SAVE` plots and generate a `compare_result.ron` (Rusty Object Notation) file"),
+    );
+
+    // File
+    let app = app.arg(Arg::with_name("SAVE").help("Mass Effect save file"));
 
     app.get_matches()
 }
@@ -55,7 +71,16 @@ async fn main() {
 
     let event_loop = tokio::spawn(event_handler::event_loop(event_rx, ui_addr));
 
-    task::block_in_place(move || gui::run(event_addr, ui_rx, args));
+    if let Some(cmp) = args.value_of("Compare") {
+        let src = args.value_of("SAVE").unwrap();
+        if let Err(err) = compare::compare(event_addr, ui_rx, src, cmp).await {
+            eprintln!("Error: {}", err);
+            process::exit(1);
+        }
+    } else {
+        task::block_in_place(move || gui::run(event_addr, ui_rx, args));
+    }
+
     event_loop.await.unwrap();
 }
 

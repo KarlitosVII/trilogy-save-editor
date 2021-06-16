@@ -117,7 +117,7 @@ impl<'ui> Gui<'ui> {
                     };
 
                     // ME1 plot
-                    if let Some(me1_origin) = plot.int_variables.get_mut(1) {
+                    if let Some(me1_origin) = plot.integers.get_mut(1) {
                         *me1_origin = origin_idx as i32;
                     }
                 }
@@ -142,7 +142,7 @@ impl<'ui> Gui<'ui> {
                     };
 
                     // ME1 plot
-                    if let Some(me1_notoriety) = plot.int_variables.get_mut(2) {
+                    if let Some(me1_notoriety) = plot.integers.get_mut(2) {
                         *me1_notoriety = notoriety_idx as i32;
                     }
                 }
@@ -162,12 +162,12 @@ impl<'ui> Gui<'ui> {
             Table::next_row();
             self.set_next_item_open(true);
             TreeNode::new("Morality").build(ui, || {
-                if let Some(paragon) = plot.int_variables.get_mut(47) {
+                if let Some(paragon) = plot.integers.get_mut(47) {
                     Table::next_row();
                     paragon.draw_raw_ui(self, "Paragon");
                 }
 
-                if let Some(renegade) = plot.int_variables.get_mut(46) {
+                if let Some(renegade) = plot.integers.get_mut(46) {
                     Table::next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }

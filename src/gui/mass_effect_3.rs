@@ -99,25 +99,25 @@ impl<'ui> Gui<'ui> {
                     *is_female = gender != 0;
 
                     // Plot
-                    if let Some(mut is_female) = plot.bool_variables.get_mut(17662) {
+                    if let Some(mut is_female) = plot.booleans.get_mut(17662) {
                         *is_female = gender != 0;
                     }
 
                     // Loco / Lola
-                    let is_loco = match plot.bool_variables.get(19578) {
+                    let is_loco = match plot.booleans.get(19578) {
                         Some(val) => *val,
                         None => false,
                     };
-                    let is_lola = match plot.bool_variables.get(19579) {
+                    let is_lola = match plot.booleans.get(19579) {
                         Some(val) => *val,
                         None => false,
                     };
 
                     if is_loco || is_lola {
-                        if let Some(mut is_loco) = plot.bool_variables.get_mut(19578) {
+                        if let Some(mut is_loco) = plot.booleans.get_mut(19578) {
                             *is_loco = gender == 0;
                         }
-                        if let Some(mut is_lola) = plot.bool_variables.get_mut(19579) {
+                        if let Some(mut is_lola) = plot.booleans.get_mut(19579) {
                             *is_lola = gender != 0;
                         }
                     }
@@ -148,42 +148,42 @@ impl<'ui> Gui<'ui> {
                     match origin {
                         Origin::None => {}
                         Origin::Spacer => {
-                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                            if let Some(mut spacer) = plot.booleans.get_mut(1533) {
                                 *spacer = true;
                             }
-                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                            if let Some(mut colonist) = plot.booleans.get_mut(1535) {
                                 *colonist = false;
                             }
-                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                            if let Some(mut eathborn) = plot.booleans.get_mut(1534) {
                                 *eathborn = false;
                             }
                         }
                         Origin::Colonist => {
-                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                            if let Some(mut spacer) = plot.booleans.get_mut(1533) {
                                 *spacer = false;
                             }
-                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                            if let Some(mut colonist) = plot.booleans.get_mut(1535) {
                                 *colonist = true;
                             }
-                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                            if let Some(mut eathborn) = plot.booleans.get_mut(1534) {
                                 *eathborn = false;
                             }
                         }
                         Origin::Earthborn => {
-                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                            if let Some(mut spacer) = plot.booleans.get_mut(1533) {
                                 *spacer = false;
                             }
-                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                            if let Some(mut colonist) = plot.booleans.get_mut(1535) {
                                 *colonist = false;
                             }
-                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                            if let Some(mut eathborn) = plot.booleans.get_mut(1534) {
                                 *eathborn = true;
                             }
                         }
                     }
 
                     // ME1 plot
-                    if let Some(me1_origin) = plot.int_variables.get_mut(&10001) {
+                    if let Some(me1_origin) = plot.integers.get_mut(&10001) {
                         *me1_origin = origin_idx as i32;
                     }
                 }
@@ -211,42 +211,42 @@ impl<'ui> Gui<'ui> {
                     match notoriety {
                         Notoriety::None => {}
                         Notoriety::Survivor => {
-                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                            if let Some(mut survivor) = plot.booleans.get_mut(1537) {
                                 *survivor = true;
                             }
-                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                            if let Some(mut war_hero) = plot.booleans.get_mut(1538) {
                                 *war_hero = false;
                             }
-                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                            if let Some(mut ruthless) = plot.booleans.get_mut(1539) {
                                 *ruthless = false;
                             }
                         }
                         Notoriety::Warhero => {
-                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                            if let Some(mut survivor) = plot.booleans.get_mut(1537) {
                                 *survivor = false;
                             }
-                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                            if let Some(mut war_hero) = plot.booleans.get_mut(1538) {
                                 *war_hero = true;
                             }
-                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                            if let Some(mut ruthless) = plot.booleans.get_mut(1539) {
                                 *ruthless = false;
                             }
                         }
                         Notoriety::Ruthless => {
-                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                            if let Some(mut survivor) = plot.booleans.get_mut(1537) {
                                 *survivor = false;
                             }
-                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                            if let Some(mut war_hero) = plot.booleans.get_mut(1538) {
                                 *war_hero = false;
                             }
-                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                            if let Some(mut ruthless) = plot.booleans.get_mut(1539) {
                                 *ruthless = true;
                             }
                         }
                     }
 
                     // ME1 plot
-                    if let Some(me1_notoriety) = plot.int_variables.get_mut(&10002) {
+                    if let Some(me1_notoriety) = plot.integers.get_mut(&10002) {
                         *me1_notoriety = notoriety_idx as i32;
                     }
                 }
@@ -265,22 +265,22 @@ impl<'ui> Gui<'ui> {
             Table::next_row();
             self.set_next_item_open(true);
             TreeNode::new("Morality").build(ui, || {
-                if let Some(paragon) = plot.int_variables.get_mut(&10159) {
+                if let Some(paragon) = plot.integers.get_mut(&10159) {
                     Table::next_row();
                     paragon.draw_raw_ui(self, "Paragon");
                 }
 
-                if let Some(renegade) = plot.int_variables.get_mut(&10160) {
+                if let Some(renegade) = plot.integers.get_mut(&10160) {
                     Table::next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }
 
-                if let Some(reputation) = plot.int_variables.get_mut(&10297) {
+                if let Some(reputation) = plot.integers.get_mut(&10297) {
                     Table::next_row();
                     reputation.draw_raw_ui(self, "Reputation");
                 }
 
-                if let Some(reputation_points) = plot.int_variables.get_mut(&10380) {
+                if let Some(reputation_points) = plot.integers.get_mut(&10380) {
                     Table::next_row();
                     reputation_points.draw_raw_ui(self, "Reputation Points");
                 }
@@ -659,7 +659,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                let plot = plot_table.booleans.get_mut(*plot_id);
                 if let Some(mut plot) = plot {
                     Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
@@ -671,7 +671,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
-                let plot = plot_table.int_variables.entry(*plot_id as i32).or_default();
+                let plot = plot_table.integers.entry(*plot_id as i32).or_default();
 
                 Table::next_row();
                 plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
@@ -695,7 +695,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                let plot = plot_table.booleans.get_mut(*plot_id);
                 if let Some(mut plot) = plot {
                     Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));

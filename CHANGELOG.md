@@ -1,4 +1,5 @@
-## Unreleased
+## 1.11.0
+- Added a command line tool to compare the plots of 2 saves, additional information with the --help argument
 - Added a `Reload` button for those who often need to reload there saves (modders, etc.)
 
 ## 1.10.0

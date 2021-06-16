@@ -73,7 +73,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
     );
 
     // Open file from command line
-    if let Some(path) = args.value_of("FILE") {
+    if let Some(path) = args.value_of("SAVE") {
         let _ = event_addr.send(MainEvent::OpenSave(path.to_owned()));
     }
 

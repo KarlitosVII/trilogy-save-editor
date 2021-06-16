@@ -60,9 +60,9 @@ impl serde::Serialize for BoolVec {
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me1PlotTable {
-    pub bool_variables: BoolVec,
-    pub int_variables: Vec<i32>,
-    pub float_variables: Vec<f32>,
+    pub booleans: BoolVec,
+    pub integers: Vec<i32>,
+    pub floats: Vec<f32>,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]

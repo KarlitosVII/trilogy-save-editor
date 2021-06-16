@@ -1,6 +1,6 @@
 [package]
 name = "trilogy_save_editor"
-version = "1.10.0"
+version = "1.11.0"
 authors = ["Karlitos"]
 license = "CeCILL-2.1"
 edition = "2018"

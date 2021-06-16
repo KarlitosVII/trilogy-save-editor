@@ -21,18 +21,23 @@ You can read the [FAQ here](https://github.com/KarlitosVII/trilogy-save-editor/w
 ## Command line usage
 ```
 USAGE:
-    trilogy_save_editor(.exe) [FLAGS] [FILE]
+    trilogy_save_editor(.exe) [FLAGS] [OPTIONS] [SAVE]
 
 FLAGS:
         --dx11       Use DirectX 11 backend (Windows)
         --dx12       Use DirectX 12 backend (Windows)
     -h, --help       Prints help information
-        --metal      Use Metal backend (Mac OS)
+        --metal      Use Metal backend (MacOS)
     -V, --version    Prints version information
         --vulkan     Use Vulkan backend
 
+OPTIONS:
+    -c, --compare <OTHER_SAVE>    Compare `SAVE` and `OTHER_SAVE` plots and 
+                                  generate a `compare_result.ron` (Rusty
+                                  Object Notation) file
+
 ARGS:
-    <FILE>    Mass Effect save file
+    <SAVE>    Mass Effect save file
 ```
 
 ## Acknowledgments

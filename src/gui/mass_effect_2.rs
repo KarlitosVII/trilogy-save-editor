@@ -184,42 +184,42 @@ impl<'ui> Gui<'ui> {
                     match origin {
                         Origin::None => {}
                         Origin::Spacer => {
-                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                            if let Some(mut spacer) = plot.booleans.get_mut(1533) {
                                 *spacer = true;
                             }
-                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                            if let Some(mut colonist) = plot.booleans.get_mut(1535) {
                                 *colonist = false;
                             }
-                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                            if let Some(mut eathborn) = plot.booleans.get_mut(1534) {
                                 *eathborn = false;
                             }
                         }
                         Origin::Colonist => {
-                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                            if let Some(mut spacer) = plot.booleans.get_mut(1533) {
                                 *spacer = false;
                             }
-                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                            if let Some(mut colonist) = plot.booleans.get_mut(1535) {
                                 *colonist = true;
                             }
-                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                            if let Some(mut eathborn) = plot.booleans.get_mut(1534) {
                                 *eathborn = false;
                             }
                         }
                         Origin::Earthborn => {
-                            if let Some(mut spacer) = plot.bool_variables.get_mut(1533) {
+                            if let Some(mut spacer) = plot.booleans.get_mut(1533) {
                                 *spacer = false;
                             }
-                            if let Some(mut colonist) = plot.bool_variables.get_mut(1535) {
+                            if let Some(mut colonist) = plot.booleans.get_mut(1535) {
                                 *colonist = false;
                             }
-                            if let Some(mut eathborn) = plot.bool_variables.get_mut(1534) {
+                            if let Some(mut eathborn) = plot.booleans.get_mut(1534) {
                                 *eathborn = true;
                             }
                         }
                     }
 
                     // ME1 plot
-                    if let Some(me1_origin) = me1_plot.int_variables.get_mut(1) {
+                    if let Some(me1_origin) = me1_plot.integers.get_mut(1) {
                         *me1_origin = origin_idx as i32;
                     }
                 }
@@ -247,42 +247,42 @@ impl<'ui> Gui<'ui> {
                     match notoriety {
                         Notoriety::None => {}
                         Notoriety::Survivor => {
-                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                            if let Some(mut survivor) = plot.booleans.get_mut(1537) {
                                 *survivor = true;
                             }
-                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                            if let Some(mut war_hero) = plot.booleans.get_mut(1538) {
                                 *war_hero = false;
                             }
-                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                            if let Some(mut ruthless) = plot.booleans.get_mut(1539) {
                                 *ruthless = false;
                             }
                         }
                         Notoriety::Warhero => {
-                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                            if let Some(mut survivor) = plot.booleans.get_mut(1537) {
                                 *survivor = false;
                             }
-                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                            if let Some(mut war_hero) = plot.booleans.get_mut(1538) {
                                 *war_hero = true;
                             }
-                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                            if let Some(mut ruthless) = plot.booleans.get_mut(1539) {
                                 *ruthless = false;
                             }
                         }
                         Notoriety::Ruthless => {
-                            if let Some(mut survivor) = plot.bool_variables.get_mut(1537) {
+                            if let Some(mut survivor) = plot.booleans.get_mut(1537) {
                                 *survivor = false;
                             }
-                            if let Some(mut war_hero) = plot.bool_variables.get_mut(1538) {
+                            if let Some(mut war_hero) = plot.booleans.get_mut(1538) {
                                 *war_hero = false;
                             }
-                            if let Some(mut ruthless) = plot.bool_variables.get_mut(1539) {
+                            if let Some(mut ruthless) = plot.booleans.get_mut(1539) {
                                 *ruthless = true;
                             }
                         }
                     }
 
                     // ME1 plot
-                    if let Some(me1_notoriety) = me1_plot.int_variables.get_mut(2) {
+                    if let Some(me1_notoriety) = me1_plot.integers.get_mut(2) {
                         *me1_notoriety = notoriety_idx as i32;
                     }
                 }
@@ -299,12 +299,12 @@ impl<'ui> Gui<'ui> {
             Table::next_row();
             self.set_next_item_open(true);
             TreeNode::new("Morality").build(ui, || {
-                if let Some(paragon) = plot.int_variables.get_mut(2) {
+                if let Some(paragon) = plot.integers.get_mut(2) {
                     Table::next_row();
                     paragon.draw_raw_ui(self, "Paragon");
                 }
 
-                if let Some(renegade) = plot.int_variables.get_mut(3) {
+                if let Some(renegade) = plot.integers.get_mut(3) {
                     Table::next_row();
                     renegade.draw_raw_ui(self, "Renegade");
                 }
@@ -572,7 +572,7 @@ impl<'ui> Gui<'ui> {
             });
 
             TabItem::new(im_str!("Mass Effect 1")).build(ui, ||  {
-                if me1_plot_table.bool_variables.is_empty() {
+                if me1_plot_table.booleans.is_empty() {
                     ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
                 } else {
                     ui.text(
@@ -601,7 +601,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.bool_variables.get_mut(*plot_id);
+                let plot = plot_table.booleans.get_mut(*plot_id);
                 if let Some(mut plot) = plot {
                     Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
@@ -613,7 +613,7 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
-                let plot = plot_table.int_variables.get_mut(*plot_id);
+                let plot = plot_table.integers.get_mut(*plot_id);
                 if let Some(plot) = plot {
                     Table::next_row();
                     plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
