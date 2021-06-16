@@ -6,14 +6,13 @@ use crate::{
     save_data::{
         mass_effect_2::{
             player::{Player, Power},
-            plot::PlotTable,
             plot_db::Me2PlotDb,
             Me2LeSaveGame, Me2SaveGame,
         },
         shared::{
             appearance::{HasHeadMorph, HeadMorph},
             player::{Notoriety, Origin},
-            plot::{Me1PlotTable, PlotCategory},
+            plot::{Me1PlotTable, PlotCategory, PlotTable},
         },
         RawUi,
     },
@@ -510,7 +509,7 @@ impl<'ui> Gui<'ui> {
         // Player
         TabScroll::new(im_str!("Player")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me2_plot_category(me2_plot_table, player);
+                self.draw_me2_and_me1_le_plot_category(me2_plot_table, player);
             });
         });
 
@@ -528,7 +527,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me2_plot_category(me2_plot_table, plot_db);
+                            self.draw_me2_and_me1_le_plot_category(me2_plot_table, plot_db);
                         });
                     });
                 }
@@ -538,13 +537,13 @@ impl<'ui> Gui<'ui> {
         // Rewards
         TabScroll::new(im_str!("Rewards")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me2_plot_category(me2_plot_table, rewards);
+                self.draw_me2_and_me1_le_plot_category(me2_plot_table, rewards);
             });
         });
         // Captain's cabin
         TabScroll::new(im_str!("Captain's cabin")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me2_plot_category(me2_plot_table, captains_cabin);
+                self.draw_me2_and_me1_le_plot_category(me2_plot_table, captains_cabin);
             });
         });
 
@@ -565,7 +564,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me2_plot_category(me2_plot_table, plot_db);
+                            self.draw_me2_and_me1_le_plot_category(me2_plot_table, plot_db);
                         });
                     });
                 }
@@ -588,7 +587,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me2_plot_category(&self, plot_table: &mut PlotTable, plot_db: &PlotCategory) {
+    pub fn draw_me2_and_me1_le_plot_category(
+        &self, plot_table: &mut PlotTable, plot_db: &PlotCategory,
+    ) {
         let ui = self.ui;
         let PlotCategory { booleans, ints } = plot_db;
 

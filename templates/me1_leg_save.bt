@@ -75,6 +75,25 @@ struct BitArray {
     BitField bit_field[len];
 };
 
+struct PlotQuest {
+	int quest_counter;
+	bool quest_updated;
+    struct {
+        int len;
+        int history[len];
+    } histories;
+};
+
+struct PlotCodexPage {
+	int page;
+	bool is_new;
+};
+
+struct PlotCodex {
+	uint len;
+	PlotCodexPage page[len];
+};
+
 struct PlotTable {
 	BitArray bool_variables <bgcolor=0x5555ff>;
     struct {
@@ -85,6 +104,23 @@ struct PlotTable {
         int len;
         float pair[len];
     } float_variables <bgcolor=0xff8855>;
+	int quest_progress_counter;
+    struct {
+        int len;
+        PlotQuest quest[len] <optimize=false>;
+    } quest_progress;
+    struct {
+        int len;
+        int id[len];
+    } quest_ids;
+    struct {
+        int len;
+        PlotCodex entry[len] <optimize=false>;
+    } codex_entries;
+    struct {
+        int len;
+        int id[len];
+    } codex_ids;
 };
 
 // Timestamp
@@ -128,11 +164,6 @@ string read_rotator(Rotator &r) {
 }
 
 // Appearance
-enum <ubyte> PlayerAppearanceType {
-	Parts,
-	Full
-};
-
 struct MorphFeature {
     String feature;
 	float offset;
@@ -160,7 +191,6 @@ string read_linear_color(LinearColor &c) {
     SPrintf(s, "r: %g, g: %g, b: %g, a: %g]", c.r, c.g, c.b, c.a);
     return s;
 }
-
 
 struct VectorParameter {
 	String name;
@@ -257,7 +287,7 @@ struct BioItemXMod {
     int id;
     byte type_enum;
     int manufacturer_id;
-    FSkip(4);
+    int plot_conditional_id;
 };
 
 struct BioItemXModdable {
@@ -265,8 +295,8 @@ struct BioItemXModdable {
     byte item_level;
     int manufacturer_id;
     int plot_conditional_id;
-    bool unknown1;
-    bool is_junk;
+    bool new_item;
+    bool junk;
     struct {
         int len <bgcolor=0x88eecc>;
         BioItemXMod list[len] <optimize=false>;
@@ -289,13 +319,13 @@ struct Inventory {
     struct {
         int len <bgcolor=0x8888ff>;
         BioItemXModdable list[len] <optimize=false>;
-    } saved_backpack_items <bgcolor=0x88ff33>;
+    } plot_items <bgcolor=0x88ff33>;
 };
 
 struct Player {
 	bool is_female;
     int localized_class_name;
-    FSkip(1);
+    byte player_class;
     int level;
     float current_xp;
     String name;
@@ -303,10 +333,10 @@ struct Player {
     Origin origin;
     Notoriety notoriety;
     int specialization_bonus_id;
-    FSkip(1);
+    byte spectre_rank;
     int talent_points;
-    FSkip(4);
-    String none;
+    int talent_pool_points;
+    String mapped_talent;
 	bool has_head_morph;
 	if (has_head_morph.value == 1) {
 		HeadMorph head_morph;
@@ -354,19 +384,6 @@ struct PlayerController {
     String last_weapon;
 };
 
-// ME1 Legendary
-struct Unknown2 {
-    int id <bgcolor=0x6666ff>;
-    FSkip(4);
-    int len <bgcolor=0x88ccff>;
-    int list[len];
-};
-
-struct Unknown4 {
-    int len <bgcolor=0x88ccee>;
-    int list[len * 2];
-};
-
 // Difficulty
 enum <int> Difficulty {
 	Casual,
@@ -396,49 +413,35 @@ struct Henchman {
         BioItemXModdable list[len] <optimize=false>;
     } quick_slot <bgcolor=0x88ff33>;
     int talent_points;
-    FSkip(4);
+    int talent_pool_points;
     int auto_levelup_template_id;
     int localized_last_name;
     int localized_class_name;
-    FSkip(1);
+    byte class_base;
     float health_per_level;
     float stability_current;
-    FSkip(6);
+    byte gender;
+    byte race;
+    float toxic_current;
     int stamina;
     int focus;
     int precision;
     int coordination;
-    FSkip(2);
+    byte attribute_primary;
+    byte attribute_secondary;
     float health_current;
-    FSkip(4);
+    float shield_current;
     int level;
-    FSkip(4);
     bool helmet_visible;
-    FSkip(1);
+    byte current_quick_slot;
+    int health_max;
 };
 
 struct {
     uint version;
     String career_id;
-	SaveTimeStamp character_creation_date <bgcolor=0xaa44aa>;
+	SaveTimeStamp created_date <bgcolor=0xaa44aa>;
     PlotTable plot;
-    FSkip(4);
-    struct {
-        int len;
-        Unknown2 list[len] <optimize=false>;
-    } unknown2 <bgcolor=0x88ffff>;
-    struct {
-        int len <bgcolor=0xff44ff>;
-        int list[len];
-    } unknown3 <bgcolor=0xaaaa88>;
-    struct {
-        int len <bgcolor=0x44ddff>;
-        Unknown4 list[len] <optimize=false>;
-    } unknown4 <bgcolor=0xaa88aa>;
-    struct {
-        int len <bgcolor=0xff44ff>;
-        int list[len];
-    } unknown5 <bgcolor=0xaaaa88>;
 	SaveTimeStamp timestamp <bgcolor=0xaa44aa>;
 	int seconds_played <bgcolor=0xaa44cc>;
     Player player;
@@ -446,15 +449,15 @@ struct {
     Difficulty difficulty;
     FSkip(177);
     PlayerController player_controller <bgcolor=0xaa33aa>;
+    String base_level_name;
     String map_name;
-    String maybe_sub_map_name1;
-    String maybe_sub_map_name2;
+    String parent_map_name;
     Vector location;
     Rotator rotation;
     struct {
         int len;
         Henchman list[len] <optimize=false>;
     } squad <bgcolor=0x33aaaa>;
-    String save_stat_display;
-    String save_name;
+    String display_name;
+    String file_name;
 } Me1Legendary <open=true>;

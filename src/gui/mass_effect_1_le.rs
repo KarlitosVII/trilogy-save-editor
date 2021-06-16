@@ -4,13 +4,16 @@ use std::ops::IndexMut;
 use crate::{
     databases::Database,
     save_data::{
-        mass_effect_1::item_db::DbItem,
+        mass_effect_1::{item_db::DbItem, plot_db::Me1PlotDb},
         mass_effect_1_le::{
             player::{ComplexTalent, Item, ItemLevel, Player},
             squad::Henchman,
             Me1LeSaveData,
         },
-        shared::player::{Notoriety, Origin},
+        shared::{
+            player::{Notoriety, Origin},
+            plot::PlotTable,
+        },
         RawUi,
     },
 };
@@ -34,7 +37,7 @@ impl<'ui> Gui<'ui> {
 
         // Plot
         TabItem::new(im_str!("Plot")).build(ui, || {
-            self.draw_me1_plot_db(&mut save_game.plot);
+            self.draw_me1_le_plot_db(&mut save_game.plot);
         });
 
         // Inventory
@@ -253,10 +256,35 @@ impl<'ui> Gui<'ui> {
 
         if ui.button(&im_str!("Reset {} talents", character_name)) {
             for talent in complex_talents {
-                *talent_points += talent.ranks;
-                talent.ranks = 0;
+                *talent_points += talent.current_rank;
+                talent.current_rank = 0;
             }
         }
+    }
+
+    pub fn draw_me1_le_plot_db(&self, me1_plot_table: &mut PlotTable) -> Option<()> {
+        let ui = self.ui;
+        let Me1PlotDb { player_crew, missions } = Database::me1_plot()?;
+
+        // Tab bar
+        let _tab_bar = TabBar::new(im_str!("plot-tab")).begin(ui)?;
+
+        let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
+
+        for (title, plot_map) in &categories {
+            TabScroll::new(title).build(ui, || {
+                for (category_name, plot_db) in plot_map.iter() {
+                    Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
+                        Table::next_row();
+                        TreeNode::new(category_name).build(ui, || {
+                            self.draw_me2_and_me1_le_plot_category(me1_plot_table, plot_db);
+                        });
+                    });
+                }
+            });
+        }
+
+        Some(())
     }
 
     fn draw_me1_le_inventory_tab(&self, savegame: &mut Me1LeSaveData) -> Option<()> {

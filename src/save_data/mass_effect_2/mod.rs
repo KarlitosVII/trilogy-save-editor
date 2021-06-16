@@ -4,8 +4,8 @@ use serde::{de, Deserialize, Serialize};
 
 use super::{
     shared::{
-        plot::Me1PlotTable, Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp,
-        Vector,
+        plot::{Me1PlotTable, PlotTable},
+        Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector,
     },
     Dummy, ImguiString,
 };
@@ -15,9 +15,6 @@ use player::*;
 
 mod squad;
 use squad::*;
-
-pub mod plot;
-use plot::*;
 
 pub mod plot_db;
 

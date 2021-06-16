@@ -13,7 +13,7 @@ use std::{fmt, io::Read};
 use crate::unreal;
 
 use super::{
-    shared::{plot::Me1PlotTable, Rotator, SaveTimeStamp, Vector},
+    shared::{plot::PlotTable, Rotator, SaveTimeStamp, Vector},
     Dummy, ImguiString, List,
 };
 
@@ -178,26 +178,23 @@ impl serde::Serialize for Me1LeSaveGame {
 pub struct Me1LeSaveData {
     _version: Me1LeVersion,
     character_id: ImguiString,
-    character_creation_date: SaveTimeStamp,
-    pub plot: Me1PlotTable,
-    _unknown2: Dummy<4>,
-    _unknown3: Vec<Unknown3>,
-    _unknown4: Vec<Dummy<4>>,
-    _unknown5: Vec<Vec<Dummy<8>>>,
-    _unknown6: Vec<Dummy<4>>,
+    created_date: SaveTimeStamp,
+    pub plot: PlotTable,
     timestamp: SaveTimeStamp,
     seconds_played: i32,
     pub player: Player,
-    _unknown7: Dummy<16>,
+    _unknown1: Dummy<16>,
     pub difficulty: Difficulty,
-    _unknown8: Dummy<177>,
+    _unknown2: Dummy<177>,
     player_controller: PlayerController,
+    base_level_name: ImguiString,
     map_name: ImguiString,
-    maybe_sub_map_name_1: ImguiString,
-    maybe_sub_map_name_2: ImguiString,
+    parent_map_name: ImguiString,
     location: Vector,
     rotation: Rotator,
     pub squad: Vec<Henchman>,
+    display_name: ImguiString,
+    file_name: ImguiString,
     // ---
     _remaining_bytes: List<u8>,
 }
@@ -220,12 +217,6 @@ impl<'de> serde::Deserialize<'de> for Me1LeVersion {
 
         Ok(Self(version))
     }
-}
-
-#[derive(Deserialize, Serialize, Clone)]
-struct Unknown3 {
-    _unknown1: Dummy<8>,
-    _unknown2: Vec<Dummy<4>>,
 }
 
 #[derive(RawUi, Clone)]

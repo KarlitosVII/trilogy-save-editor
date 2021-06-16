@@ -3,7 +3,7 @@ A save editor for Mass Effect Trilogy (and Legendary)
 
 ![Screenshot](screenshots/ME3_General.png)
 
-## A bit late but just in time !
+## Features
 This software is similar to Gibbed's save editors (and forks) but adds a lot of stuff.
 
 - Mass Effect 1 (yay!) with about a hundred plots.
@@ -44,5 +44,6 @@ ARGS:
 
 - The whole ME3Explorer team (https://github.com/ME3Explorer/ME3Explorer)
 - Gibbed (https://github.com/gibbed)
+- Bioware / EA (https://github.com/electronicarts/MELE_ModdingSupport)
 
-I spent days digging into their code to figure out how to parse Unreal files (for ME1) and saves from ME2/3. Without them I could not have done anything.
+I spent days digging into their code to figure out how to parse Mass Effect saves. Without them I could not have done anything.
