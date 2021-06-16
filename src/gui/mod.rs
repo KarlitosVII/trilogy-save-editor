@@ -170,6 +170,16 @@ impl<'ui> Gui<'ui> {
                     if ui.button(im_str!("Save")) {
                         self.save_dialog(save_game);
                     }
+                    if ui.button(im_str!("Reload")) {
+                        let file_path = match save_game {
+                            SaveGame::MassEffect1 { file_path, .. }
+                            | SaveGame::MassEffect1Le { file_path, .. }
+                            | SaveGame::MassEffect2 { file_path, .. }
+                            | SaveGame::MassEffect2Le { file_path, .. }
+                            | SaveGame::MassEffect3 { file_path, .. } => file_path,
+                        };
+                        let _ = self.event_addr.send(MainEvent::OpenSave(file_path.to_owned()));
+                    }
                 }
                 ui.menu(im_str!("About"), || {
                     self.draw_about();

@@ -1,3 +1,6 @@
+## Unreleased
+- Added a `Reload` button for those who often need to reload there saves (modders, etc.)
+
 ## 1.10.0
 - ME1LE: Added `Inventory` tab
 - ME1LE: Fixed a rare `unexpected end of file...` error
