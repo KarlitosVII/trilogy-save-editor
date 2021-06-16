@@ -14,8 +14,8 @@ Me1PlotDb(
         "Crew": PlotCategory(
             booleans: {
                 3939: "Kaidan recruited",
-                4509: "Sided against Vrynnus while speaking to Kaiden",
-                4631: "Didn't judge about Rahna while speaking to Kaiden",
+                4509: "Sided against Vrynnus while speaking to Kaidan",
+                4631: "Didn't judge about Rahna while speaking to Kaidan",
                 3940: "Ashley recruited",
                 3941: "Garrus recruited",
                 3923: "Garrus is paragon (C-Sec)",

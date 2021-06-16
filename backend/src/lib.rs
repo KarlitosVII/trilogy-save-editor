@@ -5,10 +5,10 @@ use imgui::{
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use std::{
-    panic, thread,
+    panic,
     time::{Duration, Instant},
 };
-use tokio::runtime::Handle;
+use tokio::{runtime::Handle, time};
 use wgpu::{Device, Queue, Surface, SwapChain};
 use winit::{
     dpi::{LogicalSize, PhysicalSize},
@@ -104,7 +104,7 @@ fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::Backen
         format: wgpu::TextureFormat::Bgra8UnormSrgb,
         width: size.width as u32,
         height: size.height as u32,
-        present_mode: wgpu::PresentMode::Fifo,
+        present_mode: wgpu::PresentMode::Mailbox,
     };
 
     let swap_chain = device.create_swap_chain(&surface, &sc_desc);
@@ -189,11 +189,13 @@ impl System {
         window.set_visible(true);
 
         let mut last_frame = Instant::now();
-        let mut next_frame_factor = 0.0;
 
         let mut last_cursor = None;
         let mut run = true;
         let mut dropped_file = None;
+
+        let mut frame_interval = time::interval(Duration::from_secs_f32(1.0 / 60.0)); // AKA 60 fps
+        let rt = Handle::current();
 
         event_loop.run(move |event, _, control_flow| {
             *control_flow = ControlFlow::Poll;
@@ -212,7 +214,7 @@ impl System {
                         format: wgpu::TextureFormat::Bgra8UnormSrgb,
                         width: width as u32,
                         height: height as u32,
-                        present_mode: wgpu::PresentMode::Fifo,
+                        present_mode: wgpu::PresentMode::Mailbox,
                     };
 
                     swap_chain = device.create_swap_chain(&surface, &sc_desc);
@@ -228,31 +230,21 @@ impl System {
                     // Prevent CPU tanking when minimized
                     let PhysicalSize { width, height } = window.inner_size();
                     if width == 0 || height == 0 {
-                        const SLEEP_DURATION: Duration = Duration::from_millis(100); // 10 fps
-                        thread::sleep(SLEEP_DURATION);
+                        rt.block_on(async {
+                            time::sleep(Duration::from_millis(100)).await; // ~10 fps
+                        });
                         return;
                     }
 
+                    // Sleep until reached frame time
+                    rt.block_on(async {
+                        frame_interval.tick().await;
+                    });
+                    
                     // Delta time
-                    {
-                        let now = Instant::now();
-                        let delta = now - last_frame;
-
-                        // FPS limit to 60
-                        const FRAME_TARGET: f32 = 1.0 / 60.0;
-                        let frame_duration_target =
-                            Duration::from_secs_f32((FRAME_TARGET + next_frame_factor).max(0.0));
-                        if delta < frame_duration_target {
-                            const SLEEP_DURATION: Duration = Duration::from_millis(1);
-                            thread::sleep(SLEEP_DURATION);
-                            return;
-                        }
-                        next_frame_factor =
-                            frame_duration_target.as_secs_f32() - delta.as_secs_f32();
-
-                        imgui.io_mut().update_delta_time(delta);
-                        last_frame = now;
-                    }
+                    let now = Instant::now();
+                    imgui.io_mut().update_delta_time(now - last_frame);
+                    last_frame = now;
 
                     let frame = match swap_chain.get_current_frame() {
                         Ok(frame) => frame,
