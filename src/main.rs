@@ -22,15 +22,15 @@ fn parse_args() -> ArgMatches<'static> {
         .version(env!("CARGO_PKG_VERSION"))
         .author("by Karlitos")
         .about("A save editor for Mass Effect Trilogy (and Legendary)")
-        .arg(Arg::with_name("vulkan").long("vulkan").help("Use Vulkan backend"));
+        .arg(Arg::with_name("Vulkan").long("vulkan").help("Use Vulkan backend"));
 
     #[cfg(target_os = "windows")]
     let app = app
-        .arg(Arg::with_name("directx12").long("dx12").help("Use DirectX 12 backend"))
-        .arg(Arg::with_name("directx11").long("dx11").help("Use DirectX 11 backend"));
+        .arg(Arg::with_name("DirectX12").long("dx12").help("Use DirectX 12 backend"))
+        .arg(Arg::with_name("DirectX11").long("dx11").help("Use DirectX 11 backend"));
 
     #[cfg(target_os = "macos")]
-    let app = app.arg(Arg::with_name("metal").long("metal").help("Use Metal backend"));
+    let app = app.arg(Arg::with_name("Metal").long("metal").help("Use Metal backend"));
 
     let app = app.arg(Arg::with_name("FILE").help("Mass Effect save file"));
 

@@ -10,8 +10,9 @@ edition = "2018"
 lto = true
 
 [dependencies]
-# Macro
+# Karlitos
 raw_ui_derive = { path = "raw_ui_derive" }
+backend = { path = "backend" }
 # Windows
 winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-features = false }
 # Std-like
@@ -48,8 +49,3 @@ tinyfiledialogs = "3.8"
 dirs = "3.0"
 # Dear ImGui
 imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
-imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs", features = ["winit-25"], default-features = false}
-imgui-wgpu = { git = "https://github.com/KarlitosVII/imgui-wgpu-rs" }
-wgpu = "0.8"
-winit = "0.25"
-clipboard = "0.5"

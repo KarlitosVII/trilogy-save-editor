@@ -1,26 +1,3 @@
-// Copyright (c) 2019 Steven Wittens
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-// From https://github.com/Yatekii/imgui-wgpu-rs/blob/master/examples/hello_world.rs
-
-use clap::ArgMatches;
 use clipboard::{ClipboardContext, ClipboardProvider};
 use imgui::{
     ClipboardBackend, Context, FontConfig, FontGlyphRanges, FontSource, ImStr, ImString, Ui,
@@ -60,17 +37,22 @@ const MIN_WIDTH: u32 = 480;
 const MIN_HEIGHT: u32 = 270;
 
 // Backend
-pub fn init(title: &str, width: f64, height: f64, args: &ArgMatches) -> Backend {
-    let backend = if args.is_present("directx12") {
-        wgpu::BackendBit::DX12
-    } else if args.is_present("directx11") {
-        wgpu::BackendBit::DX11
-    } else if args.is_present("metal") {
-        wgpu::BackendBit::METAL
-    } else if args.is_present("vulkan") {
-        wgpu::BackendBit::VULKAN
-    } else {
-        wgpu::BackendBit::PRIMARY
+pub enum Backend {
+    Default,
+    Vulkan,
+    DirectX11,
+    DirectX12,
+    Metal,
+}
+
+// System
+pub fn init(title: &str, width: f64, height: f64, backend: Backend) -> System {
+    let backend = match backend {
+        Backend::Default => wgpu::BackendBit::PRIMARY,
+        Backend::Vulkan => wgpu::BackendBit::VULKAN,
+        Backend::DirectX11 => wgpu::BackendBit::DX11,
+        Backend::DirectX12 => wgpu::BackendBit::DX12,
+        Backend::Metal => wgpu::BackendBit::METAL,
     };
 
     #[cfg(target_os = "windows")]
@@ -88,7 +70,7 @@ pub fn init(title: &str, width: f64, height: f64, args: &ArgMatches) -> Backend 
     init_with_backend(title, width, height, backend)
 }
 
-fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::BackendBit) -> Backend {
+fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::BackendBit) -> System {
     let rt = Handle::current();
 
     let instance = wgpu::Instance::new(backend);
@@ -172,10 +154,10 @@ fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::Backen
     let renderer_config = RendererConfig { texture_format: sc_desc.format, ..Default::default() };
     let renderer = Renderer::new(&mut imgui, &device, &queue, renderer_config);
 
-    Backend { window, event_loop, surface, device, queue, swap_chain, imgui, platform, renderer }
+    System { window, event_loop, surface, device, queue, swap_chain, imgui, platform, renderer }
 }
 
-pub struct Backend {
+pub struct System {
     window: Window,
     event_loop: EventLoop<()>,
     surface: Surface,
@@ -187,12 +169,12 @@ pub struct Backend {
     pub renderer: Renderer,
 }
 
-impl Backend {
+impl System {
     pub fn main_loop<F>(self, mut ui_builder: F)
     where
         F: FnMut(&mut bool, &mut Ui, &mut Option<String>) + 'static,
     {
-        let Backend {
+        let System {
             window,
             event_loop,
             surface,

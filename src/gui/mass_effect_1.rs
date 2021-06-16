@@ -457,8 +457,8 @@ impl<'ui> Gui<'ui> {
         let object_name: &ImStr = &*player.get_name(object.object_name_id).borrow();
 
         let property_name = match property_name {
-            Option::Some(property_name) => im_str!("{} : {}", object_name, property_name),
-            Option::None => object_name.to_owned(),
+            Some(property_name) => im_str!("{} : {}", object_name, property_name),
+            None => object_name.to_owned(),
         };
 
         TreeNode::new(&format!("{}##{}", property_name, ident)).build(ui, || {

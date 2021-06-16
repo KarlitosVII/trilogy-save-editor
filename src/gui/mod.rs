@@ -1,4 +1,5 @@
 use anyhow::Error;
+use backend::Backend;
 use clap::ArgMatches;
 use flume::{Receiver, Sender};
 use imgui::{
@@ -13,7 +14,6 @@ use crate::{
     save_data::shared::appearance::{HasHeadMorph, HeadMorph},
 };
 
-mod backend;
 mod changelog;
 mod imgui_utils;
 mod mass_effect_1;
@@ -59,7 +59,17 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
         &format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")),
         1000.0,
         670.0,
-        &args,
+        if args.is_present("DirectX11") {
+            Backend::DirectX11
+        } else if args.is_present("DirectX12") {
+            Backend::DirectX12
+        } else if args.is_present("Metal") {
+            Backend::Metal
+        } else if args.is_present("Vulkan") {
+            Backend::Vulkan
+        } else {
+            Backend::Default
+        },
     );
 
     // Open file from command line
