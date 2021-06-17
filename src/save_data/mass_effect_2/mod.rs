@@ -7,7 +7,7 @@ use super::{
         plot::{Me1PlotTable, PlotTable},
         Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector,
     },
-    Dummy, ImguiString,
+    ImguiString,
 };
 
 pub mod player;
@@ -86,12 +86,23 @@ pub struct Me2LeSaveGame {
     doors: Vec<Door>,
     pawns: Vec<Guid>,
     pub player: Player,
-    _unknown: Dummy<28>,
+    me1_import_rewards: Me1ImportRewards,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     pub me1_plot: Me1PlotTable,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone)]
+struct Me1ImportRewards {
+    me1_level: i32,
+    me2_level: i32,
+    experience: f32,
+    credits: f32,
+    resources: f32,
+    paragon: f32,
+    renegade: f32,
 }
 
 #[derive(Serialize, Clone)]

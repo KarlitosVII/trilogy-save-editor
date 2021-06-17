@@ -36,7 +36,7 @@ pub struct Me1LeSaveGame {
     headers: List<ChunkHeader>,
     pub save_data: Me1LeSaveData,
     checksum: u32,
-    _unknown: Dummy<4>,
+    compression_flag: u32, // 1 = ZLIB
     uncompressed_size: u32,
 }
 
@@ -100,7 +100,7 @@ impl<'de> serde::Deserialize<'de> for Me1LeSaveGame {
                 };
 
                 let checksum = seq.next_element()?.unwrap();
-                let _unknown = seq.next_element()?.unwrap();
+                let compression_flag = seq.next_element()?.unwrap();
                 let uncompressed_size = seq.next_element()?.unwrap();
 
                 Ok(Me1LeSaveGame {
@@ -109,7 +109,7 @@ impl<'de> serde::Deserialize<'de> for Me1LeSaveGame {
                     headers: headers.into(),
                     save_data,
                     checksum,
-                    _unknown,
+                    compression_flag,
                     uncompressed_size,
                 })
             }
@@ -129,7 +129,7 @@ impl serde::Serialize for Me1LeSaveGame {
             headers: _,
             save_data,
             checksum,
-            _unknown,
+            compression_flag,
             uncompressed_size: _,
         } = self;
 
@@ -168,7 +168,7 @@ impl serde::Serialize for Me1LeSaveGame {
         s.serialize_field("headers", &headers)?;
         s.serialize_field("save_data", &save_data)?;
         s.serialize_field("checksum", checksum)?;
-        s.serialize_field("_unknown", _unknown)?;
+        s.serialize_field("compression_flag", compression_flag)?;
         s.serialize_field("uncompressed_size", &headers[0].uncompressed_size)?;
         s.end()
     }
