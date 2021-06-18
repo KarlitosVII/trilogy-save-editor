@@ -647,14 +647,4 @@ impl<'ui> Gui<'ui> {
             }
         }
     }
-
-    fn draw_text(&self, text: &ImStr, label: Option<&ImStr>) {
-        let ui = self.ui;
-
-        if let Some(label) = label {
-            ui.label_text(label, text)
-        } else {
-            ui.text(text);
-        }
-    }
 }

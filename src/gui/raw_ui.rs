@@ -114,6 +114,35 @@ impl<'ui> Gui<'ui> {
     }
 
     // View widgets
+    pub fn draw_text(&self, text: &ImStr, label: Option<&ImStr>) {
+        let ui = self.ui;
+
+        if let Some(label) = label {
+            ui.label_text(label, text)
+        } else {
+            ui.text(text);
+        }
+    }
+
+    pub fn draw_option<T: RawUi>(&self, ident: &str, has_value: &mut Option<T>) {
+        let ui = self.ui;
+
+        if let Some(value) = has_value {
+            ui.align_text_to_frame_padding();
+            let remove = ui.small_button(&im_str!("remove##remove-{}", ident));
+
+            ui.same_line();
+            value.draw_raw_ui(self, ident);
+
+            // Remove
+            if remove {
+                *has_value = None;
+            }
+        } else {
+            self.draw_text(im_str!("None"), Some(&ImString::new(ident)));
+        }
+    }
+
     pub fn draw_struct(&self, ident: &str, fields: &mut [(&mut dyn RawUi, &str)]) {
         let ui = self.ui;
         TreeNode::new(ident).build(ui, || {

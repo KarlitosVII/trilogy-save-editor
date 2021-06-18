@@ -70,10 +70,11 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        const SIZE: usize = size_of::<u32>();
-        let bytes = self.read(SIZE)?;
-        let value = <u32>::from_le_bytes(bytes.try_into().map_err(Error::custom)?) != 0;
-        visitor.visit_bool(value)
+        let value: u32 = de::Deserialize::deserialize(&mut *self)?;
+        match value {
+            0 | 1 => visitor.visit_bool(value != 0),
+            v => Err(Error::custom(format!("expected 1 or 0, found: {}", v))),
+        }
     }
 
     // Signed ints
@@ -111,10 +112,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        const SIZE: usize = size_of::<i32>();
-        let bytes = self.read(SIZE)?;
-        let len = <i32>::from_le_bytes(bytes.try_into().map_err(Error::custom)?);
-
+        let len: i32 = de::Deserialize::deserialize(&mut *self)?;
         if len == 0 {
             return visitor.visit_borrowed_str("");
         }
@@ -160,7 +158,16 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor.visit_byte_buf(self.read_to_end()?.to_owned())
     }
 
-    unimpl_deserialize!(deserialize_option());
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: Visitor<'de>,
+    {
+        let value: bool = de::Deserialize::deserialize(&mut *self)?;
+        match value {
+            true => visitor.visit_some(&mut *self),
+            false => visitor.visit_none(),
+        }
+    }
 
     fn deserialize_unit<V>(self, _: V) -> Result<V::Value>
     where
@@ -187,20 +194,16 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        const SIZE: usize = size_of::<u32>();
-        let bytes = self.read(SIZE)?;
-        let len = <u32>::from_le_bytes(bytes.try_into().map_err(Error::custom)?) as usize;
-        visitor.visit_seq(SizedSeqMap::new(&mut self, len))
+        let len: u32 = de::Deserialize::deserialize(&mut *self)?;
+        visitor.visit_seq(SizedSeqMap::new(&mut self, len as usize))
     }
 
     fn deserialize_map<V>(mut self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        const SIZE: usize = size_of::<u32>();
-        let bytes = self.read(SIZE)?;
-        let len = <u32>::from_le_bytes(bytes.try_into().map_err(Error::custom)?) as usize;
-        visitor.visit_map(SizedSeqMap::new(&mut self, len))
+        let len: u32 = de::Deserialize::deserialize(&mut *self)?;
+        visitor.visit_map(SizedSeqMap::new(&mut self, len as usize))
     }
 
     fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value>
@@ -242,9 +245,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
             where
                 V: DeserializeSeed<'de>,
             {
-                const SIZE: usize = size_of::<u8>();
-                let bytes = self.read(SIZE)?;
-                let idx = <u8>::from_le_bytes(bytes.try_into().map_err(Error::custom)?);
+                let idx: u8 = de::Deserialize::deserialize(&mut *self)?;
                 let val = seed.deserialize(idx.into_deserializer())?;
                 Ok((val, self))
             }

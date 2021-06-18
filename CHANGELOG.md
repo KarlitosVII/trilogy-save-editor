@@ -1,5 +1,6 @@
 ## Unreleased
 - ME2LE: Added Legendary missing data (ME1 Import Rewards)
+- ME1LE: Added Journal, Codex and some missing data
 
 ## 1.11.0
 - Added a command line tool to compare the plots of 2 saves, additional information with the --help argument

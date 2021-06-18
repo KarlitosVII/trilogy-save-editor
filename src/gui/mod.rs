@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use crate::{
     databases,
     event_handler::{MainEvent, SaveGame},
-    save_data::shared::appearance::{HasHeadMorph, HeadMorph},
+    save_data::shared::appearance::HeadMorph,
 };
 
 mod changelog;
@@ -98,20 +98,19 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
                 state.save_game = Some(opened_save_game);
             }
             UiEvent::ImportedHeadMorph(head_morph) => {
-                let has_head_morph =
-                    HasHeadMorph { has_head_morph: true, head_morph: Some(*head_morph) };
+                let head_morph = Some(*head_morph);
                 match state.save_game.as_mut() {
                     Some(SaveGame::MassEffect1Le { save_game, .. }) => {
-                        save_game.save_data.player.head_morph = has_head_morph
+                        save_game.save_data.player.head_morph = head_morph
                     }
                     Some(SaveGame::MassEffect2 { save_game, .. }) => {
-                        save_game.player.appearance.head_morph = has_head_morph
+                        save_game.player.appearance.head_morph = head_morph
                     }
                     Some(SaveGame::MassEffect2Le { save_game, .. }) => {
-                        save_game.player.appearance.head_morph = has_head_morph
+                        save_game.player.appearance.head_morph = head_morph
                     }
                     Some(SaveGame::MassEffect3 { save_game, .. }) => {
-                        save_game.player.appearance.head_morph = has_head_morph
+                        save_game.player.appearance.head_morph = head_morph
                     }
                     Some(SaveGame::MassEffect1 { .. }) | None => unreachable!(),
                 }
@@ -170,6 +169,7 @@ impl<'ui> Gui<'ui> {
                     if ui.button(im_str!("Save")) {
                         self.save_dialog(save_game);
                     }
+                    ui.text("-");
                     if ui.button(im_str!("Reload")) {
                         let file_path = match save_game {
                             SaveGame::MassEffect1 { file_path, .. }

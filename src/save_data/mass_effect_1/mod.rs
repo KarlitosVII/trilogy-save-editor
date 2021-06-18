@@ -186,25 +186,25 @@ mod test {
             // Deserialize
             let me1_save_game: Me1SaveGame = unreal::Deserializer::from_bytes(&input)?;
 
-            println!("Deserialize 1 : {:?}", Instant::now().saturating_duration_since(now));
+            println!("Deserialize 1 : {:?}", Instant::now() - now);
             let now = Instant::now();
 
             // Serialize
             let output = unreal::Serializer::to_byte_buf(&me1_save_game)?;
 
-            println!("Serialize 1 : {:?}", Instant::now().saturating_duration_since(now));
+            println!("Serialize 1 : {:?}", Instant::now() - now);
             let now = Instant::now();
 
             // Deserialize (again)
             let me1_save_game: Me1SaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
 
-            println!("Deserialize 2 : {:?}", Instant::now().saturating_duration_since(now));
+            println!("Deserialize 2 : {:?}", Instant::now() - now);
             let now = Instant::now();
 
             // Serialize (again)
             let output_2 = unreal::Serializer::to_byte_buf(&me1_save_game)?;
 
-            println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
+            println!("Serialize 2 : {:?}", Instant::now() - now);
 
             // Check 2nd serialize = first serialize
             // let cmp = output.chunks(4).zip(output_2.chunks(4));

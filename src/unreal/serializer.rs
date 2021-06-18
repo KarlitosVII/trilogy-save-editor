@@ -122,14 +122,15 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_none(self) -> Result<()> {
-        unimplemented!()
+        self.serialize_bool(false)
     }
 
-    fn serialize_some<T: ?Sized>(self, _: &T) -> Result<()>
+    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<()>
     where
         T: Serialize,
     {
-        unimplemented!()
+        self.serialize_bool(true)?;
+        value.serialize(self)
     }
 
     fn serialize_unit(self) -> Result<()> {

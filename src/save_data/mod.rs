@@ -173,6 +173,15 @@ impl RawUi for bool {
     }
 }
 
+impl<T> RawUi for Option<T>
+where
+    T: RawUi,
+{
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_option(ident, self);
+    }
+}
+
 impl<T> RawUi for Vec<T>
 where
     T: RawUi + Default,

@@ -10,7 +10,7 @@ use crate::{
             Me2LeSaveGame, Me2SaveGame,
         },
         shared::{
-            appearance::{HasHeadMorph, HeadMorph},
+            appearance::HeadMorph,
             player::{Notoriety, Origin},
             plot::{Me1PlotTable, PlotCategory, PlotTable},
         },
@@ -623,9 +623,8 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    fn draw_me2_head_morph(&self, head_morph: &mut HasHeadMorph, is_female: bool) {
+    fn draw_me2_head_morph(&self, has_head_morph: &mut Option<HeadMorph>, is_female: bool) {
         let ui = self.ui;
-        let HasHeadMorph { has_head_morph, head_morph } = head_morph;
 
         // Import
         if ui.button(im_str!("Import")) {
@@ -636,7 +635,8 @@ impl<'ui> Gui<'ui> {
                 let _ = self.event_addr.send(MainEvent::ImportHeadMorph(path));
             }
         }
-        if let Some(head_morph) = head_morph {
+
+        if let Some(head_morph) = has_head_morph {
             // Export
             ui.same_line();
             if ui.button(im_str!("Export")) {
@@ -653,57 +653,63 @@ impl<'ui> Gui<'ui> {
                         .send(MainEvent::ExportHeadMorph(path, Box::new(head_morph.clone())));
                 }
             }
-            // Toggle head morph
+            // Remove head morph
+            let mut remove = false;
             if !is_female {
                 ui.same_line();
-                has_head_morph.draw_raw_ui(self, "Enable head morph");
+                ui.text("-");
+                ui.same_line();
+                remove = ui.button(im_str!("Remove head morph"));
             }
             ui.separator();
 
             // Raw
-            if *has_head_morph {
-                let HeadMorph {
-                    hair_mesh,
-                    accessory_mesh,
-                    morph_features,
-                    offset_bones,
-                    lod0_vertices,
-                    lod1_vertices,
-                    lod2_vertices,
-                    lod3_vertices,
-                    scalar_parameters,
-                    vector_parameters,
-                    texture_parameters,
-                } = head_morph;
+            let HeadMorph {
+                hair_mesh,
+                accessory_mesh,
+                morph_features,
+                offset_bones,
+                lod0_vertices,
+                lod1_vertices,
+                lod2_vertices,
+                lod3_vertices,
+                scalar_parameters,
+                vector_parameters,
+                texture_parameters,
+            } = head_morph;
 
-                Table::new(im_str!("head-morph-table"), 1).build(ui, || {
+            Table::new(im_str!("head-morph-table"), 1).build(ui, || {
+                Table::next_row();
+                self.set_next_item_open(true);
+                TreeNode::new("Raw").build(ui, || {
                     Table::next_row();
-                    self.set_next_item_open(true);
-                    TreeNode::new("Raw").build(ui, || {
-                        Table::next_row();
-                        hair_mesh.draw_raw_ui(self, "Hair Mesh");
-                        Table::next_row();
-                        accessory_mesh.draw_raw_ui(self, "Accessory Mesh");
-                        Table::next_row();
-                        morph_features.draw_raw_ui(self, "Morph Features");
-                        Table::next_row();
-                        offset_bones.draw_raw_ui(self, "Offset Bones");
-                        Table::next_row();
-                        lod0_vertices.draw_raw_ui(self, "Lod0 Vertices");
-                        Table::next_row();
-                        lod1_vertices.draw_raw_ui(self, "Lod1 Vertices");
-                        Table::next_row();
-                        lod2_vertices.draw_raw_ui(self, "Lod2 Vertices");
-                        Table::next_row();
-                        lod3_vertices.draw_raw_ui(self, "Lod3 Vertices");
-                        Table::next_row();
-                        scalar_parameters.draw_raw_ui(self, "Scalar Parameters");
-                        Table::next_row();
-                        vector_parameters.draw_raw_ui(self, "Vector Parameters");
-                        Table::next_row();
-                        texture_parameters.draw_raw_ui(self, "Texture Parameters");
-                    });
+                    hair_mesh.draw_raw_ui(self, "Hair Mesh");
+                    Table::next_row();
+                    accessory_mesh.draw_raw_ui(self, "Accessory Mesh");
+                    Table::next_row();
+                    morph_features.draw_raw_ui(self, "Morph Features");
+                    Table::next_row();
+                    offset_bones.draw_raw_ui(self, "Offset Bones");
+                    Table::next_row();
+                    lod0_vertices.draw_raw_ui(self, "Lod0 Vertices");
+                    Table::next_row();
+                    lod1_vertices.draw_raw_ui(self, "Lod1 Vertices");
+                    Table::next_row();
+                    lod2_vertices.draw_raw_ui(self, "Lod2 Vertices");
+                    Table::next_row();
+                    lod3_vertices.draw_raw_ui(self, "Lod3 Vertices");
+                    Table::next_row();
+                    scalar_parameters.draw_raw_ui(self, "Scalar Parameters");
+                    Table::next_row();
+                    vector_parameters.draw_raw_ui(self, "Vector Parameters");
+                    Table::next_row();
+                    texture_parameters.draw_raw_ui(self, "Texture Parameters");
                 });
+            });
+
+            // Remove
+            if remove {
+                *has_head_morph = None;
             }
         } else {
             ui.separator()

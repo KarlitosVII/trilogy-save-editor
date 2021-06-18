@@ -2,12 +2,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_data::{
     shared::{
-        appearance::HasHeadMorph,
+        appearance::HeadMorph,
         player::{Notoriety, Origin},
     },
     Dummy, ImguiString,
 };
 
+// TODO: Tous les u8
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Player {
     pub is_female: bool,
@@ -24,7 +25,7 @@ pub struct Player {
     pub talent_points: i32,
     talent_pool_points: i32,
     mapped_talent: ImguiString,
-    pub head_morph: HasHeadMorph,
+    pub head_morph: Option<HeadMorph>,
     simple_talents: Vec<SimpleTalent>,
     pub complex_talents: Vec<ComplexTalent>,
     pub inventory: Inventory,

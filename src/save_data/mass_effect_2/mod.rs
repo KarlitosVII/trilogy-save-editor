@@ -198,7 +198,7 @@ mod test {
         // Deserialize
         let me2_save_game: Me2SaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
 
-        println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
+        println!("Deserialize : {:?}", Instant::now() - now);
         let now = Instant::now();
 
         // Serialize
@@ -209,7 +209,7 @@ mod test {
         let checksum = crc.checksum(&output);
         output.extend(&u32::to_le_bytes(checksum));
 
-        println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
+        println!("Serialize : {:?}", Instant::now() - now);
 
         // // Check serialized = input
         // let cmp = input.chunks(4).zip(output.chunks(4));
@@ -234,7 +234,7 @@ mod test {
         // Deserialize
         let me2_save_game: Me2LeSaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
 
-        println!("Deserialize : {:?}", Instant::now().saturating_duration_since(now));
+        println!("Deserialize : {:?}", Instant::now() - now);
         let now = Instant::now();
 
         // Serialize
@@ -245,7 +245,7 @@ mod test {
         let checksum = crc.checksum(&output);
         output.extend(&u32::to_le_bytes(checksum));
 
-        println!("Serialize : {:?}", Instant::now().saturating_duration_since(now));
+        println!("Serialize : {:?}", Instant::now() - now);
 
         // // Check serialized = input
         // let cmp = input.chunks(4).zip(output.chunks(4));
