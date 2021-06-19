@@ -33,7 +33,7 @@ impl<'ui> Gui<'ui> {
 
         let width = ui.push_item_width(97.0);
         let mut new_value = *value as i32;
-        if InputInt::new(ui, &ImString::new(ident), &mut new_value).build(){
+        if InputInt::new(ui, &ImString::new(ident), &mut new_value).build() {
             *value = new_value.clamp(0, u8::MAX as i32) as u8;
         }
         width.pop(ui);

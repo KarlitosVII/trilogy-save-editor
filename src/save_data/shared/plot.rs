@@ -92,5 +92,5 @@ pub struct PlotCodex {
 #[derive(Deserialize, Serialize)]
 pub struct PlotCategory {
     pub booleans: IndexMap<usize, String>,
-    pub ints: IndexMap<usize, String>,
+    pub integers: IndexMap<usize, String>,
 }

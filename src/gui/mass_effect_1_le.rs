@@ -47,7 +47,7 @@ impl<'ui> Gui<'ui> {
 
         // Head Morph
         TabScroll::new(im_str!("Head Morph")).build(ui, || {
-            self.draw_me3_and_le_head_morph(&mut save_game.player.head_morph);
+            self.draw_head_morph(&mut save_game.player.head_morph);
         });
 
         // Raw
@@ -290,7 +290,8 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me2_and_me1_le_plot_category(me1_plot_table, plot_db);
+                            let PlotTable { booleans, integers, .. } = me1_plot_table;
+                            self.draw_plot_category(booleans, integers, plot_db);
                         });
                     });
                 }

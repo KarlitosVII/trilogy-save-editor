@@ -1,4 +1,4 @@
-use imgui::{im_str, ImStr, ImString, ListClipper, TabBar, TabItem};
+use imgui::{im_str, ImStr, ImString, TabBar, TabItem};
 use std::{
     cell::{RefCell, RefMut},
     cmp::Ordering,
@@ -13,7 +13,7 @@ use crate::{
             plot_db::Me1PlotDb,
             Me1SaveGame,
         },
-        shared::plot::{Me1PlotTable, PlotCategory},
+        shared::plot::Me1PlotTable,
         ImguiString, List, RawUi,
     },
 };
@@ -394,7 +394,8 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me1_plot_category(me1_plot_table, plot_db);
+                            let Me1PlotTable { booleans, integers, .. } = me1_plot_table;
+                            self.draw_plot_category(booleans, integers, plot_db);
                         });
                     });
                 }
@@ -402,41 +403,6 @@ impl<'ui> Gui<'ui> {
         }
 
         Some(())
-    }
-
-    fn draw_me1_plot_category(&self, plot_table: &mut Me1PlotTable, plot_db: &PlotCategory) {
-        let ui = self.ui;
-        let PlotCategory { booleans, ints } = plot_db;
-
-        if booleans.is_empty() && ints.is_empty() {
-            return;
-        }
-
-        // Booleans
-        let mut clipper = ListClipper::new(booleans.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.booleans.get_mut(*plot_id);
-                if let Some(mut plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
-                }
-            }
-        }
-
-        // Integers
-        let mut clipper = ListClipper::new(ints.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
-                let plot = plot_table.integers.get_mut(*plot_id);
-                if let Some(plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
-                }
-            }
-        }
     }
 
     fn draw_raw_player(&self, player: &Player) -> Option<()> {

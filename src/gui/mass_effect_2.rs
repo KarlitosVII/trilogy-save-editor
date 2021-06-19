@@ -1,4 +1,4 @@
-use imgui::{im_str, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem};
+use imgui::{im_str, ComboBox, ImStr, ImString, Selectable, TabBar, TabItem};
 
 use crate::{
     databases::Database,
@@ -12,7 +12,7 @@ use crate::{
         shared::{
             appearance::HeadMorph,
             player::{Notoriety, Origin},
-            plot::{Me1PlotTable, PlotCategory, PlotTable},
+            plot::{Me1PlotTable, PlotTable},
         },
         RawUi,
     },
@@ -83,7 +83,7 @@ impl<'ui> Gui<'ui> {
 
         // Head Morph
         TabScroll::new(im_str!("Head Morph")).build(ui, || {
-            self.draw_me3_and_le_head_morph(&mut save_game.player.appearance.head_morph);
+            self.draw_head_morph(&mut save_game.player.appearance.head_morph);
         });
 
         // Raw
@@ -505,11 +505,12 @@ impl<'ui> Gui<'ui> {
             captains_cabin,
             imported_me1,
         } = Database::me2_plot()?;
+        let PlotTable { booleans, integers, .. } = me2_plot_table;
 
         // Player
         TabScroll::new(im_str!("Player")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me2_and_me1_le_plot_category(me2_plot_table, player);
+                self.draw_plot_category(booleans, integers, player);
             });
         });
 
@@ -527,7 +528,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me2_and_me1_le_plot_category(me2_plot_table, plot_db);
+                            self.draw_plot_category(booleans, integers, plot_db);
                         });
                     });
                 }
@@ -537,13 +538,13 @@ impl<'ui> Gui<'ui> {
         // Rewards
         TabScroll::new(im_str!("Rewards")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me2_and_me1_le_plot_category(me2_plot_table, rewards);
+                self.draw_plot_category(booleans, integers, rewards);
             });
         });
         // Captain's cabin
         TabScroll::new(im_str!("Captain's cabin")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me2_and_me1_le_plot_category(me2_plot_table, captains_cabin);
+                self.draw_plot_category(booleans, integers, captains_cabin);
             });
         });
 
@@ -564,7 +565,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me2_and_me1_le_plot_category(me2_plot_table, plot_db);
+                            self.draw_plot_category(booleans, integers, plot_db);
                         });
                     });
                 }
@@ -585,42 +586,6 @@ impl<'ui> Gui<'ui> {
             });
         }
         Some(())
-    }
-
-    pub fn draw_me2_and_me1_le_plot_category(
-        &self, plot_table: &mut PlotTable, plot_db: &PlotCategory,
-    ) {
-        let ui = self.ui;
-        let PlotCategory { booleans, ints } = plot_db;
-
-        if booleans.is_empty() && ints.is_empty() {
-            return;
-        }
-
-        // Booleans
-        let mut clipper = ListClipper::new(booleans.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.booleans.get_mut(*plot_id);
-                if let Some(mut plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
-                }
-            }
-        }
-        // Integers
-        let mut clipper = ListClipper::new(ints.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = ints.get_index(i as usize).unwrap();
-                let plot = plot_table.integers.get_mut(*plot_id);
-                if let Some(plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
-                }
-            }
-        }
     }
 
     fn draw_me2_head_morph(&self, has_head_morph: &mut Option<HeadMorph>, is_female: bool) {

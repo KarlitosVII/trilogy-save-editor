@@ -4,7 +4,7 @@ Me1PlotDb(
             booleans: {
                 7156: "Rich Achievement (to unlock Spectre Master gear)",
             },
-            ints: {
+            integers: {
                 1: "Origin (1 = Spacer, 2 = Colonist, 3 = Earthborn)",
                 2: "Notoriety (1 = Survivor, 2 = War Hero, 3 = Ruthless)",
                 47: "Paragon points",
@@ -25,7 +25,7 @@ Me1PlotDb(
                 5336: "Retrieved Wrex family armor",
                 4596: "Gave Tali a copy of the data found in UNC: Geth Incursions",
             },
-            ints: {
+            integers: {
                 37: "Garrus pushed toward C-Sec progress (paragon)",
                 38: "Garrus pushed toward Spectres progress (renegade)",
             },
@@ -37,7 +37,7 @@ Me1PlotDb(
                 3960: "Romancing Kaidan",
                 4169: "Romancing Liara",
             },
-            ints: {
+            integers: {
                 17: "Romance progress with Ashley",
                 15: "Romance progress with Kaidan",
                 16: "Romance progress with Liara",
@@ -78,7 +78,7 @@ Me1PlotDb(
                 7164: "Got Elkoss Combine license",
                 4948: "[Reporter's Request] Gave OSD information to Emily Wong",
             },
-            ints: {
+            integers: {
                 39: "[Scan the Keepers] Keepers scanned (0-21)",
             },
         ),
@@ -98,7 +98,7 @@ Me1PlotDb(
                 6254: "[Outcome] Renegade",
                 6380: "[Outcome] Fail",
             },
-            ints: {},
+            integers: {},
         ),
         "Noveria": PlotCategory(
             booleans: {
@@ -109,7 +109,7 @@ Me1PlotDb(
                 2587: "Rachni Queen released",
                 2588: "Killed Rachni Queen",
             },
-            ints: {},
+            integers: {},
         ),
         "Virmire": PlotCategory(
             booleans: {
@@ -122,7 +122,7 @@ Me1PlotDb(
                 4459: "Geth flyers reported (Both needed to keep Kirrahe alive)",
                 6058: "Killed Rana Thanoptis",
             },
-            ints: {},
+            integers: {},
         ),
         "End": PlotCategory(
             booleans: {
@@ -131,7 +131,7 @@ Me1PlotDb(
                 5434: "Councilor Udina",
                 5435: "Councilor Anderson",
             },
-            ints: {},
+            integers: {},
         ),
         "UNC": PlotCategory(
             booleans: {
@@ -151,7 +151,7 @@ Me1PlotDb(
                 5379: "[Major Kyle] Kyle surrendered",
                 5885: "[Cerberus] Obtained quest",
             },
-            ints: {
+            integers: {
                 48: "[Valuable Minerals] Light Metals (0-20 max 34)",
                 50: "[Valuable Minerals] Heavy Metals (0-20 max 34)",
                 51: "[Valuable Minerals] Gases (0-6 max 10)",
@@ -170,7 +170,7 @@ Me1PlotDb(
                 7317: "[Bring Down the Sky] Rescued Humans 2",
                 7315: "[Bring Down the Sky] Killed Balak",
             },
-            ints: {},
+            integers: {},
         ),
     },
 )

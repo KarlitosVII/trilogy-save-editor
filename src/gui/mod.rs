@@ -21,8 +21,9 @@ mod mass_effect_1_le;
 mod mass_effect_2;
 mod mass_effect_3;
 mod raw_ui;
+mod shared;
 
-static NOTIFICATION_TIME: f64 = 1.5; // seconde
+static NOTIFICATION_TIME: f64 = 1.5; // second
 
 // States
 #[derive(Default)]
@@ -391,7 +392,6 @@ impl<'ui> Gui<'ui> {
                 hover_color: [0.02, 0.28, 0.43, 1.0],
             },
         };
-
         [
             ui.push_style_color(StyleColor::WindowBg, [0.05, 0.05, 0.05, 1.0]),
             ui.push_style_color(StyleColor::Border, [0.20, 0.20, 0.20, 1.0]),

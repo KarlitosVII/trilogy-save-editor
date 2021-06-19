@@ -6,7 +6,7 @@ Me3PlotDb(
             17662: "Shepard is female",
             22642: "Performed Cosmetic Surgery in ME3",
         },
-        ints: {
+        integers: {
             10430: "Effective Military Strength",
             10475: "New Game Plus Count",
             10159: "Paragon Points",
@@ -22,7 +22,7 @@ Me3PlotDb(
             booleans: {
                 22590: "N7 Hoodie",
             },
-            ints: {},
+            integers: {},
         ),
         "Parts": PlotCategory(
             booleans: {
@@ -62,7 +62,7 @@ Me3PlotDb(
                 19460: "Serrice Council (Shoulders)",
                 19459: "Serrice Council (Torso)",
             },
-            ints: {},
+            integers: {},
         ),
         "Full Body": PlotCategory(
             booleans: {
@@ -77,7 +77,7 @@ Me3PlotDb(
                 24820: "Cerberus Nightmare Armor",
                 24821: "Cerberus Spirit Armor",
             },
-            ints: {},
+            integers: {},
         ),
     },
     crew: {
@@ -87,7 +87,7 @@ Me3PlotDb(
                 17665: "Ashley is in squad",
                 17686: "Ashley is selectable",
             },
-            ints: {
+            integers: {
                 10154: "Ashley appearance (0 = Default, 1 = Alternate, 2 = N7 Collector, 3 = From Ashes)",
                 10330: "Ashley mission count",
             },
@@ -98,7 +98,7 @@ Me3PlotDb(
                 17667: "EDI is in squad",
                 17688: "EDI is selectable",
             },
-            ints: {
+            integers: {
                 10156: "EDI appearance (0 = Default, 1 = Alternate, 2 = N7 Collector, 3 = DLC Pack 1)",
                 10332: "EDI mission count",
             },
@@ -109,7 +109,7 @@ Me3PlotDb(
                 17666: "Garrus is in squad",
                 17687: "Garrus is selectable",
             },
-            ints: {
+            integers: {
                 10155: "Garrus appearance (0 = Default, 1 = Alternate, 2 = N7 Collector, 3 = DLC Pack 1)",
                 10331: "Garrus mission count",
             },
@@ -120,7 +120,7 @@ Me3PlotDb(
                 17692: "James is in squad",
                 17695: "James is selectable",
             },
-            ints: {
+            integers: {
                 10158: "James appearance (0 = Default, 1 = Alternate, 2 = N7 Collector, 3 = From Ashes)",
                 10334: "James mission count",
             },
@@ -131,7 +131,7 @@ Me3PlotDb(
                 17668: "Javik is in squad",
                 17689: "Javik is selectable",
             },
-            ints: {
+            integers: {
                 10157: "Javik appearance (0 = Default, 1 = Alternate)",
                 10333: "Javik mission count",
             },
@@ -142,7 +142,7 @@ Me3PlotDb(
                 17664: "Kaidan is in squad",
                 17685: "Kaidan is selectable",
             },
-            ints: {
+            integers: {
                 10153: "Kaidan appearance (0 = Default, 1 = Alternate, 2 = N7 Collector, 3 = From Ashes)",
                 10329: "Kaidan mission count",
             },
@@ -153,7 +153,7 @@ Me3PlotDb(
                 17663: "Liara is in squad",
                 17684: "Liara is selectable",
             },
-            ints: {
+            integers: {
                 10152: "Liara appearance (0 = Default, 1 = Alternate, 2 = N7 Collector, 3 = From Ashes, 4 = DLC Pack 1)",
                 10328: "Liara mission count",
             },
@@ -164,7 +164,7 @@ Me3PlotDb(
                 17836: "Tali is in squad",
                 17839: "Tali is selectable",
             },
-            ints: {
+            integers: {
                 10214: "Tali appearance (0 = Default, 1 = Alternate, 2 = From Ashes)",
                 10335: "Tali mission count",
             },
@@ -178,7 +178,7 @@ Me3PlotDb(
                 24758: "Samara is in squad",
                 24767: "Zaeed is in squad",
             },
-            ints: {},
+            integers: {},
         ),
     },
     romance: {
@@ -187,7 +187,7 @@ Me3PlotDb(
                 19724: "[Romanced] Ashley",
                 19729: "[Rejected] Ashley",
             },
-            ints: {
+            integers: {
                 10314: "[Friendship] Ashley friendship",
                 10322: "[Romance] Ashley progress",
             },
@@ -198,7 +198,7 @@ Me3PlotDb(
                 19725: "[Romanced] Garrus",
                 19730: "[Rejected] Garrus",
             },
-            ints: {
+            integers: {
                 10315: "[Friendship] Garrus friendship",
             },
         ),
@@ -207,7 +207,7 @@ Me3PlotDb(
                 19723: "[Romanced] Kaidan",
                 19728: "[Rejected] Kaidan",
             },
-            ints: {
+            integers: {
                 10313: "[Friendship] Kaidan friendship",
                 10321: "[Romance] Kaidan progress",
             },
@@ -218,7 +218,7 @@ Me3PlotDb(
                 19722: "[Romanced] Liara",
                 19727: "[Rejected] Liara",
             },
-            ints: {
+            integers: {
                 10312: "[Friendship] Liara friendship",
                 10320: "[Romance] Liara progress",
             },
@@ -229,7 +229,7 @@ Me3PlotDb(
                 19726: "[Romanced] Tali",
                 19731: "[Rejected] Tali",
             },
-            ints: {
+            integers: {
                 10318: "[Friendship] Tali friendship",
             },
         ),
@@ -238,7 +238,7 @@ Me3PlotDb(
                 19835: "[Romanced] Samantha",
                 19836: "[Rejected] Samantha",
             },
-            ints: {
+            integers: {
                 10336: "[Friendship] Samantha friendship",
                 10337: "[Romance] Samantha progress",
             },
@@ -248,7 +248,7 @@ Me3PlotDb(
                 19838: "[Romanced] Steve",
                 19839: "[Rejected] Steve",
             },
-            ints: {
+            integers: {
                 10410: "[Friendship] Steve friendship",
             },
         ),
@@ -257,7 +257,7 @@ Me3PlotDb(
                 20628: "[Flirt] Diana Allers (after Cerberus coup)",
                 20630: "[Romanced] Diana Allers (after Rannoch)",
             },
-            ints: {},
+            integers: {},
         ),
         "Other": PlotCategory(
             booleans: {
@@ -267,7 +267,7 @@ Me3PlotDb(
                 21100: "[Romanced] Kelly",
                 25045: "[DLC: Citadel] Kissed Samara in Citadel apartment",
             },
-            ints: {
+            integers: {
                 10316: "[Friendship] EDI friendship",
                 10319: "[Friendship] James friendship",
                 10317: "[Friendship] Javik friendship",
@@ -293,7 +293,7 @@ Me3PlotDb(
                 22634: "Email N7 Weapon #4",
                 22635: "Email N7 Valkyrie",
             },
-            ints: {},
+            integers: {},
         ),
         "Citadel": PlotCategory(
             booleans: {
@@ -311,7 +311,7 @@ Me3PlotDb(
                 22082: "[Liara] Had Presidium date",
 
             },
-            ints: {
+            integers: {
                 10311: "[Inspirational Stories] No. of Photos",
             },
         ),
@@ -326,19 +326,19 @@ Me3PlotDb(
                 18819: "Spoke to Thane at hospital",
                 20694: "Advised Kelly Chambers to change her identity",
             },
-            ints: {},
+            integers: {},
         ),
         "Benning: Evidence": PlotCategory(
             booleans: {
                 19616: "Found the dogtags of Ambassador Dominic Osoba's son",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Sur'Kesh": PlotCategory(
             booleans: {
                 17742: "Mission completed",
             },
-            ints: {},
+            integers: {},
         ),
         "Attican Traverse: Krogan Team": PlotCategory(
             booleans: {
@@ -348,7 +348,7 @@ Me3PlotDb(
                 17902: "Rachi Breeder killed",
                 18913: "Grunt died fighting off Rachni",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Tuchanka": PlotCategory(
             booleans: {
@@ -358,7 +358,7 @@ Me3PlotDb(
                 20494: "Mordin/Padok agreed to sabotage cure",
                 20315: "Eve is alive",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Citadel II": PlotCategory(
             booleans: {
@@ -385,7 +385,7 @@ Me3PlotDb(
                 20184: "Warned Miranda about Kai Leng",
                 19480: "Cerberus coup mission debrief completed",
             },
-            ints: {},
+            integers: {},
         ),
         "Arrae: Ex-Cerberus Scientists": PlotCategory(
             booleans: {
@@ -397,26 +397,26 @@ Me3PlotDb(
                 19411: "Spoke privately to Jacob on Gellix",
                 19397: "Had romance discussion with Jacob on Gellix",
             },
-            ints: {},
+            integers: {},
         ),
         "Kallini: Ardat-Yakshi Monastery": PlotCategory(
             booleans: {
                 19303: "Samara committed suicide",
                 19921: "Samara's suicide was prevented",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Geth Dreadnought": PlotCategory(
             booleans: {
                 17795: "Shepard agrees counterattacking the Geth Dreadnought",
             },
-            ints: {},
+            integers: {},
         ),
         "Rannoch: Admiral Koris": PlotCategory(
             booleans: {
                 18184: "Saved Admiral Koris",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Rannoch": PlotCategory(
             booleans: {
@@ -424,7 +424,7 @@ Me3PlotDb(
                 17788: "Quarians destroyed",
                 17789: "Brokered a peace deal between Geth and Quarians",
             },
-            ints: {
+            integers: {
                 10212: "Points toward Geth and Quarian peace (>= 5 points to enable paragon / renegade dialogue)",
             },
         ),
@@ -434,18 +434,18 @@ Me3PlotDb(
                 20822: "Mission completed/Met with Asari councilor",
                 19769: "Wrex was killed on Citadel",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Horizon": PlotCategory(
             booleans: {
                 20278: "Miranda mortally wounded by Kai Leng",
                 20687: "Miranda survived Horizon",
             },
-            ints: {},
+            integers: {},
         ),
         "Priority: Earth": PlotCategory(
             booleans: {},
-            ints: {
+            integers: {
                 10665: "The Illusive Man progress (>= 6 points to enable all paragon / renegade dialogues)",
             },
         ),
@@ -453,7 +453,7 @@ Me3PlotDb(
             booleans: {
                 23205: "Found the Kehri power inverter (need to speak with mechanic)",
             },
-            ints: {},
+            integers: {},
         ),
     },
     citadel_dlc: {
@@ -472,7 +472,7 @@ Me3PlotDb(
                 24945: "(Claw) Music Track 6",
                 24946: "(Claw) Music Track 7",
             },
-            ints: {
+            integers: {
                 11205: "(Relay Defense) Shepard",
                 11206: "(Relay Defense) Bailey",
                 11207: "(Relay Defense) Mouse",
@@ -502,7 +502,7 @@ Me3PlotDb(
                 24509: "Artistic Shelving",
                 24510: "Amber Accent Wall",
             },
-            ints: {},
+            integers: {},
         ),
         "Store (Decorator)": PlotCategory(
             booleans: {
@@ -527,7 +527,7 @@ Me3PlotDb(
                 24288: "(Wall - Accent) Standard Accent Wall",
                 24289: "(Wall - Accent) Amber Accent Wall",
             },
-            ints: {},
+            integers: {},
         ),
     },
     intel: PlotCategory(
@@ -558,7 +558,7 @@ Me3PlotDb(
             22422: "Advanced Biotic Amps (Purchased)",
             22641: "Med Bay Surgery (Purchased)",
         },
-        ints: {},
+        integers: {},
     ),
     normandy: {
         "Pets": PlotCategory(
@@ -566,7 +566,7 @@ Me3PlotDb(
                 21041: "Space Hamster",
                 21187: "KEI-9",
             },
-            ints:{},
+            integers:{},
         ),
         "Fish": PlotCategory(
             booleans: {
@@ -579,7 +579,7 @@ Me3PlotDb(
                 21118: "Striped Dartfish",
                 22153: "Aquarium VI",
             },
-            ints: {
+            integers: {
                 10733: "Illium Skald Fish State (0 = alive, 3 = dead)",
                 10734: "Prejek Paddle Fish State (0 = alive, 3 = dead)",
                 10735: "Thessian Sunfish State (0 = alive, 3 = dead)",
@@ -608,7 +608,7 @@ Me3PlotDb(
                 21111: "Quarian Liveship",
                 21112: "Geth Fighter",
             },
-            ints: {},
+            integers: {},
         ),
     },
     weapons_powers: {
@@ -855,7 +855,7 @@ Me3PlotDb(
                 booleans: {
                     17156: "Rich Achievement (to unlock Spectre Master gear)",
                 },
-                ints: {
+                integers: {
                     10001: "Origin (1 = Spacer, 2 = Colonist, 3 = Earthborn)",
                     10002: "Notoriety (1 = Survivor, 2 = War Hero, 3 = Ruthless)",
                     10046: "Renegade points",
@@ -876,7 +876,7 @@ Me3PlotDb(
                     15336: "Retrieved Wrex family armor",
                     14596: "Gave Tali a copy of the data found in UNC: Geth Incursions",
                 },
-                ints: {
+                integers: {
                     10037: "Garrus pushed toward C-Sec progress (paragon)",
                     10038: "Garrus pushed toward Spectres progress (renegade)",
                 },
@@ -888,7 +888,7 @@ Me3PlotDb(
                     13960: "Romancing Kaidan",
                     14169: "Romancing Liara",
                 },
-                ints: {
+                integers: {
                     10017: "Romance progress with Ashley",
                     10015: "Romance progress with Kaidan",
                     10016: "Romance progress with Liara",
@@ -929,7 +929,7 @@ Me3PlotDb(
                     17164: "Got Elkoss Combine license",
                     14948: "[Reporter's Request] Gave OSD information to Emily Wong",
                 },
-                ints: {
+                integers: {
                     10039: "[Scan the Keepers] Number of keepers scanned",
                 },
             ),
@@ -949,7 +949,7 @@ Me3PlotDb(
                     16254: "[Outcome] Renegade",
                     16380: "[Outcome] Fail",
                 },
-                ints: {},
+                integers: {},
             ),
             "Noveria": PlotCategory(
                 booleans: {
@@ -960,7 +960,7 @@ Me3PlotDb(
                     12587: "Rachni Queen released",
                     12588: "Killed Rachni Queen",
                 },
-                ints: {},
+                integers: {},
             ),
             "Virmire": PlotCategory(
                 booleans: {
@@ -973,7 +973,7 @@ Me3PlotDb(
                     14459: "Geth flyers reported (Both needed to keep Kirrahe alive)",
                     16058: "Killed Rana Thanoptis",
                 },
-                ints: {},
+                integers: {},
             ),
             "End": PlotCategory(
                 booleans: {
@@ -982,7 +982,7 @@ Me3PlotDb(
                     15434: "Councilor Udina",
                     15435: "Councilor Anderson",
                 },
-                ints: {},
+                integers: {},
             ),
             "UNC": PlotCategory(
                 booleans: {
@@ -1002,7 +1002,7 @@ Me3PlotDb(
                     15379: "[Major Kyle] Kyle surrendered",
                     15885: "[Cerberus] Obtained quest",
                 },
-                ints: {
+                integers: {
                     10048: "[Valuable Minerals] Light Metals (0-20 max 34)",
                     10050: "[Valuable Minerals] Heavy Metals (0-20 max 34)",
                     10051: "[Valuable Minerals] Gases (0-6 max 10)",
@@ -1021,7 +1021,7 @@ Me3PlotDb(
                     17317: "[Bring Down the Sky] Rescued Humans 2",
                     17315: "[Bring Down the Sky] Killed Balak",
                 },
-                ints: {},
+                integers: {},
             ),
         },
     )
