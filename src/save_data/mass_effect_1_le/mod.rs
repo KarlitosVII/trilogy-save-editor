@@ -20,7 +20,7 @@ use crate::{
 
 use super::{
     shared::{plot::PlotTable, Rotator, SaveTimeStamp, Vector},
-    Dummy, ImguiString, List,
+    ImguiString, List,
 };
 
 pub mod player;
@@ -192,10 +192,6 @@ pub struct Me1LeSaveData {
     timestamp: SaveTimeStamp,
     seconds_played: i32,
     pub player: Player,
-    _unknown1: Dummy<16>,
-    pub difficulty: Difficulty,
-    _unknown2: Dummy<177>,
-    player_controller: PlayerController,
     base_level_name: ImguiString,
     map_name: ImguiString,
     parent_map_name: ImguiString,
@@ -225,59 +221,6 @@ impl<'de> serde::Deserialize<'de> for Me1LeVersion {
 
         Ok(Self(version))
     }
-}
-
-#[derive(RawUi, Clone)]
-#[repr(u32)]
-pub enum Difficulty {
-    Casual,
-    Normal,
-    Veteran,
-    Hardcore,
-    Insanity,
-}
-
-impl<'de> serde::Deserialize<'de> for Difficulty {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let idx: u32 = serde::Deserialize::deserialize(deserializer)?;
-
-        let difficulty = match idx {
-            0 => Difficulty::Casual,
-            1 => Difficulty::Normal,
-            2 => Difficulty::Veteran,
-            3 => Difficulty::Hardcore,
-            4 => Difficulty::Insanity,
-            _ => return Err(de::Error::custom("invalid Difficulty variant")),
-        };
-        Ok(difficulty)
-    }
-}
-
-impl serde::Serialize for Difficulty {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_u32(self.clone() as u32)
-    }
-}
-
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
-struct PlayerController {
-    action_map: ImguiString,
-    _unknown: Dummy<4>,
-    hotkeys: Vec<Hotkey>,
-    current_weapon: ImguiString,
-    last_weapon: ImguiString,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
-struct Hotkey {
-    pawn: i32,
-    event: i32,
 }
 
 #[derive(Clone)]

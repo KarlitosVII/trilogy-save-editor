@@ -319,7 +319,12 @@ struct Inventory {
     struct {
         int len <bgcolor=0x8888ff>;
         Item list[len] <optimize=false>;
-    } plot_items <bgcolor=0x88ff33>;
+    } buy_pack_items <bgcolor=0x88ff33>;
+};
+
+struct Hotkey {
+    int pawn;
+    int event;
 };
 
 struct Player {
@@ -355,33 +360,41 @@ struct Player {
     float medigel <bgcolor=0x0000bb>;
     float omnigel <bgcolor=0x000099>;
     String face_code;
-    FSkip(4);
+    bool armor_overridden;
     int auto_levelup_template_id;
     float health_per_level;
-    FSkip(9);
+    float stability_current;
+    byte race;
+    float toxic_current;
     int stamina;
     int focus;
     int precision;
     int coordination;
-    FSkip(14);
+    byte attribute_primary;
+    byte attribute_secondary;
+    float skill_charm;
+    float skill_intimidate;
+    float skill_haggle;
     float health_current;
-};
-
-// PlayerController
-struct Hotkey {
-    int pawn;
-    int event;
-};
-
-struct PlayerController {
-    String action_map;
-    FSkip(4);
+    float shield_current;
+    int xp_level;
+    bool is_driving;
     struct {
-        int len <bgcolor=0xaa33ff>;
-        Hotkey list[len];
+        int len;
+        int list[len] <optimize=false>;
+    } game_options;
+    bool helmet_shown;
+    byte current_quick_slot;
+    byte last_quick_slot;
+    FSkip(3);
+    String last_power;
+    float health_max;
+    struct {
+        int len;
+        Hotkey list[len] <optimize=false>;
     } hotkeys;
-    String current_weapon;
-    String last_weapon;
+    String primary_weapon;
+    String secondary_weapon;
 };
 
 // Difficulty
@@ -432,7 +445,7 @@ struct Henchman {
     float health_current;
     float shield_current;
     int level;
-    bool helmet_visible;
+    bool helmet_shown;
     byte current_quick_slot;
     int health_max;
 };
@@ -828,11 +841,7 @@ struct {
     PlotTable plot;
 	SaveTimeStamp timestamp <bgcolor=0xaa44aa>;
 	int seconds_played <bgcolor=0xaa44cc>;
-    Player player;
-    FSkip(16);
-    Difficulty difficulty;
-    FSkip(177);
-    PlayerController player_controller <bgcolor=0xaa33aa>;
+    Player player <bgcolor=0xaacccc>;
     String base_level_name;
     String map_name;
     String parent_map_name;

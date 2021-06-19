@@ -60,7 +60,7 @@ impl<'ui> Gui<'ui> {
 
     fn draw_me1_le_general(&self, save_game: &mut Me1LeSaveData) -> Option<()> {
         let ui = self.ui;
-        let Me1LeSaveData { plot, player, difficulty, squad, .. } = save_game;
+        let Me1LeSaveData { plot, player, squad, .. } = save_game;
         let Player {
             is_female,
             level,
@@ -75,6 +75,7 @@ impl<'ui> Gui<'ui> {
             omnigel,
             face_code,
             complex_talents,
+            game_options,
             ..
         } = player;
 
@@ -202,7 +203,19 @@ impl<'ui> Gui<'ui> {
             self.set_next_item_open(true);
             TreeNode::new("General").build(ui, || {
                 Table::next_row();
-                difficulty.draw_raw_ui(self, "Difficulty");
+                if let Some(difficulty) = game_options.get_mut(0) {
+                    const DIFFICULTY_LIST: [&ImStr; 5] = [
+                        im_str!("Casual"),
+                        im_str!("Normal"),
+                        im_str!("Veteran"),
+                        im_str!("Hardcore"),
+                        im_str!("Insanity"),
+                    ];
+                    let mut difficulty_idx = *difficulty as usize;
+                    if self.draw_edit_enum("Difficulty", &mut difficulty_idx, &DIFFICULTY_LIST) {
+                        *difficulty = difficulty_idx as i32;
+                    }
+                }
             });
         });
 
