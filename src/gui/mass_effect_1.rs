@@ -20,11 +20,13 @@ use crate::{
 
 use super::{
     imgui_utils::{TabScroll, Table, TreeNode},
-    Gui,
+    Gui, PlotFilterState,
 };
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_1(&self, save_game: &mut Me1SaveGame) -> Option<()> {
+    pub fn draw_mass_effect_1(
+        &self, save_game: &mut Me1SaveGame, plot_filter: &mut PlotFilterState,
+    ) -> Option<()> {
         let ui = self.ui;
 
         // Ajoute un Name dupliqué à la liste
@@ -49,13 +51,21 @@ impl<'ui> Gui<'ui> {
         });
 
         // Raw
-        TabScroll::new(im_str!("Raw")).build(ui, || {
+        TabScroll::new(im_str!("Raw Data")).build(ui, || {
             // Player
             self.set_next_item_open(true);
             self.draw_raw_player(&save_game.player);
             // State
             self.set_next_item_open(true);
             save_game.state.draw_raw_ui(self, "State");
+        });
+
+        // Raw Plot
+        TabItem::new(im_str!("Raw Plot")).build(ui, || {
+            if let Some(plot_db) = Database::me1_raw_plot() {
+                let Me1PlotTable { booleans, integers, floats } = &mut save_game.state.plot;
+                self.draw_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+            }
         });
         Some(())
     }
@@ -452,15 +462,15 @@ impl<'ui> Gui<'ui> {
             }
             Property::Bool { name_id, value, .. } => {
                 let name: &ImStr = &*player.get_name(*name_id).borrow();
-                self.draw_edit_bool(im_str!("{}##bool-{}", name, ident).to_str(), value)
+                self.draw_edit_bool(im_str!("{}##bool-{}", name, ident).to_str(), value);
             }
             Property::Float { name_id, value, .. } => {
                 let name: &ImStr = &*player.get_name(*name_id).borrow();
-                self.draw_edit_f32(im_str!("{}##f32-{}", name, ident).to_str(), value)
+                self.draw_edit_f32(im_str!("{}##f32-{}", name, ident).to_str(), value);
             }
             Property::Int { name_id, value, .. } => {
                 let name: &ImStr = &*player.get_name(*name_id).borrow();
-                self.draw_edit_i32(im_str!("{}##i32-{}", name, ident).to_str(), value)
+                self.draw_edit_i32(im_str!("{}##i32-{}", name, ident).to_str(), value);
             }
             Property::Name { name_id, value_name_id, .. } => {
                 self.draw_name_property(player, ident, name_id, value_name_id);
@@ -488,11 +498,11 @@ impl<'ui> Gui<'ui> {
             }
             Property::Str { name_id, string, .. } => {
                 let name: &ImStr = &*player.get_name(*name_id).borrow();
-                self.draw_edit_string(im_str!("{}##string-{}", name, ident).to_str(), string)
+                self.draw_edit_string(im_str!("{}##string-{}", name, ident).to_str(), string);
             }
             Property::StringRef { name_id, value, .. } => {
                 let name: &ImStr = &*player.get_name(*name_id).borrow();
-                self.draw_edit_i32(im_str!("{}##string-ref-{}", name, ident).to_str(), value)
+                self.draw_edit_i32(im_str!("{}##string-ref-{}", name, ident).to_str(), value);
             }
             Property::Struct { name_id, struct_name_id, properties, .. } => {
                 let name: &ImStr = &*player.get_name(*name_id).borrow();

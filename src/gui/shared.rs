@@ -1,11 +1,11 @@
-use imgui::{im_str, ListClipper};
+use imgui::{im_str, ChildWindow, ListClipper, TabBar, TabItem};
 
 use crate::{
     event_handler::MainEvent,
     save_data::{
         shared::{
             appearance::HeadMorph,
-            plot::{BoolVec, PlotCategory},
+            plot::{BoolVec, PlotCategory, RawPlotDb},
         },
         RawUi,
     },
@@ -13,47 +13,10 @@ use crate::{
 
 use super::{
     imgui_utils::{Table, TreeNode},
-    Gui,
+    Gui, PlotFilterState,
 };
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_plot_category(
-        &self, booleans: &mut BoolVec, integers: &mut Vec<i32>, plot_db: &PlotCategory,
-    ) {
-        let ui = self.ui;
-        let PlotCategory { booleans: cat_bools, integers: cat_ints } = plot_db;
-
-        if cat_bools.is_empty() && cat_ints.is_empty() {
-            return;
-        }
-
-        // Booleans
-        let mut clipper = ListClipper::new(cat_bools.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = cat_bools.get_index(i as usize).unwrap();
-                let plot = booleans.get_mut(*plot_id);
-                if let Some(mut plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
-                }
-            }
-        }
-
-        // Integers
-        let mut clipper = ListClipper::new(cat_ints.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = cat_ints.get_index(i as usize).unwrap();
-                let plot = integers.get_mut(*plot_id);
-                if let Some(plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
-                }
-            }
-        }
-    }
-
     pub fn draw_head_morph(&self, has_head_morph: &mut Option<HeadMorph>) {
         let ui = self.ui;
 
@@ -141,5 +104,194 @@ impl<'ui> Gui<'ui> {
         } else {
             ui.separator()
         }
+    }
+
+    pub fn draw_plot_category(
+        &self, booleans: &mut BoolVec, integers: &mut Vec<i32>, plot_db: &PlotCategory,
+    ) {
+        let ui = self.ui;
+        let PlotCategory { booleans: bool_db, integers: int_db } = plot_db;
+
+        if bool_db.is_empty() && int_db.is_empty() {
+            return;
+        }
+
+        // Booleans
+        let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = bool_db.get_index(i as usize).unwrap();
+                // Add missing bools
+                if *plot_id >= booleans.len() {
+                    booleans.resize(*plot_id + 1, Default::default());
+                };
+                let mut plot = booleans.get_mut(*plot_id).unwrap();
+                Table::next_row();
+                plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
+            }
+        }
+        clipper.end();
+
+        // Integers
+        let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
+        while clipper.step() {
+            for i in clipper.display_start()..clipper.display_end() {
+                let (plot_id, plot_desc) = int_db.get_index(i as usize).unwrap();
+                // Add missing ints
+                if *plot_id >= integers.len() {
+                    integers.resize(*plot_id + 1, Default::default());
+                };
+                let plot = integers.get_mut(*plot_id).unwrap();
+                Table::next_row();
+                plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
+            }
+        }
+        clipper.end();
+    }
+
+    pub fn draw_raw_plot(
+        &self, booleans: &mut BoolVec, integers: &mut Vec<i32>, floats: &mut Vec<f32>,
+        plot_db: &RawPlotDb, plot_filter: &mut PlotFilterState,
+    ) -> Option<()> {
+        let ui = &self.ui;
+        let PlotFilterState { bool_filter, int_filter, float_filter, filter_db } = plot_filter;
+        if filter_db.is_none() {
+            *filter_db = Some(plot_db.clone())
+        }
+        let RawPlotDb { booleans: bool_db, integers: int_db, floats: float_db } =
+            filter_db.as_mut().unwrap();
+
+        // Tab bar
+        let _tab_bar = TabBar::new(im_str!("raw_plot")).begin(ui)?;
+
+        // Booleans
+        TabItem::new(im_str!("Booleans")).build(ui, || {
+            // Filter
+            if self.draw_edit_string("Filter", bool_filter) {
+                *bool_db = plot_db
+                    .booleans
+                    .iter()
+                    .filter_map(|(k, v)| {
+                        if v.to_lowercase().contains(&bool_filter.to_str().to_lowercase())
+                            || k.to_string().contains(bool_filter.to_str())
+                        {
+                            Some((*k, v.clone()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            }
+            ui.separator();
+
+            // Table
+            if bool_db.is_empty() {
+                return;
+            }
+            ChildWindow::new(im_str!("scroll")).build(ui, || {
+                Table::new(im_str!("plot-table"), 1).build(ui, || {
+                    let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
+                    while clipper.step() {
+                        for i in clipper.display_start()..clipper.display_end() {
+                            let (plot_id, plot_label) = bool_db.get_index(i as usize).unwrap();
+                            // Add missing bools
+                            if *plot_id >= booleans.len() {
+                                booleans.resize(*plot_id + 1, Default::default());
+                            };
+                            let mut plot = booleans.get_mut(*plot_id).unwrap();
+                            Table::next_row();
+                            plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
+                        }
+                    }
+                });
+            });
+        });
+
+        // Integers
+        TabItem::new(im_str!("Integers")).build(ui, || {
+            // Filter
+            if self.draw_edit_string("Filter", int_filter) {
+                *int_db = plot_db
+                    .integers
+                    .iter()
+                    .filter_map(|(k, v)| {
+                        if v.to_lowercase().contains(&int_filter.to_str().to_lowercase())
+                            || k.to_string().contains(int_filter.to_str())
+                        {
+                            Some((*k, v.clone()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            }
+            ui.separator();
+
+            // Table
+            if int_db.is_empty() {
+                return;
+            }
+            ChildWindow::new(im_str!("scroll")).build(ui, || {
+                Table::new(im_str!("plot-table"), 1).build(ui, || {
+                    let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
+                    while clipper.step() {
+                        for i in clipper.display_start()..clipper.display_end() {
+                            let (plot_id, plot_label) = int_db.get_index(i as usize).unwrap();
+                            // Add missing ints
+                            if *plot_id >= integers.len() {
+                                integers.resize(*plot_id + 1, Default::default());
+                            };
+                            let plot = integers.get_mut(*plot_id).unwrap();
+                            Table::next_row();
+                            plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
+                        }
+                    }
+                });
+            });
+        });
+
+        // Floats
+        TabItem::new(im_str!("Floats")).build(ui, || {
+            // Filter
+            if self.draw_edit_string("Filter", float_filter) {
+                *float_db = plot_db
+                    .floats
+                    .iter()
+                    .filter_map(|(k, v)| {
+                        if v.to_lowercase().contains(&float_filter.to_str().to_lowercase())
+                            || k.to_string().contains(float_filter.to_str())
+                        {
+                            Some((*k, v.clone()))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            }
+            ui.separator();
+
+            // Table
+            if float_db.is_empty() {
+                return;
+            }
+            ChildWindow::new(im_str!("scroll")).build(ui, || {
+                Table::new(im_str!("plot-table"), 1).build(ui, || {
+                    let mut clipper = ListClipper::new(float_db.len() as i32).begin(ui);
+                    while clipper.step() {
+                        for i in clipper.display_start()..clipper.display_end() {
+                            let (plot_id, plot_label) = float_db.get_index(i as usize).unwrap();
+                            // Add missing floats
+                            if *plot_id >= floats.len() {
+                                floats.resize(*plot_id + 1, Default::default());
+                            };
+                            let plot = floats.get_mut(*plot_id).unwrap();
+                            Table::next_row();
+                            plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
+                        }
+                    }
+                });
+            });
+        });
+        Some(())
     }
 }

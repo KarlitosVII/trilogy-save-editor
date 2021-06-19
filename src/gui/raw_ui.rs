@@ -16,8 +16,8 @@ use super::{imgui_utils::TreeNode, Gui};
 
 impl<'ui> Gui<'ui> {
     // Edit boxes
-    pub fn draw_edit_string(&self, ident: &str, value: &mut ImString) {
-        self.ui.input_text(&ImString::new(ident), value).resize_buffer(true).build();
+    pub fn draw_edit_string(&self, ident: &str, value: &mut ImString) -> bool {
+        self.ui.input_text(&ImString::new(ident), value).resize_buffer(true).build()
     }
 
     pub fn draw_edit_bool(&self, ident: &str, value: &mut bool) {

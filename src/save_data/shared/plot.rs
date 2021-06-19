@@ -89,8 +89,15 @@ pub struct PlotCodex {
     pages: IndexMap<i32, bool>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize)]
 pub struct PlotCategory {
     pub booleans: IndexMap<usize, String>,
     pub integers: IndexMap<usize, String>,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct RawPlotDb {
+    pub booleans: IndexMap<usize, String>,
+    pub integers: IndexMap<usize, String>,
+    pub floats: IndexMap<usize, String>,
 }

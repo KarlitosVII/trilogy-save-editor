@@ -20,11 +20,13 @@ use crate::{
 
 use super::{
     imgui_utils::{TabScroll, Table, TreeNode},
-    Gui,
+    Gui, PlotFilterState,
 };
 
 impl<'ui> Gui<'ui> {
-    pub fn draw_mass_effect_1_le(&self, save_game: &mut Me1LeSaveData) -> Option<()> {
+    pub fn draw_mass_effect_1_le(
+        &self, save_game: &mut Me1LeSaveData, plot_filter: &mut PlotFilterState,
+    ) -> Option<()> {
         let ui = self.ui;
 
         // Tab bar
@@ -50,10 +52,18 @@ impl<'ui> Gui<'ui> {
             self.draw_head_morph(&mut save_game.player.head_morph);
         });
 
-        // Raw
-        TabScroll::new(im_str!("Raw")).build(ui, || {
+        // Raw Data
+        TabScroll::new(im_str!("Raw Data")).build(ui, || {
             self.set_next_item_open(true);
             save_game.draw_raw_ui(self, "Mass Effect 1");
+        });
+
+        // Raw Plot
+        TabItem::new(im_str!("Raw Plot")).build(ui, || {
+            if let Some(plot_db) = Database::me1_raw_plot() {
+                let PlotTable { booleans, integers, floats, .. } = &mut save_game.plot;
+                self.draw_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+            }
         });
         Some(())
     }

@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use crate::{
     databases,
     event_handler::{MainEvent, SaveGame},
-    save_data::shared::appearance::HeadMorph,
+    save_data::shared::{appearance::HeadMorph, plot::RawPlotDb},
 };
 
 mod changelog;
@@ -27,16 +27,25 @@ static NOTIFICATION_TIME: f64 = 1.5; // second
 
 // States
 #[derive(Default)]
+struct State {
+    save_game: Option<SaveGame>,
+    error: Option<Error>,
+    notification: Option<NotificationState>,
+    plot_filter: PlotFilterState,
+}
+
+#[derive(Default)]
 struct NotificationState {
     string: ImString,
     close_time: f64,
 }
 
 #[derive(Default)]
-struct State {
-    save_game: Option<SaveGame>,
-    error: Option<Error>,
-    notification: Option<NotificationState>,
+pub struct PlotFilterState {
+    bool_filter: ImString,
+    int_filter: ImString,
+    float_filter: ImString,
+    filter_db: Option<RawPlotDb>,
 }
 
 // Events
@@ -96,6 +105,7 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
                 })
             }
             UiEvent::OpenedSave(opened_save_game) => {
+                state.plot_filter = Default::default();
                 state.save_game = Some(opened_save_game);
             }
             UiEvent::ImportedHeadMorph(head_morph) => {
@@ -196,15 +206,21 @@ impl<'ui> Gui<'ui> {
             // Game
             match &mut state.save_game {
                 None => self.draw_change_log(),
-                Some(SaveGame::MassEffect1 { save_game, .. }) => self.draw_mass_effect_1(save_game),
+                Some(SaveGame::MassEffect1 { save_game, .. }) => {
+                    self.draw_mass_effect_1(save_game, &mut state.plot_filter)
+                }
                 Some(SaveGame::MassEffect1Le { save_game, .. }) => {
-                    self.draw_mass_effect_1_le(&mut save_game.save_data)
+                    self.draw_mass_effect_1_le(&mut save_game.save_data, &mut state.plot_filter)
                 }
-                Some(SaveGame::MassEffect2 { save_game, .. }) => self.draw_mass_effect_2(save_game),
+                Some(SaveGame::MassEffect2 { save_game, .. }) => {
+                    self.draw_mass_effect_2(save_game, &mut state.plot_filter)
+                }
                 Some(SaveGame::MassEffect2Le { save_game, .. }) => {
-                    self.draw_mass_effect_2_le(save_game)
+                    self.draw_mass_effect_2_le(save_game, &mut state.plot_filter)
                 }
-                Some(SaveGame::MassEffect3 { save_game, .. }) => self.draw_mass_effect_3(save_game),
+                Some(SaveGame::MassEffect3 { save_game, .. }) => {
+                    self.draw_mass_effect_3(save_game, &mut state.plot_filter)
+                }
             };
         });
     }

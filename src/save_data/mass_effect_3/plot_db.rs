@@ -28,12 +28,22 @@ mod test {
     use anyhow::Result;
     use std::fs;
 
+    use crate::save_data::shared::plot::RawPlotDb;
+
     use super::*;
 
     #[test]
     fn deserialize_plot_db() -> Result<()> {
         let input = fs::read_to_string("databases/me3_plot_db.ron")?;
         let _me3_plot_db: Me3PlotDb = ron::from_str(&input)?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn deserialize_raw_plot_db() -> Result<()> {
+        let input = fs::read_to_string("databases/me3_raw_plot_db.ron")?;
+        let _me3_raw_plot_db: RawPlotDb = ron::from_str(&input)?;
 
         Ok(())
     }
