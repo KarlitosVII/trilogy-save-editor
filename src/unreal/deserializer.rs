@@ -64,7 +64,16 @@ macro_rules! impl_deserialize {
 impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     type Error = super::Error;
 
-    unimpl_deserialize!(deserialize_any());
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: Visitor<'de>,
+    {
+        // Only used by save_data::mass_effect_1_le::NoExport so far
+        if self.input.is_empty() {
+            return visitor.visit_none();
+        }
+        visitor.visit_some(self)
+    }
 
     fn deserialize_bool<V>(self, visitor: V) -> Result<V::Value>
     where

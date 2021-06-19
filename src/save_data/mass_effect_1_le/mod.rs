@@ -245,13 +245,30 @@ impl<'de> serde::Deserialize<'de> for NoExport {
     where
         D: serde::Deserializer<'de>,
     {
-        let no_export_data: Result<NoExportData, _> = serde::Deserialize::deserialize(deserializer);
+        struct NoExportVisitor;
+        impl<'de> de::Visitor<'de> for NoExportVisitor {
+            type Value = NoExport;
 
-        match no_export_data {
-            Ok(no_export_data) => Ok(NoExport(Some(no_export_data))),
-            Err(err) if err.to_string().starts_with("unexpected end of file") => Ok(NoExport(None)),
-            Err(err) => Err(err),
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a NoExport")
+            }
+
+            fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                let no_export_data: NoExportData = serde::Deserialize::deserialize(deserializer)?;
+                Ok(NoExport(Some(no_export_data)))
+            }
+
+            fn visit_none<E>(self) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(NoExport(None))
+            }
         }
+        deserializer.deserialize_any(NoExportVisitor)
     }
 }
 
