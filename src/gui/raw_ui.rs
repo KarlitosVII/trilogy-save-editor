@@ -28,6 +28,17 @@ impl<'ui> Gui<'ui> {
         width.pop(ui);
     }
 
+    pub fn draw_edit_u8(&self, ident: &str, value: &mut u8) {
+        let ui = self.ui;
+
+        let width = ui.push_item_width(97.0);
+        let mut new_value = *value as i32;
+        if InputInt::new(ui, &ImString::new(ident), &mut new_value).build(){
+            *value = new_value.clamp(0, u8::MAX as i32) as u8;
+        }
+        width.pop(ui);
+    }
+
     pub fn draw_edit_i32(&self, ident: &str, value: &mut i32) {
         let ui = self.ui;
 

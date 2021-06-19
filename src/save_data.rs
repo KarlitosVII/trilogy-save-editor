@@ -161,7 +161,7 @@ where
 // Implémentation des types std
 impl RawUi for u8 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_text(&ImString::new(self.to_string()), Some(&ImString::new(ident)));
+        gui.draw_edit_u8(ident, self);
     }
 }
 

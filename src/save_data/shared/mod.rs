@@ -186,23 +186,6 @@ pub struct KismetRecord {
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Door {
     guid: Guid,
-    current_state: DoorState,
-    old_state: DoorState,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Clone)]
-pub enum DoorState {
-    State0,
-    State1,
-    State2,
-    State3,
-    State4,
-    State5,
-    State6,
-}
-
-impl Default for DoorState {
-    fn default() -> Self {
-        DoorState::State0
-    }
+    current_state: u8,
+    old_state: u8,
 }
