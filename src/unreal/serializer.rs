@@ -134,7 +134,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_unit(self) -> Result<()> {
-        unimplemented!()
+        Ok(())
     }
 
     fn serialize_unit_struct(self, _: &'static str) -> Result<()> {

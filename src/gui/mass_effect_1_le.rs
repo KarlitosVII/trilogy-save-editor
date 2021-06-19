@@ -296,24 +296,23 @@ impl<'ui> Gui<'ui> {
         let Player { inventory, .. } = player;
 
         // Player
-        self.draw_me1_le_equipped_items("Player Equipped", &mut inventory.equipped);
-        self.draw_me1_le_equipped_items("Player Quick Slots", &mut inventory.quick_slots);
+        self.draw_me1_le_equipment_items("Player Equipment", &mut inventory.equipment);
+        self.draw_me1_le_equipment_items("Player Quick Slots", &mut inventory.quick_slots);
 
         // Squad
-
-        for Henchman { tag, equipped, quick_slots, .. } in squad {
-            let (character_equipped, character_quick_slots) = match tag.to_str() {
-                "hench_asari" => ("Liara Equipped", "Liara Quick Slots"),
-                "hench_humanfemale" => ("Ashley Equipped", "Ashley Quick Slots"),
-                "hench_humanmale" => ("Kaidan Equipped", "Kaidan Quick Slots"),
-                "hench_krogan" => ("Wrex Equipped", "Wrex Quick Slots"),
-                "hench_quarian" => ("Tali'Zorah Equipped", "Tali'Zorah Quick Slots"),
-                "hench_turian" => ("Garrus Equipped", "Garrus Quick Slots"),
+        for Henchman { tag, equipment, quick_slots, .. } in squad {
+            let (character_equipment, character_quick_slots) = match tag.to_str() {
+                "hench_asari" => ("Liara Equipment", "Liara Quick Slots"),
+                "hench_humanfemale" => ("Ashley Equipment", "Ashley Quick Slots"),
+                "hench_humanmale" => ("Kaidan Equipment", "Kaidan Quick Slots"),
+                "hench_krogan" => ("Wrex Equipment", "Wrex Quick Slots"),
+                "hench_quarian" => ("Tali'Zorah Equipment", "Tali'Zorah Quick Slots"),
+                "hench_turian" => ("Garrus Equipment", "Garrus Quick Slots"),
                 _ => continue,
             };
 
-            self.draw_me1_le_equipped_items(character_equipped, equipped);
-            self.draw_me1_le_equipped_items(character_quick_slots, quick_slots);
+            self.draw_me1_le_equipment_items(character_equipment, equipment);
+            self.draw_me1_le_equipment_items(character_quick_slots, quick_slots);
         }
 
         // 2ème colonne
@@ -324,7 +323,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_le_equipped_items(&self, label: &str, items: &mut Vec<Item>) -> Option<()> {
+    fn draw_me1_le_equipment_items(&self, label: &str, items: &mut Vec<Item>) -> Option<()> {
         let ui = self.ui;
 
         let _table = Table::new(&im_str!("{}-table", label), 1).begin(ui)?;

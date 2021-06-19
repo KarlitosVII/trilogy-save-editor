@@ -21,6 +21,10 @@ pub trait RawUi {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str);
 }
 
+pub trait RawUiMe1Legacy {
+    fn draw_fields<'a>(&'a mut self, gui: &'a Gui) -> Vec<Box<dyn FnMut() + 'a>>;
+}
+
 // Nouveau string type pour pouvoir implémenter serde...
 #[derive(Deref, DerefMut, From, Clone, Default, PartialEq, Eq, Hash, Display)]
 pub struct ImguiString(ImString);
@@ -70,7 +74,7 @@ impl<'de, const LEN: usize> serde::Deserialize<'de> for Dummy<LEN> {
             type Value = Dummy<LEN>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a seq")
+                formatter.write_str("a Dummy<LEN>")
             }
 
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
@@ -155,6 +159,12 @@ where
 }
 
 // Implémentation des types std
+impl RawUi for u8 {
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        gui.draw_text(&ImString::new(self.to_string()), Some(&ImString::new(ident)));
+    }
+}
+
 impl RawUi for i32 {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_i32(ident, self);
@@ -170,6 +180,15 @@ impl RawUi for f32 {
 impl RawUi for bool {
     fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
         gui.draw_edit_bool(ident, self);
+    }
+}
+
+impl<T> RawUi for Box<T>
+where
+    T: RawUi,
+{
+    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
+        self.as_mut().draw_raw_ui(gui, ident)
     }
 }
 

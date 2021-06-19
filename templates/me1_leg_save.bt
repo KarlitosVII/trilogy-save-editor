@@ -10,7 +10,7 @@ string read_bool(bool &b) {
     else if (b.value == 0)
         return "false";
     else
-        return "NOT a BOOLEAN";
+        return "<NOT a BOOLEAN>";
 }
 
 // String
@@ -18,7 +18,7 @@ typedef struct {
 	int len <bgcolor=0x000077>;
     SetBackColor(0x000044 + len);
 
-	// Détection utf8
+	// Détection unicode
 	if (len < 0) {
 		wchar_t chars[Abs(len)];
 	}
@@ -283,14 +283,14 @@ struct ComplexTalent {
     } prereq_talent_rank_array;
 };
 
-struct BioItemXMod {
+struct ItemMod {
     int id;
     byte type_enum;
     int manufacturer_id;
     int plot_conditional_id;
 };
 
-struct BioItemXModdable {
+struct Item {
     int id;
     byte item_level;
     int manufacturer_id;
@@ -299,26 +299,26 @@ struct BioItemXModdable {
     bool junk;
     struct {
         int len <bgcolor=0x88eecc>;
-        BioItemXMod list[len] <optimize=false>;
+        ItemMod list[len] <optimize=false>;
     } slot_spec <bgcolor=0x88ffff>;
 };
 
 struct Inventory {
     struct {
         int len <bgcolor=0x8888ff>;
-        BioItemXModdable list[len] <optimize=false>;
+        Item list[len] <optimize=false>;
     } equipped <bgcolor=0x88ff33>;
     struct {
         int len <bgcolor=0x8888ff>;
-        BioItemXModdable list[len] <optimize=false>;
+        Item list[len] <optimize=false>;
     } quick_slot <bgcolor=0x88ff33>;
     struct {
         int len <bgcolor=0x8888ff>;
-        BioItemXModdable list[len] <optimize=false>;
+        Item list[len] <optimize=false>;
     } inventory <bgcolor=0x88ff33>;
     struct {
         int len <bgcolor=0x8888ff>;
-        BioItemXModdable list[len] <optimize=false>;
+        Item list[len] <optimize=false>;
     } plot_items <bgcolor=0x88ff33>;
 };
 
@@ -406,11 +406,11 @@ struct Henchman {
     } complex_talents <bgcolor=0x88aa88>;
     struct {
         int len <bgcolor=0x8888ff>;
-        BioItemXModdable list[len] <optimize=false>;
+        Item list[len] <optimize=false>;
     } equipped <bgcolor=0x88ff33>;
     struct {
         int len <bgcolor=0x8888ff>;
-        BioItemXModdable list[len] <optimize=false>;
+        Item list[len] <optimize=false>;
     } quick_slot <bgcolor=0x88ff33>;
     int talent_points;
     int talent_pool_points;
@@ -437,6 +437,390 @@ struct Henchman {
     int health_max;
 };
 
+// Legacy
+struct BaseObject; // Forward
+
+struct LegacySimpleTalent {
+    int talent_id;
+    int current_rank;
+};
+
+struct LegacyComplexTalent {
+    int talent_id;
+    int current_rank;
+    int max_rank;
+    int level_offset;
+    int levels_per_rank;
+    int visual_order;
+    struct {
+        int len <bgcolor=0x888888>;
+        int list[len];
+    } prereq_talent_id_array;
+    struct {
+        int len <bgcolor=0x888888>;
+        int list[len];
+    } prereq_talent_rank_array;
+};
+
+struct QuickSlot {
+    bool has_quick_slot;
+	if (has_quick_slot.value == 1) {
+        BaseObject quick_slot;
+    }
+};
+
+struct Equipment {
+    bool has_equipment;
+	if (has_equipment.value == 1) {
+        BaseObject equipment;
+    }
+};
+
+struct BioPawnBehavior {
+    bool is_dead;
+    bool generated_treasure;
+    bool challenge_scaled;
+    bool has_owner;
+	if (has_owner.value == 1) {
+        BaseObject owner;
+    }
+    float health_current;
+    float shield_current;
+    String first_name;
+    int localized_last_name;
+    float health_max;
+    float health_regen_rate;
+    float radar_range;
+    int level;
+    float health_per_level;
+    float stability_current;
+	byte gender;
+    byte race;
+    float toxic_current;
+    int stamina;
+    int focus;
+    int precision;
+    int coordination;
+    byte quick_slot_current;
+    bool has_squad;
+	if (has_squad.value == 1) {
+        BaseObject squad;
+    }
+    bool has_inventory;
+	if (has_inventory.value == 1) {
+        BaseObject inventory;
+    }
+    FSkip(3);
+    int experience;
+	int talent_points;
+	int talent_pool_points;
+	byte attribute_primary;
+	byte attribute_secondary;
+	byte class_base;
+	int localized_class_name;
+	int auto_level_up_template_id;
+	byte spectre_rank;
+	byte background_origin;
+	byte background_notoriety;
+	byte specialization_bonus_id;
+    float skill_charm;
+    float skill_intimidate;
+    float skill_haggle;
+    float audibility;
+    float blindness;
+    float damage_duration_mult;
+    float deafness;
+    int unlootable_grenade_count;
+    bool head_gear_visible_preference;
+    struct {
+        int len;
+        LegacySimpleTalent list[len] <optimize=false>;
+    } simple_talents;
+    struct {
+        int len;
+        LegacyComplexTalent list[len] <optimize=false>;
+    } complex_talents;
+    struct {
+        int len;
+        QuickSlot list[len] <optimize=false>;
+    } quick_slots;
+    struct {
+        int len;
+        Equipment list[len] <optimize=false>;
+    } equipments;
+};
+
+struct BioPawn {
+    Vector location;
+    Rotator rotation;
+    Vector velocity;
+    Vector acceleration;
+    bool script_initialized;
+    bool hidden;
+    bool stasis;
+    float grime_level;
+    float grime_dirt_level;
+    int talked_to_count;
+    bool head_gear_visible_preference;
+};
+
+struct BioBaseSquad {
+    bool has_inventory;
+	if (has_inventory.value == 1) {
+        BaseObject inventory;
+    }
+};
+
+struct PlotItem {
+    int localized_name;
+    int localized_desc;
+    int export_id;
+    int base_price;
+    int shop_gui_imagei_id;
+    int plot_conditional_id;
+};
+
+struct BioInventory {
+    struct {
+        int len;
+        BaseObject list[len] <optimize=false>;
+    } items;
+    struct {
+        int len;
+        PlotItem list[len] <optimize=false>;
+    } plot_items;
+    int credits;
+    int grenades;
+    float medigel;
+    float omnigel;
+};
+
+struct ItemXMod {
+    int id;
+    byte sophistication;
+    int manufacturer;
+    int plot_conditional_id;
+    int type;
+};
+
+struct HasItemXMod {
+    bool has_mod;
+    if (has_mod.value == 1) {
+        BaseObject item_mod;
+    }
+};
+
+struct XModdableSlotSpec {
+    int type;
+    struct {
+        int len;
+        HasItemXMod list[len] <optimize=false>;
+    } mods;
+};
+
+struct ItemXModdable {
+    int id;
+    byte sophistication;
+    int manufacturer;
+    int plot_conditional_id;
+    struct {
+        int len;
+        XModdableSlotSpec list[len] <optimize=false>;
+    } slot_specs;
+};
+
+struct ArtPlaceable {
+    FSkip(60);
+};
+
+struct ArtPlaceableBehavior {
+    bool is_dead;
+    bool generated_treasure;
+    bool challenge_scaled;
+    bool has_owner;
+	if (has_owner.value == 1) {
+        BaseObject owner;
+    }
+    float health;
+    float current_health;
+    bool enabled;
+    String current_fsm_state_mame;
+    bool is_destroyed;
+    String state_0;
+    String state_1;
+    byte use_case;
+    bool use_case_override;
+    bool player_only;
+    byte skill_difficulty;
+    bool has_inventory;
+	if (has_inventory.value == 1) {
+        BaseObject inventory;
+    }
+    bool skill_game_failed;
+    bool skill_game_xp_awarded;
+};
+
+struct HasInventory {
+    bool has_inventory;
+	if (has_inventory.value == 1) {
+        BaseObject inventory;
+    }
+};
+
+struct Shop {
+    int last_player_level;
+    bool is_initialized;
+    struct {
+        int len;
+        HasInventory list[len] <optimize=false>;
+    } inventory;
+};
+
+struct VehicleBehavior {
+    String actor_type;
+    bool powertrain_enabled;
+    bool vehicle_fonction_enabled;
+    bool has_owner;
+	if (has_owner.value == 1) {
+        BaseObject owner;
+    }
+};
+
+struct LegacyVehicle {
+    Vector location;
+    Rotator rotation;
+    Vector velocity;
+    Vector acceleration;
+    bool script_initialized;
+    bool hidden;
+    bool stasis;
+    float health_current;
+    float shield_current;
+    String first_name;
+    int localized_last_name;
+    FSkip(16);
+};
+
+struct WorldStreamingState {
+    String name;
+    byte enabled;
+};
+
+struct World {
+    struct {
+        int len;
+        WorldStreamingState list[len] <optimize=false>;
+    } streaming_states;
+    String destination_area_map;
+    Vector destination;
+    struct {
+        int len;
+        String list[len] <optimize=false>;
+    } cinematics_seen;
+    struct {
+        int len;
+        int list[len];
+    } scanned_clusters;
+    struct {
+        int len;
+        int list[len];
+    } scanned_systems;
+    struct {
+        int len;
+        int list[len];
+    } scanned_planets;
+    byte journal_sort_method;
+    bool journal_showing_missions;
+    int journal_last_selected_mission;
+    int journal_last_selected_assignment;
+    bool codex_showing_primary;
+    int codex_last_selected_primary;
+    int codex_last_selected_secondary;
+    int current_tip_id;
+    int override_tip;
+    byte browser_alerts[8];
+    bool has_loot;
+    if (has_loot.value == 1) {
+        BaseObject pending_loot;
+    }
+};
+
+struct BaseObject {
+    String class_name;
+    String owner_name;
+    bool has_owner_class;
+	if (has_owner_class.value == 1) {
+        String owner_class_name;
+    }
+
+    switch (class_name.chars) {
+        case "BioPawnBehaviorSaveObject":
+            BioPawnBehavior pawn_behavior;
+            break;
+        case "BioPawnSaveObject":
+            BioPawn pawn;
+            break;
+        case "BioBaseSquadSaveObject":
+            BioBaseSquad squad;
+            break;
+        case "BioShopSaveObject":
+            Shop shop;
+            break;
+        case "BioInventorySaveObject":
+            BioInventory inventory;
+            break;
+        case "BioItemXModdableSaveObject":
+            ItemXModdable item_moddable;
+            break;
+        case "BioItemXModSaveObject":
+            ItemXMod item_mod;
+            break;
+        case "BioArtPlaceableBehaviorSaveObject":
+            ArtPlaceableBehavior art_placeable_behavior;
+            break;
+        case "BioArtPlaceableSaveObject":
+            ArtPlaceable art_placeable;
+            break;
+        case "BioVehicleBehaviorSaveObject":
+            VehicleBehavior vehicle;
+            break;
+        case "BioVehicleSaveObject":
+            LegacyVehicle vehicle;
+            break;
+        case "BioWorldInfoSaveObject":
+            World world;
+            break;
+    };
+};
+
+struct Level {
+    String level_name;
+    struct {
+        int len;
+        BaseObject list[len] <optimize=false>;
+    } objects;
+    struct {
+        int len;
+        String list[len] <optimize=false>;
+    } actors;
+};
+
+struct Map {
+    String map_name;
+    struct {
+        int len;
+        Level list[len] <optimize=false>;
+    } levels;
+    FSkip(4);
+};
+
+struct Vehicle {
+    String first_name;
+    int localized_last_name;
+    float health_current;
+    float shield_current;
+};
+
 struct {
     uint version;
     String career_id;
@@ -460,4 +844,13 @@ struct {
     } squad <bgcolor=0x33aaaa>;
     String display_name;
     String file_name;
+    // If not export save
+    if(!FEof()) {
+        struct {
+            int len;
+            Map list[len] <optimize=false>;
+        } legacy_maps <bgcolor=0x33aa33>;
+        BaseObject legacy_world <bgcolor=0xaa33aa>;
+        Vehicle mako <bgcolor=0xaaaaaa>;
+    }
 } Me1Legendary <open=true>;

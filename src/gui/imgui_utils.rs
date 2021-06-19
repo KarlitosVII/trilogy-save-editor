@@ -18,6 +18,7 @@ pub struct Table<'a> {
     ident: &'a ImStr,
     column: i32,
 }
+
 impl<'a> Table<'a> {
     pub fn new(ident: &ImStr, column: i32) -> Table {
         Table { ident, column }
@@ -91,6 +92,7 @@ pub struct TreeNode<'a> {
     ident: &'a str,
     label: Option<&'a str>,
 }
+
 impl<'a> TreeNode<'a> {
     pub fn new(ident: &str) -> TreeNode {
         let mut rsplit = ident.rsplit("##");
@@ -125,6 +127,7 @@ impl<'a> TreeNode<'a> {
 pub struct TabScroll<'a> {
     ident: &'a ImStr,
 }
+
 impl<'a> TabScroll<'a> {
     pub fn new(ident: &ImStr) -> TabScroll {
         TabScroll { ident }

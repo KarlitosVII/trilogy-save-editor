@@ -15,7 +15,7 @@ use crate::{
 };
 
 mod changelog;
-mod imgui_utils;
+pub mod imgui_utils;
 mod mass_effect_1;
 mod mass_effect_1_le;
 mod mass_effect_2;

@@ -549,8 +549,8 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
 
         let is_duplicate = player.get_name(*value_name_id).borrow().is_duplicate;
+        let label = &*player.get_name(*name_id).borrow();
         if !is_duplicate {
-            let label = &*player.get_name(*name_id).borrow();
             let value = &*player.get_name(*value_name_id).borrow();
 
             self.draw_text(value, Some(label));
@@ -565,10 +565,9 @@ impl<'ui> Gui<'ui> {
             ui.same_line();
             self.draw_help_marker("In order to modify this string you have to duplicate it first.");
         } else {
-            let ident = &*player.get_name(*name_id).borrow();
             let value = &mut *player.get_name(*value_name_id).borrow_mut();
 
-            self.draw_edit_string(ident.to_str(), value);
+            self.draw_edit_string(label.to_str(), value);
         }
     }
 

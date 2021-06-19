@@ -28,7 +28,7 @@ impl<'de> serde::Deserialize<'de> for BoolVec {
             type Value = BoolVec;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a seq")
+                formatter.write_str("a BoolVec")
             }
 
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>

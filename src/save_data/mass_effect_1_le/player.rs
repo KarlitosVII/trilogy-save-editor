@@ -13,7 +13,7 @@ use crate::save_data::{
 pub struct Player {
     pub is_female: bool,
     localized_class_name: i32,
-    _player_class: u8,
+    player_class: u8,
     pub level: i32,
     pub current_xp: f32,
     pub first_name: ImguiString,
@@ -21,7 +21,7 @@ pub struct Player {
     pub origin: Origin,
     pub notoriety: Notoriety,
     specialization_bonus_id: i32,
-    _spectre_rank: u8,
+    spectre_rank: u8,
     pub talent_points: i32,
     talent_pool_points: i32,
     mapped_talent: ImguiString,
@@ -66,7 +66,7 @@ pub struct ComplexTalent {
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
 pub struct Inventory {
-    pub equipped: Vec<Item>,
+    pub equipment: Vec<Item>,
     pub quick_slots: Vec<Item>,
     pub inventory: Vec<Item>,
     plot_items: Vec<Item>,

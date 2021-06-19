@@ -240,7 +240,7 @@ impl System {
                     rt.block_on(async {
                         frame_interval.tick().await;
                     });
-                    
+
                     // Delta time
                     let now = Instant::now();
                     imgui.io_mut().update_delta_time(now - last_frame);

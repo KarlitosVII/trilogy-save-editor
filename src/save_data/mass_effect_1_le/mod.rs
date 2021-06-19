@@ -3,6 +3,8 @@ use flate2::{
     read::{ZlibDecoder, ZlibEncoder},
     Compression,
 };
+use imgui::im_str;
+use indexmap::IndexMap;
 use serde::{
     de,
     ser::{self, SerializeStruct},
@@ -10,7 +12,11 @@ use serde::{
 };
 use std::{fmt, io::Read};
 
-use crate::unreal;
+use crate::{
+    gui::{imgui_utils::Table, Gui},
+    save_data::RawUi,
+    unreal,
+};
 
 use super::{
     shared::{plot::PlotTable, Rotator, SaveTimeStamp, Vector},
@@ -22,6 +28,9 @@ use self::player::*;
 
 pub mod squad;
 use self::squad::*;
+
+pub mod legacy;
+use self::legacy::*;
 
 #[derive(Serialize, Clone)]
 struct ChunkHeader {
@@ -50,7 +59,7 @@ impl<'de> serde::Deserialize<'de> for Me1LeSaveGame {
             type Value = Me1LeSaveGame;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a seq")
+                formatter.write_str("a Me1LeSaveGame")
             }
 
             fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
@@ -195,8 +204,7 @@ pub struct Me1LeSaveData {
     pub squad: Vec<Henchman>,
     display_name: ImguiString,
     file_name: ImguiString,
-    // ---
-    _remaining_bytes: List<u8>,
+    no_export: NoExport, // Only serialized for normal savegames, not for character export
 }
 
 #[derive(Serialize, Clone)]
@@ -272,6 +280,65 @@ struct Hotkey {
     event: i32,
 }
 
+#[derive(Clone)]
+struct NoExport(Option<NoExportData>);
+
+impl RawUi for NoExport {
+    fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
+        if let Some(NoExportData { legacy_maps, legacy_world, mako }) = &mut self.0 {
+            legacy_maps.draw_raw_ui(gui, "Legacy Maps");
+            Table::next_row();
+            legacy_world.draw_raw_ui(gui, "Legacy World");
+            Table::next_row();
+            mako.draw_raw_ui(gui, "Mako");
+        } else {
+            gui.draw_text(im_str!("Export save"), None);
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for NoExport {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let no_export_data: Result<NoExportData, _> = serde::Deserialize::deserialize(deserializer);
+
+        match no_export_data {
+            Ok(no_export_data) => Ok(NoExport(Some(no_export_data))),
+            Err(err) if err.to_string().starts_with("unexpected end of file") => Ok(NoExport(None)),
+            Err(err) => Err(err),
+        }
+    }
+}
+
+impl serde::Serialize for NoExport {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match &self.0 {
+            Some(no_export_data) => no_export_data.serialize(serializer),
+            None => serializer.serialize_unit(),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+struct NoExportData {
+    legacy_maps: IndexMap<ImguiString, Map>,
+    legacy_world: legacy::BaseObject,
+    mako: Vehicle,
+}
+
+#[derive(Deserialize, Serialize, RawUi, Clone)]
+struct Vehicle {
+    first_name: ImguiString,
+    localized_last_name: i32,
+    health_current: f32,
+    shield_current: f32,
+}
+
 #[cfg(test)]
 mod test {
     use anyhow::Result;
@@ -284,75 +351,82 @@ mod test {
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
-        let input = fs::read("test/ME1Le00_QuickSave.pcsav")?;
+        let files = [
+            "test/ME1Le00_QuickSave.pcsav", // Normal save game
+            "test/ME1Le_Export.pcsav",      // Export save game
+        ];
 
-        let now = Instant::now();
+        for file in &files {
+            let input = fs::read(file)?;
 
-        // Deserialize
-        let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
+            let now = Instant::now();
 
-        println!("Deserialize 1 : {:?}", Instant::now().saturating_duration_since(now));
-        let now = Instant::now();
+            // Deserialize
+            let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
-        // Serialize
-        let mut output = unreal::Serializer::to_byte_buf(&me1_save_game)?;
+            println!("Deserialize 1 : {:?}", Instant::now() - now);
+            let now = Instant::now();
 
-        // Checksum
-        {
-            let checksum_offset = output.len() - 12;
-            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
-            let checksum = crc.checksum(&output[..checksum_offset]);
+            // Serialize
+            let mut output = unreal::Serializer::to_byte_buf(&me1_save_game)?;
 
-            // Update checksum
-            let end = checksum_offset + 4;
-            output[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+            // Checksum
+            {
+                let checksum_offset = output.len() - 12;
+                let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+                let checksum = crc.checksum(&output[..checksum_offset]);
+
+                // Update checksum
+                let end = checksum_offset + 4;
+                output[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+            }
+
+            println!("Serialize 1 : {:?}", Instant::now() - now);
+            let now = Instant::now();
+
+            // Deserialize (again)
+            let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
+
+            println!("Deserialize 2 : {:?}", Instant::now() - now);
+            let now = Instant::now();
+
+            // Serialize (again)
+            let mut output_2 = unreal::Serializer::to_byte_buf(&me1_save_game)?;
+
+            // Checksum
+            {
+                let checksum_offset = output_2.len() - 12;
+                let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+                let checksum = crc.checksum(&output_2[..checksum_offset]);
+
+                // Update checksum
+                let end = checksum_offset + 4;
+                output_2[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
+            }
+
+            println!("Serialize 2 : {:?}", Instant::now() - now);
+
+            // Check 2nd serialize = first serialize
+            // let cmp = output.chunks(4).zip(output_2.chunks(4));
+            // for (i, (a, b)) in cmp.enumerate() {
+            //     if a != b {
+            //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+            //     }
+            // }
+
+            // Check 2nd serialize = first serialize
+            assert_eq!(output, output_2);
         }
-
-        println!("Serialize 1 : {:?}", Instant::now().saturating_duration_since(now));
-        let now = Instant::now();
-
-        // Deserialize (again)
-        let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
-
-        println!("Deserialize 2 : {:?}", Instant::now().saturating_duration_since(now));
-        let now = Instant::now();
-
-        // Serialize (again)
-        let mut output_2 = unreal::Serializer::to_byte_buf(&me1_save_game)?;
-
-        // Checksum
-        {
-            let checksum_offset = output_2.len() - 12;
-            let crc = Crc::<u32>::new(&CRC_32_BZIP2);
-            let checksum = crc.checksum(&output_2[..checksum_offset]);
-
-            // Update checksum
-            let end = checksum_offset + 4;
-            output_2[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
-        }
-
-        println!("Serialize 2 : {:?}", Instant::now().saturating_duration_since(now));
-
-        // Check 2nd serialize = first serialize
-        // let cmp = output.chunks(4).zip(output_2.chunks(4));
-        // for (i, (a, b)) in cmp.enumerate() {
-        //     if a != b {
-        //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
-        //     }
-        // }
-
-        // Check 2nd serialize = first serialize
-        assert_eq!(output, output_2);
         Ok(())
     }
 
     // #[test]
     // fn uncompress() -> Result<()> {
-    //     let input = fs::read("test/Clare00_QuickSave.pcsav")?;
+    //     let input = fs::read("test/ME1Le_Export.pcsav")?;
     //     let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
     //     let output = unreal::Serializer::to_byte_buf(&me1_save_game.save_data)?;
-    //     fs::write("test/Clare00_QuickSave.uncompressed", &output)?;
+    //     fs::write("test/ME1Le_Export.uncompressed", &output)?;
 
     //     Ok(())
     // }

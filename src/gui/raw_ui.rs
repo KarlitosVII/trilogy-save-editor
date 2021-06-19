@@ -129,7 +129,7 @@ impl<'ui> Gui<'ui> {
 
         if let Some(value) = has_value {
             ui.align_text_to_frame_padding();
-            let remove = ui.small_button(&im_str!("remove##remove-{}", ident));
+            let remove = ui.small_button(&im_str!("remove##rm-option-{}", ident));
 
             ui.same_line();
             value.draw_raw_ui(self, ident);
@@ -143,31 +143,23 @@ impl<'ui> Gui<'ui> {
         }
     }
 
-    pub fn draw_struct(&self, ident: &str, fields: &mut [(&mut dyn RawUi, &str)]) {
+    pub fn draw_struct(&self, ident: &str, fields: &mut [Box<dyn FnMut() + '_>]) {
         let ui = self.ui;
         TreeNode::new(ident).build(ui, || {
             Table::new(&ImString::new(ident), 1).build(ui, || {
-                for (field, ident) in fields {
+                for draw_field in fields {
                     Table::next_row();
-                    field.draw_raw_ui(self, ident);
+                    draw_field();
                 }
             });
         });
     }
 
-    pub fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) {
+    pub fn draw_boolvec(&self, ident: &str, list: &mut BoolSlice) -> Option<()> {
         let ui = self.ui;
-        // Tree node
-        let _tree_node = match TreeNode::new(ident).push(ui) {
-            Some(t) => t,
-            None => return,
-        };
 
-        // Table
-        let _table = match Table::new(&ImString::new(ident), 1).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _tree_node = TreeNode::new(ident).push(ui)?;
+        let _table = Table::new(&ImString::new(ident), 1).begin(ui)?;
 
         if !list.is_empty() {
             let mut clipper = ListClipper::new(list.len() as i32).begin(ui);
@@ -181,25 +173,17 @@ impl<'ui> Gui<'ui> {
             Table::next_row();
             ui.text("Empty");
         }
+        Some(())
     }
 
-    pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>)
+    pub fn draw_vec<T>(&self, ident: &str, list: &mut Vec<T>) -> Option<()>
     where
         T: RawUi + Default,
     {
         let ui = self.ui;
 
-        // Tree node
-        let _tree_node = match TreeNode::new(ident).push(ui) {
-            Some(t) => t,
-            None => return,
-        };
-
-        // Table
-        let _table = match Table::new(&ImString::new(ident), 1).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _tree_node = TreeNode::new(ident).push(ui)?;
+        let _table = Table::new(&ImString::new(ident), 1).begin(ui)?;
 
         if !list.is_empty() {
             // Item
@@ -207,7 +191,7 @@ impl<'ui> Gui<'ui> {
             for (i, item) in list.iter_mut().enumerate() {
                 Table::next_row();
                 ui.align_text_to_frame_padding();
-                if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                if ui.small_button(&im_str!("remove##rm-vec-{}", i)) {
                     remove = Some(i);
                 }
                 ui.same_line();
@@ -233,26 +217,37 @@ impl<'ui> Gui<'ui> {
 
             list.push(T::default());
         }
+        Some(())
     }
 
-    pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>)
+    pub fn draw_vec_no_edit<T: RawUi>(&self, ident: &str, list: &mut Vec<T>) -> Option<()> {
+        let ui = self.ui;
+
+        let _tree_node = TreeNode::new(ident).push(ui)?;
+        let _table = Table::new(&ImString::new(ident), 1).begin(ui)?;
+
+        if !list.is_empty() {
+            // Item
+            for (i, item) in list.iter_mut().enumerate() {
+                Table::next_row();
+                item.draw_raw_ui(self, &i.to_string());
+            }
+        } else {
+            Table::next_row();
+            ui.text("Empty");
+        }
+        Some(())
+    }
+
+    pub fn draw_indexmap<K, V>(&self, ident: &str, list: &mut IndexMap<K, V>) -> Option<()>
     where
         K: RawUi + Eq + Hash + Default + Display + 'static,
         V: RawUi + Default,
     {
         let ui = self.ui;
 
-        // Tree node
-        let _tree_node = match TreeNode::new(ident).push(ui) {
-            Some(t) => t,
-            None => return,
-        };
-
-        // Table
-        let _table = match Table::new(&ImString::new(ident), 1).begin(ui) {
-            Some(t) => t,
-            None => return,
-        };
+        let _tree_node = TreeNode::new(ident).push(ui)?;
+        let _table = Table::new(&ImString::new(ident), 1).begin(ui)?;
 
         if !list.is_empty() {
             // Item
@@ -260,7 +255,7 @@ impl<'ui> Gui<'ui> {
             for i in 0..list.len() {
                 Table::next_row();
                 ui.align_text_to_frame_padding();
-                if ui.small_button(&im_str!("remove##remove-{}", i)) {
+                if ui.small_button(&im_str!("remove##rm-indexmap-{}", i)) {
                     remove = Some(i);
                 }
                 ui.same_line();
@@ -303,5 +298,6 @@ impl<'ui> Gui<'ui> {
 
             list.entry(new_k).or_default();
         }
+        Some(())
     }
 }
