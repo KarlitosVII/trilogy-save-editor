@@ -1,6 +1,9 @@
 ## Unreleased
 - ME2LE: Added Legendary missing data (ME1 Import Rewards)
 - ME1LE: Added remaining data (Journal, Codex, Player, Squad, Maps, World, Mako, etc.)
+- Added `Raw Plot` tab to all games with databases (minus ME1(LE) booleans and floats)
+- Added and fixed a lot of plots through the databases
+- BIG thanks to Bioware for giving us ME1LE save format, plot databases and for responding so quickly to my issues. Love you <3
 
 ## 1.11.0
 - Added a command line tool to compare the plots of 2 saves, additional information with the --help argument

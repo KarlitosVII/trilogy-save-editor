@@ -4883,7 +4883,7 @@ RawPlotDb(
         6556: "Troop_Truck_Appeared",
         6557: "Searched_Watercooler",
         6558: "Searched_Ashtray",
-        6561: "ME2.DLC_UNC_Pack01.Pack01_04_Showdown.MissionComplete.VIExecuted",
+        6561: "ME2.DLC_UNC_Pack01.Pack01_04_Showdown.MissionComplete.VIRescued",
         6562: "ME2.DLC_UNC_Pack01.Pack01_04_Showdown.MissionComplete.VIHandedOver",
         6563: "ME2.DLC_UNC_Pack01.Pack01_04_Showdown.Section1.EnteredBase",
         6564: "ME2.DLC_UNC_Pack01.Pack01_04_Showdown.Section2.EnteredVIWorld",

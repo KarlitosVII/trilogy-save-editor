@@ -13,14 +13,14 @@ Me1PlotDb(
         ),
         "Crew": PlotCategory(
             booleans: {
-                3939: "Kaidan recruited",
+                3939: "Kaidan in party",
                 4509: "Sided against Vrynnus while speaking to Kaidan",
                 4631: "Didn't judge about Rahna while speaking to Kaidan",
-                3940: "Ashley recruited",
-                3941: "Garrus recruited",
+                3940: "Ashley in party",
+                3941: "Garrus in party",
                 3923: "Garrus is paragon (C-Sec)",
                 3922: "Garrus is renegade (Spectre)",
-                3942: "Wrex recruited",
+                3942: "Wrex in party",
                 3021: "Wrex is dead",
                 5336: "Retrieved Wrex family armor",
                 4596: "Gave Tali a copy of the data found in UNC: Geth Incursions",
