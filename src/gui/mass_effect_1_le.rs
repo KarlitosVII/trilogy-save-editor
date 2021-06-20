@@ -342,7 +342,8 @@ impl<'ui> Gui<'ui> {
         // 2ème colonne
         Table::next_column();
 
-        self.draw_me1_le_inventory(&mut inventory.inventory);
+        self.draw_me1_le_inventory("Inventory", &mut inventory.inventory);
+        self.draw_me1_le_inventory("Buy Pack Items", &mut inventory.buy_pack_items);
 
         Some(())
     }
@@ -376,13 +377,13 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me1_le_inventory(&self, inventory: &mut Vec<Item>) -> Option<()> {
+    fn draw_me1_le_inventory(&self, ident: &str, inventory: &mut Vec<Item>) -> Option<()> {
         let ui = self.ui;
 
-        let _table = Table::new(im_str!("inventory-table"), 1).begin(ui)?;
+        let _table = Table::new(&im_str!("{}-table", ident), 1).begin(ui)?;
         Table::next_row();
         self.set_next_item_open(true);
-        let _tree_node = TreeNode::new("Inventory").push(ui)?;
+        let _tree_node = TreeNode::new(ident).push(ui)?;
 
         if !inventory.is_empty() {
             let mut clipper = ListClipper::new(inventory.len() as i32).begin(ui);

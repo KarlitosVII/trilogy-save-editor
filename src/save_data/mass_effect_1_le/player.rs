@@ -8,7 +8,6 @@ use crate::save_data::{
     Dummy, ImguiString,
 };
 
-// TODO: Tous les u8
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Player {
     pub is_female: bool,
@@ -86,7 +85,7 @@ pub struct Inventory {
     pub equipment: Vec<Item>,
     pub quick_slots: Vec<Item>,
     pub inventory: Vec<Item>,
-    buy_pack_items: Vec<Item>, // TODO: Inventory tab
+    pub buy_pack_items: Vec<Item>,
 }
 
 #[allow(clippy::upper_case_acronyms)]

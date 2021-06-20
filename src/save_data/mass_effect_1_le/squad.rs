@@ -4,7 +4,6 @@ use crate::save_data::ImguiString;
 
 use super::player::{ComplexTalent, Item, SimpleTalent};
 
-// TODO: Tous les u8
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Henchman {
     pub tag: ImguiString,
