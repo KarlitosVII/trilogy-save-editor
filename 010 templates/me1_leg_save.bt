@@ -824,7 +824,10 @@ struct Map {
         int len;
         Level list[len] <optimize=false>;
     } levels;
-    FSkip(4);
+    bool has_world;
+    if (has_world.value == 1) {
+        BaseObject world;
+    }
 };
 
 struct Vehicle {
@@ -859,7 +862,6 @@ struct {
             int len;
             Map list[len] <optimize=false>;
         } legacy_maps <bgcolor=0x33aa33>;
-        BaseObject legacy_world <bgcolor=0xaa33aa>;
         Vehicle mako <bgcolor=0xaaaaaa>;
     }
 } Me1Legendary <open=true>;

@@ -23,13 +23,14 @@ use self::art_placeable::*;
 #[derive(Deserialize, Serialize, Clone, Default)]
 pub struct Map {
     levels: IndexMap<ImguiString, Level>,
-    _unknown: Dummy<4>,
+    world: Option<BaseObject>,
 }
 
 impl RawUi for Map {
     fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
-        let Map { levels, _unknown } = self;
+        let Map { levels, world } = self;
         levels.draw_raw_ui(gui, "Levels");
+        world.draw_raw_ui(gui, "World");
     }
 }
 

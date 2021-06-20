@@ -228,10 +228,8 @@ struct NoExport(Option<NoExportData>);
 
 impl RawUi for NoExport {
     fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
-        if let Some(NoExportData { legacy_maps, legacy_world, mako }) = &mut self.0 {
+        if let Some(NoExportData { legacy_maps, mako }) = &mut self.0 {
             legacy_maps.draw_raw_ui(gui, "Legacy Maps");
-            Table::next_row();
-            legacy_world.draw_raw_ui(gui, "Legacy World");
             Table::next_row();
             mako.draw_raw_ui(gui, "Mako");
         } else {
@@ -287,7 +285,6 @@ impl serde::Serialize for NoExport {
 #[derive(Deserialize, Serialize, Clone)]
 struct NoExportData {
     legacy_maps: IndexMap<ImguiString, Map>,
-    legacy_world: legacy::BaseObject,
     mako: Vehicle,
 }
 
