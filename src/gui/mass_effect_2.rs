@@ -176,6 +176,13 @@ impl<'ui> Gui<'ui> {
                 let mut gender = *is_female as usize;
                 if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
                     *is_female = gender != 0;
+
+                    // Plot
+                    // FIXME: ME1
+                    // ME2
+                    if let Some(mut is_female) = plot.booleans.get_mut(66) {
+                        *is_female = gender != 0;
+                    }
                 }
 
                 ui.same_line();
@@ -561,6 +568,7 @@ impl<'ui> Gui<'ui> {
                 self.draw_plot_category(booleans, integers, rewards);
             });
         });
+
         // Captain's cabin
         TabScroll::new(im_str!("Captain's cabin")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {

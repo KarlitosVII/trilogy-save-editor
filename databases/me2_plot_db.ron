@@ -1,11 +1,12 @@
 Me2PlotDb(
     player: PlotCategory(
         booleans: {
-            2279: "[General] Played Mass Effect 1",
-            1456: "[General] Game done",
-            5979: "[General] Cosmetic Surgery unlocked",
-            5978: "[General] Cosmetic Surgery applied",
-            5616: "[Other] Changed difficulty (Failed Insanity playthrough)",
+            2279: "Played Mass Effect 1",
+            1456: "Game done",
+            66: "Player is female",
+            5979: "Cosmetic Surgery unlocked",
+            5978: "Cosmetic Surgery applied",
+            5616: "Changed difficulty (Failed Insanity playthrough)",
         },
         integers: {
             2: "Paragon points",
@@ -404,12 +405,12 @@ Me2PlotDb(
         ),
         "DLCs": PlotCategory(
             booleans: {
-                6815: "[Lair of the Shadow Broker] Completed mission",
+                6815: "[Lair of the Shadow Broker] Mission completed",
                 7151: "[Lair of the Shadow Broker] Had drone intro conversation",
-                6512: "[Project Overlord] Completed mission",
+                6512: "[Project Overlord] Mission completed",
                 6561: "[Project Overlord] David sent to Grissom Academy",
                 6562: "[Project Overlord] David given to Cerberus",
-                7451: "[Arrival] Completed mission",
+                7451: "[Arrival] Mission completed",
                 7500: "[Arrival] Warned Batarians",
             },
             integers: {},
@@ -418,13 +419,13 @@ Me2PlotDb(
     loyalty_missions: {
         "Garrus": PlotCategory(
             booleans: {
-                1501: "[Eye for an Eye] Completed mission",
+                1501: "[Eye for an Eye] Mission completed",
             },
             integers: {},
         ),
         "Grunt": PlotCategory(
             booleans: {
-                1505: "[Rite of Passage] Completed mission",
+                1505: "[Rite of Passage] Mission completed",
                 126: "[Rite of Passage] Thresher Maw killed",
                 127: "[Rite of Passage] Thresher Maw survived",
             },
@@ -432,7 +433,7 @@ Me2PlotDb(
         ),
         "Jack": PlotCategory(
             booleans: {
-                1498: "[Subject Zero] Completed mission",
+                1498: "[Subject Zero] Mission completed",
                 281: "[Subject Zero] Survivor killed",
                 282: "[Subject Zero] Survivor spared",
                 1578: "[Conflict with Miranda] Sided with Jack",
@@ -443,7 +444,7 @@ Me2PlotDb(
         ),
         "Jacob": PlotCategory(
             booleans: {
-                1497: "[The Gift of Greatness] Completed mission",
+                1497: "[The Gift of Greatness] Mission completed",
                 360: "[The Gift of Greatness] Dad marooned",
                 361: "[The Gift of Greatness] Dad arrested",
                 362: "[The Gift of Greatness] Dad suicide",
@@ -452,7 +453,7 @@ Me2PlotDb(
         ),
         "Kasumi": PlotCategory(
             booleans: {
-                1500: "[Stealing Memory] Completed mission",
+                1500: "[Stealing Memory] Mission completed",
                 6637: "[Stealing Memory] Destroyed graybox",
                 6638: "[Stealing Memory] Kept graybox",
             },
@@ -460,7 +461,7 @@ Me2PlotDb(
         ),
         "Legion": PlotCategory(
             booleans: {
-                1499: "[A House Divided] Completed mission",
+                1499: "[A House Divided] Mission completed",
                 757: "[A House Divided] Heretics destroyed",
                 759: "[A House Divided] Heretics rewritten",
                 1583: "[Conflict with Tali] Sided with Legion",
@@ -471,7 +472,7 @@ Me2PlotDb(
         ),
         "Miranda": PlotCategory(
             booleans: {
-                1496: "[The Prodigal] Completed mission",
+                1496: "[The Prodigal] Mission completed",
                 1577: "[Conflict with Jack] Sided with Miranda",
                 1578: "[Conflict with Jack] Sided with Jack",
                 1579: "[Conflict with Jack] Kept the peace",
@@ -480,7 +481,7 @@ Me2PlotDb(
         ),
         "Mordin": PlotCategory(
             booleans: {
-                1504: "[Old Blood] Completed mission",
+                1504: "[Old Blood] Mission completed",
                 2050: "[Old Blood] Maelon killed",
                 2678: "[Old Blood] Maelon saved",
                 2676: "[Old Blood] Kept Maelon's data",
@@ -490,7 +491,7 @@ Me2PlotDb(
         ),
         "Samara": PlotCategory(
             booleans: {
-                1506: "[The Ardat-Yakshi] Completed mission",
+                1506: "[The Ardat-Yakshi] Mission completed",
                 3559: "[The Ardat-Yakshi] Failed mission",
                 1664: "[The Ardat-Yakshi] Killed Samara to recruit Morinth",
             },
@@ -498,7 +499,7 @@ Me2PlotDb(
         ),
         "Thane": PlotCategory(
             booleans: {
-                1502: "[Sins of the Father] Completed mission",
+                1502: "[Sins of the Father] Mission completed",
                 3313: "[Sins of the Father] Failed mission",
                 3426: "[Sins of the Father] Thane reunited with Kolyat",
             },
@@ -506,7 +507,7 @@ Me2PlotDb(
         ),
         "Tali": PlotCategory(
             booleans: {
-                1503: "[Treason] Completed mission",
+                1503: "[Treason] Mission completed",
                 668: "[Treason] Legion was part of Tali's loyalty mission",
                 2933: "[Treason] Revealed father's war crimes (unloyal)",
                 2934: "[Treason] Tali exiled",
@@ -520,7 +521,7 @@ Me2PlotDb(
         ),
         "Zaeed": PlotCategory(
             booleans: {
-                1507: "[The Price of Revenge] Completed mission",
+                1507: "[The Price of Revenge] Mission completed",
                 6423: "[The Price of Revenge] Saved the trapped workers and Vido got away",
                 6261: "[The Price of Revenge] Zaeed died",
             },
@@ -885,6 +886,8 @@ Me2PlotDb(
             3337: "[Model] Athabasca Class Freighter",
             3338: "[Model] Geth Ship",
             7200: "[Model] Shadow Broker Base",
+            6157: "[Normandy Crash] Shepard's helmet",
+            6206: "[Firewalker] Prothean relic",
             3322: "[Fish] Illium Skald Fish",
             3323: "[Fish] Thessian Sunfish",
             3324: "[Fish] Prejek Paddle Fish",

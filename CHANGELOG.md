@@ -1,4 +1,4 @@
-## Unreleased
+## 1.12.0
 - ME2LE: Added Legendary missing data (ME1 Import Rewards)
 - ME1LE: Added remaining data (Journal, Codex, Player, Squad, Maps, World, Mako, etc.)
 - Added `Raw Plot` tab to all games with databases (minus ME1(LE) booleans and floats)

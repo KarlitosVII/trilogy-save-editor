@@ -109,6 +109,12 @@ impl<'ui> Gui<'ui> {
                     *is_female = gender != 0;
 
                     // Plot
+                    // FIXME: ME1
+                    // ME2
+                    if let Some(mut is_female) = plot.booleans.get_mut(66) {
+                        *is_female = gender != 0;
+                    }
+                    // ME3
                     if let Some(mut is_female) = plot.booleans.get_mut(17662) {
                         *is_female = gender != 0;
                     }

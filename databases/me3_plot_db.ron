@@ -1,13 +1,12 @@
 Me3PlotDb(
     general: PlotCategory(
         booleans: {
-            22226: "Played Mass Effect 1",
-            21554: "Is ME2 Import",
-            17662: "Shepard is female",
+            22226: "ME1 Import",
+            21554: "ME2 Import",
+            17662: "Player is female",
             22642: "Performed Cosmetic Surgery in ME3",
         },
         integers: {
-            10430: "Effective Military Strength",
             10475: "New Game Plus Count",
             10159: "Paragon Points",
             10160: "Renegade Points",
@@ -83,7 +82,7 @@ Me3PlotDb(
     crew: {
         "Ashley": PlotCategory(
             booleans: {
-                17680: "Ashley recruited",
+                17680: "Ashley in party",
                 17665: "Ashley is in squad",
                 17686: "Ashley is selectable",
             },
@@ -94,7 +93,7 @@ Me3PlotDb(
         ),
         "EDI": PlotCategory(
             booleans: {
-                17682: "EDI recruited",
+                17682: "EDI in party",
                 17667: "EDI is in squad",
                 17688: "EDI is selectable",
             },
@@ -105,7 +104,7 @@ Me3PlotDb(
         ),
         "Garrus": PlotCategory(
             booleans: {
-                17681: "Garrus recruited",
+                17681: "Garrus in party",
                 17666: "Garrus is in squad",
                 17687: "Garrus is selectable",
             },
@@ -116,7 +115,7 @@ Me3PlotDb(
         ),
         "James": PlotCategory(
             booleans: {
-                17694: "James recruited",
+                17694: "James in party",
                 17692: "James is in squad",
                 17695: "James is selectable",
             },
@@ -127,7 +126,7 @@ Me3PlotDb(
         ),
         "Javik": PlotCategory(
             booleans: {
-                17683: "Javik recruited",
+                17683: "Javik in party",
                 17668: "Javik is in squad",
                 17689: "Javik is selectable",
             },
@@ -138,7 +137,7 @@ Me3PlotDb(
         ),
         "Kaidan": PlotCategory(
             booleans: {
-                17679: "Kaidan recruited",
+                17679: "Kaidan in party",
                 17664: "Kaidan is in squad",
                 17685: "Kaidan is selectable",
             },
@@ -149,7 +148,7 @@ Me3PlotDb(
         ),
         "Liara": PlotCategory(
             booleans: {
-                17678: "Liara recruited",
+                17678: "Liara in party",
                 17663: "Liara is in squad",
                 17684: "Liara is selectable",
             },
@@ -160,7 +159,7 @@ Me3PlotDb(
         ),
         "Tali": PlotCategory(
             booleans: {
-                17838: "Tali recruited",
+                17838: "Tali in party",
                 17836: "Tali is in squad",
                 17839: "Tali is selectable",
             },
@@ -168,17 +167,6 @@ Me3PlotDb(
                 10214: "Tali appearance (0 = Default, 1 = Alternate, 2 = From Ashes)",
                 10335: "Tali mission count",
             },
-        ),
-        "Mass Effect 2 (Armax Arena)": PlotCategory(
-            booleans: {
-                24759: "Grunt is in squad",
-                24755: "Jack is in squad",
-                24757: "Jacob is in squad",
-                24756: "Miranda is in squad",
-                24758: "Samara is in squad",
-                24767: "Zaeed is in squad",
-            },
-            integers: {},
         ),
     },
     romance: {
@@ -194,12 +182,13 @@ Me3PlotDb(
         ),
         "Garrus": PlotCategory(
             booleans: {
-                19715: "[Flirt] Garrus",
+                19715: "[Flirt] Still romancing Garrus",
                 19725: "[Romanced] Garrus",
                 19730: "[Rejected] Garrus",
             },
             integers: {
                 10315: "[Friendship] Garrus friendship",
+                10323: "[Romance] Garrus progress",
             },
         ),
         "Kaidan": PlotCategory(
@@ -214,7 +203,7 @@ Me3PlotDb(
         ),
         "Liara": PlotCategory(
             booleans: {
-                21758: "[Flirt] Liara",
+                21758: "[Flirt] Continuing ME1 romance",
                 19722: "[Romanced] Liara",
                 19727: "[Rejected] Liara",
             },
@@ -231,6 +220,7 @@ Me3PlotDb(
             },
             integers: {
                 10318: "[Friendship] Tali friendship",
+                10327: "[Romance] Tali progress",
             },
         ),
         "Samantha": PlotCategory(
@@ -249,7 +239,8 @@ Me3PlotDb(
                 19839: "[Rejected] Steve",
             },
             integers: {
-                10410: "[Friendship] Steve friendship",
+                10340: "[Friendship] Steve friendship",
+                10341: "[Romance] Steve progress",
             },
         ),
         "Diana Allers": PlotCategory(
@@ -262,7 +253,9 @@ Me3PlotDb(
         "Other": PlotCategory(
             booleans: {
                 19846: "[Romanced] Jack",
+                19847: "[Rejected] Jack",
                 21750: "[Romanced] Miranda",
+                21751: "[Rejected] Miranda",
                 19283: "[Romanced] Thane",
                 21100: "[Romanced] Kelly",
                 25045: "[DLC: Citadel] Kissed Samara in Citadel apartment",
@@ -277,28 +270,19 @@ Me3PlotDb(
     missions: {
         "Normandy": PlotCategory(
             booleans: {
-                19499: "Spoke with EDI about acquiring Dr. Eva's body",
                 19578: "James refers to Shepard as 'Loco'",
                 19579: "James refers to Shepard as 'Lola'",
                 20574: "Allers on the Normandy",
                 20624: "Allers kicked off the Normandy",
                 20171: "Had Time Capsule conversation with Liara",
                 20122: "Argued with Joker",
-                22628: "Email M-55 Argus Rifle",
-                22629: "Email AT-12 Raider",
-                22630: "Email M-90 Indra",
-                22631: "Email N7 Weapon #1",
-                22632: "Email N7 Weapon #2",
-                22633: "Email N7 Weapon #3",
-                22634: "Email N7 Weapon #4",
-                22635: "Email N7 Valkyrie",
             },
             integers: {},
         ),
         "Citadel": PlotCategory(
             booleans: {
                 19297: "[Medi-Gel Sabotage] Mission completed",
-                19630: "[Inspirational Stories] Mission completed",
+                19629: "[Inspirational Stories] Mission completed",
                 19906: "[Krogan Dying Message] Gave Charr's poem to Ereba",
                 20498: "[Batarian Codes] Quest completed",
                 21119: "[Asari Widow] Delivered Tashya's message to Weshra",
@@ -315,10 +299,16 @@ Me3PlotDb(
                 10311: "[Inspirational Stories] No. of Photos",
             },
         ),
+        "Eden Prime": PlotCategory(
+            booleans: {
+                22595: "Helped colony resistance",
+            },
+            integers: {},
+        ),
         "Priority: Citadel I": PlotCategory(
             booleans: {
-                19181: "Dr. Chakwas recruited",
-                19182: "Dr. Michel recruited",
+                19181: "Dr. Chakwas in party",
+                19182: "Dr. Michel in party",
                 19245: "Visited Ashley/Kaidan in the hospital (while awoke)",
                 20929: "Spoke to Ashley about Spectre status during hospital visit",
                 19358: "Spoke with Aria T'Loak to discuss recruiting gangs for war effort",
@@ -334,12 +324,6 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Priority: Sur'Kesh": PlotCategory(
-            booleans: {
-                17742: "Mission completed",
-            },
-            integers: {},
-        ),
         "Attican Traverse: Krogan Team": PlotCategory(
             booleans: {
                 17900: "Rachi Queen saved",
@@ -347,6 +331,7 @@ Me3PlotDb(
                 18846: "Rachi Breeder saved",
                 17902: "Rachi Breeder killed",
                 18913: "Grunt died fighting off Rachni",
+                20646: "Grunt survived fighting off Rachni",
             },
             integers: {},
         ),
@@ -357,12 +342,13 @@ Me3PlotDb(
                 19062: "Mordin/Padok is killed by Shepard",
                 20494: "Mordin/Padok agreed to sabotage cure",
                 20315: "Eve is alive",
+                19060: "Eve is dead",
             },
             integers: {},
         ),
         "Priority: Citadel II": PlotCategory(
             booleans: {
-                19186: "Kai Leng mortally wounded Salarian Counselor",
+                19186: "Kai Leng mortally wounded Salarian Councilor",
                 19188: "Kai Leng mortally wounded Thane",
                 19189: "Kai Leng mortally wounded Kirrahe",
                 19704: "Udina killed by Shepard",
@@ -389,8 +375,6 @@ Me3PlotDb(
         ),
         "Arrae: Ex-Cerberus Scientists": PlotCategory(
             booleans: {
-                // 19412: "Jacob is present",
-                // 20742: "Jacob is absent",
                 18261: "Talked with Brynn",
                 18090: "Shepard disapproves of Jacob protecting scientists",
                 18187: "Shepard approves of Jacob protecting scientists",
@@ -409,6 +393,7 @@ Me3PlotDb(
         "Priority: Geth Dreadnought": PlotCategory(
             booleans: {
                 17795: "Shepard agrees counterattacking the Geth Dreadnought",
+                17800: "Punched Han'Gerrel",
             },
             integers: {},
         ),
@@ -430,16 +415,14 @@ Me3PlotDb(
         ),
         "Priority: Citadel III": PlotCategory(
             booleans: {
-                19301: "Mission completed/Met with Asari councilor",
-                20822: "Mission completed/Met with Asari councilor",
-                19769: "Wrex was killed on Citadel",
+                19769: "Wrex/Wreav was killed on Citadel",
             },
             integers: {},
         ),
         "Priority: Horizon": PlotCategory(
             booleans: {
-                20278: "Miranda mortally wounded by Kai Leng",
-                20687: "Miranda survived Horizon",
+                20278: "Miranda killed by Kai Leng",
+                20687: "Miranda survived",
             },
             integers: {},
         ),
@@ -449,9 +432,11 @@ Me3PlotDb(
                 10665: "The Illusive Man progress (>= 6 points to enable all paragon / renegade dialogues)",
             },
         ),
-        "DLC: Omega: Assist the Mechanic": PlotCategory(
+        "DLC: Omega": PlotCategory(
             booleans: {
-                23205: "Found the Kehri power inverter (need to speak with mechanic)",
+                24082: "[Assist the Hacker] Mission completed",
+                23205: "[Assist the Mechanic] Found the Kehri power inverter",
+                24081: "[Assist Harrot] Found Aria's old couch for Harrot",
             },
             integers: {},
         ),
@@ -487,7 +472,7 @@ Me3PlotDb(
                 11203: "(Shattered Eezo) Shifty Cow",
             },
         ),
-        "Store (Furniture)": PlotCategory(
+        "Furniture Store": PlotCategory(
             booleans: {
                 24499: "Polished Vanity",
                 24500: "Deluxe Vanity",
@@ -504,7 +489,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Store (Decorator)": PlotCategory(
+        "Appartment Decorations": PlotCategory(
             booleans: {
                 24270: "(Bathroom) Standard Vanity",
                 24271: "(Bathroom) Polished Vanity",
@@ -550,8 +535,6 @@ Me3PlotDb(
             21546: "Miniaturized Armor Capacitors (Purchased)",
             21547: "Gallea's Electronic Signature (Unlocked)",
             21548: "Gallea's Electronic Signature (Purchased)",
-            21549: "Prejek Paddlefish (Unlocked)",
-            21550: "Prejek Paddlefish (Purchased)",
             22419: "Armor Modkit (Unlocked)",
             22420: "Armor Modkit (Purchased)",
             22421: "Advanced Biotic Amps (Unlocked)",
@@ -614,6 +597,10 @@ Me3PlotDb(
     weapons_powers: {
         "Assault Rifles": PlotVariable(
             booleans: {
+                25098: "Adas Anti-Synthetic Rifle",
+                25099: "Adas Anti-Synthetic Rifle (New Game Plus)",
+                25096: "Cerberus Harrier",
+                25097: "Cerberus Harrier (New Game Plus)",
                 23811: "Chakram Launcher",
                 23812: "Chakram Launcher (New Game Plus)",
                 21227: "Geth Pulse Rifle",
@@ -626,20 +613,24 @@ Me3PlotDb(
                 21566: "M-15 Vindicator (New Game Plus)",
                 21226: "M-37 Falcon",
                 21562: "M-37 Falcon (New Game Plus)",
-                23743: "M-55 Argus",
-                23744: "M-55 Argus (New Game Plus)",
+                25108: "M-55 Argus",
+                25109: "M-55 Argus (New Game Plus)",
                 21229: "M-76 Revenant",
                 21565: "M-76 Revenant (New Game Plus)",
                 21228: "M-96 Mattock",
                 21564: "M-96 Mattock (New Game Plus)",
                 21568: "M-99 Saber",
                 21567: "M-99 Saber (New Game Plus)",
+                25102: "N7 Typhoon",
+                25103: "N7 Typhoon (New Game Plus)",
                 23809: "N7 Valkyrie",
                 23810: "N7 Valkyrie (New Game Plus)",
                 22746: "Particle Rifle",
                 22747: "Particle Rifle (New Game Plus)",
                 21225: "Phaeston",
                 21561: "Phaeston (New Game Plus)",
+                25100: "Striker Assault Rifle",
+                25101: "Striker Assault Rifle (New Game Plus)",
             },
             variables: {
                 "SFXGameContentDLC_CON_GUN01.SFXWeapon_AssaultRifle_Quarian": "Adas Anti-Synthetic Rifle",
@@ -674,8 +665,12 @@ Me3PlotDb(
         ),
         "Pistols": PlotVariable(
             booleans: {
+                25130: "Acolyte",
+                25131: "Acolyte (New Game Plus)",
                 21251: "Arc Pistol",
                 21588: "Arc Pistol (New Game Plus)",
+                25128: "Executioner Pistol",
+                25129: "Executioner Pistol (New Game Plus)",
                 21569: "M-3 Predator",
                 21589: "M-3 Predator (New Game Plus)",
                 21249: "M-5 Phalanx",
@@ -685,6 +680,8 @@ Me3PlotDb(
                 21248: "M-77 Paladin",
                 21570: "M-358 Talon",
                 21590: "M-358 Talon (New Game Plus)",
+                25138: "N7 Eagle",
+                25139: "N7 Eagle (New Game Plus)",
                 21250: "Scorpion",
                 21587: "Scorpion (New Game Plus)",
             },
@@ -713,8 +710,8 @@ Me3PlotDb(
         ),
         "Shotguns": PlotVariable(
             booleans: {
-                23741: "AT-12 Raider",
-                23742: "AT-12 Raider (New Game Plus)",
+                25124: "AT-12 Raider",
+                25125: "AT-12 Raider (New Game Plus)",
                 21239: "Disciple",
                 21579: "Disciple (New Game Plus)",
                 21241: "Geth Plasma Shotgun",
@@ -730,6 +727,8 @@ Me3PlotDb(
                 21584: "M-27 Scimitar (New Game Plus)",
                 21238: "M-300 Claymore",
                 21578: "M-300 Claymore (New Game Plus)",
+                25126: "N7 Crusader",
+                25127: "N7 Crusader (New Game Plus)",
             },
             variables: {
                 "SFXGameContent.SFXWeapon_Shotgun_Raider": "AT-12 Raider",
@@ -757,6 +756,10 @@ Me3PlotDb(
         ),
         "SMGs": PlotVariable(
             booleans: {
+                25134: "Blood Pack Punisher",
+                25135: "Blood Pack Punisher (New Game Plus)",
+                25132: "Geth Plasma SMG",
+                25133: "Geth Plasma SMG (New Game Plus)",
                 21255: "M-4 Shuriken",
                 21593: "M-4 Shuriken (New Game Plus)",
                 21256: "M-9 Tempest",
@@ -765,6 +768,8 @@ Me3PlotDb(
                 21592: "M-12 Locust (New Game Plus)",
                 21252: "M-25 Hornet",
                 21591: "M-25 Hornet (New Game Plus)",
+                25136: "N7 Hurricane",
+                25137: "N7 Hurricane (New Game Plus)",
             },
             variables: {
                 "SFXGameContentDLC_CON_GUN01.SFXWeapon_SMG_Bloodpack": "Blood Pack Punisher",
@@ -790,16 +795,24 @@ Me3PlotDb(
                 21246: "Black Widow",
                 21236: "Javelin",
                 21573: "Javelin (New Game Plus)",
+                25114: "Kishock Harpoon Gun",
+                25115: "Kishock Harpoon Gun (New Game Plus)",
+                25112: "Krysae Sniper Rifle",
+                25113: "Krysae Sniper Rifle (New Game Plus)",
                 21234: "M-13 Raptor",
                 21575: "M-13 Raptor (New Game Plus)",
                 21235: "M-29 Incisor",
                 21572: "M-29 Incisor (New Game Plus)",
+                25110: "M-90 Indra",
+                25111: "M-90 Indra (New Game Plus)",
                 21232: "M-92 Mantis",
                 21574: "M-92 Mantis (New Game Plus)",
                 21233: "M-97 Viper",
                 21576: "M-97 Viper (New Game Plus)",
                 21237: "M-98 Widow",
                 21577: "M-98 Widow (New Game Plus)",
+                25116: "N7 Valiant",
+                25117: "N7 Valiant (New Game Plus)",
             },
             variables: {
                 "SFXGameContent.SFXWeapon_SniperRifle_BlackWidow": "Black Widow",
@@ -845,6 +858,7 @@ Me3PlotDb(
                 23718: "Dominate",
                 23922: "Lash",
                 23923: "Flare",
+                24468: "Stim Pack",
             },
             variables: {},
         ),
@@ -864,14 +878,14 @@ Me3PlotDb(
             ),
             "Crew": PlotCategory(
                 booleans: {
-                    13939: "Kaidan recruited",
+                    13939: "Kaidan in party",
                     14509: "Sided against Vrynnus while speaking to Kaiden",
                     14631: "Didn't judge about Rahna while speaking to Kaiden",
-                    13940: "Ashley recruited",
-                    13941: "Garrus recruited",
+                    13940: "Ashley in party",
+                    13941: "Garrus in party",
                     13923: "Garrus is paragon (C-Sec)",
                     13922: "Garrus is renegade (Spectre)",
-                    13942: "Wrex recruited",
+                    13942: "Wrex in party",
                     13021: "Wrex is dead",
                     15336: "Retrieved Wrex family armor",
                     14596: "Gave Tali a copy of the data found in UNC: Geth Incursions",
