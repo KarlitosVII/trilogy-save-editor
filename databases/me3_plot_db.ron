@@ -5,6 +5,7 @@ Me3PlotDb(
             21554: "ME2 Import",
             17662: "Player is female",
             22642: "Performed Cosmetic Surgery in ME3",
+            5616: "Changed difficulty (Failed Insanity playthrough)",
         },
         integers: {
             10475: "New Game Plus Count",

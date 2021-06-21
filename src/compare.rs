@@ -52,19 +52,26 @@ pub async fn compare(
         }
     }
 
-    let (src_bools, src_ints, src_floats) = get_plot_from_save_game(src_save.unwrap());
-    let (cmp_bools, cmp_ints, cmp_floats) = get_plot_from_save_game(cmp_save.unwrap());
+    let (mut src_bools, mut src_ints, mut src_floats) = get_plot_from_save_game(src_save.unwrap());
+    let (mut cmp_bools, mut cmp_ints, mut cmp_floats) = get_plot_from_save_game(cmp_save.unwrap());
 
     // Booleans
     let mut booleans = IndexMap::new();
 
     let max_len = src_bools.len().max(cmp_bools.len());
     for i in 0..max_len {
-        let from = src_bools.get(i).map(|b| *b);
-        let to = cmp_bools.get(i).map(|b| *b);
+        // Add plot if missing
+        if i >= src_bools.len() {
+            src_bools.resize(i + 1, Default::default());
+        }
+        if i >= cmp_bools.len() {
+            cmp_bools.resize(i + 1, Default::default());
+        }
+        let src = *src_bools.get(i).unwrap();
+        let cmp = *cmp_bools.get(i).unwrap();
 
-        if from != to {
-            booleans.insert(i, BoolDifference { src: from, cmp: to });
+        if src != cmp {
+            booleans.insert(i, BoolDifference { src, cmp });
         }
     }
 
@@ -76,12 +83,12 @@ pub async fn compare(
     keys.sort_unstable();
     keys.dedup();
 
-    for k in &keys {
-        let src = src_ints.get(k).cloned();
-        let cmp = cmp_ints.get(k).cloned();
+    for &k in &keys {
+        let src = *src_ints.entry(k).or_default();
+        let cmp = *cmp_ints.entry(k).or_default();
 
         if src != cmp {
-            integers.insert(*k, IntegerDifference { src, cmp });
+            integers.insert(k, IntegerDifference { src, cmp });
         }
     }
 
@@ -93,12 +100,12 @@ pub async fn compare(
     keys.sort_unstable();
     keys.dedup();
 
-    for k in &keys {
-        let src = src_floats.get(k).cloned();
-        let cmp = cmp_floats.get(k).cloned();
+    for &k in &keys {
+        let src = *src_floats.entry(k).or_default();
+        let cmp = *cmp_floats.entry(k).or_default();
 
         if src != cmp {
-            floats.insert(*k, FloatDifference { src, cmp });
+            floats.insert(k, FloatDifference { src, cmp });
         }
     }
 
@@ -122,20 +129,20 @@ struct Differences {
 
 #[derive(Serialize)]
 struct BoolDifference {
-    src: Option<bool>,
-    cmp: Option<bool>,
+    src: bool,
+    cmp: bool,
 }
 
 #[derive(Serialize)]
 struct IntegerDifference {
-    src: Option<i32>,
-    cmp: Option<i32>,
+    src: i32,
+    cmp: i32,
 }
 
 #[derive(Serialize)]
 struct FloatDifference {
-    src: Option<f32>,
-    cmp: Option<f32>,
+    src: f32,
+    cmp: f32,
 }
 
 fn get_plot_from_save_game(
