@@ -115,9 +115,7 @@ fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::Backen
     if let Some(backend) = clipboard_init() {
         imgui.set_clipboard_backend(Box::new(backend));
     } else {
-        tokio::spawn(async {
-            panic!("Failed to initialize clipboard");
-        });
+        eprintln!("Error: failed to initialize clipboard");
     }
 
     let mut platform = WinitPlatform::init(&mut imgui);
