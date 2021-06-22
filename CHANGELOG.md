@@ -1,3 +1,8 @@
+## Unreleased
+- PS4 saves support
+- Updated ME1 raw plot database
+- Thanks again to Bioware for the quick update of their plot databases
+
 ## 1.12.1
 - ME2LE: Added Legendary missing data (ME1 Import Rewards)
 - ME1LE: Added remaining data (Journal, Codex, Player, Squad, Maps, World, Mako, etc.)

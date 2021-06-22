@@ -1,4 +1,5 @@
 use imgui::{im_str, ChildWindow, ListClipper, TabBar, TabItem};
+use indexmap::IndexMap;
 
 use crate::{
     event_handler::MainEvent,
@@ -109,39 +110,50 @@ impl<'ui> Gui<'ui> {
     pub fn draw_plot_category(
         &self, booleans: &mut BoolVec, integers: &mut Vec<i32>, plot_db: &PlotCategory,
     ) {
-        let ui = self.ui;
         let PlotCategory { booleans: bool_db, integers: int_db } = plot_db;
 
-        if bool_db.is_empty() && int_db.is_empty() {
+        self.draw_plot_bools(booleans, bool_db);
+        self.draw_plot_ints(integers, int_db);
+    }
+
+    pub fn draw_plot_bools(&self, booleans: &mut BoolVec, bool_db: &IndexMap<usize, String>) {
+        let ui = self.ui;
+
+        if bool_db.is_empty() {
             return;
         }
 
-        // Booleans
         let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = bool_db.get_index(i as usize).unwrap();
+                let (&plot_id, plot_desc) = bool_db.get_index(i as usize).unwrap();
                 // Add missing bools
-                if *plot_id >= booleans.len() {
-                    booleans.resize(*plot_id + 1, Default::default());
+                if plot_id >= booleans.len() {
+                    booleans.resize(plot_id + 1, Default::default());
                 };
-                let mut plot = booleans.get_mut(*plot_id).unwrap();
+                let mut plot = booleans.get_mut(plot_id).unwrap();
                 Table::next_row();
                 plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
             }
         }
         clipper.end();
+    }
 
-        // Integers
+    pub fn draw_plot_ints(&self, integers: &mut Vec<i32>, int_db: &IndexMap<usize, String>) {
+        let ui = self.ui;
+        if int_db.is_empty() {
+            return;
+        }
+
         let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = int_db.get_index(i as usize).unwrap();
+                let (&plot_id, plot_desc) = int_db.get_index(i as usize).unwrap();
                 // Add missing ints
-                if *plot_id >= integers.len() {
-                    integers.resize(*plot_id + 1, Default::default());
+                if plot_id >= integers.len() {
+                    integers.resize(plot_id + 1, Default::default());
                 };
-                let plot = integers.get_mut(*plot_id).unwrap();
+                let plot = integers.get_mut(plot_id).unwrap();
                 Table::next_row();
                 plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
             }
@@ -193,12 +205,12 @@ impl<'ui> Gui<'ui> {
                     let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
                     while clipper.step() {
                         for i in clipper.display_start()..clipper.display_end() {
-                            let (plot_id, plot_label) = bool_db.get_index(i as usize).unwrap();
+                            let (&plot_id, plot_label) = bool_db.get_index(i as usize).unwrap();
                             // Add missing bools
-                            if *plot_id >= booleans.len() {
-                                booleans.resize(*plot_id + 1, Default::default());
+                            if plot_id >= booleans.len() {
+                                booleans.resize(plot_id + 1, Default::default());
                             };
-                            let mut plot = booleans.get_mut(*plot_id).unwrap();
+                            let mut plot = booleans.get_mut(plot_id).unwrap();
                             Table::next_row();
                             plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
                         }
@@ -236,12 +248,12 @@ impl<'ui> Gui<'ui> {
                     let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
                     while clipper.step() {
                         for i in clipper.display_start()..clipper.display_end() {
-                            let (plot_id, plot_label) = int_db.get_index(i as usize).unwrap();
+                            let (&plot_id, plot_label) = int_db.get_index(i as usize).unwrap();
                             // Add missing ints
-                            if *plot_id >= integers.len() {
-                                integers.resize(*plot_id + 1, Default::default());
+                            if plot_id >= integers.len() {
+                                integers.resize(plot_id + 1, Default::default());
                             };
-                            let plot = integers.get_mut(*plot_id).unwrap();
+                            let plot = integers.get_mut(plot_id).unwrap();
                             Table::next_row();
                             plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
                         }
@@ -279,12 +291,12 @@ impl<'ui> Gui<'ui> {
                     let mut clipper = ListClipper::new(float_db.len() as i32).begin(ui);
                     while clipper.step() {
                         for i in clipper.display_start()..clipper.display_end() {
-                            let (plot_id, plot_label) = float_db.get_index(i as usize).unwrap();
+                            let (&plot_id, plot_label) = float_db.get_index(i as usize).unwrap();
                             // Add missing floats
-                            if *plot_id >= floats.len() {
-                                floats.resize(*plot_id + 1, Default::default());
+                            if plot_id >= floats.len() {
+                                floats.resize(plot_id + 1, Default::default());
                             };
-                            let plot = floats.get_mut(*plot_id).unwrap();
+                            let plot = floats.get_mut(plot_id).unwrap();
                             Table::next_row();
                             plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
                         }

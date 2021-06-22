@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-use crate::save_data::{mass_effect_1::plot_db::Me1PlotDb, shared::plot::PlotCategory};
+use crate::save_data::shared::plot::PlotCategory;
 
 #[derive(Deserialize)]
 pub struct Me3PlotDb {
@@ -14,7 +14,6 @@ pub struct Me3PlotDb {
     pub normandy: IndexMap<String, PlotCategory>,
     pub intel: PlotCategory,
     pub weapons_powers: IndexMap<String, PlotVariable>,
-    pub me1_imported: Me1PlotDb,
 }
 
 #[derive(Deserialize)]

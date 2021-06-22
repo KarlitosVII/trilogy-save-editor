@@ -506,7 +506,6 @@ impl<'ui> Gui<'ui> {
             intel,
             normandy,
             weapons_powers,
-            me1_imported,
         } = Database::me3_plot()?;
 
         // Tab bar
@@ -569,7 +568,7 @@ impl<'ui> Gui<'ui> {
         {
             let _colors = self.style_colors(Theme::MassEffect1);
             TabItem::new(im_str!("Mass Effect 1")).build(ui, || {
-                self.draw_me1_imported_plot_db(plot_table, me1_imported);
+                self.draw_me1_imported_plot_db(plot_table);
             });
         }
         Some(())
@@ -636,11 +635,9 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    pub fn draw_me1_imported_plot_db(
-        &self, me1_plot_table: &mut PlotTable, me1_imported: &Me1PlotDb,
-    ) -> Option<()> {
+    pub fn draw_me1_imported_plot_db(&self, plot_table: &mut PlotTable) -> Option<()> {
         let ui = self.ui;
-        let Me1PlotDb { player_crew, missions } = me1_imported;
+        let Me1PlotDb { player_crew, missions } = Database::me1_plot()?;
 
         // Tab bar
         let _tab_bar = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -653,7 +650,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me3_plot_category(me1_plot_table, plot_db);
+                            self.draw_me3_plot_category_is_me1_cat(plot_table, plot_db, true);
                         });
                     });
                 }
@@ -663,6 +660,12 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot_category(&self, plot_table: &mut PlotTable, plot_db: &PlotCategory) {
+        self.draw_me3_plot_category_is_me1_cat(plot_table, plot_db, false);
+    }
+
+    fn draw_me3_plot_category_is_me1_cat(
+        &self, plot_table: &mut PlotTable, plot_db: &PlotCategory, is_me1_cat: bool,
+    ) {
         let ui = self.ui;
         let PlotTable { booleans, integers, .. } = plot_table;
         let PlotCategory { booleans: bool_db, integers: int_db } = plot_db;
@@ -676,11 +679,16 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = bool_db.get_index(i as usize).unwrap();
+                // Add 10 000 to ME1 import ids
+                let mut plot_id = *plot_id;
+                if is_me1_cat {
+                    plot_id += 10_000;
+                }
                 // Add missing bools
-                if *plot_id >= booleans.len() {
-                    booleans.resize(*plot_id + 1, Default::default());
+                if plot_id >= booleans.len() {
+                    booleans.resize(plot_id + 1, Default::default());
                 };
-                let mut plot = booleans.get_mut(*plot_id).unwrap();
+                let mut plot = booleans.get_mut(plot_id).unwrap();
                 Table::next_row();
                 plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
             }
@@ -692,7 +700,12 @@ impl<'ui> Gui<'ui> {
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
                 let (plot_id, plot_desc) = int_db.get_index(i as usize).unwrap();
-                let plot = integers.entry(*plot_id as i32).or_default();
+                // Add 10 000 to ME1 import ids
+                let mut plot_id = *plot_id;
+                if is_me1_cat {
+                    plot_id += 10_000;
+                }
+                let plot = integers.entry(plot_id as i32).or_default();
 
                 Table::next_row();
                 plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
@@ -702,46 +715,38 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot_variable(
-        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
+        &self, plot_table: &mut PlotTable, variables: &mut IndexMap<ImguiString, i32>,
         plot_db: &PlotVariable,
     ) {
         let ui = self.ui;
-        let PlotVariable { booleans, variables } = plot_db;
+        let PlotTable { booleans, .. } = plot_table;
+        let PlotVariable { booleans: bool_db, variables: var_db } = plot_db;
 
-        if booleans.is_empty() && player_variables.is_empty() {
+        if bool_db.is_empty() && variables.is_empty() {
             return;
         }
 
         // Booleans
-        let mut clipper = ListClipper::new(booleans.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = booleans.get_index(i as usize).unwrap();
-                let plot = plot_table.booleans.get_mut(*plot_id);
-                if let Some(mut plot) = plot {
-                    Table::next_row();
-                    plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
-                }
-            }
-        }
+        self.draw_plot_bools(booleans, bool_db);
+
         // Variables
-        let mut clipper = ListClipper::new(variables.len() as i32).begin(ui);
+        let mut clipper = ListClipper::new(var_db.len() as i32).begin(ui);
         while clipper.step() {
             for i in clipper.display_start()..clipper.display_end() {
-                let (variable_id, variable_desc) = variables.get_index(i as usize).unwrap();
-                let variable = player_variables
-                    .iter_mut()
-                    .find(|(key, _)| unicase::eq(key.to_str(), variable_id));
+                let (var_id, var_desc) = var_db.get_index(i as usize).unwrap();
+                let variable =
+                    variables.iter_mut().find(|(key, _)| unicase::eq(key.to_str(), var_id));
 
                 let value = match variable {
                     Some((_, value)) => value,
-                    None => player_variables.entry(ImString::new(variable_id).into()).or_default(),
+                    None => variables.entry(ImString::new(var_id).into()).or_default(),
                 };
 
                 Table::next_row();
-                value.draw_raw_ui(self, &format!("{}##var-{}", variable_desc, variable_desc));
+                value.draw_raw_ui(self, &format!("{}##var-{}", var_desc, var_desc));
             }
         }
+        clipper.end();
     }
 
     fn draw_me3_raw_plot(
@@ -788,12 +793,12 @@ impl<'ui> Gui<'ui> {
                     let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
                     while clipper.step() {
                         for i in clipper.display_start()..clipper.display_end() {
-                            let (plot_id, plot_label) = bool_db.get_index(i as usize).unwrap();
+                            let (&plot_id, plot_label) = bool_db.get_index(i as usize).unwrap();
                             // Add missing bools
-                            if *plot_id >= booleans.len() {
-                                booleans.resize(*plot_id + 1, Default::default());
+                            if plot_id >= booleans.len() {
+                                booleans.resize(plot_id + 1, Default::default());
                             };
-                            let mut plot = booleans.get_mut(*plot_id).unwrap();
+                            let mut plot = booleans.get_mut(plot_id).unwrap();
                             Table::next_row();
                             plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
                         }
@@ -831,8 +836,8 @@ impl<'ui> Gui<'ui> {
                     let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
                     while clipper.step() {
                         for i in clipper.display_start()..clipper.display_end() {
-                            let (plot_id, plot_label) = int_db.get_index(i as usize).unwrap();
-                            let plot = integers.entry(*plot_id as i32).or_default();
+                            let (&plot_id, plot_label) = int_db.get_index(i as usize).unwrap();
+                            let plot = integers.entry(plot_id as i32).or_default();
                             Table::next_row();
                             plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
                         }
@@ -870,8 +875,8 @@ impl<'ui> Gui<'ui> {
                     let mut clipper = ListClipper::new(float_db.len() as i32).begin(ui);
                     while clipper.step() {
                         for i in clipper.display_start()..clipper.display_end() {
-                            let (plot_id, plot_label) = float_db.get_index(i as usize).unwrap();
-                            let plot = floats.entry(*plot_id as i32).or_default();
+                            let (&plot_id, plot_label) = float_db.get_index(i as usize).unwrap();
+                            let plot = floats.entry(plot_id as i32).or_default();
                             Table::next_row();
                             plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
                         }
