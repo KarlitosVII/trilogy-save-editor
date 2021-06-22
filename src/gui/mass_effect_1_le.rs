@@ -3,8 +3,9 @@ use std::ops::IndexMut;
 
 use crate::{
     databases::Database,
+    gui::shared::PlotType,
     save_data::{
-        mass_effect_1::{item_db::DbItem, plot_db::Me1PlotDb},
+        mass_effect_1::item_db::DbItem,
         mass_effect_1_le::{
             player::{ComplexTalent, Item, ItemLevel, Player},
             squad::Henchman,
@@ -39,7 +40,8 @@ impl<'ui> Gui<'ui> {
 
         // Plot
         TabItem::new(im_str!("Plot")).build(ui, || {
-            self.draw_me1_le_plot_db(&mut save_game.plot);
+            let PlotTable { booleans, integers, .. } = &mut save_game.plot;
+            self.draw_me1_plot(booleans, integers);
         });
 
         // Inventory
@@ -62,7 +64,13 @@ impl<'ui> Gui<'ui> {
         TabItem::new(im_str!("Raw Plot")).build(ui, || {
             if let Some(plot_db) = Database::me1_raw_plot() {
                 let PlotTable { booleans, integers, floats, .. } = &mut save_game.plot;
-                self.draw_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+                self.draw_raw_plot(
+                    booleans,
+                    PlotType::Vec(integers),
+                    PlotType::Vec(floats),
+                    plot_db,
+                    plot_filter,
+                );
             }
         });
         Some(())
@@ -283,32 +291,6 @@ impl<'ui> Gui<'ui> {
                 talent.current_rank = 0;
             }
         }
-    }
-
-    pub fn draw_me1_le_plot_db(&self, me1_plot_table: &mut PlotTable) -> Option<()> {
-        let ui = self.ui;
-        let Me1PlotDb { player_crew, missions } = Database::me1_plot()?;
-
-        // Tab bar
-        let _tab_bar = TabBar::new(im_str!("plot-tab")).begin(ui)?;
-
-        let categories = [(im_str!("Player / Crew"), player_crew), (im_str!("Missions"), missions)];
-
-        for (title, plot_map) in &categories {
-            TabScroll::new(title).build(ui, || {
-                for (category_name, plot_db) in plot_map.iter() {
-                    Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
-                        Table::next_row();
-                        TreeNode::new(category_name).build(ui, || {
-                            let PlotTable { booleans, integers, .. } = me1_plot_table;
-                            self.draw_plot_category(booleans, integers, plot_db);
-                        });
-                    });
-                }
-            });
-        }
-
-        Some(())
     }
 
     fn draw_me1_le_inventory_tab(&self, savegame: &mut Me1LeSaveData) -> Option<()> {

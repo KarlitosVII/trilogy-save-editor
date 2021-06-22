@@ -1,10 +1,9 @@
-use imgui::{
-    im_str, ChildWindow, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem,
-};
+use imgui::{im_str, ComboBox, ImStr, ImString, ListClipper, Selectable, TabBar, TabItem};
 use indexmap::IndexMap;
 
 use crate::{
     databases::Database,
+    gui::shared::PlotType,
     save_data::{
         mass_effect_1::plot_db::Me1PlotDb,
         mass_effect_2::plot_db::Me2PlotDb,
@@ -16,7 +15,7 @@ use crate::{
         },
         shared::{
             player::{Notoriety, Origin},
-            plot::{BoolVec, PlotCategory, RawPlotDb},
+            plot::PlotCategory,
         },
         ImguiString, RawUi,
     },
@@ -43,7 +42,7 @@ impl<'ui> Gui<'ui> {
 
         // Plot
         TabItem::new(im_str!("Plot")).build(ui, || {
-            self.draw_me3_plot_db(&mut save_game.plot, &mut save_game.player_variables);
+            self.draw_me3_plot(&mut save_game.plot, &mut save_game.player_variables);
         });
 
         // Head Morph
@@ -61,7 +60,13 @@ impl<'ui> Gui<'ui> {
         TabItem::new(im_str!("Raw Plot")).build(ui, || {
             if let Some(plot_db) = Database::me3_raw_plot() {
                 let PlotTable { booleans, integers, floats, .. } = &mut save_game.plot;
-                self.draw_me3_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+                self.draw_raw_plot(
+                    booleans,
+                    PlotType::IndexMap(integers),
+                    PlotType::IndexMap(floats),
+                    plot_db,
+                    plot_filter,
+                );
             }
         });
         Some(())
@@ -467,6 +472,7 @@ impl<'ui> Gui<'ui> {
                 im_str!("SFXGameContentDLC_Exp_Pack002.SFXPowerCustomAction_BioticFlare"),
                 im_str!("Flare"),
             ),
+            // FIXME: Stim pack
         ];
 
         for &(power_class_name, power_name) in &POWER_LIST {
@@ -491,7 +497,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me3_plot_db(
+    fn draw_me3_plot(
         &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
     ) -> Option<()> {
         let ui = self.ui;
@@ -507,6 +513,7 @@ impl<'ui> Gui<'ui> {
             normandy,
             weapons_powers,
         } = Database::me3_plot()?;
+        let PlotTable { booleans, integers, .. } = plot_table;
 
         // Tab bar
         let _tab_bar = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -514,7 +521,7 @@ impl<'ui> Gui<'ui> {
         // Mass Effect 3
         TabScroll::new(im_str!("General")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me3_plot_category(plot_table, general);
+                self.draw_plot_category(booleans, PlotType::IndexMap(integers), general);
             });
         });
 
@@ -533,7 +540,11 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me3_plot_category(plot_table, plot_db);
+                            self.draw_plot_category(
+                                booleans,
+                                PlotType::IndexMap(integers),
+                                plot_db,
+                            );
                         });
                     });
                 }
@@ -542,7 +553,7 @@ impl<'ui> Gui<'ui> {
 
         TabScroll::new(im_str!("Intel")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me3_plot_category(plot_table, intel);
+                self.draw_plot_category(booleans, PlotType::IndexMap(integers), intel);
             });
         });
 
@@ -561,7 +572,7 @@ impl<'ui> Gui<'ui> {
         // Mass Effect 2
         let _colors = self.style_colors(Theme::MassEffect2);
         TabItem::new(im_str!("Mass Effect 2")).build(ui, || {
-            self.draw_me2_imported_plot_db(plot_table);
+            self.draw_me2_imported_plot(plot_table);
         });
 
         // Mass Effect 1
@@ -574,7 +585,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    pub fn draw_me2_imported_plot_db(&self, me3_plot_table: &mut PlotTable) -> Option<()> {
+    pub fn draw_me2_imported_plot(&self, me3_plot_table: &mut PlotTable) -> Option<()> {
         let ui = self.ui;
         let Me2PlotDb {
             player,
@@ -587,6 +598,7 @@ impl<'ui> Gui<'ui> {
             captains_cabin,
             imported_me1: _,
         } = Database::me2_plot()?;
+        let PlotTable { booleans, integers, .. } = me3_plot_table;
 
         // Tab bar
         let _tab_bar = TabBar::new(im_str!("plot-tab")).begin(ui)?;
@@ -594,7 +606,7 @@ impl<'ui> Gui<'ui> {
         // Player
         TabScroll::new(im_str!("Player")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me3_plot_category(me3_plot_table, player);
+                self.draw_plot_category(booleans, PlotType::IndexMap(integers), player);
             });
         });
 
@@ -612,7 +624,11 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me3_plot_category(me3_plot_table, plot_db);
+                            self.draw_plot_category(
+                                booleans,
+                                PlotType::IndexMap(integers),
+                                plot_db,
+                            );
                         });
                     });
                 }
@@ -622,14 +638,14 @@ impl<'ui> Gui<'ui> {
         // Rewards
         TabScroll::new(im_str!("Rewards")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me3_plot_category(me3_plot_table, rewards);
+                self.draw_plot_category(booleans, PlotType::IndexMap(integers), rewards);
             });
         });
 
         // Captain's cabin
         TabScroll::new(im_str!("Captain's cabin")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_me3_plot_category(me3_plot_table, captains_cabin);
+                self.draw_plot_category(booleans, PlotType::IndexMap(integers), captains_cabin);
             });
         });
         Some(())
@@ -650,7 +666,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_me3_plot_category_is_me1_cat(plot_table, plot_db, true);
+                            self.draw_me3_imported_me1_plot_category(plot_table, plot_db);
                         });
                     });
                 }
@@ -659,59 +675,14 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me3_plot_category(&self, plot_table: &mut PlotTable, plot_db: &PlotCategory) {
-        self.draw_me3_plot_category_is_me1_cat(plot_table, plot_db, false);
-    }
-
-    fn draw_me3_plot_category_is_me1_cat(
-        &self, plot_table: &mut PlotTable, plot_db: &PlotCategory, is_me1_cat: bool,
+    fn draw_me3_imported_me1_plot_category(
+        &self, plot_table: &mut PlotTable, plot_db: &PlotCategory,
     ) {
-        let ui = self.ui;
         let PlotTable { booleans, integers, .. } = plot_table;
         let PlotCategory { booleans: bool_db, integers: int_db } = plot_db;
 
-        if bool_db.is_empty() && int_db.is_empty() {
-            return;
-        }
-
-        // Booleans
-        let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = bool_db.get_index(i as usize).unwrap();
-                // Add 10 000 to ME1 import ids
-                let mut plot_id = *plot_id;
-                if is_me1_cat {
-                    plot_id += 10_000;
-                }
-                // Add missing bools
-                if plot_id >= booleans.len() {
-                    booleans.resize(plot_id + 1, Default::default());
-                };
-                let mut plot = booleans.get_mut(plot_id).unwrap();
-                Table::next_row();
-                plot.draw_raw_ui(self, &format!("{}##bool-{}", plot_desc, plot_desc));
-            }
-        }
-        clipper.end();
-
-        // Integers
-        let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
-        while clipper.step() {
-            for i in clipper.display_start()..clipper.display_end() {
-                let (plot_id, plot_desc) = int_db.get_index(i as usize).unwrap();
-                // Add 10 000 to ME1 import ids
-                let mut plot_id = *plot_id;
-                if is_me1_cat {
-                    plot_id += 10_000;
-                }
-                let plot = integers.entry(plot_id as i32).or_default();
-
-                Table::next_row();
-                plot.draw_raw_ui(self, &format!("{}##int-{}", plot_desc, plot_desc));
-            }
-        }
-        clipper.end();
+        self.draw_plot_bools(booleans, bool_db, true);
+        self.draw_plot_ints(PlotType::IndexMap(integers), int_db, true);
     }
 
     fn draw_me3_plot_variable(
@@ -727,7 +698,7 @@ impl<'ui> Gui<'ui> {
         }
 
         // Booleans
-        self.draw_plot_bools(booleans, bool_db);
+        self.draw_plot_bools(booleans, bool_db, false);
 
         // Variables
         let mut clipper = ListClipper::new(var_db.len() as i32).begin(ui);
@@ -747,143 +718,5 @@ impl<'ui> Gui<'ui> {
             }
         }
         clipper.end();
-    }
-
-    fn draw_me3_raw_plot(
-        &self, booleans: &mut BoolVec, integers: &mut IndexMap<i32, i32>,
-        floats: &mut IndexMap<i32, f32>, plot_db: &RawPlotDb, plot_filter: &mut PlotFilterState,
-    ) -> Option<()> {
-        let ui = &self.ui;
-        let PlotFilterState { bool_filter, int_filter, float_filter, filter_db } = plot_filter;
-        if filter_db.is_none() {
-            *filter_db = Some(plot_db.clone())
-        }
-        let RawPlotDb { booleans: bool_db, integers: int_db, floats: float_db } =
-            filter_db.as_mut().unwrap();
-
-        // Tab bar
-        let _tab_bar = TabBar::new(im_str!("raw_plot")).begin(ui)?;
-
-        // Booleans
-        TabItem::new(im_str!("Booleans")).build(ui, || {
-            // Filter
-            if self.draw_edit_string("Filter", bool_filter) {
-                *bool_db = plot_db
-                    .booleans
-                    .iter()
-                    .filter_map(|(k, v)| {
-                        if v.to_lowercase().contains(&bool_filter.to_str().to_lowercase())
-                            || k.to_string().contains(bool_filter.to_str())
-                        {
-                            Some((*k, v.clone()))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect()
-            }
-            ui.separator();
-
-            // Table
-            if bool_db.is_empty() {
-                return;
-            }
-            ChildWindow::new(im_str!("scroll")).build(ui, || {
-                Table::new(im_str!("plot-table"), 1).build(ui, || {
-                    let mut clipper = ListClipper::new(bool_db.len() as i32).begin(ui);
-                    while clipper.step() {
-                        for i in clipper.display_start()..clipper.display_end() {
-                            let (&plot_id, plot_label) = bool_db.get_index(i as usize).unwrap();
-                            // Add missing bools
-                            if plot_id >= booleans.len() {
-                                booleans.resize(plot_id + 1, Default::default());
-                            };
-                            let mut plot = booleans.get_mut(plot_id).unwrap();
-                            Table::next_row();
-                            plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
-                        }
-                    }
-                });
-            });
-        });
-
-        // Integers
-        TabItem::new(im_str!("Integers")).build(ui, || {
-            // Filter
-            if self.draw_edit_string("Filter", int_filter) {
-                *int_db = plot_db
-                    .integers
-                    .iter()
-                    .filter_map(|(k, v)| {
-                        if v.to_lowercase().contains(&int_filter.to_str().to_lowercase())
-                            || k.to_string().contains(int_filter.to_str())
-                        {
-                            Some((*k, v.clone()))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect()
-            }
-            ui.separator();
-
-            // Table
-            if int_db.is_empty() {
-                return;
-            }
-            ChildWindow::new(im_str!("scroll")).build(ui, || {
-                Table::new(im_str!("plot-table"), 1).build(ui, || {
-                    let mut clipper = ListClipper::new(int_db.len() as i32).begin(ui);
-                    while clipper.step() {
-                        for i in clipper.display_start()..clipper.display_end() {
-                            let (&plot_id, plot_label) = int_db.get_index(i as usize).unwrap();
-                            let plot = integers.entry(plot_id as i32).or_default();
-                            Table::next_row();
-                            plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
-                        }
-                    }
-                });
-            });
-        });
-
-        // Floats
-        TabItem::new(im_str!("Floats")).build(ui, || {
-            // Filter
-            if self.draw_edit_string("Filter", float_filter) {
-                *float_db = plot_db
-                    .floats
-                    .iter()
-                    .filter_map(|(k, v)| {
-                        if v.to_lowercase().contains(&float_filter.to_str().to_lowercase())
-                            || k.to_string().contains(float_filter.to_str())
-                        {
-                            Some((*k, v.clone()))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect()
-            }
-            ui.separator();
-
-            // Table
-            if float_db.is_empty() {
-                return;
-            }
-            ChildWindow::new(im_str!("scroll")).build(ui, || {
-                Table::new(im_str!("plot-table"), 1).build(ui, || {
-                    let mut clipper = ListClipper::new(float_db.len() as i32).begin(ui);
-                    while clipper.step() {
-                        for i in clipper.display_start()..clipper.display_end() {
-                            let (&plot_id, plot_label) = float_db.get_index(i as usize).unwrap();
-                            let plot = floats.entry(plot_id as i32).or_default();
-                            Table::next_row();
-                            plot.draw_raw_ui(self, &format!("{} - {}", plot_id, plot_label));
-                        }
-                    }
-                });
-            });
-        });
-        Some(())
     }
 }

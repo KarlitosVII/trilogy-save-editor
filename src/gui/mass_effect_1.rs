@@ -6,6 +6,7 @@ use std::{
 
 use crate::{
     databases::Database,
+    gui::shared::PlotType,
     save_data::{
         mass_effect_1::{
             data::{ArrayType, Data, Property, StructType},
@@ -13,7 +14,7 @@ use crate::{
             plot_db::Me1PlotDb,
             Me1SaveGame,
         },
-        shared::plot::Me1PlotTable,
+        shared::plot::{BoolVec, Me1PlotTable},
         ImguiString, List, RawUi,
     },
 };
@@ -47,7 +48,8 @@ impl<'ui> Gui<'ui> {
 
         // Plot
         TabItem::new(im_str!("Plot")).build(ui, || {
-            self.draw_me1_plot_db(&mut save_game.state.plot);
+            let Me1PlotTable { booleans, integers, .. } = &mut save_game.state.plot;
+            self.draw_me1_plot(booleans, integers);
         });
 
         // Raw
@@ -64,7 +66,13 @@ impl<'ui> Gui<'ui> {
         TabItem::new(im_str!("Raw Plot")).build(ui, || {
             if let Some(plot_db) = Database::me1_raw_plot() {
                 let Me1PlotTable { booleans, integers, floats } = &mut save_game.state.plot;
-                self.draw_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+                self.draw_raw_plot(
+                    booleans,
+                    PlotType::Vec(integers),
+                    PlotType::Vec(floats),
+                    plot_db,
+                    plot_filter,
+                );
             }
         });
         Some(())
@@ -389,7 +397,7 @@ impl<'ui> Gui<'ui> {
         })
     }
 
-    pub fn draw_me1_plot_db(&self, me1_plot_table: &mut Me1PlotTable) -> Option<()> {
+    pub fn draw_me1_plot(&self, booleans: &mut BoolVec, integers: &mut Vec<i32>) -> Option<()> {
         let ui = self.ui;
         let Me1PlotDb { player_crew, missions } = Database::me1_plot()?;
 
@@ -404,8 +412,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            let Me1PlotTable { booleans, integers, .. } = me1_plot_table;
-                            self.draw_plot_category(booleans, integers, plot_db);
+                            self.draw_plot_category(booleans, PlotType::Vec(integers), plot_db);
                         });
                     });
                 }

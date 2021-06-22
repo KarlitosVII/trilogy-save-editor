@@ -3,6 +3,7 @@ use imgui::{im_str, ComboBox, ImStr, ImString, Selectable, TabBar, TabItem};
 use crate::{
     databases::Database,
     event_handler::MainEvent,
+    gui::shared::PlotType,
     save_data::{
         mass_effect_2::{
             player::{Player, Power},
@@ -45,7 +46,7 @@ impl<'ui> Gui<'ui> {
         // Plot
         TabItem::new(im_str!("Plot")).build(ui, || {
             TabBar::new(im_str!("plot-tab")).build(ui, || {
-                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
+                self.draw_me2_plot(&mut save_game.plot, &mut save_game.me1_plot);
             });
         });
 
@@ -67,7 +68,13 @@ impl<'ui> Gui<'ui> {
         TabItem::new(im_str!("Raw Plot")).build(ui, || {
             if let Some(plot_db) = Database::me2_raw_plot() {
                 let PlotTable { booleans, integers, floats, .. } = &mut save_game.plot;
-                self.draw_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+                self.draw_raw_plot(
+                    booleans,
+                    PlotType::Vec(integers),
+                    PlotType::Vec(floats),
+                    plot_db,
+                    plot_filter,
+                );
             }
         });
         Some(())
@@ -89,7 +96,7 @@ impl<'ui> Gui<'ui> {
         // Plot
         TabItem::new(im_str!("Plot")).build(ui, || {
             TabBar::new(im_str!("plot-tab")).build(ui, || {
-                self.draw_me2_plot_db(&mut save_game.plot, &mut save_game.me1_plot);
+                self.draw_me2_plot(&mut save_game.plot, &mut save_game.me1_plot);
             });
         });
 
@@ -108,7 +115,13 @@ impl<'ui> Gui<'ui> {
         TabItem::new(im_str!("Raw Plot")).build(ui, || {
             if let Some(plot_db) = Database::me2_raw_plot() {
                 let PlotTable { booleans, integers, floats, .. } = &mut save_game.plot;
-                self.draw_raw_plot(booleans, integers, floats, plot_db, plot_filter);
+                self.draw_raw_plot(
+                    booleans,
+                    PlotType::Vec(integers),
+                    PlotType::Vec(floats),
+                    plot_db,
+                    plot_filter,
+                );
             }
         });
         Some(())
@@ -516,7 +529,7 @@ impl<'ui> Gui<'ui> {
         Some(())
     }
 
-    fn draw_me2_plot_db(
+    fn draw_me2_plot(
         &self, me2_plot_table: &mut PlotTable, me1_plot_table: &mut Me1PlotTable,
     ) -> Option<()> {
         let ui = self.ui;
@@ -537,7 +550,7 @@ impl<'ui> Gui<'ui> {
         // Player
         TabScroll::new(im_str!("Player")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_plot_category(booleans, integers, player);
+                self.draw_plot_category(booleans, PlotType::Vec(integers), player);
             });
         });
 
@@ -555,7 +568,7 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_plot_category(booleans, integers, plot_db);
+                            self.draw_plot_category(booleans, PlotType::Vec(integers), plot_db);
                         });
                     });
                 }
@@ -565,14 +578,14 @@ impl<'ui> Gui<'ui> {
         // Rewards
         TabScroll::new(im_str!("Rewards")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_plot_category(booleans, integers, rewards);
+                self.draw_plot_category(booleans, PlotType::Vec(integers), rewards);
             });
         });
 
         // Captain's cabin
         TabScroll::new(im_str!("Captain's cabin")).build(ui, || {
             Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_plot_category(booleans, integers, captains_cabin);
+                self.draw_plot_category(booleans, PlotType::Vec(integers), captains_cabin);
             });
         });
 
@@ -593,14 +606,15 @@ impl<'ui> Gui<'ui> {
                     Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                         Table::next_row();
                         TreeNode::new(category_name).build(ui, || {
-                            self.draw_plot_category(booleans, integers, plot_db);
+                            self.draw_plot_category(booleans, PlotType::Vec(integers), plot_db);
                         });
                     });
                 }
             });
 
             TabItem::new(im_str!("Mass Effect 1")).build(ui, ||  {
-                if me1_plot_table.booleans.is_empty() {
+                let Me1PlotTable { booleans, integers, .. } = me1_plot_table;
+                if booleans.is_empty() {
                     ui.text("You cannot edit ME1 plot if you have not imported a ME1 save.");
                 } else {
                     ui.text(
@@ -609,7 +623,7 @@ impl<'ui> Gui<'ui> {
                     ui.same_line();
                     self.draw_help_marker("You have to change your end game state to `LiveToFightAgain` then import it to start a new game.\nOr you can start a New Game +.");
                     ui.separator();
-                    self.draw_me1_plot_db(me1_plot_table);
+                    self.draw_me1_plot(booleans, integers);
                 }
             });
         }
