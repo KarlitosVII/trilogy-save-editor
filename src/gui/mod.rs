@@ -114,6 +114,9 @@ pub fn run(event_addr: Sender<MainEvent>, rx: Receiver<UiEvent>, args: ArgMatche
                     Some(SaveGame::MassEffect1Le { save_game, .. }) => {
                         save_game.save_data.player.head_morph = head_morph
                     }
+                    Some(SaveGame::MassEffect1LePs4 { save_game, .. }) => {
+                        save_game.player.head_morph = head_morph
+                    }
                     Some(SaveGame::MassEffect2 { save_game, .. }) => {
                         save_game.player.appearance.head_morph = head_morph
                     }
@@ -160,10 +163,12 @@ impl<'ui> Gui<'ui> {
         // Pop on drop
         let _colors = self.style_colors(match state.save_game {
             None => Theme::MassEffect3,
-            Some(SaveGame::MassEffect1 { .. }) | Some(SaveGame::MassEffect1Le { .. }) => {
-                Theme::MassEffect1
-            }
-            Some(SaveGame::MassEffect2 { .. }) | Some(SaveGame::MassEffect2Le { .. }) => {
+            Some(
+                SaveGame::MassEffect1 { .. }
+                | SaveGame::MassEffect1Le { .. }
+                | SaveGame::MassEffect1LePs4 { .. },
+            ) => Theme::MassEffect1,
+            Some(SaveGame::MassEffect2 { .. } | SaveGame::MassEffect2Le { .. }) => {
                 Theme::MassEffect2
             }
             Some(SaveGame::MassEffect3 { .. }) => Theme::MassEffect3,
@@ -185,6 +190,7 @@ impl<'ui> Gui<'ui> {
                         let file_path = match save_game {
                             SaveGame::MassEffect1 { file_path, .. }
                             | SaveGame::MassEffect1Le { file_path, .. }
+                            | SaveGame::MassEffect1LePs4 { file_path, .. }
                             | SaveGame::MassEffect2 { file_path, .. }
                             | SaveGame::MassEffect2Le { file_path, .. }
                             | SaveGame::MassEffect3 { file_path, .. } => file_path,
@@ -211,6 +217,9 @@ impl<'ui> Gui<'ui> {
                 }
                 Some(SaveGame::MassEffect1Le { save_game, .. }) => {
                     self.draw_mass_effect_1_le(&mut save_game.save_data, &mut state.plot_filter)
+                }
+                Some(SaveGame::MassEffect1LePs4 { save_game, .. }) => {
+                    self.draw_mass_effect_1_le(save_game, &mut state.plot_filter)
                 }
                 Some(SaveGame::MassEffect2 { save_game, .. }) => {
                     self.draw_mass_effect_2(save_game, &mut state.plot_filter)
@@ -263,8 +272,8 @@ impl<'ui> Gui<'ui> {
             "",
             &dir.to_string_lossy(),
             Some((
-                &["*.pcsav", "*.MassEffectSave"],
-                "Mass Effect Trilogy Save (*.pcsav, *.MassEffectSave)",
+                &["*.pcsav", "*.ps4sav", "*.MassEffectSave"],
+                "Mass Effect Trilogy Save (*.pcsav, *.ps4sav, *.MassEffectSave)",
             )),
         );
 
@@ -274,23 +283,26 @@ impl<'ui> Gui<'ui> {
     }
 
     fn save_dialog(&self, save_game: &SaveGame) {
-        let (file_path, description, extension) = match save_game {
+        let (file_path, extensions, description): (_, &[_], _) = match save_game {
             SaveGame::MassEffect1 { file_path, .. } => {
-                (file_path, "Mass Effect 1 Save (*.MassEffectSave)", "*.MassEffectSave")
+                (file_path, &["*.MassEffectSave"], "Mass Effect 1 Save (*.MassEffectSave)")
             }
             SaveGame::MassEffect1Le { file_path, .. } => {
-                (file_path, "Mass Effect 1 Legendary Save (*.pcsav)", "*.pcsav")
+                (file_path, &["*.pcsav"], "Mass Effect 1 Legendary Save (*.pcsav)")
+            }
+            SaveGame::MassEffect1LePs4 { file_path, .. } => {
+                (file_path, &["*.ps4sav"], "Mass Effect 1 Legendary Save (*.ps4sav)")
             }
             SaveGame::MassEffect2 { file_path, .. } | SaveGame::MassEffect2Le { file_path, .. } => {
-                (file_path, "Mass Effect 2 Save (*.pcsav)", "*.pcsav")
+                (file_path, &["*.pcsav", "*.ps4sav"], "Mass Effect 2 Save (*.pcsav, *.ps4sav)")
             }
             SaveGame::MassEffect3 { file_path, .. } => {
-                (file_path, "Mass Effect 3 Save (*.pcsav)", "*.pcsav")
+                (file_path, &["*.pcsav", "*.ps4sav"], "Mass Effect 3 Save (*.pcsav, *.ps4sav)")
             }
         };
 
         let file =
-            tinyfiledialogs::save_file_dialog_with_filter("", file_path, &[extension], description);
+            tinyfiledialogs::save_file_dialog_with_filter("", file_path, extensions, description);
 
         if let Some(path) = file {
             let _ = self.event_addr.send(MainEvent::SaveSave(path, save_game.clone()));

@@ -9,7 +9,7 @@ use crate::{
     gui::UiEvent,
     save_data::{
         mass_effect_1::Me1SaveGame,
-        mass_effect_1_le::Me1LeSaveGame,
+        mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
         mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
         mass_effect_3::{Me3SaveGame, Me3Version},
         shared::appearance::HeadMorph,
@@ -28,6 +28,7 @@ pub enum MainEvent {
 pub enum SaveGame {
     MassEffect1 { file_path: String, save_game: Box<Me1SaveGame> },
     MassEffect1Le { file_path: String, save_game: Box<Me1LeSaveGame> },
+    MassEffect1LePs4 { file_path: String, save_game: Box<Me1LeSaveData> },
     MassEffect2 { file_path: String, save_game: Box<Me2SaveGame> },
     MassEffect2Le { file_path: String, save_game: Box<Me2LeSaveGame> },
     MassEffect3 { file_path: String, save_game: Box<Me3SaveGame> },
@@ -85,7 +86,14 @@ async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
             save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
         }
     } else if let Some(ext) = Path::new(&file_path).extension() {
-        if unicase::eq(ext.to_string_lossy().into_owned().as_str(), "MassEffectSave") {
+        let ext = ext.to_string_lossy().into_owned();
+        if unicase::eq(ext.as_str(), "ps4sav") {
+            // ME1LE PS4
+            SaveGame::MassEffect1LePs4 {
+                file_path,
+                save_game: Box::new(unreal::Deserializer::from_bytes(&input)?),
+            }
+        } else if unicase::eq(ext.as_str(), "MassEffectSave") {
             // ME1
             SaveGame::MassEffect1 {
                 file_path,
@@ -118,6 +126,9 @@ async fn save_save(path: String, save_game: SaveGame, ui_addr: Sender<UiEvent>) 
             let end = checksum_offset + 4;
             output[checksum_offset..end].swap_with_slice(&mut u32::to_le_bytes(checksum));
             output
+        }
+        SaveGame::MassEffect1LePs4 { save_game, .. } => {
+            unreal::Serializer::to_byte_buf(&save_game)?
         }
         SaveGame::MassEffect2 { save_game, .. } => {
             let mut output = unreal::Serializer::to_byte_buf(&save_game)?;

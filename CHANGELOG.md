@@ -1,4 +1,4 @@
-## Unreleased
+## 1.13.0
 - PS4 saves support
 - Updated ME1 raw plot database
 - Fix ME1 plots through ME1 raw database

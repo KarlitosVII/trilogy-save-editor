@@ -29,6 +29,7 @@ pub async fn compare(
                     let opened_path = match save_game {
                         SaveGame::MassEffect1 { ref file_path, .. }
                         | SaveGame::MassEffect1Le { ref file_path, .. }
+                        | SaveGame::MassEffect1LePs4 { ref file_path, .. }
                         | SaveGame::MassEffect2 { ref file_path, .. }
                         | SaveGame::MassEffect2Le { ref file_path, .. }
                         | SaveGame::MassEffect3 { ref file_path, .. } => file_path,
@@ -160,6 +161,14 @@ fn get_plot_from_save_game(
         }
         SaveGame::MassEffect1Le { save_game, .. } => {
             let plot = save_game.save_data.plot;
+            (
+                plot.booleans,
+                plot.integers.into_iter().enumerate().map(|(k, v)| (k as i32, v)).collect(),
+                plot.floats.into_iter().enumerate().map(|(k, v)| (k as i32, v)).collect(),
+            )
+        }
+        SaveGame::MassEffect1LePs4 { save_game, .. } => {
+            let plot = save_game.plot;
             (
                 plot.booleans,
                 plot.integers.into_iter().enumerate().map(|(k, v)| (k as i32, v)).collect(),
