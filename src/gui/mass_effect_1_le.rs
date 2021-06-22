@@ -115,6 +115,11 @@ impl<'ui> Gui<'ui> {
                 let mut gender = *is_female as usize;
                 if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
                     *is_female = gender != 0;
+
+                    // Plot
+                    if let Some(mut is_female) = plot.booleans.get_mut(4639) {
+                        *is_female = gender != 0;
+                    }
                 }
 
                 ui.same_line();

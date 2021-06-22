@@ -191,7 +191,10 @@ impl<'ui> Gui<'ui> {
                     *is_female = gender != 0;
 
                     // Plot
-                    // FIXME: ME1
+                    // ME1
+                    if let Some(mut is_female) = me1_plot.booleans.get_mut(4639) {
+                        *is_female = gender != 0;
+                    }
                     // ME2
                     if let Some(mut is_female) = plot.booleans.get_mut(66) {
                         *is_female = gender != 0;
@@ -594,12 +597,12 @@ impl<'ui> Gui<'ui> {
             let _colors = self.style_colors(Theme::MassEffect1);
 
             TabScroll::new(im_str!("Imported ME1")).build(ui, || {
-                ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner bugfix :");
+                ui.text("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix :");
                 ui.same_line();
                 self.draw_help_marker(
                     "- Untick `[The Fan] Intimidated him`\n\
-                        - Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
-                        - Only works if you didn't talk to Aethyta",
+                    - Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
+                    - Only works if you didn't talk to Aethyta",
                 );
                 ui.separator();
                 for (category_name, plot_db) in imported_me1.iter() {

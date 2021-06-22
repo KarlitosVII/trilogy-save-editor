@@ -1,6 +1,7 @@
 ## Unreleased
 - PS4 saves support
 - Updated ME1 raw plot database
+- Fix ME1 plots through ME1 raw database
 - Thanks again to Bioware for the quick update of their plot databases
 
 ## 1.12.1
