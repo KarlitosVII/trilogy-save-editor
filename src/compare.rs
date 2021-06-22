@@ -104,7 +104,8 @@ pub async fn compare(
         let src = *src_floats.entry(k).or_default();
         let cmp = *cmp_floats.entry(k).or_default();
 
-        if src != cmp {
+        // src != cmp
+        if (src - cmp).abs() > f32::EPSILON {
             floats.insert(k, FloatDifference { src, cmp });
         }
     }
