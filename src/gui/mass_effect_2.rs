@@ -185,9 +185,9 @@ impl<'ui> Gui<'ui> {
 
                 // Gender
                 Table::next_row();
-                const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
+                const GENDER_LIST: &[&ImStr] = &[im_str!("Male"), im_str!("Female")];
                 let mut gender = *is_female as usize;
-                if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
+                if self.draw_edit_enum("Gender", &mut gender, GENDER_LIST) {
                     *is_female = gender != 0;
 
                     // Plot
@@ -209,10 +209,10 @@ impl<'ui> Gui<'ui> {
 
                 // Origin
                 Table::next_row();
-                const ORIGIN_LIST: [&ImStr; 4] =
-                    [im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
+                const ORIGIN_LIST: &[&ImStr] =
+                    &[im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
                 let mut origin_idx = origin.clone() as usize;
-                if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                if self.draw_edit_enum("Origin", &mut origin_idx, ORIGIN_LIST) {
                     // Enum
                     *origin = match origin_idx {
                         0 => Origin::None,
@@ -268,7 +268,7 @@ impl<'ui> Gui<'ui> {
 
                 // Notoriety
                 Table::next_row();
-                const NOTORIETY_LIST: [&ImStr; 4] = [
+                const NOTORIETY_LIST: &[&ImStr] = &[
                     im_str!("None"),
                     im_str!("Survivor"),
                     im_str!("War Hero"),
@@ -426,7 +426,7 @@ impl<'ui> Gui<'ui> {
     fn draw_me2_class(&self, class_name: &mut ImString) {
         let ui = self.ui;
 
-        const CLASS_LIST: [(&ImStr, &ImStr); 6] = [
+        const CLASS_LIST: &[(&ImStr, &ImStr)] = &[
             (im_str!("SFXGame.SFXPawn_PlayerAdept"), im_str!("Adept")),
             (im_str!("SFXGame.SFXPawn_PlayerEngineer"), im_str!("Engineer")),
             (im_str!("SFXGame.SFXPawn_PlayerInfiltrator"), im_str!("Infiltrator")),
@@ -446,7 +446,7 @@ impl<'ui> Gui<'ui> {
             if ComboBox::new(im_str!("Class")).build_simple(
                 self.ui,
                 &mut class_id,
-                &CLASS_LIST,
+                CLASS_LIST,
                 &|&(_, name)| name.into(),
             ) {
                 *class_name = CLASS_LIST[class_id].0.to_owned();
@@ -475,7 +475,7 @@ impl<'ui> Gui<'ui> {
             At level 30 you have `51` points to spend.",
         );
 
-        const POWER_LIST: [(&ImStr, &ImStr); 14] = [
+        const POWER_LIST: &[(&ImStr, &ImStr)] = &[
             (im_str!("SFXGameContent_Powers.SFXPower_Crush_Player"), im_str!("Slam")),
             (im_str!("SFXGameContent_Powers.SFXPower_Barrier_Player"), im_str!("Barrier")),
             (im_str!("SFXGameContent_Powers.SFXPower_WarpAmmo_Player"), im_str!("Warp Ammo")),
@@ -510,7 +510,7 @@ impl<'ui> Gui<'ui> {
             (im_str!("SFXGameContentLiara.SFXPower_StasisNew"), im_str!("Stasis")),
         ];
 
-        for &(power_class_name, power_name) in &POWER_LIST {
+        for &(power_class_name, power_name) in POWER_LIST {
             let mut selected = powers
                 .iter()
                 .any(|power| unicase::eq(power.power_class_name.as_ref(), power_class_name));

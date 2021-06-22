@@ -232,7 +232,7 @@ impl<'ui> Gui<'ui> {
                     Self::me1_find_int_property(player, m_game_options, "m_nCombatDifficulty")
                 {
                     Table::next_row();
-                    const DIFFICULTY_LIST: [&ImStr; 5] = [
+                    const DIFFICULTY_LIST: &[&ImStr] = &[
                         im_str!("Casual"),
                         im_str!("Normal"),
                         im_str!("Veteran"),
@@ -241,7 +241,7 @@ impl<'ui> Gui<'ui> {
                     ];
 
                     let mut index = *difficulty as usize;
-                    if self.draw_edit_enum("Difficulty", &mut index, &DIFFICULTY_LIST) {
+                    if self.draw_edit_enum("Difficulty", &mut index, DIFFICULTY_LIST) {
                         *difficulty = index as i32;
                     }
                 }

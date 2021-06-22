@@ -111,9 +111,9 @@ impl<'ui> Gui<'ui> {
 
                 // Gender
                 Table::next_row();
-                const GENDER_LIST: [&ImStr; 2] = [im_str!("Male"), im_str!("Female")];
+                const GENDER_LIST: &[&ImStr] = &[im_str!("Male"), im_str!("Female")];
                 let mut gender = *is_female as usize;
-                if self.draw_edit_enum("Gender", &mut gender, &GENDER_LIST) {
+                if self.draw_edit_enum("Gender", &mut gender, GENDER_LIST) {
                     *is_female = gender != 0;
 
                     // Plot
@@ -130,10 +130,10 @@ impl<'ui> Gui<'ui> {
 
                 // Origin
                 Table::next_row();
-                const ORIGIN_LIST: [&ImStr; 4] =
-                    [im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
+                const ORIGIN_LIST: &[&ImStr] =
+                    &[im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
                 let mut origin_idx = origin.clone() as usize;
-                if self.draw_edit_enum("Origin", &mut origin_idx, &ORIGIN_LIST) {
+                if self.draw_edit_enum("Origin", &mut origin_idx, ORIGIN_LIST) {
                     // Enum
                     *origin = match origin_idx {
                         0 => Origin::None,
@@ -151,14 +151,14 @@ impl<'ui> Gui<'ui> {
 
                 // Notoriety
                 Table::next_row();
-                const NOTORIETY_LIST: [&ImStr; 4] = [
+                const NOTORIETY_LIST: &[&ImStr] = &[
                     im_str!("None"),
                     im_str!("Survivor"),
                     im_str!("War Hero"),
                     im_str!("Ruthless"),
                 ];
                 let mut notoriety_idx = notoriety.clone() as usize;
-                if self.draw_edit_enum("Notoriety", &mut notoriety_idx, &NOTORIETY_LIST) {
+                if self.draw_edit_enum("Notoriety", &mut notoriety_idx, NOTORIETY_LIST) {
                     // Enum
                     *notoriety = match notoriety_idx {
                         0 => Notoriety::None,
@@ -227,7 +227,7 @@ impl<'ui> Gui<'ui> {
             TreeNode::new("General").build(ui, || {
                 Table::next_row();
                 if let Some(difficulty) = game_options.get_mut(0) {
-                    const DIFFICULTY_LIST: [&ImStr; 5] = [
+                    const DIFFICULTY_LIST: &[&ImStr] = &[
                         im_str!("Casual"),
                         im_str!("Normal"),
                         im_str!("Veteran"),
@@ -235,7 +235,7 @@ impl<'ui> Gui<'ui> {
                         im_str!("Insanity"),
                     ];
                     let mut difficulty_idx = *difficulty as usize;
-                    if self.draw_edit_enum("Difficulty", &mut difficulty_idx, &DIFFICULTY_LIST) {
+                    if self.draw_edit_enum("Difficulty", &mut difficulty_idx, DIFFICULTY_LIST) {
                         *difficulty = difficulty_idx as i32;
                     }
                 }
@@ -441,7 +441,7 @@ impl<'ui> Gui<'ui> {
 
         // Item level
         let mut item_level_idx = current_item.item_level.clone() as usize;
-        const ITEM_LEVEL_LIST: [&ImStr; 11] = [
+        const ITEM_LEVEL_LIST: &[&ImStr] = &[
             im_str!("None"),
             im_str!("I"),
             im_str!("II"),
@@ -458,7 +458,7 @@ impl<'ui> Gui<'ui> {
         if ComboBox::new(&im_str!("##item-level-{}", ident)).build_simple_string(
             ui,
             &mut item_level_idx,
-            &ITEM_LEVEL_LIST,
+            ITEM_LEVEL_LIST,
         ) {
             // Enum
             current_item.item_level = match item_level_idx {
