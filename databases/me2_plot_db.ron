@@ -206,7 +206,7 @@ Me2PlotDb(
                 3660: "[Rejected] Garrus",
             },
             integers: {
-                270: "Garrus progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                270: "Garrus progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Jack": PlotCategory(
@@ -216,7 +216,7 @@ Me2PlotDb(
                 3270: "[Rejected] Jack",
             },
             integers: {
-                213: "Jack progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                213: "Jack progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Jacob": PlotCategory(
@@ -226,7 +226,7 @@ Me2PlotDb(
                 3472: "[Rejected] Jacob",
             },
             integers: {
-                267: "Jacob progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                267: "Jacob progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Miranda": PlotCategory(
@@ -237,7 +237,7 @@ Me2PlotDb(
                 3304: "[Rejected] Miranda",
             },
             integers: {
-                266: "Miranda progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                266: "Miranda progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Samara": PlotCategory(
@@ -245,7 +245,7 @@ Me2PlotDb(
                 5751: "Encouraged romance",
             },
             integers: {
-                275: "Samara progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                275: "Samara progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Tali": PlotCategory(
@@ -255,7 +255,7 @@ Me2PlotDb(
                 3307: "[Rejected] Tali",
             },
             integers: {
-                272: "Tali progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                272: "Tali progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Thane": PlotCategory(
@@ -265,7 +265,7 @@ Me2PlotDb(
                 3310: "[Rejected] Thane",
             },
             integers: {
-                271: "Thane progress (1-4 = friends, 5 = romance, 6 = broke up)",
+                271: "Thane progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
         "Liara": PlotCategory(
@@ -473,6 +473,8 @@ Me2PlotDb(
         "Miranda": PlotCategory(
             booleans: {
                 1496: "[The Prodigal] Mission completed",
+                1288: "[The Prodigal] Saved Oriana",
+                1791: "[The Prodigal] Miranda talked Oriana",
                 1577: "[Conflict with Jack] Sided with Miranda",
                 1578: "[Conflict with Jack] Sided with Jack",
                 1579: "[Conflict with Jack] Kept the peace",
@@ -500,8 +502,8 @@ Me2PlotDb(
         "Thane": PlotCategory(
             booleans: {
                 1502: "[Sins of the Father] Mission completed",
-                3313: "[Sins of the Father] Failed mission",
                 3426: "[Sins of the Father] Thane reunited with Kolyat",
+                3313: "[Sins of the Father] Failed mission",
             },
             integers: {},
         ),
@@ -565,6 +567,46 @@ Me2PlotDb(
                 461: "[Heavy Weapon] M-622 Avalanch",
                 496: "[Heavy Weapon] M-920 Cain",
                 851: "[Heavy Weapon] M-490 Blackstorm",
+            },
+        ),
+        "Armors": PlotCategory(
+            booleans: {
+                7562: "[Full Body] Cerberus armor discovered",
+                7585: "[Full Body] Cerberus armor unlocked",
+                7567: "[Full Body] Inferno armor discovered",
+                7587: "[Full Body] Inferno armor unlocked",
+                7578: "[Full Body] Collector armor discovered",
+                7588: "[Full Body] Collector armor unlocked",
+                7590: "[Full Body] Terminus armor",
+                7592: "[Full Body] Blood Dragon armor",
+                7596: "[Parts] Kestrel Helmet",
+                7597: "[Parts] Kestrel Chest",
+                7598: "[Parts] Kestrel Shoulders",
+                7599: "[Parts] Kestrel Arms",
+                7600: "[Parts] Kestrel Legs",
+                4433: "[Helmet] Kuwashii Visor",
+                4450: "[Helmet] Death Mask",
+                7591: "[Helmet] Capacitor",
+                7593: "[Helmet] Sentry Interface",
+                7594: "[Helmet] Umbra Visor",
+                7595: "[Helmet] Archon Visor",
+                4271: "[Chest] Aegis Vest",
+                4438: "[Chest] Capacitor Chestplate",
+                4453: "[Chest] Shield Harness",
+                4423: "[Shoulders] Amplifier Plates",
+                4451: "[Shoulders] Asymmetric Defense Layer",
+                4437: "[Shoulders] Strength Boost Pads",
+                4449: "[Arms] Heavy Damping Gauntlets",
+                4269: "[Arms] Off-Hand Ammo Pack",
+                4435: "[Arms] Stabilization Gauntlets",
+                4436: "[Legs] Stimulator Conduits",
+                4270: "[Legs] Life Support Webbing",
+                4434: "[Legs] Ordnance Packs",
+            },
+            integers: {
+                846: "[Full Body] Inferno armor",
+                848: "[Full Body] Cerberus armor",
+                849: "[Full Body] Collector armor",
             },
         ),
         "Assault Rifle": PlotCategory(
@@ -738,7 +780,7 @@ Me2PlotDb(
                 467: "Heavy Muscle Weave upgrade",
             },
         ),
-        "Squadmate": PlotCategory(
+        "Squadmates": PlotCategory(
             booleans: {
                 6042: "[Grunt] Krogan Vitality discovered",
                 6054: "[Grunt] Krogan Vitality unlocked",

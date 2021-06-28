@@ -1,4 +1,5 @@
 ## Unreleased
+- ME2: Added all armors plots
 - Merged ME1 plot db into ME3's
 
 ## 1.13.0

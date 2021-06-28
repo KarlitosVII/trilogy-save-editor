@@ -143,8 +143,8 @@ Me1PlotDb(
                 5015: "[Hostile Takeover] Persuaded criminal to disband gang",
                 5038: "[Dead Scientists] Convinced Corporal Toombs",
                 5039: "[Dead Scientists] Killed scientist",
-                4904: "[Major Kyle] Kyle surrendered",
-                4903: "[Major Kyle] Fought Kyle",
+                4903: "[Major Kyle] Kyle surrendered",
+                4904: "[Major Kyle] Fought Kyle",
             },
             integers: {
                 48: "[Valuable Minerals] Light Metals",
