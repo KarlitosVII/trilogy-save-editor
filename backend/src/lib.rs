@@ -4,10 +4,7 @@ use imgui::{
 };
 use imgui_wgpu::{Renderer, RendererConfig};
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
-use std::{
-    panic,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 use tokio::{runtime::Handle, time};
 use wgpu::{Device, Queue, Surface, SwapChain};
 use winit::{
@@ -57,7 +54,7 @@ pub fn init(title: &str, width: f64, height: f64, backend: Backend) -> System {
 
     #[cfg(target_os = "windows")]
     {
-        panic::catch_unwind(|| init_with_backend(title, width, height, backend)).unwrap_or_else(
+        std::panic::catch_unwind(|| init_with_backend(title, width, height, backend)).unwrap_or_else(
             |_| {
                 eprintln!("Fallback to DirectX 11");
                 eprintln!("If it works for you, you can ignore this error or run TSE with --dx11 argument");
@@ -92,10 +89,11 @@ fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::Backen
             power_preference: wgpu::PowerPreference::HighPerformance,
             compatible_surface: Some(&surface),
         }))
-        .unwrap();
+        .expect("Failed to find an appropriate adapter");
 
-    let (device, queue) =
-        rt.block_on(adapter.request_device(&wgpu::DeviceDescriptor::default(), None)).unwrap();
+    let (device, queue) = rt
+        .block_on(adapter.request_device(&wgpu::DeviceDescriptor::default(), None))
+        .expect("Failed to create device");
 
     // Set up swap chain
     let size = window.inner_size();
@@ -121,8 +119,9 @@ fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::Backen
     let mut platform = WinitPlatform::init(&mut imgui);
     platform.attach_window(imgui.io_mut(), &window, HiDpiMode::Default);
 
-    let hidpi_factor = platform.hidpi_factor();
+    let hidpi_factor = window.scale_factor();
     let font_size = (13.0 * hidpi_factor) as f32;
+    imgui.io_mut().font_global_scale = (1.0 / hidpi_factor) as f32;
 
     const FONT: &[u8] = include_bytes!("mplus-1p-regular.ttf");
     imgui.fonts().add_font(&[
@@ -147,8 +146,6 @@ fn init_with_backend(title: &str, width: f64, height: f64, backend: wgpu::Backen
         },
     ]);
 
-    imgui.io_mut().font_global_scale = (1.0 / hidpi_factor) as f32;
-
     let renderer_config = RendererConfig { texture_format: sc_desc.format, ..Default::default() };
     let renderer = Renderer::new(&mut imgui, &device, &queue, renderer_config);
 
@@ -168,7 +165,7 @@ pub struct System {
 }
 
 impl System {
-    pub fn main_loop<F>(self, mut ui_builder: F)
+    pub fn main_loop<F>(self, mut render_ui: F)
     where
         F: FnMut(&mut bool, &mut Ui, &mut Option<String>) + 'static,
     {
@@ -221,7 +218,7 @@ impl System {
                     *control_flow = ControlFlow::Exit;
                 }
                 Event::WindowEvent { event: WindowEvent::DroppedFile(ref path), .. } => {
-                    dropped_file = Some(path.to_string_lossy().into());
+                    dropped_file = Some(path.to_string_lossy().into_owned());
                 }
                 Event::MainEventsCleared => window.request_redraw(),
                 Event::RedrawEventsCleared => {
@@ -257,7 +254,7 @@ impl System {
                         .expect("Failed to prepare frame");
 
                     let mut ui = imgui.frame();
-                    ui_builder(&mut run, &mut ui, &mut dropped_file);
+                    render_ui(&mut run, &mut ui, &mut dropped_file);
 
                     if !run {
                         *control_flow = ControlFlow::Exit;
