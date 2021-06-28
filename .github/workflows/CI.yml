@@ -42,6 +42,8 @@ jobs:
     - name: Install dependencies
       if: matrix.target == 'x86_64-unknown-linux-gnu'
       run: sudo apt install libxcb-shape0-dev libxcb-xfixes0-dev
+    - name: Check
+      run: cargo check --verbose
     - name: Build
       run: cargo build --verbose
     - name: Run tests
