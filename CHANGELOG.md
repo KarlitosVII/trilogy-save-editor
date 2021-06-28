@@ -1,3 +1,6 @@
+## Unreleased
+- Merged ME1 plot db into ME3's
+
 ## 1.13.0
 - PS4 saves support
 - Updated ME1 raw plot database
