@@ -6,14 +6,14 @@ use crate::save_data::shared::plot::PlotCategory;
 #[derive(Deserialize)]
 pub struct Me3PlotDb {
     pub general: PlotCategory,
-    pub appearances: IndexMap<String, PlotCategory>,
     pub crew: IndexMap<String, PlotCategory>,
     pub romance: IndexMap<String, PlotCategory>,
     pub missions: IndexMap<String, PlotCategory>,
     pub citadel_dlc: IndexMap<String, PlotCategory>,
     pub normandy: IndexMap<String, PlotCategory>,
-    pub intel: PlotCategory,
+    pub appearances: IndexMap<String, PlotCategory>,
     pub weapons_powers: IndexMap<String, PlotVariable>,
+    pub intel: PlotCategory,
 }
 
 #[derive(Deserialize)]

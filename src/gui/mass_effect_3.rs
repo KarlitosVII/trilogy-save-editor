@@ -15,7 +15,7 @@ use crate::{
         },
         shared::{
             player::{Notoriety, Origin},
-            plot::PlotCategory,
+            plot::{BoolVec, PlotCategory},
         },
         ImguiString, RawUi,
     },
@@ -510,14 +510,14 @@ impl<'ui> Gui<'ui> {
 
         let Me3PlotDb {
             general,
-            appearances,
             crew,
             romance,
             missions,
             citadel_dlc,
-            intel,
             normandy,
+            appearances,
             weapons_powers,
+            intel,
         } = Database::me3_plot()?;
         let PlotTable { booleans, integers, .. } = plot_table;
 
@@ -532,12 +532,12 @@ impl<'ui> Gui<'ui> {
         });
 
         let categories = [
-            (im_str!("Appearances"), appearances),
             (im_str!("Crew"), crew),
             (im_str!("Romance"), romance),
             (im_str!("Missions"), missions),
             (im_str!("Normandy"), normandy),
             (im_str!("Citadel DLC"), citadel_dlc),
+            (im_str!("Appearances"), appearances),
         ];
 
         for (title, plot_map) in &categories {
@@ -557,22 +557,22 @@ impl<'ui> Gui<'ui> {
             });
         }
 
-        TabScroll::new(im_str!("Intel")).build(ui, || {
-            Table::new(im_str!("plot-table"), 1).build(ui, || {
-                self.draw_plot_category(booleans, PlotType::IndexMap(integers), intel);
-            });
-        });
-
         // Weapons / Powers
         TabScroll::new(im_str!("Weapons / Powers")).build(ui, || {
             for (category_name, plot_db) in weapons_powers {
                 Table::new(&im_str!("{}-table", category_name), 1).build(ui, || {
                     Table::next_row();
                     TreeNode::new(category_name).build(ui, || {
-                        self.draw_me3_plot_variable(plot_table, player_variables, plot_db);
+                        self.draw_me3_plot_variable(booleans, player_variables, plot_db);
                     });
                 });
             }
+        });
+
+        TabScroll::new(im_str!("Intel")).build(ui, || {
+            Table::new(im_str!("plot-table"), 1).build(ui, || {
+                self.draw_plot_category(booleans, PlotType::IndexMap(integers), intel);
+            });
         });
 
         // Mass Effect 2
@@ -692,11 +692,10 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot_variable(
-        &self, plot_table: &mut PlotTable, variables: &mut IndexMap<ImguiString, i32>,
+        &self, booleans: &mut BoolVec, variables: &mut IndexMap<ImguiString, i32>,
         plot_db: &PlotVariable,
     ) {
         let ui = self.ui;
-        let PlotTable { booleans, .. } = plot_table;
         let PlotVariable { booleans: bool_db, variables: var_db } = plot_db;
 
         if bool_db.is_empty() && variables.is_empty() {
