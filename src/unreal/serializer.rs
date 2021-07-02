@@ -91,7 +91,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
             encoded.push(0);
 
             let mut bytes = Vec::new();
-            for doublebyte in encoded.drain(..) {
+            for doublebyte in encoded {
                 bytes.extend(&u16::to_le_bytes(doublebyte));
             }
 

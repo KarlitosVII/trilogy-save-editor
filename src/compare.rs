@@ -84,7 +84,7 @@ pub async fn compare(
     keys.sort_unstable();
     keys.dedup();
 
-    for &k in &keys {
+    for k in keys {
         let src = *src_ints.entry(k).or_default();
         let cmp = *cmp_ints.entry(k).or_default();
 
@@ -101,7 +101,7 @@ pub async fn compare(
     keys.sort_unstable();
     keys.dedup();
 
-    for &k in &keys {
+    for k in keys {
         let src = *src_floats.entry(k).or_default();
         let cmp = *cmp_floats.entry(k).or_default();
 

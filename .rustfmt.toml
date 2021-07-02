@@ -1,2 +1,3 @@
+newline_style = "Unix"
 fn_args_layout = "Compressed"
 use_small_heuristics = "Max"

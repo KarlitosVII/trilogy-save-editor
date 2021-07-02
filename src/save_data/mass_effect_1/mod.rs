@@ -178,7 +178,7 @@ mod test {
             "test/Char_01-60-3-2-2-26-6-2018-57-26.MassEffectSave", // Sans
         ];
 
-        for file in &files {
+        for file in files {
             let input = fs::read(file)?;
 
             let now = Instant::now();

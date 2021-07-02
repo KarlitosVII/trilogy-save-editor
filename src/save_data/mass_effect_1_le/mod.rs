@@ -313,7 +313,7 @@ mod test {
             "test/ME1Le_Export.pcsav",      // Export save game
         ];
 
-        for file in &files {
+        for file in files {
             let input = fs::read(file)?;
 
             let now = Instant::now();
