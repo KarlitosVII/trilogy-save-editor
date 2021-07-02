@@ -1,0 +1,72 @@
+# utils
+[tasks.fmt]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.clippy]
+install_crate = "clippy"
+command = "cargo"
+args = ["clippy", "--all"]
+dependencies = ["fmt"]
+
+[tasks.outdated]
+install_crate = "outdated"
+command = "cargo"
+args = ["outdated", "-wR"]
+dependencies = ["update"]
+
+# build
+[tasks.update]
+command = "cargo"
+args = ["update"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+dependencies = ["update"]
+
+[tasks.copy-databases]
+script_runner = "@duckscript"
+script = '''
+rm -r ./target/release/databases
+cp ./databases ./target/release
+'''
+
+[tasks.release]
+command = "cargo"
+args = ["build", "--release"]
+dependencies = ["copy-databases", "update"]
+
+# Cook
+[tasks.zip]
+script_runner = "@duckscript"
+script = '''
+cd ./target/release/
+
+project_name = set "${CARGO_MAKE_PROJECT_NAME}"
+dir = set "${project_name}"
+mkdir "${dir}"
+cp ./databases "./${dir}/"
+
+file = set ""
+if eq "${CARGO_MAKE_RUST_TARGET_OS}" "windows"
+	ext = set ".exe"
+end
+
+file_name = set "${project_name}${ext}"
+cp "./${file_name}" "./${dir}/${file_name}"
+
+exec 7z a "${CARGO_MAKE_WORKING_DIRECTORY}/${project_name}.zip" "${project_name}" -mx=7
+
+rm -r "./${dir}/"
+'''
+
+[tasks.cook]
+dependencies = [
+    "fmt",
+    "clippy",
+    "test",
+    "release",
+    "zip",
+]
