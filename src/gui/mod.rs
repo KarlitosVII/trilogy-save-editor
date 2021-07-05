@@ -402,29 +402,29 @@ impl<'ui> Gui<'ui> {
         let ui = self.ui;
         let theme = match game_theme {
             Theme::MassEffect1 => ColorTheme {
-                bg_color: [0.11, 0.32, 0.43, 1.0],
-                color: [0.16, 0.42, 0.58, 1.0],
-                active_color: [0.28, 0.55, 0.67, 1.0],
-                hover_color: [0.83, 0.43, 0.17, 1.0],
+                bg_color: [0.11, 0.32, 0.43, 1.0],     // #1C526E
+                color: [0.16, 0.42, 0.58, 1.0],        // #296B94
+                active_color: [0.28, 0.55, 0.67, 1.0], // #478CAB
+                hover_color: [0.83, 0.43, 0.17, 1.0],  // #D46E2B
             },
             Theme::MassEffect2 => ColorTheme {
-                bg_color: [0.64, 0.32, 0.12, 1.0],
-                color: [0.70, 0.37, 0.16, 1.0],
-                active_color: [0.85, 0.49, 0.25, 1.0],
-                hover_color: [0.22, 0.52, 0.23, 1.0],
+                bg_color: [0.64, 0.32, 0.12, 1.0],     // #A3521F
+                color: [0.70, 0.37, 0.16, 1.0],        // #B35E29
+                active_color: [0.85, 0.49, 0.25, 1.0], // #D97D40
+                hover_color: [0.22, 0.52, 0.23, 1.0],  // #38853B
             },
             Theme::MassEffect3 => ColorTheme {
-                bg_color: [0.40, 0.0, 0.0, 1.0],
-                color: [0.53, 0.0, 0.0, 1.0],
-                active_color: [0.70, 0.0, 0.0, 1.0],
-                hover_color: [0.02, 0.28, 0.43, 1.0],
+                bg_color: [0.40, 0.0, 0.0, 1.0],      // #660000
+                color: [0.53, 0.0, 0.0, 1.0],         // #870000
+                active_color: [0.70, 0.0, 0.0, 1.0],  // #B30000
+                hover_color: [0.02, 0.28, 0.43, 1.0], // #05476E
             },
         };
         [
-            ui.push_style_color(StyleColor::WindowBg, [0.05, 0.05, 0.05, 1.0]),
-            ui.push_style_color(StyleColor::Border, [0.20, 0.20, 0.20, 1.0]),
-            ui.push_style_color(StyleColor::Separator, [0.20, 0.20, 0.20, 1.0]),
-            ui.push_style_color(StyleColor::PopupBg, [0.07, 0.07, 0.07, 0.99]),
+            ui.push_style_color(StyleColor::WindowBg, [0.05, 0.05, 0.05, 1.0]), // #0D0D0D
+            ui.push_style_color(StyleColor::Border, [0.20, 0.20, 0.20, 1.0]),   // #333333
+            ui.push_style_color(StyleColor::Separator, [0.20, 0.20, 0.20, 1.0]), // #333333
+            ui.push_style_color(StyleColor::PopupBg, [0.07, 0.07, 0.07, 0.99]), // #121212FC
             ui.push_style_color(StyleColor::TitleBgActive, theme.active_color),
             ui.push_style_color(StyleColor::FrameBg, theme.bg_color),
             ui.push_style_color(StyleColor::FrameBgActive, theme.active_color),
@@ -439,11 +439,11 @@ impl<'ui> Gui<'ui> {
             ui.push_style_color(StyleColor::Header, theme.bg_color),
             ui.push_style_color(StyleColor::HeaderActive, theme.active_color),
             ui.push_style_color(StyleColor::HeaderHovered, theme.hover_color),
-            ui.push_style_color(StyleColor::CheckMark, [1.0, 1.0, 1.0, 1.0]),
-            ui.push_style_color(StyleColor::PlotHistogram, [1.0, 1.0, 1.0, 1.0]),
-            ui.push_style_color(StyleColor::TableRowBg, [0.07, 0.07, 0.07, 1.0]),
-            ui.push_style_color(StyleColor::TableRowBgAlt, [0.1, 0.1, 0.1, 1.0]),
-            ui.push_style_color(StyleColor::TableBorderStrong, [0.20, 0.20, 0.20, 1.0]),
+            ui.push_style_color(StyleColor::CheckMark, [1.0, 1.0, 1.0, 1.0]), // #FFFFFF
+            ui.push_style_color(StyleColor::PlotHistogram, [1.0, 1.0, 1.0, 1.0]), // #FFFFFF
+            ui.push_style_color(StyleColor::TableRowBg, [0.07, 0.07, 0.07, 1.0]), // #121212
+            ui.push_style_color(StyleColor::TableRowBgAlt, [0.1, 0.1, 0.1, 1.0]), // #1A1A1A
+            ui.push_style_color(StyleColor::TableBorderStrong, [0.20, 0.20, 0.20, 1.0]), // #333333
         ]
     }
 }

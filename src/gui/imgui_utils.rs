@@ -25,7 +25,7 @@ impl<'a> Table<'a> {
     }
 
     fn begin_with_flags<'ui>(self, flags: u32, ui: &Ui<'ui>) -> Option<TableToken<'ui>> {
-        if unsafe {
+        unsafe {
             sys::igBeginTable(
                 self.ident.as_ptr(),
                 self.column,
@@ -33,11 +33,8 @@ impl<'a> Table<'a> {
                 [0.0, 0.0].into(),
                 0.0,
             )
-        } {
-            Some(TableToken::new(ui))
-        } else {
-            None
         }
+        .then(|| TableToken::new(ui))
     }
 
     pub fn begin<'ui>(self, ui: &Ui<'ui>) -> Option<TableToken<'ui>> {

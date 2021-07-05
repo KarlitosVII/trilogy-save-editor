@@ -49,7 +49,7 @@ dir = set "${project_name}"
 mkdir "${dir}"
 cp ./databases "./${dir}/"
 
-file = set ""
+ext = set ""
 if eq "${CARGO_MAKE_RUST_TARGET_OS}" "windows"
 	ext = set ".exe"
 end

@@ -85,10 +85,9 @@ impl<'ui> Gui<'ui> {
 
         // Current Game
         let mut current_game = player.objects.iter().enumerate().find_map(|(i, object)| {
-            match player.get_name(object.object_name_id).borrow().to_str() {
-                "CurrentGame" => Some(player.get_data(i as i32 + 1).borrow_mut()),
-                _ => None,
-            }
+            let object_name = player.get_name(object.object_name_id).borrow();
+            (object_name.to_str() == "CurrentGame")
+                .then(|| player.get_data(i as i32 + 1).borrow_mut())
         })?;
 
         // m_Player

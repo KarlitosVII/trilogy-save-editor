@@ -26,26 +26,22 @@ fn impl_raw_ui_struct(ast: &syn::DeriveInput, fields: &Fields) -> proc_macro2::T
     let name = &ast.ident;
 
     let draw_lets = fields.iter().filter_map(|f| {
-        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
-            None
-        } else {
+        (!f.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
             let field_name = &f.ident;
-            Some(quote! {
+            quote! {
                let #field_name = &mut self.#field_name;
-            })
-        }
+            }
+        })
     });
 
     let draw_fields = fields.iter().filter_map(|f| {
-        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
-            None
-        } else {
+        (!f.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
             let field_name = &f.ident;
             let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
-            Some(quote! {
+            quote! {
                 Box::new(move || { crate::save_data::RawUi::draw_raw_ui(#field_name, gui, #field_string) })
-            })
-        }
+            }
+        })
     });
 
     quote! {
@@ -118,26 +114,22 @@ fn impl_raw_ui_me1_legacy(ast: &syn::DeriveInput, fields: &Fields) -> proc_macro
     let name = &ast.ident;
 
     let draw_lets = fields.iter().filter_map(|f| {
-        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
-            None
-        } else {
+        (!f.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
             let field_name = &f.ident;
-            Some(quote! {
+            quote! {
                let #field_name = &mut self.#field_name;
-            })
-        }
+            }
+        })
     });
 
     let draw_fields = fields.iter().filter_map(|f| {
-        if f.ident.as_ref().unwrap().to_string().starts_with('_') {
-            None
-        } else {
+        (!f.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
             let field_name = &f.ident;
             let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
-            Some(quote! {
+            quote! {
                 Box::new(move || { crate::save_data::RawUi::draw_raw_ui(#field_name, gui, #field_string) })
-            })
-        }
+            }
+        })
     });
 
     quote! {

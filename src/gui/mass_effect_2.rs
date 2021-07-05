@@ -435,13 +435,11 @@ impl<'ui> Gui<'ui> {
             (im_str!("SFXGame.SFXPawn_PlayerVanguard"), im_str!("Vanguard")),
         ];
 
-        if let Some(mut class_id) = CLASS_LIST.iter().enumerate().find_map(|(i, &name)| {
-            if unicase::eq(name.0, class_name) {
-                Some(i)
-            } else {
-                None
-            }
-        }) {
+        if let Some(mut class_id) = CLASS_LIST
+            .iter()
+            .enumerate()
+            .find_map(|(i, &name)| unicase::eq(name.0, class_name).then(|| i))
+        {
             let width = ui.push_item_width(200.0);
             if ComboBox::new(im_str!("Class")).build_simple(
                 self.ui,

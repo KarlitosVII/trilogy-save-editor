@@ -211,13 +211,9 @@ impl<'ui> Gui<'ui> {
                     .booleans
                     .iter()
                     .filter_map(|(k, v)| {
-                        if v.to_lowercase().contains(&bool_filter.to_str().to_lowercase())
-                            || k.to_string().contains(bool_filter.to_str())
-                        {
-                            Some((*k, v.clone()))
-                        } else {
-                            None
-                        }
+                        (v.to_lowercase().contains(&bool_filter.to_str().to_lowercase())
+                            || k.to_string().contains(bool_filter.to_str()))
+                        .then(|| (*k, v.clone()))
                     })
                     .collect()
             }
@@ -254,13 +250,9 @@ impl<'ui> Gui<'ui> {
                     .integers
                     .iter()
                     .filter_map(|(k, v)| {
-                        if v.to_lowercase().contains(&int_filter.to_str().to_lowercase())
-                            || k.to_string().contains(int_filter.to_str())
-                        {
-                            Some((*k, v.clone()))
-                        } else {
-                            None
-                        }
+                        (v.to_lowercase().contains(&int_filter.to_str().to_lowercase())
+                            || k.to_string().contains(int_filter.to_str()))
+                        .then(|| (*k, v.clone()))
                     })
                     .collect()
             }
@@ -304,13 +296,9 @@ impl<'ui> Gui<'ui> {
                     .floats
                     .iter()
                     .filter_map(|(k, v)| {
-                        if v.to_lowercase().contains(&float_filter.to_str().to_lowercase())
-                            || k.to_string().contains(float_filter.to_str())
-                        {
-                            Some((*k, v.clone()))
-                        } else {
-                            None
-                        }
+                        (v.to_lowercase().contains(&float_filter.to_str().to_lowercase())
+                            || k.to_string().contains(float_filter.to_str()))
+                        .then(|| (*k, v.clone()))
                     })
                     .collect()
             }
