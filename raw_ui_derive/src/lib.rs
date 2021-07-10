@@ -117,7 +117,7 @@ fn impl_raw_ui_me1_legacy(ast: &syn::DeriveInput, fields: &Fields) -> proc_macro
         (!f.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
             let field_name = &f.ident;
             quote! {
-               let #field_name = &mut self.#field_name;
+                let #field_name = &mut self.#field_name;
             }
         })
     });

@@ -319,12 +319,12 @@ impl<'ui> Gui<'ui> {
             TabBar::new(im_str!("tabs")).build(ui, || {
                 TabItem::new(im_str!("English")).build(ui, || {
                     ChildWindow::new("scroll").size([540.0, 500.0]).build(ui, || {
-                        ui.text(include_str!("../../License_CeCILL_V2.1-en.txt"));
+                        ui.text(include_str!("../../LICENSE.txt"));
                     });
                 });
                 TabItem::new(im_str!("French")).build(ui, || {
                     ChildWindow::new("scroll").size([540.0, 500.0]).build(ui, || {
-                        ui.text(include_str!("../../Licence_CeCILL_V2.1-fr.txt"));
+                        ui.text(include_str!("../../LICENSE_FRENCH.txt"));
                     });
                 });
             });

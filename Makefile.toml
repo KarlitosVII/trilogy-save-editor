@@ -1,13 +1,16 @@
+[config]
+default_to_workspace = false
+
 # utils
 [tasks.fmt]
 install_crate = "rustfmt"
 command = "cargo"
-args = ["fmt", "--all"]
+args = ["fmt"]
 
 [tasks.clippy]
 install_crate = "clippy"
 command = "cargo"
-args = ["clippy", "--all"]
+args = ["clippy"]
 dependencies = ["fmt"]
 
 [tasks.outdated]

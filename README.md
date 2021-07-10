@@ -1,7 +1,7 @@
 # Trilogy Save Editor
 A save editor for Mass Effect Trilogy (and Legendary)
 
-![Screenshot](screenshots/ME3_General.png)
+![Screenshot](misc/screenshots/ME3_General.png)
 
 ## Features
 This software is similar to Gibbed's save editors (and forks) but adds a lot of stuff.
