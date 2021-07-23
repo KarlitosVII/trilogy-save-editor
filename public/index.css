@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: "Proggy Clean";
+    src: url(/ProggyClean.ttf) format("truetype");
+  }
+    
+  .chevron {
+    background-size: 1.0em 1.0em;
+    background-repeat: no-repeat;
+  }
+
+  .chevron-down {
+    @apply chevron;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white' %3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+  }
+
+  .chevron-right {
+    @apply chevron;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white' %3E%3Cpath fill-rule='evenodd' d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z' clip-rule='evenodd' /%3E%3C/svg%3E");
+  }
+}
+
+:root {
+  --bg: theme('colors.me3.bg');
+  --default: theme('colors.me3.default');
+  --active: theme('colors.me3.active');
+  --hover: theme('colors.me3.hover');
+}
+
+.me1 {
+  --bg: theme('colors.me1.bg');
+  --default: theme('colors.me1.default');
+  --active: theme('colors.me1.active');
+  --hover: theme('colors.me1.hover');
+}
+
+.me2 {
+  --bg: theme('colors.me2.bg');
+  --default: theme('colors.me2.default');
+  --active: theme('colors.me2.active');
+  --hover: theme('colors.me2.hover');
+}
+
+.me3 {
+  --bg: theme('colors.me3.bg');
+  --default: theme('colors.me3.default');
+  --active: theme('colors.me3.active');
+  --hover: theme('colors.me3.hover');
+}
+
+.btn {
+  @apply rounded-none px-1 bg-theme-bg hover:bg-theme-hover active:bg-theme-active
+}
+
+.navbar-chevron {
+  @apply chevron-right;
+  background-position: right 0.05rem center;
+}
+
+.select-chevron {
+  @apply chevron-down;
+  background-position: right 0.05rem center;
+}
+
+.table-chevron-down {
+  @apply chevron-down;
+  background-position: left 0.2rem center;
+}
+
+.table-chevron-right {
+  @apply chevron-right;
+  background-position: left 0.2rem center;
+}
+
+.table-row {
+  @apply flex-1 p-[1.5px] px-1 odd:bg-table-odd even:bg-table-even
+}
+
+.input {
+  @apply bg-theme-bg px-1 mr-1 rounded-none
+}
+
+.clipper-bg {
+  background: linear-gradient(0, theme('colors.table.even') 50%, theme('colors.table.odd') 50%);
+  background-size: 100% 46px;
+  background-repeat: repeat;
+}
+
+.clipper-row {
+  @apply p-[1.5px] px-1 w-full h-[23px]
+}

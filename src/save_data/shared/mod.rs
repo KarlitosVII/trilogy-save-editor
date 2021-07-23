@@ -1,17 +1,14 @@
-use imgui::ImString;
 use serde::{de, ser, Deserialize, Serialize};
 use std::fmt;
 use uuid::Uuid;
 
-use crate::gui::Gui;
-
-use super::{ImguiString, List, RawUi};
+use super::List;
 
 pub mod appearance;
 pub mod player;
 pub mod plot;
 
-#[derive(RawUi, Clone)]
+#[derive(Clone, PartialEq, RawUi)]
 #[repr(u32)]
 pub enum EndGameState {
     NotFinished,
@@ -45,7 +42,8 @@ impl serde::Serialize for EndGameState {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct SaveTimeStamp {
     seconds_since_midnight: i32,
     day: i32,
@@ -53,53 +51,57 @@ pub struct SaveTimeStamp {
     year: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Vector {
     x: f32,
     y: f32,
     z: f32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Vector2d {
     x: f32,
     y: f32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Rotator {
     pitch: i32,
     yaw: i32,
     roll: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Level {
-    name: ImguiString,
+    name: String,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
 #[derive(Clone)]
 pub struct Guid {
-    pub part1: ImguiString,
-    pub part2: ImguiString,
-    pub part3: ImguiString,
-    pub part4: ImguiString,
-    pub part5: ImguiString,
+    pub part1: String,
+    pub part2: String,
+    pub part3: String,
+    pub part4: String,
+    pub part5: String,
 }
 
 impl Default for Guid {
     fn default() -> Self {
-        let mut part1: ImguiString = ImString::with_capacity(8).into();
+        let mut part1 = String::with_capacity(8);
         part1.push_str("00000000");
-        let mut part2: ImguiString = ImString::with_capacity(4).into();
+        let mut part2 = String::with_capacity(4);
         part2.push_str("0000");
-        let mut part3: ImguiString = ImString::with_capacity(4).into();
+        let mut part3 = String::with_capacity(4);
         part3.push_str("0000");
-        let mut part4: ImguiString = ImString::with_capacity(4).into();
+        let mut part4 = String::with_capacity(4);
         part4.push_str("0000");
-        let mut part5: ImguiString = ImString::with_capacity(12).into();
+        let mut part5 = String::with_capacity(12);
         part5.push_str("000000000000");
 
         Guid { part1, part2, part3, part4, part5 }
@@ -133,15 +135,15 @@ impl<'de> serde::Deserialize<'de> for Guid {
                 let guid =
                     Uuid::from_slice(&result).map_err(de::Error::custom)?.to_simple().to_string();
 
-                let mut part1: ImguiString = ImString::with_capacity(8).into();
+                let mut part1 = String::with_capacity(8);
                 part1.push_str(&guid[0..8]);
-                let mut part2: ImguiString = ImString::with_capacity(4).into();
+                let mut part2 = String::with_capacity(4);
                 part2.push_str(&guid[8..12]);
-                let mut part3: ImguiString = ImString::with_capacity(4).into();
+                let mut part3 = String::with_capacity(4);
                 part3.push_str(&guid[12..16]);
-                let mut part4: ImguiString = ImString::with_capacity(4).into();
+                let mut part4 = String::with_capacity(4);
                 part4.push_str(&guid[16..20]);
-                let mut part5: ImguiString = ImString::with_capacity(12).into();
+                let mut part5 = String::with_capacity(12);
                 part5.push_str(&guid[20..32]);
 
                 Ok(Guid { part1, part2, part3, part4, part5 })
@@ -156,11 +158,8 @@ impl serde::Serialize for Guid {
     where
         S: serde::Serializer,
     {
-        let guid_str = self.part1.to_string()
-            + self.part2.to_str()
-            + self.part3.to_str()
-            + self.part4.to_str()
-            + self.part5.to_str();
+        let guid_str =
+            self.part1.to_owned() + &self.part2 + &self.part3 + &self.part4 + &self.part5;
         let guid = List(
             Uuid::parse_str(&guid_str)
                 .map_err(|err| ser::Error::custom(format!("GUID: {}", err)))?
@@ -171,19 +170,15 @@ impl serde::Serialize for Guid {
     }
 }
 
-impl RawUi for Guid {
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_guid(ident, self);
-    }
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct KismetRecord {
     guid: Guid,
     value: bool,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Door {
     guid: Guid,
     current_state: u8,

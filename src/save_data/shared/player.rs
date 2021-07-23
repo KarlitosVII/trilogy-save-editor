@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::ImguiString;
-
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
 pub enum Origin {
     None,
     Spacer,
@@ -10,7 +8,7 @@ pub enum Origin {
     Earthborn,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
 pub enum Notoriety {
     None,
     Survivor,
@@ -18,12 +16,13 @@ pub enum Notoriety {
     Ruthless,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct WeaponLoadout {
-    assault_rifle: ImguiString,
-    shotgun: ImguiString,
-    sniper_rifle: ImguiString,
-    submachine_gun: ImguiString,
-    pistol: ImguiString,
-    heavy_weapon: ImguiString,
+    assault_rifle: String,
+    shotgun: String,
+    sniper_rifle: String,
+    submachine_gun: String,
+    pistol: String,
+    heavy_weapon: String,
 }

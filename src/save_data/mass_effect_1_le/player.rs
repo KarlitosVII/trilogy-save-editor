@@ -5,7 +5,7 @@ use crate::save_data::{
         appearance::HeadMorph,
         player::{Notoriety, Origin},
     },
-    Dummy, ImguiString,
+    Dummy, String,
 };
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
@@ -15,7 +15,7 @@ pub struct Player {
     player_class: u8,
     pub level: i32,
     pub current_xp: f32,
-    pub first_name: ImguiString,
+    pub first_name: String,
     localized_last_name: i32,
     pub origin: Origin,
     pub notoriety: Notoriety,
@@ -23,7 +23,7 @@ pub struct Player {
     spectre_rank: u8,
     pub talent_points: i32,
     talent_pool_points: i32,
-    mapped_talent: ImguiString,
+    mapped_talent: String,
     pub head_morph: Option<HeadMorph>,
     simple_talents: Vec<SimpleTalent>,
     pub complex_talents: Vec<ComplexTalent>,
@@ -32,7 +32,7 @@ pub struct Player {
     pub medigel: i32,
     pub grenades: f32,
     pub omnigel: f32,
-    pub face_code: ImguiString,
+    pub face_code: String,
     armor_overridden: bool,
     auto_levelup_template_id: i32,
     health_per_level: f32,
@@ -55,11 +55,11 @@ pub struct Player {
     pub game_options: Vec<i32>,
     helmet_shown: bool,
     _unknown: Dummy<5>,
-    last_power: ImguiString,
+    last_power: String,
     health_max: f32,
     hotkeys: Vec<Hotkey>,
-    primary_weapon: ImguiString,
-    secondary_weapon: ImguiString,
+    primary_weapon: String,
+    secondary_weapon: String,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]

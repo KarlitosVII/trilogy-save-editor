@@ -1,7 +1,7 @@
 [config]
 default_to_workspace = false
 
-# utils
+# Utils
 [tasks.fmt]
 install_crate = "rustfmt"
 command = "cargo"
@@ -19,7 +19,7 @@ command = "cargo"
 args = ["outdated", "-wR"]
 dependencies = ["update"]
 
-# build
+# Build
 [tasks.update]
 command = "cargo"
 args = ["update"]
@@ -66,10 +66,22 @@ rm -r "./${dir}/"
 '''
 
 [tasks.cook]
-dependencies = [
-    "fmt",
-    "clippy",
-    "test",
-    "release",
-    "zip",
-]
+dependencies = ["fmt", "clippy", "test", "release", "zip"]
+
+# Serve
+[tasks.tailwind-watch]
+command = "npm"
+args = ["run", "watch"]
+windows_alias = "windows-tailwind-watch"
+
+[tasks.windows-tailwind-watch]
+command = "powershell"
+args = ["-Command", "npm", "run", "watch"]
+
+[tasks.trunk-serve]
+install_crate = "trunk"
+command = "trunk"
+args = ["serve"]
+
+[tasks.serve]
+run_task = { name = ["tailwind-watch", "trunk-serve"], parallel = true }

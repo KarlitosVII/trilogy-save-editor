@@ -15,7 +15,7 @@ use crate::{
             Me1SaveGame,
         },
         shared::plot::{BoolVec, Me1PlotTable},
-        ImguiString, List, RawUi,
+        String, List, RawUi,
     },
 };
 
@@ -372,7 +372,7 @@ impl<'ui> Gui<'ui> {
 
     fn me1_find_str_property<'a>(
         player: &Player, properties: &'a mut [Property], property_name: &str,
-    ) -> Option<&'a mut ImguiString> {
+    ) -> Option<&'a mut String> {
         properties.iter_mut().find_map(|property| match property {
             Property::Str { name_id, string, .. }
                 if player.get_name(*name_id).borrow().to_str() == property_name =>

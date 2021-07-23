@@ -4,7 +4,7 @@ use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
 use std::{cell::RefCell, fmt};
 
 use crate::{
-    save_data::{Dummy, ImguiString},
+    save_data::{Dummy, String},
     unreal,
 };
 
@@ -182,7 +182,7 @@ struct Header {
     _magic: u32,
     _version: Dummy<4>, // low_version: u16, high_version: u16
     data_offset: u32,
-    _upk_name: ImguiString,
+    _upk_name: String,
     _flags: u32,
     name_len: u32,
     name_offset: u32,
@@ -200,7 +200,7 @@ struct Header {
 pub struct Name {
     #[deref]
     #[deref_mut]
-    string: ImguiString,
+    string: String,
     _osef: Dummy<8>,
     #[serde(skip)]
     pub is_duplicate: bool, // Spécial

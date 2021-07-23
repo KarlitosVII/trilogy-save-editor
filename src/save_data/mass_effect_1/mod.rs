@@ -79,7 +79,7 @@ impl Me1SaveGame {
                 zipper.write_all(&state_data)?;
             }
             // WorldSavePackage
-            if let Some(_world_save_package) = &self._world_save_package {
+            if let Some(ref _world_save_package) = self._world_save_package {
                 let world_save_package_data = unreal::Serializer::to_byte_buf(_world_save_package)?;
                 zipper.start_file("WorldSavePackage.sav", options)?;
                 zipper.write_all(&world_save_package_data)?;

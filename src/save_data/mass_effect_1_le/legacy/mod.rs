@@ -7,7 +7,7 @@ use crate::{
     gui::{imgui_utils::Table, Gui},
     save_data::{
         shared::{Rotator, Vector},
-        Dummy, ImguiString, RawUi, RawUiMe1Legacy,
+        Dummy, String, RawUi, RawUiMe1Legacy,
     },
 };
 
@@ -22,7 +22,7 @@ use self::art_placeable::*;
 
 #[derive(Deserialize, Serialize, Clone, Default)]
 pub struct Map {
-    levels: IndexMap<ImguiString, Level>,
+    levels: IndexMap<String, Level>,
     world: Option<BaseObject>,
 }
 
@@ -37,7 +37,7 @@ impl RawUi for Map {
 #[derive(Deserialize, Serialize, Clone, Default)]
 struct Level {
     objects: Vec<BaseObject>,
-    actors: Vec<ImguiString>,
+    actors: Vec<String>,
 }
 
 impl RawUi for Level {
@@ -51,9 +51,9 @@ impl RawUi for Level {
 
 #[derive(Serialize, Clone)]
 pub struct BaseObject {
-    class_name: ImguiString,
-    owner_name: ImguiString,
-    owner_class: Option<ImguiString>,
+    class_name: String,
+    owner_name: String,
+    owner_class: Option<String>,
     object: Object,
 }
 
@@ -110,7 +110,7 @@ impl<'de> serde::Deserialize<'de> for BaseObject {
             where
                 A: de::SeqAccess<'de>,
             {
-                let class_name: ImguiString = seq.next_element()?.unwrap();
+                let class_name: String = seq.next_element()?.unwrap();
                 let owner_name = seq.next_element()?.unwrap();
                 let owner_class = seq.next_element()?.unwrap();
                 let object = match class_name.to_str() {
@@ -162,7 +162,7 @@ enum Object {
 
 #[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
 struct VehicleBehavior {
-    actor_type: ImguiString,
+    actor_type: String,
     powertrain_enabled: bool,
     vehicle_fonction_enabled: bool,
     owner: Box<Option<BaseObject>>,
@@ -179,23 +179,23 @@ struct Vehicle {
     stasis: bool,
     health_current: f32,
     shield_current: f32,
-    first_name: ImguiString,
+    first_name: String,
     localized_last_name: i32,
     _unknown: Dummy<16>,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone, Default)]
 struct WorldStreamingState {
-    name: ImguiString,
+    name: String,
     enabled: u8,
 }
 
 #[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
 struct World {
     streaming_states: Vec<WorldStreamingState>,
-    destination_area_map: ImguiString,
+    destination_area_map: String,
     destination: Vector,
-    cinematics_seen: Vec<ImguiString>,
+    cinematics_seen: Vec<String>,
     scanned_clusters: Vec<i32>,
     scanned_systems: Vec<i32>,
     scanned_planets: Vec<i32>,

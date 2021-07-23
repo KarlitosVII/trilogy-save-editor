@@ -5,18 +5,10 @@ use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 use std::fmt;
 
-use crate::{gui::Gui, save_data::RawUi};
-
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
 #[derive(Deref, DerefMut, Clone)]
 pub struct BoolVec(BitVec<Lsb0, u32>);
-
-impl RawUi for BoolVec {
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_boolvec(ident, &mut self.0);
-    }
-}
 
 impl<'de> serde::Deserialize<'de> for BoolVec {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -58,14 +50,16 @@ impl serde::Serialize for BoolVec {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Me1PlotTable {
     pub booleans: BoolVec,
     pub integers: Vec<i32>,
     pub floats: Vec<f32>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct PlotTable {
     pub booleans: BoolVec,
     pub integers: Vec<i32>,
@@ -77,14 +71,16 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,
     history: Vec<i32>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct PlotCodex {
     pages: IndexMap<i32, bool>,
 }

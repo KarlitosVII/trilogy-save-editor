@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::ImguiString;
+use crate::save_data::String;
 
 use super::player::{ComplexTalent, Item, SimpleTalent};
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Henchman {
-    pub tag: ImguiString,
+    pub tag: String,
     simple_talents: Vec<SimpleTalent>,
     pub complex_talents: Vec<ComplexTalent>,
     pub equipment: Vec<Item>,

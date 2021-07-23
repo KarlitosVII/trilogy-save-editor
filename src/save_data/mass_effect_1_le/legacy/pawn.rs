@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_data::{
     shared::{Rotator, Vector},
-    Dummy, ImguiString,
+    Dummy, String,
 };
 
 use super::BaseObject;
@@ -15,7 +15,7 @@ pub struct PawnBehavior {
     owner: Box<Option<BaseObject>>,
     health_current: f32,
     shield_current: f32,
-    first_name: ImguiString,
+    first_name: String,
     localized_last_name: i32,
     health_max: f32,
     health_regen_rate: f32,

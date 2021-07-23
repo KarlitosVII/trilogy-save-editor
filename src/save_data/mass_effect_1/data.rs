@@ -7,7 +7,7 @@ use serde::{de, Serialize};
 use crate::{
     save_data::{
         shared::{appearance::LinearColor, Rotator, Vector},
-        Dummy, ImguiString,
+        Dummy, String,
     },
     unreal,
 };
@@ -140,7 +140,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        string: ImguiString,
+        string: String,
     },
     StringRef {
         name_id: u32,
@@ -351,7 +351,7 @@ pub enum ArrayType {
     Int(i32),
     Object(i32),
     Vector(Vector),
-    String(ImguiString),
+    String(String),
     Properties(List<Property>),
 }
 

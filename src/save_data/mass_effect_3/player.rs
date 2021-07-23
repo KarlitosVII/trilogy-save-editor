@@ -6,26 +6,26 @@ use crate::save_data::{
         appearance::Appearance,
         player::{Notoriety, Origin, WeaponLoadout},
     },
-    Dummy, ImguiString,
+    Dummy, String,
 };
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Player {
     pub is_female: bool,
-    pub class_name: ImguiString,
+    pub class_name: String,
     is_combat_pawn: bool,
     is_injured_pawn: bool,
     use_casual_appearance: bool,
     pub level: i32,
     pub current_xp: f32,
-    pub first_name: ImguiString,
+    pub first_name: String,
     localized_last_name: i32,
     pub origin: Origin,
     pub notoriety: Notoriety,
     pub talent_points: i32,
-    mapped_power_1: ImguiString,
-    mapped_power_2: ImguiString,
-    mapped_power_3: ImguiString,
+    mapped_power_1: String,
+    mapped_power_2: String,
+    mapped_power_3: String,
     pub appearance: Appearance,
     emissive_id: i32,
     pub powers: Vec<Power>,
@@ -33,8 +33,8 @@ pub struct Player {
     weapons: Vec<Weapon>,
     weapons_mods: Vec<WeaponMod>,
     weapons_loadout: WeaponLoadout,
-    primary_weapon: ImguiString,
-    secondary_weapon: ImguiString,
+    primary_weapon: String,
+    secondary_weapon: String,
     loadout_weapon_group: Vec<i32>,
     hotkeys: Vec<Hotkey>,
     current_health: f32,
@@ -47,14 +47,14 @@ pub struct Player {
     probes: i32,
     pub current_fuel: f32,
     pub grenades: i32,
-    pub face_code: ImguiString,
+    pub face_code: String,
     localized_class_name: i32,
     _character_guid: Dummy<16>,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Power {
-    name: ImguiString,
+    name: String,
     rank: f32,
     evolved_choice_0: i32,
     evolved_choice_1: i32,
@@ -62,29 +62,29 @@ pub struct Power {
     evolved_choice_3: i32,
     evolved_choice_4: i32,
     evolved_choice_5: i32,
-    pub power_class_name: ImguiString,
+    pub power_class_name: String,
     wheel_display_index: i32,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct Weapon {
-    class_name: ImguiString,
+    class_name: String,
     ammo_used_count: i32,
     ammo_total: i32,
     current_weapon: bool,
     was_last_weapon: bool,
-    ammo_power_name: ImguiString,
-    ammo_power_source_tag: ImguiString,
+    ammo_power_name: String,
+    ammo_power_source_tag: String,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 pub struct WeaponMod {
-    weapon_class_name: ImguiString,
-    weapon_mod_class_names: Vec<ImguiString>,
+    weapon_class_name: String,
+    weapon_mod_class_names: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct Hotkey {
-    pawn_name: ImguiString,
-    power_name: ImguiString,
+    pawn_name: String,
+    power_name: String,
 }

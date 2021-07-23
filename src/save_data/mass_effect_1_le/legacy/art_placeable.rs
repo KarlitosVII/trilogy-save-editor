@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::{Dummy, ImguiString};
+use crate::save_data::{Dummy, String};
 
 use super::BaseObject;
 
@@ -13,10 +13,10 @@ pub struct ArtPlaceableBehavior {
     health: f32,
     current_health: f32,
     enabled: bool,
-    current_fsm_state_name: ImguiString,
+    current_fsm_state_name: String,
     is_destroyed: bool,
-    state_0: ImguiString,
-    state_1: ImguiString,
+    state_0: String,
+    state_1: String,
     use_case: u8,
     use_case_override: bool,
     player_only: bool,

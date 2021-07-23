@@ -14,13 +14,12 @@ use std::{fmt, io::Read};
 
 use crate::{
     gui::{imgui_utils::Table, Gui},
-    save_data::RawUi,
     unreal,
 };
 
 use super::{
     shared::{plot::PlotTable, Rotator, SaveTimeStamp, Vector},
-    ImguiString, List,
+    String, List,
 };
 
 pub mod player;
@@ -186,20 +185,20 @@ impl serde::Serialize for Me1LeSaveGame {
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me1LeSaveData {
     _version: Me1LeVersion,
-    character_id: ImguiString,
+    character_id: String,
     created_date: SaveTimeStamp,
     pub plot: PlotTable,
     timestamp: SaveTimeStamp,
     seconds_played: i32,
     pub player: Player,
-    base_level_name: ImguiString,
-    map_name: ImguiString,
-    parent_map_name: ImguiString,
+    base_level_name: String,
+    map_name: String,
+    parent_map_name: String,
     location: Vector,
     rotation: Rotator,
     pub squad: Vec<Henchman>,
-    display_name: ImguiString,
-    file_name: ImguiString,
+    display_name: String,
+    file_name: String,
     no_export: NoExport, // Only serialized for normal savegames, not for character export
 }
 
@@ -275,8 +274,8 @@ impl serde::Serialize for NoExport {
     where
         S: serde::Serializer,
     {
-        match &self.0 {
-            Some(no_export_data) => no_export_data.serialize(serializer),
+        match self.0 {
+            Some(ref no_export_data) => no_export_data.serialize(serializer),
             None => serializer.serialize_unit(),
         }
     }
@@ -284,13 +283,13 @@ impl serde::Serialize for NoExport {
 
 #[derive(Deserialize, Serialize, Clone)]
 struct NoExportData {
-    legacy_maps: IndexMap<ImguiString, Map>,
+    legacy_maps: IndexMap<String, Map>,
     mako: Vehicle,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 struct Vehicle {
-    first_name: ImguiString,
+    first_name: String,
     localized_last_name: i32,
     health_current: f32,
     shield_current: f32,

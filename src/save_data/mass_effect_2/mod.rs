@@ -2,12 +2,9 @@ use anyhow::Result;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 
-use super::{
-    shared::{
-        plot::{Me1PlotTable, PlotTable},
-        Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector,
-    },
-    ImguiString,
+use super::shared::{
+    plot::{Me1PlotTable, PlotTable},
+    Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector,
 };
 
 pub mod player;
@@ -21,13 +18,14 @@ pub mod plot_db;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Me2SaveGame {
     _version: Me2Version,
-    debug_name: ImguiString,
+    debug_name: String,
     seconds_played: f32,
     disc: i32,
-    base_level_name: ImguiString,
+    base_level_name: String,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
@@ -35,7 +33,7 @@ pub struct Me2SaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_records: IndexMap<ImguiString, bool>,
+    streaming_records: IndexMap<String, bool>,
     kismet_records: Vec<KismetRecord>,
     doors: Vec<Door>,
     pawns: Vec<Guid>,
@@ -67,13 +65,14 @@ impl<'de> serde::Deserialize<'de> for Me2Version {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Me2LeSaveGame {
     _version: Me2LeVersion,
-    debug_name: ImguiString,
+    debug_name: String,
     seconds_played: f32,
     disc: i32,
-    base_level_name: ImguiString,
+    base_level_name: String,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
@@ -81,7 +80,7 @@ pub struct Me2LeSaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_records: IndexMap<ImguiString, bool>,
+    streaming_records: IndexMap<String, bool>,
     kismet_records: Vec<KismetRecord>,
     doors: Vec<Door>,
     pawns: Vec<Guid>,
@@ -94,7 +93,8 @@ pub struct Me2LeSaveGame {
     dependant_dlcs: Vec<DependentDlc>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 struct Me1ImportRewards {
     me1_level: i32,
     me2_level: i32,
@@ -125,7 +125,7 @@ impl<'de> serde::Deserialize<'de> for Me2LeVersion {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
 pub enum Difficulty {
     Casual,
     Normal,
@@ -134,38 +134,41 @@ pub enum Difficulty {
     Insanity,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct DependentDlc {
     id: i32,
-    name: ImguiString,
+    name: String,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct LevelTreasure {
-    level_name: ImguiString,
+    level_name: String,
     credits: i32,
     xp: i32,
-    items: Vec<ImguiString>,
+    items: Vec<String>,
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
 enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
     NoDecisions,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct ObjectiveMarker {
-    marker_owned_data: ImguiString,
+    marker_owned_data: String,
     marker_offset: Vector,
     marker_label: i32,
-    bone_to_attach_to: ImguiString,
+    bone_to_attach_to: String,
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
 enum ObjectiveMarkerIconType {
     None,
     Attack,

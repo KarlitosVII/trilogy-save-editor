@@ -4,7 +4,7 @@ use serde::{de, Deserialize, Serialize};
 
 use super::{
     shared::{Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector},
-    ImguiString,
+    String,
 };
 
 pub mod player;
@@ -24,11 +24,11 @@ use galaxy_map::*;
 #[derive(Deserialize, Serialize, RawUi, Clone)]
 pub struct Me3SaveGame {
     _version: Me3Version,
-    debug_name: ImguiString,
+    debug_name: String,
     seconds_played: f32,
     disc: i32,
-    base_level_name: ImguiString,
-    base_level_name_display_override_as_read: ImguiString,
+    base_level_name: String,
+    base_level_name_display_override_as_read: String,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
@@ -36,7 +36,7 @@ pub struct Me3SaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_records: IndexMap<ImguiString, bool>,
+    streaming_records: IndexMap<String, bool>,
     kismet_records: Vec<KismetRecord>,
     doors: Vec<Door>,
     placeables: Vec<Placeable>,
@@ -45,7 +45,7 @@ pub struct Me3SaveGame {
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     _me1_plot: Me1PlotTable,
-    pub player_variables: IndexMap<ImguiString, i32>,
+    pub player_variables: IndexMap<String, i32>,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
     treasures: Vec<LevelTreasure>,
@@ -106,16 +106,16 @@ impl Default for PlaceableState {
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct DependentDlc {
     id: i32,
-    name: ImguiString,
-    canonical_name: ImguiString,
+    name: String,
+    canonical_name: String,
 }
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct LevelTreasure {
-    level_name: ImguiString,
+    level_name: String,
     credits: i32,
     xp: i32,
-    items: Vec<ImguiString>,
+    items: Vec<String>,
 }
 
 #[allow(clippy::enum_variant_names)]
@@ -128,10 +128,10 @@ pub enum AutoReplyModeOptions {
 
 #[derive(Deserialize, Serialize, RawUi, Default, Clone)]
 struct ObjectiveMarker {
-    marker_owned_data: ImguiString,
+    marker_owned_data: String,
     marker_offset: Vector,
     marker_label: i32,
-    bone_to_attach_to: ImguiString,
+    bone_to_attach_to: String,
     marker_icon_type: ObjectiveMarkerIconType,
 }
 

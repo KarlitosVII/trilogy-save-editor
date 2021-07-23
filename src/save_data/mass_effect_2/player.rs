@@ -1,27 +1,25 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::{
-    shared::{
-        appearance::Appearance,
-        player::{Notoriety, Origin, WeaponLoadout},
-    },
-    ImguiString,
+use crate::save_data::shared::{
+    appearance::Appearance,
+    player::{Notoriety, Origin, WeaponLoadout},
 };
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Player {
     pub is_female: bool,
-    pub class_name: ImguiString,
+    pub class_name: String,
     pub level: i32,
     pub current_xp: f32,
-    pub first_name: ImguiString,
+    pub first_name: String,
     localized_last_name: i32,
     pub origin: Origin,
     pub notoriety: Notoriety,
     pub talent_points: i32,
-    mapped_power_1: ImguiString,
-    mapped_power_2: ImguiString,
-    mapped_power_3: ImguiString,
+    mapped_power_1: String,
+    mapped_power_2: String,
+    mapped_power_3: String,
     pub appearance: Appearance,
     pub powers: Vec<Power>,
     weapons: Vec<Weapon>,
@@ -35,30 +33,33 @@ pub struct Player {
     pub platinum: i32,
     pub probes: i32,
     pub current_fuel: f32,
-    pub face_code: ImguiString,
+    pub face_code: String,
     localized_class_name: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Power {
-    name: ImguiString,
+    name: String,
     rank: f32,
-    pub power_class_name: ImguiString,
+    pub power_class_name: String,
     wheel_display_index: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct Weapon {
-    class_name: ImguiString,
+    class_name: String,
     ammo_used_count: i32,
     ammo_total: i32,
     current_weapon: bool,
     was_last_weapon: bool,
-    ammo_power_name: ImguiString,
+    ammo_power_name: String,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct Hotkey {
-    pawn_name: ImguiString,
+    pawn_name: String,
     power_id: i32,
 }

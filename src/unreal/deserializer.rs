@@ -126,7 +126,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
             return visitor.visit_borrowed_str("");
         }
 
-        let string = if len < 0 {
+        let mut string = if len < 0 {
             // Unicode
             let string_len = (len.abs() * 2) as usize;
             let bytes = self.read(string_len)?.to_owned();
@@ -149,6 +149,9 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
 
             decoded.into_owned()
         };
+
+        // Remove trailing 0
+        string.pop();
 
         visitor.visit_string(string)
     }

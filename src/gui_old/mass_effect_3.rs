@@ -17,7 +17,7 @@ use crate::{
             player::{Notoriety, Origin},
             plot::{BoolVec, PlotCategory},
         },
-        ImguiString, RawUi,
+        String, RawUi,
     },
 };
 
@@ -502,7 +502,7 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot(
-        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<ImguiString, i32>,
+        &self, plot_table: &mut PlotTable, player_variables: &mut IndexMap<String, i32>,
     ) -> Option<()> {
         let ui = self.ui;
 
@@ -690,7 +690,7 @@ impl<'ui> Gui<'ui> {
     }
 
     fn draw_me3_plot_variable(
-        &self, booleans: &mut BoolVec, variables: &mut IndexMap<ImguiString, i32>,
+        &self, booleans: &mut BoolVec, variables: &mut IndexMap<String, i32>,
         plot_db: &PlotVariable,
     ) {
         let ui = self.ui;

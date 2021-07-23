@@ -2,14 +2,10 @@ use anyhow::Result;
 use indexmap::IndexMap;
 use serde::{ser::SerializeTupleStruct, Deserialize, Serialize};
 
-use crate::{
-    gui::Gui,
-    save_data::{ImguiString, RawUi},
-};
-
 use super::Vector;
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Appearance {
     combat_appearance: PlayerAppearanceType,
     casual_id: i32,
@@ -28,35 +24,30 @@ pub struct Appearance {
     pub head_morph: Option<HeadMorph>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
 enum PlayerAppearanceType {
     Parts,
     Full,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct HeadMorph {
-    pub hair_mesh: ImguiString,
-    pub accessory_mesh: Vec<ImguiString>,
-    pub morph_features: IndexMap<ImguiString, f32>,
-    pub offset_bones: IndexMap<ImguiString, Vector>,
+    pub hair_mesh: String,
+    pub accessory_mesh: Vec<String>,
+    pub morph_features: IndexMap<String, f32>,
+    pub offset_bones: IndexMap<String, Vector>,
     pub lod0_vertices: Vec<Vector>,
     pub lod1_vertices: Vec<Vector>,
     pub lod2_vertices: Vec<Vector>,
     pub lod3_vertices: Vec<Vector>,
-    pub scalar_parameters: IndexMap<ImguiString, f32>,
-    pub vector_parameters: IndexMap<ImguiString, LinearColor>,
-    pub texture_parameters: IndexMap<ImguiString, ImguiString>,
+    pub scalar_parameters: IndexMap<String, f32>,
+    pub vector_parameters: IndexMap<String, LinearColor>,
+    pub texture_parameters: IndexMap<String, String>,
 }
 
 #[derive(Default, Clone)]
 pub struct LinearColor([f32; 4]);
-
-impl RawUi for LinearColor {
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_edit_color(ident, &mut self.0);
-    }
-}
 
 impl<'de> serde::Deserialize<'de> for LinearColor {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

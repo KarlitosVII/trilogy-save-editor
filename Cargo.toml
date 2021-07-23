@@ -1,6 +1,6 @@
 [package]
 name = "trilogy-save-editor"
-version = "1.13.1"
+version = "2.0.0"
 authors = ["Karlitos"]
 license = "CECILL-2.1"
 edition = "2018"
@@ -13,9 +13,8 @@ lto = true
 [dependencies]
 # Karlitos
 raw_ui_derive = { path = "raw_ui_derive" }
-backend = { path = "backend" }
 # Windows
-winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-features = false }
+# winapi = { version = "0.3", features = ["consoleapi", "wincon"], default-features = false }
 # Std-like
 anyhow = "1.0"
 derive_more = { version = "0.99", features = ["deref", "deref_mut", "from", "display"], default-features = false }
@@ -23,31 +22,37 @@ bitvec = { version = "0.22", features = ["std"], default-features = false }
 indexmap = { version = "1.6", features = ["std"], default-features = false }
 encoding_rs = { version = "0.8", default-features = false }
 # Async
-tokio = { version = "1.0", features = [
-    "rt-multi-thread",
-    "sync",
-    "parking_lot",
-    "macros",
-    "fs",
-    "io-util",
-], default-features = false }
+# tokio = { version = "1.0", features = [
+#     "rt-multi-thread",
+#     "sync",
+#     "parking_lot",
+#     "macros",
+#     "fs",
+#     "io-util",
+# ], default-features = false }
 # Sync
 # parking_lot = "0.11"
-flume = { version = "0.10", features = ["async"], default-features = false }
-# (De)Serializers
-serde = { version = "1.0", features = ["derive"], default-features = false }
-ron = { version = "0.6", features = ["indexmap"], default-features = false }
+# flume = { version = "0.10", features = ["async"], default-features = false }
 # Utils
 lazy_static = "1.4"
 crc = "2.0"
-flate2 = { version = "1.0", features = ["zlib"], default-features = false }
-zip = { version = "0.5", features = ["deflate-zlib"], default-features = false }
+flate2 = { version = "1.0", features = ["rust_backend"], default-features = false }
+zip = { version = "0.5", features = ["deflate"], default-features = false }
 unicase = "2.6"
 uuid = "0.8"
-clap = "2.0"
+# Wasm
+web-sys = { version="0.3", features=["CssStyleDeclaration"] }
+# js-sys = "0.3"
+# wasm-bindgen = "0.2"
+# wasm-bindgen-futures = "0.4"
+# Yew
+yew = "0.18"
+yewtil = "0.4"
+# (De)Serialization
+serde = { version = "1.0", features = ["derive", "rc"], default-features = false }
+ron = { version = "0.6", features = ["indexmap"], default-features = false }
+# serde_json = "1.0"
+# clap = "2.0"
 # GUI
-tinyfiledialogs = "3.8"
-dirs = "3.0"
-# Dear ImGui
-imgui = { git = "https://github.com/imgui-rs/imgui-rs" }
-wgpu = "0.9"
+# tinyfiledialogs = "3.8"
+# dirs = "3.0"
