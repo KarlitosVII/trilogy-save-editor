@@ -251,7 +251,7 @@ fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenS
                 use crate::gui::component::RawUiStruct;
                 let fields = [#(#view_fields),*];
                 yew::html!{
-                    <RawUiStruct title=label.to_owned()>
+                    <RawUiStruct label=label.to_owned()>
                         { for fields }
                     </RawUiStruct>
                 }

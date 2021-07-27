@@ -17,7 +17,7 @@ pub enum Notoriety {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default)]
+#[derive(Deserialize, Serialize, Clone, Default, PartialEq)]
 pub struct WeaponLoadout {
     assault_rifle: String,
     shotgun: String,

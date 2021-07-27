@@ -13,7 +13,10 @@ use crate::{
     save_data::shared::{appearance::LinearColor, plot::BoolVec, Guid},
 };
 
-pub trait RawUi {
+pub trait RawUi
+where
+    Self: Clone + 'static,
+{
     fn view(&self, label: &str) -> yew::Html;
 }
 
@@ -64,8 +67,11 @@ impl RawUi for RcUi<f32> {
 }
 
 impl RawUi for RcUi<bool> {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        // TODO
+        html! {
+            {label}
+        }
     }
 }
 
@@ -79,30 +85,36 @@ impl RawUi for RcUi<String> {
 
 impl<T> RawUi for RcUi<Option<T>>
 where
-    T: RawUi,
+    T: RawUi + PartialEq,
 {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        html! {
+            <RawUiOption<T> label=label.to_owned() option=self.clone() />
+        }
     }
 }
 
 impl<T> RawUi for RcUi<Vec<T>>
 where
-    T: RawUi + Default,
+    T: RawUi + PartialEq + Default,
 {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        html! {
+            <RawUiVec<T> label=label.to_owned() vec=self.clone() />
+        }
     }
 }
 
 impl<K, V> RawUi for RcUi<IndexMap<K, V>>
 where
-    // K: RawUi + Eq + Hash + Default + Display + 'static,
-    K: Eq + Hash + Display,
+    K: Clone + Eq + Hash + Display + 'static,
     V: RawUi + Default,
 {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        // TODO
+        html! {
+            {label}
+        }
     }
 }
 
@@ -117,19 +129,28 @@ where
 
 // Shared
 impl RawUi for RcUi<BoolVec> {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        // TODO
+        html! {
+            {label}
+        }
     }
 }
 
 impl RawUi for RcUi<Guid> {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        // TODO
+        html! {
+            {label}
+        }
     }
 }
 
 impl RawUi for RcUi<LinearColor> {
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
+    fn view(&self, label: &str) -> yew::Html {
+        // TODO
+        html! {
+            {label}
+        }
     }
 }

@@ -135,7 +135,7 @@ pub enum Difficulty {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 struct DependentDlc {
     id: i32,
     name: String,

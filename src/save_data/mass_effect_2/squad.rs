@@ -5,7 +5,7 @@ use crate::save_data::shared::player::WeaponLoadout;
 use super::player::Power;
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, Default)]
 pub struct Henchman {
     tag: String,
     powers: Vec<Power>,

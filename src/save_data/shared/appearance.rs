@@ -31,7 +31,7 @@ enum PlayerAppearanceType {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq)]
 pub struct HeadMorph {
     pub hair_mesh: String,
     pub accessory_mesh: Vec<String>,
@@ -46,7 +46,7 @@ pub struct HeadMorph {
     pub texture_parameters: IndexMap<String, String>,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, PartialEq)]
 pub struct LinearColor([f32; 4]);
 
 impl<'de> serde::Deserialize<'de> for LinearColor {

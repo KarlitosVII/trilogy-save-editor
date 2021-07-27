@@ -8,9 +8,9 @@ pub enum Msg {
 pub struct Props {
     #[prop_or_default]
     pub title: Option<String>,
+    pub children: Children,
     #[prop_or(true)]
     pub opened: bool,
-    pub children: Children,
 }
 
 pub struct Table {
@@ -54,13 +54,7 @@ impl Component for Table {
             .title
             .as_ref()
             .map(|title| {
-                let chevron = if opened {
-                    // Down ▼
-                    "table-chevron-down"
-                } else {
-                    // Right ▶
-                    "table-chevron-right"
-                };
+                let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
 
                 html! {
                     <div class="flex-1 bg-table-odd p-px">

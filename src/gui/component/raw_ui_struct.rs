@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::gui::component::Table;
 
@@ -8,7 +9,7 @@ pub enum Msg {
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    pub title: String,
+    pub label: String,
     pub children: Children,
 }
 
@@ -35,22 +36,29 @@ impl Component for RawUiStruct {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        todo!()
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {
-        let chevron = if self.opened {
-            // Down ▼
-            "table-chevron-down"
-        } else {
-            // Right ▶
-            "table-chevron-right"
-        };
+        let chevron = if self.opened { "table-chevron-down" } else { "table-chevron-right" };
+
+        let content = self
+            .opened
+            .then(|| {
+                html! {
+                    <div class="p-1">
+                        <Table>
+                            { self.props.children.clone() }
+                        </Table>
+                    </div>
+                }
+            })
+            .unwrap_or_default();
 
         html! {
-            <div class="flex flex-col">
-                <div class="flex-1 p-px">
+            <div class="flex-auto flex flex-col">
+                <div class="p-px">
                     <button
                         class=classes![
                             "rounded-none",
@@ -64,12 +72,10 @@ impl Component for RawUiStruct {
                         ]
                         onclick=self.link.callback(|_| Msg::Toggle)
                     >
-                        { &self.props.title }
+                        { &self.props.label }
                     </button>
                 </div>
-                <Table>
-                    { self.props.children.clone() }
-                </Table>
+                { content }
             </div>
         }
     }

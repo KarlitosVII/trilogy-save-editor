@@ -43,13 +43,13 @@ impl Component for Gui {
         html! {
             <div class="h-screen flex flex-col font-mono text-base leading-tight text-white me2">
                 <NavBar />
-                <section class="flex flex-auto p-1">
+                <section class="flex-auto flex p-1">
                     <TabBar>
+                        <Tab title="Raw Data">
+                            { self.save_game.view("Mass Effect 2") }
+                        </Tab>
                         <Tab title="Général">
                             <Me2General save_game=Me2Type::Legendary(self.save_game.clone()) />
-                        </Tab>
-                        <Tab title="Cécé">
-                            <Clipper list=(0..25000).collect::<Vec<_>>() />
                         </Tab>
                     </TabBar>
                 </section>

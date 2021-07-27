@@ -52,7 +52,7 @@ pub struct SaveTimeStamp {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct Vector {
     x: f32,
     y: f32,
@@ -60,7 +60,7 @@ pub struct Vector {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct Vector2d {
     x: f32,
     y: f32,
@@ -75,14 +75,14 @@ pub struct Rotator {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct Level {
     name: String,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Guid {
     pub part1: String,
     pub part2: String,
@@ -171,14 +171,14 @@ impl serde::Serialize for Guid {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct KismetRecord {
     guid: Guid,
     value: bool,
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 pub struct Door {
     guid: Guid,
     current_state: u8,
