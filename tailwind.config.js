@@ -1,15 +1,15 @@
-const defaultTheme = require('tailwindcss/defaultTheme')
+const defaultTheme = require("tailwindcss/defaultTheme")
 
 module.exports = {
-  mode: 'jit',
+  mode: "jit",
   purge: [
-    './index.html',
-    './src/**/*.rs',
+    "./index.html",
+    "./src/**/*.rs",
   ],
-  darkMode: false, // or 'media' or 'class'
+  darkMode: false, // or "media" or "class"
   theme: {
     fontFamily: {
-      mono: ['Proggy Clean', ...defaultTheme.fontFamily.mono],
+      mono: ["Proggy Clean", ...defaultTheme.fontFamily.mono],
     },
     colors: {
       black: "#000000",

@@ -82,10 +82,10 @@ where
                 let vec = self.props.vec();
                 let items = vec.iter().enumerate().map(|(i, item)| {
                     html_nested! {
-                        <div class="flex flex-row gap-1">
-                            <div>
+                        <div class="flex gap-1">
+                            <div class="py-px">
                                 <a
-                                    class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer select-none"
+                                    class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
                                     onclick=self.link.callback(move |_| Msg::Remove(i))
                                 >
                                     {"remove"}

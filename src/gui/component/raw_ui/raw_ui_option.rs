@@ -65,10 +65,10 @@ where
     fn view(&self) -> Html {
         match *self.props.option() {
             Some(ref content) => html! {
-                <div class="flex flex-row gap-1">
-                    <div>
+                <div class="flex gap-1">
+                    <div class="py-px">
                         <a
-                            class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer select-none"
+                            class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
                             onclick=self.link.callback(|_| Msg::Remove)
                         >
                             {"remove"}
@@ -78,7 +78,7 @@ where
                 </div>
             },
             None => html! {
-                <div class="flex flex-row gap-1">
+                <div class="flex items-center gap-1">
                     <span class="w-2/3">{ "None" }</span>
                     <span>{ &self.props.label }</span>
                 </div>

@@ -52,7 +52,7 @@ where
     fn view(&self) -> Html {
         let current_idx: usize = self.props.value.borrow().clone().into();
         html! {
-            <div class="flex gap-1 cursor-default">
+            <div class="flex items-center gap-1 cursor-default">
                 <Select
                     options=self.props.items
                     current_idx=current_idx

@@ -71,8 +71,8 @@ impl Component for InputNumber {
         };
 
         html! {
-            <label>
-                <input type="number" class="input w-[120px]" value=value placeholder=placeholder onchange=self.link.callback(Msg::Change) />
+            <label class="flex items-center gap-1">
+                <input type="number" class="input w-[120px]" placeholder=placeholder value=value onchange=self.link.callback(Msg::Change) />
                 { &self.props.label }
             </label>
         }

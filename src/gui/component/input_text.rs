@@ -54,8 +54,8 @@ impl Component for InputText {
         let oninput = self.link.callback(|data: InputData| Msg::Input(data.value));
 
         html! {
-            <label>
-                <input type="text" class="input w-2/3" value=self.props.value().to_owned() oninput=oninput />
+            <label class="flex items-center gap-1 align-bottom">
+                <input type="text" class="input w-2/3" placeholder="Empty" value=self.props.value().to_owned() oninput=oninput />
                 { &self.props.label }
             </label>
         }

@@ -63,7 +63,7 @@ impl Component for NavBar {
     fn view(&self) -> Html {
         html! {
             <nav class="bg-menu-bar select-none">
-                <div class="flex gap-2 px-1">
+                <div class="flex items-center gap-2 px-1">
                     <button class="btn" onclick=self.link.callback(|_| Msg::Open)>
                         {"Open"}
                     </button>
