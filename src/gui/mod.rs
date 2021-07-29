@@ -49,7 +49,7 @@ impl Component for Gui {
                             { self.save_game.view("Mass Effect 2") }
                         </Tab>
                         <Tab title="Général">
-                            <Me2General save_game=Me2Type::Legendary(self.save_game.clone()) />
+                            <Me2General save_game=Me2Type::Legendary(RcUi::clone(&self.save_game)) />
                         </Tab>
                     </TabBar>
                 </section>

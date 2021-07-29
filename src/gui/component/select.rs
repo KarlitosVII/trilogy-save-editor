@@ -89,7 +89,7 @@ impl Component for Select {
                 onblur=self.opened.then(||self.link.callback(|_| Msg::Close))
                 ref=self.select_ref.clone()
             >
-                <a class="block bg-theme-bg hover:bg-theme-hover px-1 cursor-pointer min-w-full relative select-chevron"
+                <a class="block bg-theme-bg hover:bg-theme-hover active:bg-theme-active px-1 cursor-pointer min-w-full relative select-chevron"
                     onclick=onclick
                 >
                     { self.props.options[self.props.current_idx] }

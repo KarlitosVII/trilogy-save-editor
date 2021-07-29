@@ -45,7 +45,7 @@ impl<T> RcUi<T> {
 impl RawUi for RcUi<u8> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label=label.to_owned() value=NumberType::Byte(self.clone()) />
+            <InputNumber label=label.to_owned() value=NumberType::Byte(RcUi::clone(self)) />
         }
     }
 }
@@ -53,7 +53,7 @@ impl RawUi for RcUi<u8> {
 impl RawUi for RcUi<i32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label=label.to_owned() value=NumberType::Integer(self.clone()) />
+            <InputNumber label=label.to_owned() value=NumberType::Integer(RcUi::clone(self)) />
         }
     }
 }
@@ -61,16 +61,15 @@ impl RawUi for RcUi<i32> {
 impl RawUi for RcUi<f32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label=label.to_owned() value=NumberType::Float(self.clone()) />
+            <InputNumber label=label.to_owned() value=NumberType::Float(RcUi::clone(self)) />
         }
     }
 }
 
 impl RawUi for RcUi<bool> {
     fn view(&self, label: &str) -> yew::Html {
-        // TODO
         html! {
-            {label}
+            <CheckBox label=label.to_owned() value=RcUi::clone(self) />
         }
     }
 }
@@ -78,7 +77,7 @@ impl RawUi for RcUi<bool> {
 impl RawUi for RcUi<String> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputText label=label.to_owned() value=self.clone() />
+            <InputText label=label.to_owned() value=RcUi::clone(self) />
         }
     }
 }
@@ -89,7 +88,7 @@ where
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <RawUiOption<T> label=label.to_owned() option=self.clone() />
+            <RawUiOption<T> label=label.to_owned() option=RcUi::clone(self) />
         }
     }
 }
@@ -100,7 +99,7 @@ where
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <RawUiVec<T> label=label.to_owned() vec=self.clone() />
+            <RawUiVec<T> label=label.to_owned() vec=RcUi::clone(self) />
         }
     }
 }

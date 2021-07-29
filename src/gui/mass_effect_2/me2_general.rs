@@ -75,11 +75,11 @@ impl Component for Me2General {
         let (player, me1_plot, plot) = match self.props.save_game {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
-                (me2.player.clone(), me2.me1_plot.clone(), me2.plot.clone())
+                (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
             }
             Me2Type::Legendary(ref me2) => {
                 let me2 = me2.borrow();
-                (me2.player.clone(), me2.me1_plot.clone(), me2.plot.clone())
+                (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
             }
         };
         let (player, me1_plot, plot) = (player.borrow(), me1_plot.borrow(), plot.borrow());
@@ -232,33 +232,32 @@ impl Component for Me2General {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
                 (
-                    me2.difficulty.clone(),
-                    me2.end_game_state.clone(),
-                    me2.player.clone(),
-                    me2.plot.clone(),
+                    RcUi::clone(&me2.difficulty),
+                    RcUi::clone(&me2.end_game_state),
+                    RcUi::clone(&me2.player),
+                    RcUi::clone(&me2.plot),
                 )
             }
             Me2Type::Legendary(ref me2) => {
                 let me2 = me2.borrow();
                 (
-                    me2.difficulty.clone(),
-                    me2.end_game_state.clone(),
-                    me2.player.clone(),
-                    me2.plot.clone(),
+                    RcUi::clone(&me2.difficulty),
+                    RcUi::clone(&me2.end_game_state),
+                    RcUi::clone(&me2.player),
+                    RcUi::clone(&me2.plot),
                 )
             }
         };
 
         html! {
-            <div class="flex flex-row gap-1">
-                <div class="flex-1 flex flex-col gap-1">
+            <div class="flex flex-row divide-solid divide-x divide-default-border">
+                <div class="flex-1 pr-1 flex flex-col gap-1">
                     { self.role_play(player.borrow()) }
                     { self.morality(plot.borrow()) }
                     { self.gameplay(player.borrow()) }
                     { self.resources(player.borrow()) }
                 </div>
-                <div class="flex-initial w-px bg-default-border"></div>
-                <div class="flex-1 flex flex-col gap-1">
+                <div class="flex-1 pl-1 flex flex-col gap-1">
                     { self.general(difficulty, end_game_state) }
                     { self.bonus_powers(player.borrow()) }
                 </div>

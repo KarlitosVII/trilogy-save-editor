@@ -37,6 +37,7 @@ impl Component for Table {
 
     fn change(&mut self, mut props: Self::Properties) -> ShouldRender {
         let Props { title, opened, children } = &mut props;
+        // Prevent table to close
         if self.props.title != *title || self.props.children != *children {
             *opened = self.props.opened;
             self.props = props;
