@@ -99,7 +99,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
             (bytes, -(len / 2))
         } else {
             // Ascii
-            let (encoded, _, had_errors) = WINDOWS_1252.encode(&string);
+            let (encoded, _, had_errors) = WINDOWS_1252.encode(string);
             if had_errors {
                 return Err(Error::custom("WINDOWS_1252 encoding error"));
             }
