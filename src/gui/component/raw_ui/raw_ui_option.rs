@@ -1,6 +1,5 @@
 use std::cell::{Ref, RefMut};
 use yew::prelude::*;
-use yewtil::NeqAssign;
 
 use crate::gui::{RawUi, RcUi};
 
@@ -8,10 +7,10 @@ pub enum Msg {
     Remove,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, Clone)]
 pub struct Props<T>
 where
-    T: RawUi + PartialEq,
+    T: RawUi,
 {
     pub label: String,
     pub option: RcUi<Option<T>>,
@@ -19,7 +18,7 @@ where
 
 impl<T> Props<T>
 where
-    T: RawUi + PartialEq,
+    T: RawUi,
 {
     fn option(&self) -> Ref<'_, Option<T>> {
         self.option.borrow()
@@ -32,7 +31,7 @@ where
 
 pub struct RawUiOption<T>
 where
-    T: RawUi + PartialEq,
+    T: RawUi,
 {
     props: Props<T>,
     link: ComponentLink<Self>,
@@ -40,7 +39,7 @@ where
 
 impl<T> Component for RawUiOption<T>
 where
-    T: RawUi + PartialEq,
+    T: RawUi,
 {
     type Message = Msg;
     type Properties = Props<T>;
@@ -59,7 +58,13 @@ where
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
+        let Props { label, option } = &props;
+        if self.props.label != *label || !self.props.option.ptr_eq(option) {
+            self.props = props;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {

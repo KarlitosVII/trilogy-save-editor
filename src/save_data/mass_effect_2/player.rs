@@ -38,7 +38,7 @@ pub struct Player {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Power {
     name: String,
     rank: f32,
@@ -47,7 +47,7 @@ pub struct Power {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct Weapon {
     class_name: String,
     ammo_used_count: i32,
@@ -58,7 +58,7 @@ struct Weapon {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct Hotkey {
     pawn_name: String,
     power_id: i32,

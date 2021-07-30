@@ -3,7 +3,7 @@ use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 
 use super::{
-    shared::{Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector},
+    shared::{Door, EndGameState, Guid, Kismet, Level, Rotator, SaveTimeStamp, Vector},
     String,
 };
 
@@ -36,8 +36,8 @@ pub struct Me3SaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_records: IndexMap<String, bool>,
-    kismet_records: Vec<KismetRecord>,
+    streaming_states: IndexMap<String, bool>,
+    kismet_records: Vec<Kismet>,
     doors: Vec<Door>,
     placeables: Vec<Placeable>,
     pawns: Vec<Guid>,

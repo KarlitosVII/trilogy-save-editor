@@ -72,7 +72,7 @@ pub struct PlotTable {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,
@@ -80,7 +80,7 @@ pub struct PlotQuest {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct PlotCodex {
     pages: IndexMap<i32, bool>,
 }

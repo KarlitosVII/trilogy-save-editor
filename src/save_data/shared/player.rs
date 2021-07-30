@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum Origin {
     None,
     Spacer,
@@ -8,7 +8,7 @@ pub enum Origin {
     Earthborn,
 }
 
-#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum Notoriety {
     None,
     Survivor,
@@ -17,7 +17,7 @@ pub enum Notoriety {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct WeaponLoadout {
     assault_rifle: String,
     shotgun: String,

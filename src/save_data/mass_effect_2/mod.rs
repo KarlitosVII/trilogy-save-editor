@@ -4,7 +4,7 @@ use serde::{de, Deserialize, Serialize};
 
 use super::shared::{
     plot::{Me1PlotTable, PlotTable},
-    Door, EndGameState, Guid, KismetRecord, Level, Rotator, SaveTimeStamp, Vector,
+    Door, EndGameState, Guid, Kismet, Level, Rotator, SaveTimeStamp, Vector,
 };
 
 pub mod player;
@@ -33,8 +33,8 @@ pub struct Me2SaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_records: IndexMap<String, bool>,
-    kismet_records: Vec<KismetRecord>,
+    streaming_states: IndexMap<String, bool>,
+    kismet_records: Vec<Kismet>,
     doors: Vec<Door>,
     pawns: Vec<Guid>,
     pub player: Player,
@@ -80,8 +80,8 @@ pub struct Me2LeSaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_records: IndexMap<String, bool>,
-    kismet_records: Vec<KismetRecord>,
+    streaming_states: IndexMap<String, bool>,
+    kismet_records: Vec<Kismet>,
     doors: Vec<Door>,
     pawns: Vec<Guid>,
     pub player: Player,
@@ -125,7 +125,7 @@ impl<'de> serde::Deserialize<'de> for Me2LeVersion {
     }
 }
 
-#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum Difficulty {
     Casual,
     Normal,
@@ -135,51 +135,10 @@ pub enum Difficulty {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 struct DependentDlc {
     id: i32,
     name: String,
-}
-
-#[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
-struct LevelTreasure {
-    level_name: String,
-    credits: i32,
-    xp: i32,
-    items: Vec<String>,
-}
-
-#[allow(clippy::enum_variant_names)]
-#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
-enum AutoReplyModeOptions {
-    AllDecisions,
-    MajorDecisions,
-    NoDecisions,
-}
-
-#[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
-struct ObjectiveMarker {
-    marker_owned_data: String,
-    marker_offset: Vector,
-    marker_label: i32,
-    bone_to_attach_to: String,
-    marker_icon_type: ObjectiveMarkerIconType,
-}
-
-#[derive(Deserialize, Serialize, Clone, PartialEq, RawUi)]
-enum ObjectiveMarkerIconType {
-    None,
-    Attack,
-    Supply,
-    Alert,
-}
-
-impl Default for ObjectiveMarkerIconType {
-    fn default() -> Self {
-        ObjectiveMarkerIconType::None
-    }
 }
 
 #[cfg(test)]

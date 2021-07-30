@@ -9,7 +9,7 @@ pub use deserializer::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum Error {
     Message(String),
     Eof,

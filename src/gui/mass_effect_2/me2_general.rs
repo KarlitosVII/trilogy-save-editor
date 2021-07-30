@@ -22,7 +22,7 @@ pub enum Me2Type {
     Legendary(RcUi<Me2LeSaveGame>),
 }
 
-#[derive(Clone, PartialEq, RawUi)]
+#[derive(Clone, RawUi)]
 enum Me2Class {
     Adept,
     Engineer,

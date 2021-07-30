@@ -1,5 +1,4 @@
 use yew::prelude::*;
-use yewtil::NeqAssign;
 
 use crate::gui::{component::Select, RcUi};
 
@@ -7,10 +6,10 @@ pub enum Msg {
     Changed(usize),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, Clone)]
 pub struct Props<T>
 where
-    T: From<usize> + Into<usize> + Clone + PartialEq + 'static,
+    T: From<usize> + Into<usize> + Clone + 'static,
 {
     pub label: String,
     pub items: &'static [&'static str],
@@ -19,7 +18,7 @@ where
 
 pub struct RawUiEnum<T>
 where
-    T: From<usize> + Into<usize> + Clone + PartialEq + 'static,
+    T: From<usize> + Into<usize> + Clone + 'static,
 {
     props: Props<T>,
     link: ComponentLink<Self>,
@@ -27,7 +26,7 @@ where
 
 impl<T> Component for RawUiEnum<T>
 where
-    T: From<usize> + Into<usize> + Clone + PartialEq + 'static,
+    T: From<usize> + Into<usize> + Clone + 'static,
 {
     type Message = Msg;
     type Properties = Props<T>;
@@ -46,7 +45,16 @@ where
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
+        let Props { label, items, value } = &props;
+        if self.props.label != *label
+            || self.props.items != *items
+            || !self.props.value.ptr_eq(value)
+        {
+            self.props = props;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {

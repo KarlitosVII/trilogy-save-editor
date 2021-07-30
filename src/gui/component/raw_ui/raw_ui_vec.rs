@@ -1,6 +1,5 @@
 use std::cell::{Ref, RefMut};
 use yew::prelude::*;
-use yewtil::NeqAssign;
 
 use crate::gui::{component::Table, RawUi, RcUi};
 
@@ -10,10 +9,10 @@ pub enum Msg {
     Remove(usize),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, Clone)]
 pub struct Props<T>
 where
-    T: RawUi + PartialEq + Default,
+    T: RawUi + Default,
 {
     pub label: String,
     pub vec: RcUi<Vec<T>>,
@@ -21,7 +20,7 @@ where
 
 impl<T> Props<T>
 where
-    T: RawUi + PartialEq + Default,
+    T: RawUi + Default,
 {
     fn vec(&self) -> Ref<'_, Vec<T>> {
         self.vec.borrow()
@@ -34,7 +33,7 @@ where
 
 pub struct RawUiVec<T>
 where
-    T: RawUi + PartialEq + Default,
+    T: RawUi + Default,
 {
     props: Props<T>,
     link: ComponentLink<Self>,
@@ -43,7 +42,7 @@ where
 
 impl<T> Component for RawUiVec<T>
 where
-    T: RawUi + PartialEq + Default,
+    T: RawUi + Default,
 {
     type Message = Msg;
     type Properties = Props<T>;
@@ -70,7 +69,13 @@ where
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
+        let Props { label, vec } = &props;
+        if self.props.label != *label || !self.props.vec.ptr_eq(vec) {
+            self.props = props;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {

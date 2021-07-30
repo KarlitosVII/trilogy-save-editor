@@ -24,7 +24,7 @@ where
 //     fn draw_fields<'a>(&'a mut self, gui: &'a Gui) -> Vec<Box<dyn FnMut() + 'a>>;
 // }
 
-#[derive(Deserialize, Serialize, Clone, Default, PartialEq, Eq)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct RcUi<T>(Rc<RefCell<T>>);
 
 impl<T> RcUi<T> {
@@ -33,11 +33,15 @@ impl<T> RcUi<T> {
     }
 
     pub fn borrow(&self) -> Ref<'_, T> {
-        (*self.0).borrow()
+        RefCell::borrow(&*self.0)
     }
 
     pub fn borrow_mut(&self) -> RefMut<'_, T> {
-        (*self.0).borrow_mut()
+        RefCell::borrow_mut(&*self.0)
+    }
+    
+    pub fn ptr_eq(&self, other: &RcUi<T>) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
     }
 }
 
@@ -84,7 +88,7 @@ impl RawUi for RcUi<String> {
 
 impl<T> RawUi for RcUi<Option<T>>
 where
-    T: RawUi + PartialEq,
+    T: RawUi,
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
@@ -95,7 +99,7 @@ where
 
 impl<T> RawUi for RcUi<Vec<T>>
 where
-    T: RawUi + PartialEq + Default,
+    T: RawUi + Default,
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
@@ -106,7 +110,7 @@ where
 
 impl<K, V> RawUi for RcUi<IndexMap<K, V>>
 where
-    K: Clone + Eq + Hash + Display + 'static,
+    K: Clone + Eq + Hash + Default + Display + 'static,
     V: RawUi + Default,
 {
     fn view(&self, label: &str) -> yew::Html {

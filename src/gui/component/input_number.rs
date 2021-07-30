@@ -1,20 +1,47 @@
 use yew::prelude::*;
-use yewtil::NeqAssign;
 
 use crate::gui::RcUi;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub enum NumberType {
     Byte(RcUi<u8>),
     Integer(RcUi<i32>),
     Float(RcUi<f32>),
 }
 
+impl PartialEq for NumberType {
+    fn eq(&self, other: &NumberType) -> bool {
+        match self {
+            NumberType::Byte(byte) => {
+                if let NumberType::Byte(other) = other {
+                    byte.ptr_eq(other)
+                } else {
+                    false
+                }
+            }
+            NumberType::Integer(integer) => {
+                if let NumberType::Integer(other) = other {
+                    integer.ptr_eq(other)
+                } else {
+                    false
+                }
+            }
+            NumberType::Float(float) => {
+                if let NumberType::Float(other) = other {
+                    float.ptr_eq(other)
+                } else {
+                    false
+                }
+            }
+        }
+    }
+}
+
 pub enum Msg {
     Change(ChangeData),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, Clone)]
 pub struct Props {
     pub label: String,
     pub value: NumberType,
@@ -60,7 +87,13 @@ impl Component for InputNumber {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
+        let Props { label, value } = &props;
+        if self.props.label != *label || self.props.value != *value {
+            self.props = props;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {

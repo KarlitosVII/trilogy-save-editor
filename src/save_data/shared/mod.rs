@@ -8,7 +8,7 @@ pub mod appearance;
 pub mod player;
 pub mod plot;
 
-#[derive(Clone, PartialEq, RawUi)]
+#[derive(Clone, RawUi)]
 #[repr(u32)]
 pub enum EndGameState {
     NotFinished,
@@ -52,7 +52,7 @@ pub struct SaveTimeStamp {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Vector {
     x: f32,
     y: f32,
@@ -60,7 +60,7 @@ pub struct Vector {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Vector2d {
     x: f32,
     y: f32,
@@ -75,14 +75,14 @@ pub struct Rotator {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Level {
     name: String,
     should_be_loaded: bool,
     should_be_visible: bool,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct Guid {
     pub part1: String,
     pub part2: String,
@@ -171,14 +171,14 @@ impl serde::Serialize for Guid {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
-pub struct KismetRecord {
+#[derive(Deserialize, Serialize, Default, Clone)]
+pub struct Kismet {
     guid: Guid,
     value: bool,
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct Door {
     guid: Guid,
     current_state: u8,
