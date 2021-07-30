@@ -1,4 +1,7 @@
-use std::cell::{Ref, RefMut};
+use std::{
+    cell::{Ref, RefMut},
+    fmt::Display,
+};
 use yew::prelude::*;
 
 use crate::gui::{component::Table, RawUi, RcUi};
@@ -12,7 +15,7 @@ pub enum Msg {
 #[derive(Properties, Clone)]
 pub struct Props<T>
 where
-    T: RawUi + Default,
+    T: RawUi + Default + Display,
 {
     pub label: String,
     pub vec: RcUi<Vec<T>>,
@@ -20,7 +23,7 @@ where
 
 impl<T> Props<T>
 where
-    T: RawUi + Default,
+    T: RawUi + Default + Display,
 {
     fn vec(&self) -> Ref<'_, Vec<T>> {
         self.vec.borrow()
@@ -33,7 +36,7 @@ where
 
 pub struct RawUiVec<T>
 where
-    T: RawUi + Default,
+    T: RawUi + Default + Display,
 {
     props: Props<T>,
     link: ComponentLink<Self>,
@@ -42,7 +45,7 @@ where
 
 impl<T> Component for RawUiVec<T>
 where
-    T: RawUi + Default,
+    T: RawUi + Default + Display,
 {
     type Message = Msg;
     type Properties = Props<T>;
@@ -85,7 +88,23 @@ where
             .opened
             .then(|| {
                 let vec = self.props.vec();
+                
+                // Exceptions
+                macro_rules! display_idx {
+                    ($vec:ident => $($type:ty)*) => {
+                        $((&*$vec as &dyn std::any::Any).is::<Vec<RcUi<$type>>>()) ||*
+                    }
+                }
+                let display_idx = display_idx!(vec => u8 i32 f32 bool String);
+
                 let items = vec.iter().enumerate().map(|(i, item)| {
+                    let label = item.to_string();
+                    let row = if display_idx || label.is_empty() {
+                        item.view(&i.to_string())
+                    } else {
+                        item.view(&label)
+                    };
+
                     html_nested! {
                         <div class="flex gap-1">
                             <div class="py-px">
@@ -96,7 +115,7 @@ where
                                     {"remove"}
                                 </a>
                             </div>
-                            { item.view(&i.to_string()) }
+                            { row }
                         </div>
                     }
                 });

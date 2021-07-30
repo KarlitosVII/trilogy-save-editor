@@ -1,6 +1,6 @@
 use anyhow::Result;
 use bitvec::prelude::*;
-use derive_more::{Deref, DerefMut};
+use derive_more::{Deref, DerefMut, Display};
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
 use std::fmt;
@@ -72,7 +72,8 @@ pub struct PlotTable {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "{}", quest_counter)]
 pub struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,
@@ -80,9 +81,18 @@ pub struct PlotQuest {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "")]
 pub struct PlotCodex {
-    pages: IndexMap<i32, bool>,
+    pages: Vec<PlotCodexPage>,
+}
+
+#[rc_ize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "{}", page)]
+pub struct PlotCodexPage {
+    page: i32,
+    is_new: bool,
 }
 
 #[derive(Deserialize)]

@@ -1,11 +1,8 @@
 use anyhow::Result;
-use indexmap::IndexMap;
 use serde::{de, Deserialize, Serialize};
+use derive_more::Display;
 
-use super::shared::{
-    plot::{Me1PlotTable, PlotTable},
-    Door, EndGameState, Guid, Kismet, Level, Rotator, SaveTimeStamp, Vector,
-};
+use super::{Guid, shared::{Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp, StreamingState, Vector, plot::{Me1PlotTable, PlotTable}}};
 
 pub mod player;
 use player::*;
@@ -33,7 +30,7 @@ pub struct Me2SaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_states: IndexMap<String, bool>,
+    streaming_states: Vec<StreamingState>,
     kismet_records: Vec<Kismet>,
     doors: Vec<Door>,
     pawns: Vec<Guid>,
@@ -80,12 +77,12 @@ pub struct Me2LeSaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_states: IndexMap<String, bool>,
+    streaming_states: Vec<StreamingState>,
     kismet_records: Vec<Kismet>,
     doors: Vec<Door>,
     pawns: Vec<Guid>,
     pub player: Player,
-    me1_import_rewards: Me1ImportRewards,
+    me1_import_rewards: Me1ImportBonus,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     pub me1_plot: Me1PlotTable,
@@ -95,14 +92,14 @@ pub struct Me2LeSaveGame {
 
 #[rc_ize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
-struct Me1ImportRewards {
-    me1_level: i32,
-    me2_level: i32,
-    experience: f32,
-    credits: f32,
-    resources: f32,
-    paragon: f32,
-    renegade: f32,
+struct Me1ImportBonus {
+    imported_me1_level: i32,
+    starting_me2_level: i32,
+    bonus_xp: f32,
+    bonus_credits: f32,
+    bonus_resources: f32,
+    bonus_paragon: f32,
+    bonus_renegade: f32,
 }
 
 #[derive(Serialize, Clone)]
@@ -135,7 +132,8 @@ pub enum Difficulty {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "{}", name)]
 struct DependentDlc {
     id: i32,
     name: String,

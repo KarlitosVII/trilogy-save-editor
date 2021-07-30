@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use derive_more::Display;
 
 use crate::save_data::shared::{
     appearance::Appearance,
@@ -38,7 +39,8 @@ pub struct Player {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "{}", name)]
 pub struct Power {
     name: String,
     rank: f32,
@@ -47,18 +49,20 @@ pub struct Power {
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "{}", class_name)]
 struct Weapon {
     class_name: String,
     ammo_used_count: i32,
     ammo_total: i32,
     current_weapon: bool,
-    was_last_weapon: bool,
+    last_weapon: bool,
     ammo_power_name: String,
 }
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[display(fmt = "")]
 struct Hotkey {
     pawn_name: String,
     power_id: i32,

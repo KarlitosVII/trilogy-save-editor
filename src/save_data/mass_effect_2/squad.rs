@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
+use derive_more::Display;
 
 use crate::save_data::shared::player::WeaponLoadout;
 
 use super::player::Power;
 
 #[rc_ize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", tag)]
 pub struct Henchman {
     tag: String,
     powers: Vec<Power>,

@@ -2,15 +2,18 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::{
     cell::{Ref, RefCell, RefMut},
-    fmt::Display,
-    hash::Hash,
+    fmt::{self, Display},
     rc::Rc,
+    hash::Hash
 };
 use yew::prelude::*;
 
 use crate::{
     gui::component::*,
-    save_data::shared::{appearance::LinearColor, plot::BoolVec, Guid},
+    save_data::{
+        shared::{appearance::LinearColor, plot::BoolVec},
+        Guid,
+    },
 };
 
 pub trait RawUi
@@ -39,9 +42,15 @@ impl<T> RcUi<T> {
     pub fn borrow_mut(&self) -> RefMut<'_, T> {
         RefCell::borrow_mut(&*self.0)
     }
-    
+
     pub fn ptr_eq(&self, other: &RcUi<T>) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl<T: Display> Display for RcUi<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.borrow().fmt(f)
     }
 }
 
@@ -99,7 +108,7 @@ where
 
 impl<T> RawUi for RcUi<Vec<T>>
 where
-    T: RawUi + Default,
+    T: RawUi + Default + Display,
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
