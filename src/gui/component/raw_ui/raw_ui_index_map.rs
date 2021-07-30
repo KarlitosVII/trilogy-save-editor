@@ -63,6 +63,7 @@ where
     props: Props<T>,
     link: ComponentLink<Self>,
     opened: bool,
+    new_item_idx: usize,
 }
 
 impl<T> Component for RawUiIndexMap<T>
@@ -73,21 +74,34 @@ where
     type Properties = Props<T>;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        RawUiIndexMap { props, link, opened: false }
+        RawUiIndexMap { props, link, opened: false, new_item_idx: 0 }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Toggle => {
                 self.opened = !self.opened;
+                if self.opened {
+                    // Prevent last item to reopen
+                    self.new_item_idx = match self.props.index_map {
+                        IndexMapKeyType::I32(ref index_map) => index_map.borrow().len(),
+                        IndexMapKeyType::String(ref index_map) => index_map.borrow().len(),
+                    };
+                }
                 true
             }
             Msg::Add => {
                 match self.props.index_map {
                     IndexMapKeyType::I32(ref index_map) => {
+                        // Open added item
+                        self.new_item_idx = index_map.borrow().len();
+
                         index_map.borrow_mut().entry(-1).or_default();
                     }
                     IndexMapKeyType::String(ref index_map) => {
+                        // Open added item
+                        self.new_item_idx = index_map.borrow().len();
+
                         index_map.borrow_mut().entry(Default::default()).or_default();
                     }
                 }
@@ -153,7 +167,7 @@ where
                                     {"remove"}
                                 </a>
                             </div>
-                            <RawUiStruct label=label>
+                            <RawUiStruct label=label opened=self.new_item_idx == idx>
                                 { key }
                                 { RawUi::view(value, "Value") }
                             </RawUiStruct>
@@ -181,11 +195,16 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html!{
-                                <InputText label=String::from("Key") value=RcUi::new(key.clone())
+                                <InputText label=String::from("Key") value=RcUi::new(key.to_owned())
                                     oninput=self.link.callback(move |callback| Msg::EditKey(idx, callback))
                                 />
                             };
-                            item(idx, key.to_string(), input_k, value)
+                            let label = if !key.is_empty() {
+                                key.to_owned()
+                            } else {
+                                String::from("<empty>")
+                            };
+                            item(idx, label, input_k, value)
                         })
                         .collect::<Html>(),
                 };

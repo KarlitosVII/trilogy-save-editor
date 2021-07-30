@@ -41,7 +41,7 @@ impl serde::Serialize for EndGameState {
     }
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct SaveTimeStamp {
     seconds_since_midnight: i32,
@@ -50,7 +50,7 @@ pub struct SaveTimeStamp {
     year: i32,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "")]
 pub struct Vector {
@@ -59,7 +59,7 @@ pub struct Vector {
     z: f32,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "")]
 pub struct Vector2d {
@@ -67,7 +67,7 @@ pub struct Vector2d {
     y: f32,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Rotator {
     pitch: i32,
@@ -75,7 +75,7 @@ pub struct Rotator {
     roll: i32,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", name)]
 pub struct Level {
@@ -84,7 +84,7 @@ pub struct Level {
     should_be_visible: bool,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", name)]
 pub struct StreamingState {
@@ -92,7 +92,7 @@ pub struct StreamingState {
     is_active: bool,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "")]
 pub struct Kismet {
@@ -100,7 +100,7 @@ pub struct Kismet {
     value: bool,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "")]
 pub struct Door {

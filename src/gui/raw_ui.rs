@@ -20,6 +20,9 @@ where
     Self: Clone + 'static,
 {
     fn view(&self, label: &str) -> yew::Html;
+    fn view_opened(&self, label: &str, _opened: bool) -> yew::Html {
+        self.view(label)
+    }
 }
 
 // pub trait RawUiMe1Legacy {
@@ -120,7 +123,7 @@ impl<K, V> RawUi for RcUi<IndexMap<K, V>>
 where
     K: Clone + 'static,
     V: RawUi + Default,
-    RcUi<IndexMap<K, V>>: Into<IndexMapKeyType<V>>
+    RcUi<IndexMap<K, V>>: Into<IndexMapKeyType<V>>,
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {

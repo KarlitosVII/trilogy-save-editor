@@ -71,7 +71,7 @@ impl Component for InputText {
 
         html! {
             <label class="flex items-center gap-1 align-bottom">
-                <input type="text" class="input w-2/3" placeholder="Empty" value=self.props.value().to_owned() oninput=oninput />
+                <input type="text" class="input w-2/3" placeholder="<empty>" value=self.props.value().to_owned() oninput=oninput />
                 { &self.props.label }
             </label>
         }

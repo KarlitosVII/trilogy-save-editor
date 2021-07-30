@@ -16,7 +16,7 @@ pub enum Notoriety {
     Ruthless,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone, Default)]
 pub struct WeaponLoadout {
     assault_rifle: String,

@@ -50,7 +50,7 @@ impl serde::Serialize for BoolVec {
     }
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Me1PlotTable {
     pub booleans: BoolVec,
@@ -58,7 +58,7 @@ pub struct Me1PlotTable {
     pub floats: Vec<f32>,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PlotTable {
     pub booleans: BoolVec,
@@ -71,7 +71,7 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", quest_counter)]
 pub struct PlotQuest {
@@ -80,14 +80,14 @@ pub struct PlotQuest {
     history: Vec<i32>,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "")]
 pub struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", page)]
 pub struct PlotCodexPage {

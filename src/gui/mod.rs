@@ -46,7 +46,7 @@ impl Component for Gui {
                 <section class="flex-auto flex p-1">
                     <TabBar>
                         <Tab title="Raw Data">
-                            { self.save_game.view("Mass Effect 2") }
+                            { self.save_game.view_opened("Mass Effect 2", true) }
                         </Tab>
                         <Tab title="Général">
                             <Me2General save_game=Me2Type::Legendary(RcUi::clone(&self.save_game)) />

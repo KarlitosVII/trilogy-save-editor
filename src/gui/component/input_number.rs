@@ -122,11 +122,11 @@ impl Component for InputNumber {
 
     fn view(&self) -> Html {
         let (value, placeholder) = match self.props.value {
-            NumberType::Byte(ref byte) => (byte.borrow().to_string(), "Byte"),
-            NumberType::Integer(ref integer) => (integer.borrow().to_string(), "Integer"),
+            NumberType::Byte(ref byte) => (byte.borrow().to_string(), "<byte>"),
+            NumberType::Integer(ref integer) => (integer.borrow().to_string(), "<integer>"),
             NumberType::Float(ref float) => {
                 let mut ryu = ryu::Buffer::new();
-                (ryu.format(*float.borrow()).trim_end_matches(".0").to_owned(), "Float")
+                (ryu.format(*float.borrow()).trim_end_matches(".0").to_owned(), "<float>")
             }
         };
 

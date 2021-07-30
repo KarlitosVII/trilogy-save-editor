@@ -9,7 +9,7 @@ use syn::{
 };
 
 #[proc_macro_attribute]
-pub fn rc_ize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(input as DeriveInput);
 
     if !matches!(ast.data, syn::Data::Struct(_)) {
@@ -248,10 +248,14 @@ fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenS
     quote! {
         impl crate::gui::RawUi for crate::gui::RcUi<#name> {
             fn view(&self, label: &str) -> yew::Html {
+                self.view_opened(label, false)
+            }
+            
+            fn view_opened(&self, label: &str, opened: bool) -> yew::Html {
                 use crate::gui::component::RawUiStruct;
                 let fields = [#(#view_fields),*];
                 yew::html! {
-                    <RawUiStruct label=label.to_owned()>
+                    <RawUiStruct label=label.to_owned() opened=opened>
                         { for fields }
                     </RawUiStruct>
                 }

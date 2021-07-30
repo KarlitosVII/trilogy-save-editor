@@ -4,7 +4,7 @@ use serde::{ser::SerializeTupleStruct, Deserialize, Serialize};
 
 use super::Vector;
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Appearance {
     combat_appearance: PlayerAppearanceType,
@@ -30,7 +30,7 @@ enum PlayerAppearanceType {
     Full,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct HeadMorph {
     pub hair_mesh: String,

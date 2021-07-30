@@ -6,7 +6,7 @@ use crate::save_data::shared::{
     player::{Notoriety, Origin, WeaponLoadout},
 };
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Player {
     pub is_female: bool,
@@ -38,7 +38,7 @@ pub struct Player {
     localized_class_name: i32,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", name)]
 pub struct Power {
@@ -48,7 +48,7 @@ pub struct Power {
     wheel_display_index: i32,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", class_name)]
 struct Weapon {
@@ -60,7 +60,7 @@ struct Weapon {
     ammo_power_name: String,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "")]
 struct Hotkey {

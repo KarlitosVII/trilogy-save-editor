@@ -41,6 +41,7 @@ where
     props: Props<T>,
     link: ComponentLink<Self>,
     opened: bool,
+    new_item_idx: usize,
 }
 
 impl<T> Component for RawUiVec<T>
@@ -51,16 +52,23 @@ where
     type Properties = Props<T>;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        RawUiVec { props, link, opened: false }
+        RawUiVec { props, link, opened: false, new_item_idx: 0 }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Toggle => {
                 self.opened = !self.opened;
+                if self.opened {
+                    // Prevent last item to reopen
+                    self.new_item_idx = self.props.vec().len();
+                }
                 true
             }
             Msg::Add => {
+                // Open added item
+                self.new_item_idx = self.props.vec().len();
+                
                 self.props.vec_mut().push(Default::default());
                 true
             }
@@ -97,19 +105,20 @@ where
                 }
                 let display_idx = display_idx!(vec => u8 i32 f32 bool String);
 
-                let items = vec.iter().enumerate().map(|(i, item)| {
+                let items = vec.iter().enumerate().map(|(idx, item)| {
                     let label = item.to_string();
+                    let opened = self.new_item_idx == idx;
                     let item = if display_idx || label.is_empty() {
-                        item.view(&i.to_string())
+                        item.view_opened(&idx.to_string(), opened)
                     } else {
-                        item.view(&label)
+                        item.view_opened(&label, opened)
                     };
 
                     html_nested! {
                         <div class="flex gap-1">
                             <div class="py-px">
                                 <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
-                                    onclick=self.link.callback(move |_| Msg::Remove(i))
+                                    onclick=self.link.callback(move |_| Msg::Remove(idx))
                                 >
                                     {"remove"}
                                 </a>

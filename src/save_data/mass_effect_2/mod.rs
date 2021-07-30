@@ -15,7 +15,7 @@ pub mod plot_db;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Me2SaveGame {
     _version: Me2Version,
@@ -62,7 +62,7 @@ impl<'de> serde::Deserialize<'de> for Me2Version {
     }
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Me2LeSaveGame {
     _version: Me2LeVersion,
@@ -90,7 +90,7 @@ pub struct Me2LeSaveGame {
     dependant_dlcs: Vec<DependentDlc>,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
 struct Me1ImportBonus {
     imported_me1_level: i32,
@@ -131,7 +131,7 @@ pub enum Difficulty {
     Insanity,
 }
 
-#[rc_ize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Default, Clone, Display)]
 #[display(fmt = "{}", name)]
 struct DependentDlc {
