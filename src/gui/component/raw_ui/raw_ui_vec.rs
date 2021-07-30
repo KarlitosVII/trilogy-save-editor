@@ -88,7 +88,7 @@ where
             .opened
             .then(|| {
                 let vec = self.props.vec();
-                
+
                 // Exceptions
                 macro_rules! display_idx {
                     ($vec:ident => $($type:ty)*) => {
@@ -99,7 +99,7 @@ where
 
                 let items = vec.iter().enumerate().map(|(i, item)| {
                     let label = item.to_string();
-                    let row = if display_idx || label.is_empty() {
+                    let item = if display_idx || label.is_empty() {
                         item.view(&i.to_string())
                     } else {
                         item.view(&label)
@@ -108,23 +108,22 @@ where
                     html_nested! {
                         <div class="flex gap-1">
                             <div class="py-px">
-                                <a
-                                    class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
+                                <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
                                     onclick=self.link.callback(move |_| Msg::Remove(i))
                                 >
                                     {"remove"}
                                 </a>
                             </div>
-                            { row }
+                            { item }
                         </div>
                     }
                 });
+                
                 html! {
                     <div class="p-1">
                         <Table>
                             { for items }
-                            <button
-                                class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
+                            <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
                                 onclick=self.link.callback(|_| Msg::Add)
                             >
                                 {"add"}

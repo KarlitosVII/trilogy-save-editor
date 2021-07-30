@@ -4,7 +4,6 @@ use std::{
     cell::{Ref, RefCell, RefMut},
     fmt::{self, Display},
     rc::Rc,
-    hash::Hash
 };
 use yew::prelude::*;
 
@@ -119,13 +118,13 @@ where
 
 impl<K, V> RawUi for RcUi<IndexMap<K, V>>
 where
-    K: Clone + Eq + Hash + Default + Display + 'static,
+    K: Clone + 'static,
     V: RawUi + Default,
+    RcUi<IndexMap<K, V>>: Into<IndexMapKeyType<V>>
 {
     fn view(&self, label: &str) -> yew::Html {
-        // TODO
         html! {
-            {label}
+            <RawUiIndexMap<V> label=label.to_owned() index_map=RcUi::clone(self).into() />
         }
     }
 }

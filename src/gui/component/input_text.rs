@@ -3,6 +3,8 @@ use yew::prelude::*;
 
 use crate::gui::RcUi;
 
+use super::CallbackType;
+
 pub enum Msg {
     Input(String),
 }
@@ -11,6 +13,8 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: RcUi<String>,
+    #[prop_or_default]
+    pub oninput: Option<Callback<CallbackType>>,
 }
 
 impl Props {
@@ -39,6 +43,10 @@ impl Component for InputText {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Input(value) => {
+                if let Some(ref callback) = self.props.oninput {
+                    callback.emit(CallbackType::String(value.clone()));
+                }
+
                 *self.props.value_mut() = value;
                 false
             }
@@ -46,8 +54,11 @@ impl Component for InputText {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, value } = &props;
-        if self.props.label != *label || !self.props.value.ptr_eq(value) {
+        let Props { label, value, oninput: onchange } = &props;
+        if self.props.label != *label
+            || !self.props.value.ptr_eq(value)
+            || self.props.oninput != *onchange
+        {
             self.props = props;
             true
         } else {

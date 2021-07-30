@@ -1,3 +1,5 @@
+use std::cell::{Ref, RefMut};
+
 use yew::prelude::*;
 
 use crate::gui::{component::Select, RcUi};
@@ -14,6 +16,19 @@ where
     pub label: String,
     pub items: &'static [&'static str],
     pub value: RcUi<T>,
+}
+
+impl<T> Props<T>
+where
+    T: From<usize> + Into<usize> + Clone + 'static,
+{
+    fn value(&self) -> Ref<'_, T> {
+        self.value.borrow()
+    }
+
+    fn value_mut(&self) -> RefMut<'_, T> {
+        self.value.borrow_mut()
+    }
 }
 
 pub struct RawUiEnum<T>
@@ -38,7 +53,7 @@ where
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Changed(idx) => {
-                *self.props.value.borrow_mut() = T::from(idx);
+                *self.props.value_mut() = T::from(idx);
                 true
             }
         }
@@ -58,7 +73,7 @@ where
     }
 
     fn view(&self) -> Html {
-        let current_idx: usize = self.props.value.borrow().clone().into();
+        let current_idx: usize = self.props.value().clone().into();
         html! {
             <div class="flex items-center gap-1 cursor-default">
                 <Select

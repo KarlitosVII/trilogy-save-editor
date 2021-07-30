@@ -12,3 +12,10 @@ pub use self::{
     check_box::*, clipper::*, input_number::*, input_text::*, nav_bar::*, raw_ui::*, select::*,
     tab_bar::*, table::*,
 };
+
+pub enum CallbackType {
+    Byte(u8),
+    Integer(i32),
+    Float(f32),
+    String(String),
+}

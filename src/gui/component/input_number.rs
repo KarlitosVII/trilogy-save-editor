@@ -2,6 +2,8 @@ use yew::prelude::*;
 
 use crate::gui::RcUi;
 
+use super::CallbackType;
+
 #[derive(Clone)]
 pub enum NumberType {
     Byte(RcUi<u8>),
@@ -45,6 +47,8 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: NumberType,
+    #[prop_or_default]
+    pub onchange: Option<Callback<CallbackType>>,
 }
 
 pub struct InputNumber {
@@ -63,20 +67,37 @@ impl Component for InputNumber {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Change(data) => match data {
-                ChangeData::Value(mut value) => {
+                ChangeData::Value(value) => {
                     if value.is_empty() {
-                        value = String::from("0");
+                        return true;
                     }
 
                     if let Ok(value) = value.parse::<f64>() {
                         match self.props.value {
                             NumberType::Byte(ref byte) => {
-                                *byte.borrow_mut() = value as u8;
+                                let value: u8 = value as u8;
+                                *byte.borrow_mut() = value;
+
+                                if let Some(ref callback) = self.props.onchange {
+                                    callback.emit(CallbackType::Byte(value));
+                                }
                             }
                             NumberType::Integer(ref integer) => {
-                                *integer.borrow_mut() = value as i32
+                                let value = value as i32;
+                                *integer.borrow_mut() = value;
+
+                                if let Some(ref callback) = self.props.onchange {
+                                    callback.emit(CallbackType::Integer(value));
+                                }
                             }
-                            NumberType::Float(ref float) => *float.borrow_mut() = value as f32,
+                            NumberType::Float(ref float) => {
+                                let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
+                                *float.borrow_mut() = value;
+
+                                if let Some(ref callback) = self.props.onchange {
+                                    callback.emit(CallbackType::Float(value));
+                                }
+                            }
                         };
                     }
                     true
@@ -87,8 +108,11 @@ impl Component for InputNumber {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, value } = &props;
-        if self.props.label != *label || self.props.value != *value {
+        let Props { label, value, onchange } = &props;
+        if self.props.label != *label
+            || self.props.value != *value
+            || self.props.onchange != *onchange
+        {
             self.props = props;
             true
         } else {
@@ -100,7 +124,10 @@ impl Component for InputNumber {
         let (value, placeholder) = match self.props.value {
             NumberType::Byte(ref byte) => (byte.borrow().to_string(), "Byte"),
             NumberType::Integer(ref integer) => (integer.borrow().to_string(), "Integer"),
-            NumberType::Float(ref float) => (float.borrow().to_string(), "Float"),
+            NumberType::Float(ref float) => {
+                let mut ryu = ryu::Buffer::new();
+                (ryu.format(*float.borrow()).trim_end_matches(".0").to_owned(), "Float")
+            }
         };
 
         html! {
