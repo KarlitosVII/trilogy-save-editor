@@ -254,7 +254,7 @@ fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenS
             }
 
             fn view_opened(&self, label: &str, opened: bool) -> yew::Html {
-                use crate::gui::component::RawUiStruct;
+                use crate::gui::components::RawUiStruct;
                 let fields = [#(#view_fields),*];
                 yew::html! {
                     <RawUiStruct label=label.to_owned() opened=opened>
@@ -302,7 +302,7 @@ fn impl_raw_ui_root(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStr
             }
 
             fn view_opened(&self, _: &str, _: bool) -> yew::Html {
-                use crate::gui::component::Table;
+                use crate::gui::components::Table;
                 let fields = [#(#view_fields),*];
                 yew::html! {
                     <Table>
@@ -366,7 +366,7 @@ fn impl_raw_ui_enum(
 
         impl crate::gui::RawUi for crate::gui::RcUi<#name> {
             fn view(&self, label: &str) -> yew::Html {
-                use crate::gui::component::RawUiEnum;
+                use crate::gui::components::RawUiEnum;
 
                 yew::html!{
                     <RawUiEnum<#name> label=label.to_owned() items=#name::variants() value=self.clone() />

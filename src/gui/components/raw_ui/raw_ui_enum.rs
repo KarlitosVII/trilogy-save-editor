@@ -2,7 +2,7 @@ use std::cell::{Ref, RefMut};
 
 use yew::prelude::*;
 
-use crate::gui::{component::Select, RcUi};
+use crate::gui::{components::Select, RcUi};
 
 pub enum Msg {
     Changed(usize),

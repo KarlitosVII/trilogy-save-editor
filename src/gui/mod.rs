@@ -2,14 +2,14 @@ use yew::prelude::*;
 
 use crate::{
     gui::{
-        component::*,
+        components::*,
         mass_effect_2::{Me2General, Me2Type},
     },
     save_data::mass_effect_2::Me2LeSaveGame,
     unreal,
 };
 
-pub mod component;
+pub mod components;
 mod mass_effect_2;
 mod raw_ui;
 

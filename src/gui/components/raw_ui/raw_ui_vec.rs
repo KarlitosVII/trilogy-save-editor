@@ -4,7 +4,7 @@ use std::{
 };
 use yew::prelude::*;
 
-use crate::gui::{component::Table, RawUi, RcUi};
+use crate::gui::{components::Table, RawUi, RcUi};
 
 pub enum Msg {
     Toggle,

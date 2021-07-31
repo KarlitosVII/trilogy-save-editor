@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use crate::gui::component::Table;
+use crate::gui::components::Table;
 
 pub enum Msg {
     Toggle,

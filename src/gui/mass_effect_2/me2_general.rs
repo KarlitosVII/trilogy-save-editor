@@ -2,7 +2,7 @@ use std::cell::Ref;
 use yew::prelude::*;
 
 use crate::{
-    gui::{component::*, RawUi, RcUi},
+    gui::{components::*, RawUi, RcUi},
     save_data::{
         mass_effect_2::{
             player::{Player, Power},

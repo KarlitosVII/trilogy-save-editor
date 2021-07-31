@@ -8,7 +8,7 @@ use std::{
 use yew::prelude::*;
 
 use crate::{
-    gui::component::*,
+    gui::components::*,
     save_data::{
         shared::{appearance::LinearColor, plot::BoolVec},
         Guid,

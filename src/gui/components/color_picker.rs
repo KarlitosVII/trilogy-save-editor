@@ -4,7 +4,7 @@ use yew::prelude::*;
 
 use crate::{
     gui::{
-        component::{CallbackType, InputNumber, NumberType},
+        components::{CallbackType, InputNumber, NumberType},
         RcUi,
     },
     save_data::shared::appearance::LinearColor,

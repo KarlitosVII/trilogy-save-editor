@@ -3,7 +3,7 @@ use indexmap::IndexMap;
 use yew::prelude::*;
 
 use crate::gui::{
-    component::{CallbackType, InputNumber, InputText, NumberType, RawUiStruct, Table},
+    components::{CallbackType, InputNumber, InputText, NumberType, RawUiStruct, Table},
     RawUi, RcUi,
 };
 
