@@ -171,7 +171,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_tuple(self, _: usize) -> Result<Self::SerializeTuple> {
-        unimplemented!()
+        Ok(self)
     }
 
     fn serialize_tuple_struct(
@@ -299,15 +299,15 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     type Ok = ();
     type Error = super::Error;
 
-    fn serialize_element<T: ?Sized>(&mut self, _: &T) -> Result<()>
+    fn serialize_element<T: ?Sized>(&mut self, value: &T) -> Result<()>
     where
         T: Serialize,
     {
-        unimplemented!()
+        value.serialize(&mut **self)
     }
 
     fn end(self) -> Result<()> {
-        unimplemented!()
+        Ok(())
     }
 }
 

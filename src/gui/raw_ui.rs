@@ -153,9 +153,8 @@ impl RawUi for RcUi<BoolVec> {
 
 impl RawUi for RcUi<Guid> {
     fn view(&self, label: &str) -> yew::Html {
-        // TODO
         html! {
-            {label}
+            <RawUiGuid label=label.to_owned() guid=RcUi::clone(self) />
         }
     }
 }

@@ -82,7 +82,7 @@ pub struct Me2LeSaveGame {
     doors: Vec<Door>,
     pawns: Vec<Guid>,
     pub player: Player,
-    me1_import_rewards: Me1ImportBonus,
+    me1_import_bonus: Me1ImportBonus,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
     pub me1_plot: Me1PlotTable,

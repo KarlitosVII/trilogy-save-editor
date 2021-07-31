@@ -67,11 +67,11 @@ impl Component for InputText {
     }
 
     fn view(&self) -> Html {
-        let oninput = self.link.callback(|data: InputData| Msg::Input(data.value));
-
         html! {
             <label class="flex items-center gap-1 align-bottom">
-                <input type="text" class="input w-2/3" placeholder="<empty>" value=self.props.value().to_owned() oninput=oninput />
+                <input type="text" class="input w-2/3" placeholder="<empty>" value=self.props.value().to_owned()
+                    oninput=self.link.callback(|data: InputData| Msg::Input(data.value))
+                />
                 { &self.props.label }
             </label>
         }

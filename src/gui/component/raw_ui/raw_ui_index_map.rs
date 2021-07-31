@@ -181,20 +181,20 @@ where
                         .iter()
                         .enumerate()
                         .map(|(idx, (key, value))| {
-                            let input_k = html!{
+                            let input_k = html! {
                                 <InputNumber label=String::from("Key") value=NumberType::Integer(RcUi::new(*key))
                                     onchange=self.link.callback(move |callback| Msg::EditKey(idx, callback))
                                 />
                             };
                             item(idx, key.to_string(), input_k, value)
                         })
-                        .collect::<Html>(),
+                        .collect::<Vec<_>>(),
                     IndexMapKeyType::String(ref index_map) => index_map
                         .borrow()
                         .iter()
                         .enumerate()
                         .map(|(idx, (key, value))| {
-                            let input_k = html!{
+                            let input_k = html! {
                                 <InputText label=String::from("Key") value=RcUi::new(key.to_owned())
                                     oninput=self.link.callback(move |callback| Msg::EditKey(idx, callback))
                                 />
@@ -206,13 +206,13 @@ where
                             };
                             item(idx, label, input_k, value)
                         })
-                        .collect::<Html>(),
+                        .collect::<Vec<_>>(),
                 };
 
                 html! {
                     <div class="p-1">
                         <Table>
-                            { items }
+                            { for items }
                             <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
                                 onclick=self.link.callback(|_| Msg::Add)
                             >
