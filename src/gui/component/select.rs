@@ -105,7 +105,7 @@ impl Component for Select {
                         "border",
                         "border-default-border",
                         "min-w-full",
-                        "z-50",
+                        "z-40",
                         (!self.opened).then(|| "hidden" ),
                     ]
                 >

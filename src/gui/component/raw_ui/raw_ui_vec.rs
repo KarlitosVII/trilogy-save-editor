@@ -68,7 +68,7 @@ where
             Msg::Add => {
                 // Open added item
                 self.new_item_idx = self.props.vec().len();
-                
+
                 self.props.vec_mut().push(Default::default());
                 true
             }
@@ -127,7 +127,7 @@ where
                         </div>
                     }
                 });
-                
+
                 html! {
                     <div class="p-1">
                         <Table>

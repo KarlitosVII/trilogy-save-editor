@@ -39,22 +39,20 @@ impl Component for RawUiGuid {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Change(data) => match data {
-                ChangeData::Value(value) => {
-                    if let Ok(guid) = Uuid::parse_str(&value) {
-                        *self.props.guid_mut() = Guid::from(guid.to_hyphenated().to_string());
-                    }
-                    true
+            Msg::Change(ChangeData::Value(value)) => {
+                if let Ok(guid) = Uuid::parse_str(&value) {
+                    *self.props.guid_mut() = Guid::from(guid.to_hyphenated().to_string());
                 }
-                _ => false,
-            },
+                true
+            }
+            _ => unreachable!(),
         }
     }
 
     fn change(&mut self, mut props: Self::Properties) -> ShouldRender {
         let Props { label, guid } = &mut props;
         // Prevent struct to close
-        if self.props.label != *label || self.props.guid.ptr_eq(guid) {
+        if self.props.label != *label || !self.props.guid.ptr_eq(guid) {
             self.props = props;
             true
         } else {

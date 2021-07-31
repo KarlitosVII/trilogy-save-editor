@@ -66,44 +66,42 @@ impl Component for InputNumber {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Change(data) => match data {
-                ChangeData::Value(value) => {
-                    if value.is_empty() {
-                        return true;
-                    }
-
-                    if let Ok(value) = value.parse::<f64>() {
-                        match self.props.value {
-                            NumberType::Byte(ref byte) => {
-                                let value: u8 = value as u8;
-                                *byte.borrow_mut() = value;
-
-                                if let Some(ref callback) = self.props.onchange {
-                                    callback.emit(CallbackType::Byte(value));
-                                }
-                            }
-                            NumberType::Integer(ref integer) => {
-                                let value = value as i32;
-                                *integer.borrow_mut() = value;
-
-                                if let Some(ref callback) = self.props.onchange {
-                                    callback.emit(CallbackType::Integer(value));
-                                }
-                            }
-                            NumberType::Float(ref float) => {
-                                let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
-                                *float.borrow_mut() = value;
-
-                                if let Some(ref callback) = self.props.onchange {
-                                    callback.emit(CallbackType::Float(value));
-                                }
-                            }
-                        };
-                    }
-                    true
+            Msg::Change(ChangeData::Value(value)) => {
+                if value.is_empty() {
+                    return true;
                 }
-                _ => false,
-            },
+
+                if let Ok(value) = value.parse::<f64>() {
+                    match self.props.value {
+                        NumberType::Byte(ref byte) => {
+                            let value: u8 = value as u8;
+                            *byte.borrow_mut() = value;
+
+                            if let Some(ref callback) = self.props.onchange {
+                                callback.emit(CallbackType::Byte(value));
+                            }
+                        }
+                        NumberType::Integer(ref integer) => {
+                            let value = value as i32;
+                            *integer.borrow_mut() = value;
+
+                            if let Some(ref callback) = self.props.onchange {
+                                callback.emit(CallbackType::Integer(value));
+                            }
+                        }
+                        NumberType::Float(ref float) => {
+                            let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
+                            *float.borrow_mut() = value;
+
+                            if let Some(ref callback) = self.props.onchange {
+                                callback.emit(CallbackType::Float(value));
+                            }
+                        }
+                    };
+                }
+                true
+            }
+            _ => unreachable!(),
         }
     }
 
@@ -132,7 +130,11 @@ impl Component for InputNumber {
 
         html! {
             <label class="flex items-center gap-1">
-                <input type="number" class="input w-[120px]" placeholder=placeholder value=value onchange=self.link.callback(Msg::Change) />
+                <input type="number" class="input w-[120px]" step="any"
+                    placeholder=placeholder
+                    value=value
+                    onchange=self.link.callback(Msg::Change)
+                />
                 { &self.props.label }
             </label>
         }

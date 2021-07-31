@@ -1,8 +1,14 @@
 use anyhow::Result;
-use serde::{de, Deserialize, Serialize};
 use derive_more::Display;
+use serde::{de, Deserialize, Serialize};
 
-use super::{Guid, shared::{Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp, StreamingState, Vector, plot::{Me1PlotTable, PlotTable}}};
+use super::{
+    shared::{
+        plot::{Me1PlotTable, PlotTable},
+        Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp, StreamingState, Vector,
+    },
+    Guid,
+};
 
 pub mod player;
 use player::*;
@@ -15,7 +21,7 @@ pub mod plot_db;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[rcize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUiRoot)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Me2SaveGame {
     _version: Me2Version,
@@ -62,7 +68,7 @@ impl<'de> serde::Deserialize<'de> for Me2Version {
     }
 }
 
-#[rcize_fields_derive(RawUi)]
+#[rcize_fields_derive(RawUiRoot)]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Me2LeSaveGame {
     _version: Me2LeVersion,

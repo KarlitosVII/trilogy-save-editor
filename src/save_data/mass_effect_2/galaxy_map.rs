@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use derive_more::Display;
+use serde::{Deserialize, Serialize};
 
 use crate::save_data::shared::Vector2d;
 

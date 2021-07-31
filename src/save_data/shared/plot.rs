@@ -2,8 +2,7 @@ use anyhow::Result;
 use bitvec::prelude::*;
 use derive_more::{Deref, DerefMut, Display};
 use indexmap::IndexMap;
-use serde::{de, Deserialize, Serialize};
-use std::fmt;
+use serde::{Deserialize, Serialize};
 
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
@@ -15,28 +14,9 @@ impl<'de> serde::Deserialize<'de> for BoolVec {
     where
         D: serde::Deserializer<'de>,
     {
-        struct BoolVecVisitor;
-        impl<'de> de::Visitor<'de> for BoolVecVisitor {
-            type Value = BoolVec;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a BoolVec")
-            }
-
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-            where
-                A: de::SeqAccess<'de>,
-            {
-                let mut bitfields: Vec<u32> = Vec::new();
-                while let Some(element) = seq.next_element()? {
-                    bitfields.push(element);
-                }
-
-                let variables = BitVec::from_vec(bitfields);
-                Ok(BoolVec(variables))
-            }
-        }
-        deserializer.deserialize_seq(BoolVecVisitor)
+        let bitfields: Vec<u32> = serde::Deserialize::deserialize(deserializer)?;
+        let bitvec = BitVec::from_vec(bitfields);
+        Ok(BoolVec(bitvec))
     }
 }
 

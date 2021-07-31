@@ -195,7 +195,9 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
         Some(arg) => {
             let derive_name = arg.to_string();
             match derive_name.as_str() {
-                "RawUi" | "RawUiMe1Legacy" => Ident::new(&derive_name, Span::call_site()),
+                "RawUi" | "RawUiRoot" | "RawUiMe1Legacy" => {
+                    Ident::new(&derive_name, Span::call_site())
+                }
                 _ => panic!("{} not supported", arg),
             }
         }
@@ -250,7 +252,7 @@ fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenS
             fn view(&self, label: &str) -> yew::Html {
                 self.view_opened(label, false)
             }
-            
+
             fn view_opened(&self, label: &str, opened: bool) -> yew::Html {
                 use crate::gui::component::RawUiStruct;
                 let fields = [#(#view_fields),*];
@@ -258,6 +260,54 @@ fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenS
                     <RawUiStruct label=label.to_owned() opened=opened>
                         { for fields }
                     </RawUiStruct>
+                }
+            }
+        }
+    }
+}
+
+#[proc_macro_derive(RawUiRoot)]
+pub fn raw_ui_derive_root(input: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(input as DeriveInput);
+
+    match ast.data {
+        syn::Data::Struct(ref s) => impl_raw_ui_root(&ast, &s.fields),
+        _ => panic!("enum / union not supported"),
+    }
+    .into()
+}
+
+fn impl_raw_ui_root(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStream {
+    let fields = match *fields {
+        Fields::Named(ref fields) => &fields.named,
+        _ => panic!("non named fields not supported"),
+    };
+
+    let name = &ast.ident;
+
+    let view_fields = fields.iter().filter_map(|field| {
+        (!field.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
+            let field_name = &field.ident;
+            let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
+            quote! {
+                crate::gui::RawUi::view(&self.borrow().#field_name, #field_string)
+            }
+        })
+    });
+
+    quote! {
+        impl crate::gui::RawUi for crate::gui::RcUi<#name> {
+            fn view(&self, label: &str) -> yew::Html {
+                self.view_opened(label, false)
+            }
+
+            fn view_opened(&self, _: &str, _: bool) -> yew::Html {
+                use crate::gui::component::Table;
+                let fields = [#(#view_fields),*];
+                yew::html! {
+                    <Table>
+                        { for fields }
+                    </Table>
                 }
             }
         }

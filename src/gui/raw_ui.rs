@@ -132,15 +132,6 @@ where
     }
 }
 
-impl<T> RawUi for Box<T>
-where
-    T: RawUi,
-{
-    fn view(&self, _label: &str) -> yew::Html {
-        todo!()
-    }
-}
-
 // Shared
 impl RawUi for RcUi<BoolVec> {
     fn view(&self, label: &str) -> yew::Html {
@@ -161,9 +152,8 @@ impl RawUi for RcUi<Guid> {
 
 impl RawUi for RcUi<LinearColor> {
     fn view(&self, label: &str) -> yew::Html {
-        // TODO
         html! {
-            {label}
+            <ColorPicker label=label.to_owned() color=RcUi::clone(self) />
         }
     }
 }

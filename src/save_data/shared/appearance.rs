@@ -47,7 +47,12 @@ pub struct HeadMorph {
 }
 
 #[derive(Default, Clone)]
-pub struct LinearColor([f32; 4]);
+pub struct LinearColor {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
+}
 
 impl<'de> serde::Deserialize<'de> for LinearColor {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -58,7 +63,7 @@ impl<'de> serde::Deserialize<'de> for LinearColor {
         struct LinearColor(f32, f32, f32, f32);
 
         let LinearColor(r, g, b, a) = serde::Deserialize::deserialize(deserializer)?;
-        Ok(Self([r, g, b, a]))
+        Ok(Self { r, g, b, a })
     }
 }
 
@@ -68,9 +73,10 @@ impl serde::Serialize for LinearColor {
         S: serde::Serializer,
     {
         let mut linear_color = serializer.serialize_tuple_struct("LinearColor", 4)?;
-        for float in self.0.iter() {
-            linear_color.serialize_field(float)?;
-        }
+        linear_color.serialize_field(&self.r)?;
+        linear_color.serialize_field(&self.g)?;
+        linear_color.serialize_field(&self.b)?;
+        linear_color.serialize_field(&self.a)?;
         linear_color.end()
     }
 }
