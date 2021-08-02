@@ -1,6 +1,7 @@
 use std::cell::{Ref, RefMut};
 use uuid::Uuid;
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::{gui::RcUi, save_data::Guid};
 
@@ -8,7 +9,7 @@ pub enum Msg {
     Change(ChangeData),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub label: String,
     pub guid: RcUi<Guid>,
@@ -49,15 +50,8 @@ impl Component for RawUiGuid {
         }
     }
 
-    fn change(&mut self, mut props: Self::Properties) -> ShouldRender {
-        let Props { label, guid } = &mut props;
-        // Prevent struct to close
-        if self.props.label != *label || !self.props.guid.ptr_eq(guid) {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

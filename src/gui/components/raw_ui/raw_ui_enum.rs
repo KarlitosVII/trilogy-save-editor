@@ -1,5 +1,4 @@
 use std::cell::{Ref, RefMut};
-
 use yew::prelude::*;
 
 use crate::gui::{components::Select, RcUi};
@@ -61,10 +60,7 @@ where
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         let Props { label, items, value } = &props;
-        if self.props.label != *label
-            || self.props.items != *items
-            || !self.props.value.ptr_eq(value)
-        {
+        if self.props.label != *label || self.props.items != *items || self.props.value != *value {
             self.props = props;
             true
         } else {

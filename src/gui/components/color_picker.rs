@@ -1,6 +1,7 @@
 use anyhow::bail;
 use std::cell::{Ref, RefMut};
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::{
     gui::{
@@ -18,7 +19,7 @@ pub enum Msg {
     Change(ChangeData),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub label: String,
     pub color: RcUi<LinearColor>,
@@ -91,15 +92,8 @@ impl Component for ColorPicker {
         }
     }
 
-    fn change(&mut self, mut props: Self::Properties) -> ShouldRender {
-        let Props { label, color } = &mut props;
-        // Prevent struct to close
-        if self.props.label != *label || !self.props.color.ptr_eq(color) {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

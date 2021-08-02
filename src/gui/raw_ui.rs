@@ -17,7 +17,7 @@ use crate::{
 
 pub trait RawUi
 where
-    Self: Clone + 'static,
+    Self: Clone + PartialEq + 'static,
 {
     fn view(&self, label: &str) -> yew::Html;
     fn view_opened(&self, label: &str, _opened: bool) -> yew::Html {
@@ -29,6 +29,7 @@ where
 //     fn draw_fields<'a>(&'a mut self, gui: &'a Gui) -> Vec<Box<dyn FnMut() + 'a>>;
 // }
 
+// RcUi
 #[derive(Clone, Default)]
 pub struct RcUi<T>(Rc<RefCell<T>>);
 
@@ -43,10 +44,6 @@ impl<T> RcUi<T> {
 
     pub fn borrow_mut(&self) -> RefMut<'_, T> {
         RefCell::borrow_mut(&*self.0)
-    }
-
-    pub fn ptr_eq(&self, other: &RcUi<T>) -> bool {
-        Rc::ptr_eq(&self.0, &other.0)
     }
 }
 
@@ -66,6 +63,12 @@ impl<T: Serialize> serde::Serialize for RcUi<T> {
         S: Serializer,
     {
         self.borrow().serialize(serializer)
+    }
+}
+
+impl<T> PartialEq for RcUi<T> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
     }
 }
 

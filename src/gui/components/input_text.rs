@@ -1,5 +1,6 @@
 use std::cell::{Ref, RefMut};
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::gui::RcUi;
 
@@ -9,7 +10,7 @@ pub enum Msg {
     Input(String),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub label: String,
     pub value: RcUi<String>,
@@ -54,16 +55,7 @@ impl Component for InputText {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, value, oninput: onchange } = &props;
-        if self.props.label != *label
-            || !self.props.value.ptr_eq(value)
-            || self.props.oninput != *onchange
-        {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

@@ -1,5 +1,6 @@
 use std::cell::{Ref, RefMut};
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::gui::RcUi;
 
@@ -7,7 +8,7 @@ pub enum Msg {
     Toggle,
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub label: String,
     pub value: RcUi<bool>,
@@ -47,13 +48,7 @@ impl Component for CheckBox {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, value } = &props;
-        if self.props.label != *label || !self.props.value.ptr_eq(value) {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

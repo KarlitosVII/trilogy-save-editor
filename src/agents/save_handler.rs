@@ -1,14 +1,18 @@
 use anyhow::Error;
 use yew::agent::{Agent, AgentLink, HandlerId, Job};
 
-use crate::{gui::RcUi, save_data::mass_effect_2::Me2LeSaveGame, unreal};
+use crate::{
+    gui::RcUi,
+    save_data::mass_effect_2::{Me2LeSaveGame, Me2SaveGame},
+    unreal,
+};
 
 #[derive(Clone)]
 pub enum SaveGame {
     // MassEffect1 { file_path: String, save_game: RcUi<Me1SaveGame> },
     // MassEffect1Le { file_path: String, save_game: RcUi<Me1LeSaveGame> },
     // MassEffect1LePs4 { file_path: String, save_game: RcUi<Me1LeSaveData> },
-    // MassEffect2 { file_path: String, save_game: RcUi<Me2SaveGame> },
+    MassEffect2 { file_path: String, save_game: RcUi<Me2SaveGame> },
     MassEffect2Le { file_path: String, save_game: RcUi<Me2LeSaveGame> },
     // MassEffect3 { file_path: String, save_game: RcUi<Me3SaveGame> },
 }

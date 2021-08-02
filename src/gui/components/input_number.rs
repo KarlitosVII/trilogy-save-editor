@@ -15,15 +15,15 @@ impl PartialEq for NumberType {
     fn eq(&self, other: &NumberType) -> bool {
         match self {
             NumberType::Byte(byte) => match other {
-                NumberType::Byte(other) => byte.ptr_eq(other),
+                NumberType::Byte(other) => byte == other,
                 _ => false,
             },
             NumberType::Integer(integer) => match other {
-                NumberType::Integer(other) => integer.ptr_eq(other),
+                NumberType::Integer(other) => integer == other,
                 _ => false,
             },
             NumberType::Float(float) => match other {
-                NumberType::Float(other) => float.ptr_eq(other),
+                NumberType::Float(other) => float == other,
                 _ => false,
             },
         }

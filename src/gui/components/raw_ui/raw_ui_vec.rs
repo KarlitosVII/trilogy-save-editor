@@ -3,6 +3,7 @@ use std::{
     fmt::Display,
 };
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::gui::{components::Table, RawUi, RcUi};
 
@@ -12,7 +13,7 @@ pub enum Msg {
     Remove(usize),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props<T>
 where
     T: RawUi + Default + Display,
@@ -80,13 +81,7 @@ where
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, vec } = &props;
-        if self.props.label != *label || !self.props.vec.ptr_eq(vec) {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

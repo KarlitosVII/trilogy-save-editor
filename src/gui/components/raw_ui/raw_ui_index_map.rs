@@ -1,6 +1,7 @@
 use derive_more::From;
 use indexmap::IndexMap;
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::gui::{
     components::{CallbackType, InputNumber, InputText, NumberType, RawUiStruct, Table},
@@ -23,11 +24,11 @@ where
     fn eq(&self, other: &IndexMapKeyType<T>) -> bool {
         match self {
             IndexMapKeyType::I32(index_map) => match other {
-                IndexMapKeyType::I32(other) => index_map.ptr_eq(other),
+                IndexMapKeyType::I32(other) => index_map == other,
                 _ => false,
             },
             IndexMapKeyType::String(index_map) => match other {
-                IndexMapKeyType::String(other) => index_map.ptr_eq(other),
+                IndexMapKeyType::String(other) => index_map == other,
                 _ => false,
             },
         }
@@ -41,7 +42,7 @@ pub enum Msg {
     EditKey(usize, CallbackType),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props<T>
 where
     T: RawUi + Default,
@@ -136,13 +137,7 @@ where
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, index_map } = &props;
-        if self.props.label != *label || self.props.index_map != *index_map {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

@@ -6,7 +6,7 @@ use serde::{
     },
     Deserialize,
 };
-use std::mem::size_of;
+use std::mem;
 
 use super::Result;
 
@@ -53,7 +53,7 @@ macro_rules! impl_deserialize {
         where
             V: Visitor<'de>,
         {
-            const SIZE: usize = size_of::<$type>();
+            const SIZE: usize = mem::size_of::<$type>();
             let slice = self.read(SIZE)?;
 
             let mut bytes = [0; SIZE];
