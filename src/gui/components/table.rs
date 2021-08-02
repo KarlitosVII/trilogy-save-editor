@@ -1,12 +1,12 @@
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 pub enum Msg {
     Toggle,
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    #[prop_or_default]
     pub title: Option<String>,
     pub children: Children,
     #[prop_or(true)]
@@ -35,16 +35,8 @@ impl Component for Table {
         }
     }
 
-    fn change(&mut self, mut props: Self::Properties) -> ShouldRender {
-        let Props { title, opened, children } = &mut props;
-        // Prevent table to close
-        if self.props.title != *title || self.props.children != *children {
-            *opened = self.props.opened;
-            self.props = props;
-            true
-        } else {
-            false
-        }
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

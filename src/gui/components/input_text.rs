@@ -14,7 +14,6 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: RcUi<String>,
-    #[prop_or_default]
     pub oninput: Option<Callback<CallbackType>>,
 }
 
@@ -23,7 +22,7 @@ impl Props {
         self.value.borrow()
     }
 
-    fn value_mut(&self) -> RefMut<'_, String> {
+    fn value_mut(&mut self) -> RefMut<'_, String> {
         self.value.borrow_mut()
     }
 }

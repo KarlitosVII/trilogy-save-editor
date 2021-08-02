@@ -5,7 +5,7 @@ use std::{
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::gui::{components::Table, RawUi, RcUi};
+use crate::gui::{components::Table, raw_ui::RawUi, RcUi};
 
 pub enum Msg {
     Toggle,
@@ -30,7 +30,7 @@ where
         self.vec.borrow()
     }
 
-    fn vec_mut(&self) -> RefMut<'_, Vec<T>> {
+    fn vec_mut(&mut self) -> RefMut<'_, Vec<T>> {
         self.vec.borrow_mut()
     }
 }

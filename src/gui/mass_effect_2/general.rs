@@ -2,7 +2,7 @@ use std::cell::Ref;
 use yew::prelude::*;
 
 use crate::{
-    gui::{components::*, Me2Type, RawUi, RcUi},
+    gui::{components::*, raw_ui::RawUi, RcUi},
     save_data::{
         mass_effect_2::{
             player::{Player, Power},
@@ -15,6 +15,8 @@ use crate::{
         },
     },
 };
+
+use super::Me2Type;
 
 #[derive(Clone, RawUi)]
 enum Me2Class {
@@ -66,7 +68,7 @@ impl Component for Me2General {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        let (player, me1_plot, plot) = match self.props.save_game {
+        let (mut player, mut me1_plot, mut plot) = match self.props.save_game {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
                 (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
@@ -76,7 +78,8 @@ impl Component for Me2General {
                 (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
             }
         };
-        let (player, me1_plot, plot) = (player.borrow(), me1_plot.borrow(), plot.borrow());
+        let (mut player, mut me1_plot, mut plot) =
+            (player.borrow_mut(), me1_plot.borrow_mut(), plot.borrow_mut());
 
         match msg {
             Msg::Gender(gender) => {
@@ -201,13 +204,13 @@ impl Component for Me2General {
             }
             Msg::ToggleBonusPower(power_class_name) => {
                 let idx = player.powers().iter().enumerate().find_map(|(i, power)| {
-                    unicase::eq(&power_class_name, &*power.borrow().power_class_name()).then(|| i)
+                    unicase::eq(&power_class_name, &power.borrow().power_class_name()).then(|| i)
                 });
 
                 if let Some(idx) = idx {
                     player.powers_mut().remove(idx);
                 } else {
-                    let power = Power::default();
+                    let mut power = Power::default();
                     *power.power_class_name.borrow_mut() = power_class_name;
                     player.powers_mut().push(RcUi::new(power));
                 }
@@ -270,7 +273,7 @@ impl Me2General {
     fn role_play(&self, player: Ref<'_, Player>) -> Html {
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
-            <Table title=Some(String::from("Role-Play"))>
+            <Table title=String::from("Role-Play")>
                 { player.first_name.view("Name") }
                 <div class="flex gap-1 cursor-default">
                     <Select
@@ -303,7 +306,7 @@ impl Me2General {
 
     fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
         html! {
-            <Table title=Some(String::from("Morality"))>
+            <Table title=String::from("Morality")>
                 { plot.integers().get(2).map(|paragon| paragon.view("Paragon")).unwrap_or_default() }
                 { plot.integers().get(3).map(|renegade| renegade.view("Renegade")).unwrap_or_default() }
             </Table>
@@ -316,11 +319,11 @@ impl Me2General {
         let class_idx = Me2Class::names()
             .iter()
             .enumerate()
-            .find_map(|(i, &name)| unicase::eq(name, &*player.class_name()).then(|| i))
+            .find_map(|(i, &name)| unicase::eq(name, &player.class_name()).then(|| i))
             .unwrap_or_default();
 
         html! {
-            <Table title=Some(String::from("Gameplay"))>
+            <Table title=String::from("Gameplay")>
                 <div class="flex gap-1 cursor-default">
                     <Select
                         options=Me2Class::variants()
@@ -342,7 +345,7 @@ impl Me2General {
         let Player { eezo, iridium, palladium, platinum, probes, current_fuel, .. } = &*player;
 
         html! {
-            <Table title=Some(String::from("Resources"))>
+            <Table title=String::from("Resources")>
                 { eezo.view("Eezo") }
                 { iridium.view("Iridium") }
                 { palladium.view("Palladium") }
@@ -355,7 +358,7 @@ impl Me2General {
 
     fn general(&self, difficulty: RcUi<Difficulty>, end_game_state: RcUi<EndGameState>) -> Html {
         html! {
-            <Table title=Some(String::from("General"))>
+            <Table title=String::from("General")>
                 { difficulty.view("Difficulty") }
                 { end_game_state.view("End Game Stage") }
             </Table>
@@ -383,7 +386,7 @@ impl Me2General {
         let selectables = powers.iter().map(|&(power_class_name, power_name)| {
             let selected = player.powers()
                 .iter()
-                .any(|power| unicase::eq(power_class_name, &*power.borrow().power_class_name()));
+                .any(|power| unicase::eq(power_class_name, &power.borrow().power_class_name()));
 
             html_nested! {
                 <button
@@ -404,7 +407,7 @@ impl Me2General {
         });
 
         html! {
-            <Table title=Some(String::from("Bonus Powers //TODO: (?)"))>
+            <Table title=String::from("Bonus Powers //TODO: (?)")>
                 { for selectables }
             </Table>
         }

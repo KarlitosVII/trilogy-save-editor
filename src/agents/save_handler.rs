@@ -27,7 +27,7 @@ pub enum Response {
 }
 
 pub struct SaveHandler {
-    link: AgentLink<SaveHandler>,
+    link: AgentLink<Self>,
 }
 
 impl Agent for SaveHandler {

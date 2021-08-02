@@ -1,19 +1,16 @@
 use indexmap::IndexMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    fmt::{self, Display},
-    rc::Rc,
-};
+use std::fmt::Display;
 use yew::prelude::*;
 
 use crate::{
-    gui::components::*,
+    gui::components::{raw_ui::*, *},
     save_data::{
-        shared::{appearance::LinearColor, plot::BoolVec},
+        shared::{appearance::LinearColor, plot::BitVec},
         Guid,
     },
 };
+
+use super::RcUi;
 
 pub trait RawUi
 where
@@ -28,55 +25,6 @@ where
 // pub trait RawUiMe1Legacy {
 //     fn draw_fields<'a>(&'a mut self, gui: &'a Gui) -> Vec<Box<dyn FnMut() + 'a>>;
 // }
-
-// RcUi
-#[derive(Clone, Default)]
-pub struct RcUi<T>(Rc<RefCell<T>>);
-
-impl<T> RcUi<T> {
-    pub fn new(inner: T) -> Self {
-        RcUi(Rc::new(RefCell::new(inner)))
-    }
-
-    pub fn borrow(&self) -> Ref<'_, T> {
-        RefCell::borrow(&*self.0)
-    }
-
-    pub fn borrow_mut(&self) -> RefMut<'_, T> {
-        RefCell::borrow_mut(&*self.0)
-    }
-}
-
-impl<'de, T: Deserialize<'de>> Deserialize<'de> for RcUi<T> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let inner: T = Deserialize::deserialize(deserializer)?;
-        Ok(RcUi::new(inner))
-    }
-}
-
-impl<T: Serialize> serde::Serialize for RcUi<T> {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.borrow().serialize(serializer)
-    }
-}
-
-impl<T> PartialEq for RcUi<T> {
-    fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.0, &other.0)
-    }
-}
-
-impl<T: Display> Display for RcUi<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.borrow().fmt(f)
-    }
-}
 
 // Implémentation des types std
 impl RawUi for RcUi<u8> {
@@ -155,7 +103,7 @@ where
 }
 
 // Shared
-impl RawUi for RcUi<BoolVec> {
+impl RawUi for RcUi<BitVec> {
     fn view(&self, label: &str) -> yew::Html {
         // TODO
         html! {

@@ -115,7 +115,7 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
                             self.#field_name.borrow()
                         }
 
-                        #visibility fn #field_name_mut(&self) -> std::cell::RefMut<'_, #field_type> {
+                        #visibility fn #field_name_mut(&mut self) -> std::cell::RefMut<'_, #field_type> {
                             self.#field_name.borrow_mut()
                         }
                     }
@@ -242,19 +242,19 @@ fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenS
             let field_name = &field.ident;
             let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
             quote! {
-                crate::gui::RawUi::view(&self.borrow().#field_name, #field_string)
+                crate::gui::raw_ui::RawUi::view(&self.borrow().#field_name, #field_string)
             }
         })
     });
 
     quote! {
-        impl crate::gui::RawUi for crate::gui::RcUi<#name> {
+        impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
             fn view(&self, label: &str) -> yew::Html {
                 self.view_opened(label, false)
             }
 
             fn view_opened(&self, label: &str, opened: bool) -> yew::Html {
-                use crate::gui::components::RawUiStruct;
+                use crate::gui::components::raw_ui::RawUiStruct;
                 let fields = [#(#view_fields),*];
                 yew::html! {
                     <RawUiStruct label=label.to_owned() opened=opened>
@@ -290,13 +290,13 @@ fn impl_raw_ui_root(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStr
             let field_name = &field.ident;
             let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
             quote! {
-                crate::gui::RawUi::view(&self.borrow().#field_name, #field_string)
+                crate::gui::raw_ui::RawUi::view(&self.borrow().#field_name, #field_string)
             }
         })
     });
 
     quote! {
-        impl crate::gui::RawUi for crate::gui::RcUi<#name> {
+        impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
             fn view(&self, label: &str) -> yew::Html {
                 self.view_opened(label, false)
             }
@@ -364,9 +364,9 @@ fn impl_raw_ui_enum(
             }
         }
 
-        impl crate::gui::RawUi for crate::gui::RcUi<#name> {
+        impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
             fn view(&self, label: &str) -> yew::Html {
-                use crate::gui::components::RawUiEnum;
+                use crate::gui::components::raw_ui::RawUiEnum;
 
                 yew::html!{
                     <RawUiEnum<#name> label=label.to_owned() items=#name::variants() value=self.clone() />
@@ -409,13 +409,13 @@ fn impl_raw_ui_me1_legacy(ast: &DeriveInput, fields: &Fields) -> proc_macro2::To
             let field_name = &field.ident;
             let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
             quote! {
-                Box::new(move || { crate::gui::RawUi::view(#field_name, #field_string) })
+                Box::new(move || { crate::gui::raw_ui::RawUi::view(#field_name, #field_string) })
             }
         })
     });
 
     quote! {
-        impl crate::gui::RawUiMe1Legacy for #name {
+        impl crate::gui::raw_ui::RawUiMe1Legacy for #name {
             fn draw_fields<'a>(&'a mut self: &'a crate::gui::Gui) -> Vec<Box<dyn FnMut() + 'a>> {
                 #(#draw_lets)*
                 vec![#(#draw_fields),*]

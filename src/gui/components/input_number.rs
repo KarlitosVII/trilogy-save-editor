@@ -38,7 +38,6 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: NumberType,
-    #[prop_or_default]
     pub onchange: Option<Callback<CallbackType>>,
 }
 
@@ -64,7 +63,7 @@ impl Component for InputNumber {
 
                 if let Ok(value) = value.parse::<f64>() {
                     match self.props.value {
-                        NumberType::Byte(ref byte) => {
+                        NumberType::Byte(ref mut byte) => {
                             let value: u8 = value as u8;
                             *byte.borrow_mut() = value;
 
@@ -72,7 +71,7 @@ impl Component for InputNumber {
                                 callback.emit(CallbackType::Byte(value));
                             }
                         }
-                        NumberType::Integer(ref integer) => {
+                        NumberType::Integer(ref mut integer) => {
                             let value = value as i32;
                             *integer.borrow_mut() = value;
 
@@ -80,7 +79,7 @@ impl Component for InputNumber {
                                 callback.emit(CallbackType::Integer(value));
                             }
                         }
-                        NumberType::Float(ref float) => {
+                        NumberType::Float(ref mut float) => {
                             let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
                             *float.borrow_mut() = value;
 

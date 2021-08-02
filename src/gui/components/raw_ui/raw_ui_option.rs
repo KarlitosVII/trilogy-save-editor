@@ -2,7 +2,7 @@ use std::cell::{Ref, RefMut};
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::gui::{RawUi, RcUi};
+use crate::gui::{raw_ui::RawUi, RcUi};
 
 pub enum Msg {
     Remove,
@@ -25,7 +25,7 @@ where
         self.option.borrow()
     }
 
-    fn option_mut(&self) -> RefMut<'_, Option<T>> {
+    fn option_mut(&mut self) -> RefMut<'_, Option<T>> {
         self.option.borrow_mut()
     }
 }

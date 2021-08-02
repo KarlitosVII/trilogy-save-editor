@@ -25,7 +25,7 @@ where
         self.value.borrow()
     }
 
-    fn value_mut(&self) -> RefMut<'_, T> {
+    fn value_mut(&mut self) -> RefMut<'_, T> {
         self.value.borrow_mut()
     }
 }

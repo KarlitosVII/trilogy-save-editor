@@ -1,35 +1,17 @@
-use anyhow::Error;
+use anyhow::{anyhow, Error};
 use std::mem;
-use yew::prelude::*;
+use yew::{prelude::*, services::ConsoleService};
 
 use crate::{
-    agents::{Request, Response, SaveGame, SaveHandler},
-    gui::{components::*, mass_effect_2::Me2General, raw_ui::RawUi},
-    save_data::mass_effect_2::{Me2LeSaveGame, Me2SaveGame},
+    database_service::DatabaseService,
+    gui::{
+        components::{NavBar, Tab, TabBar, Table},
+        mass_effect_2::{Me2General, Me2Plot, Me2Type},
+        raw_ui::RawUi,
+        RcUi, Theme,
+    },
+    save_handler::{Request, Response, SaveGame, SaveHandler},
 };
-
-use super::RcUi;
-
-#[derive(Clone)]
-pub enum Me2Type {
-    Vanilla(RcUi<Me2SaveGame>),
-    Legendary(RcUi<Me2LeSaveGame>),
-}
-
-impl PartialEq for Me2Type {
-    fn eq(&self, other: &Me2Type) -> bool {
-        match self {
-            Me2Type::Vanilla(me2) => match other {
-                Me2Type::Vanilla(other) => me2.ptr_eq(other),
-                _ => false,
-            },
-            Me2Type::Legendary(me2) => match other {
-                Me2Type::Legendary(other) => me2.ptr_eq(other),
-                _ => false,
-            },
-        }
-    }
-}
 
 pub enum Msg {
     OpenSave,
@@ -49,6 +31,7 @@ pub struct App {
     props: Props,
     link: ComponentLink<Self>,
     save_handle: Box<dyn Bridge<SaveHandler>>,
+    _dbs_service: Box<dyn Bridge<DatabaseService>>,
 }
 
 impl Component for App {
@@ -56,13 +39,16 @@ impl Component for App {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let callback = link.callback(|response| match response {
+        let save_handle = SaveHandler::bridge(link.callback(|response| match response {
             Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
             Response::Error(err) => Msg::Error(err),
-        });
-        let save_handle = SaveHandler::bridge(callback);
+        }));
 
-        App { props, link, save_handle }
+        let _dbs_service = DatabaseService::bridge(
+            link.callback(|_| Msg::Error(anyhow!("should not send a message to App component"))),
+        );
+
+        App { props, link, save_handle, _dbs_service }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -78,14 +64,20 @@ impl Component for App {
             Msg::SaveSave => false,
             Msg::ReloadSave => {
                 let file_path = match self.props.save_game {
-                    Some(SaveGame::MassEffect2Le { ref file_path, .. }) => file_path.to_owned(),
+                    Some(
+                        SaveGame::MassEffect2 { ref file_path, .. }
+                        | SaveGame::MassEffect2Le { ref file_path, .. },
+                    ) => file_path.to_owned(),
                     None => return false,
                 };
 
                 self.save_handle.send(Request::OpenSave(file_path));
                 false
             }
-            Msg::Error(_) => todo!(),
+            Msg::Error(err) => {
+                ConsoleService::warn(&err.to_string());
+                false
+            }
         }
     }
 
@@ -96,12 +88,17 @@ impl Component for App {
     fn view(&self) -> Html {
         let (content, theme) = if let Some(ref save_game) = self.props.save_game {
             match save_game {
-                SaveGame::MassEffect2Le { save_game, .. } => {
-                    (App::mass_effect_2(Me2Type::Legendary(RcUi::clone(save_game))), "me2")
-                }
+                SaveGame::MassEffect2 { save_game, .. } => (
+                    App::mass_effect_2(self, Me2Type::Vanilla(RcUi::clone(save_game))),
+                    Theme::MassEffect2,
+                ),
+                SaveGame::MassEffect2Le { save_game, .. } => (
+                    App::mass_effect_2(self, Me2Type::Legendary(RcUi::clone(save_game))),
+                    Theme::MassEffect2,
+                ),
             }
         } else {
-            (App::changelog(), "me3")
+            (App::changelog(), Theme::MassEffect3)
         };
 
         html! {
@@ -151,7 +148,7 @@ impl App {
 
         let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
             html! {
-                <Table title=Some(version.to_owned()) opened=i==0>
+                <Table title=version.to_owned() opened=i==0>
                     { for changes }
                 </Table>
             }
@@ -168,15 +165,26 @@ impl App {
         }
     }
 
-    fn mass_effect_2(me2: Me2Type) -> Html {
-        let raw_data = match me2 {
-            Me2Type::Vanilla(ref me2) => me2.view_opened("Mass Effect 2", true),
-            Me2Type::Legendary(ref me2) => me2.view_opened("Mass Effect 2", true),
+    fn mass_effect_2(&self, me2: Me2Type) -> Html {
+        let (raw_data, plot) = match me2 {
+            Me2Type::Vanilla(ref me2) => {
+                (me2.view_opened("Mass Effect 2", true), RcUi::clone(&me2.borrow().plot))
+            }
+            Me2Type::Legendary(ref me2) => {
+                (me2.view_opened("Mass Effect 2", true), RcUi::clone(&me2.borrow().plot))
+            }
         };
 
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar>
+                    <Tab title="Plot">
+                        <Me2Plot
+                            booleans=RcUi::clone(&plot.borrow().booleans)
+                            integers=RcUi::clone(&plot.borrow().integers)
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </Tab>
                     <Tab title="Général">
                         <Me2General save_game=Me2Type::clone(&me2) />
                     </Tab>

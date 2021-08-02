@@ -8,12 +8,13 @@ extern crate derive_more;
 extern crate raw_ui_derive;
 
 // mod compare;
-// mod databases;
 // mod event_handler;
 mod agents;
 mod gui;
 mod save_data;
 mod unreal;
+
+pub use self::agents::*;
 
 use gui::App;
 

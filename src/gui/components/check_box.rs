@@ -12,6 +12,7 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: RcUi<bool>,
+    pub onchange: Option<Callback<bool>>,
 }
 
 impl Props {
@@ -19,7 +20,7 @@ impl Props {
         self.value.borrow()
     }
 
-    fn value_mut(&self) -> RefMut<'_, bool> {
+    fn value_mut(&mut self) -> RefMut<'_, bool> {
         self.value.borrow_mut()
     }
 }
@@ -40,8 +41,12 @@ impl Component for CheckBox {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Toggle => {
-                let value = *self.props.value();
-                *self.props.value_mut() = !value;
+                let value = !*self.props.value();
+                *self.props.value_mut() = value;
+
+                if let Some(ref callback) = self.props.onchange {
+                    callback.emit(value);
+                }
                 true
             }
         }

@@ -32,21 +32,21 @@
   --hover: theme("colors.me3.hover");
 }
 
-.me1 {
+.mass-effect-1 {
   --bg: theme("colors.me1.bg");
   --default: theme("colors.me1.default");
   --active: theme("colors.me1.active");
   --hover: theme("colors.me1.hover");
 }
 
-.me2 {
+.mass-effect-2 {
   --bg: theme("colors.me2.bg");
   --default: theme("colors.me2.default");
   --active: theme("colors.me2.active");
   --hover: theme("colors.me2.hover");
 }
 
-.me3 {
+.mass-effect-3 {
   --bg: theme("colors.me3.bg");
   --default: theme("colors.me3.default");
   --active: theme("colors.me3.active");
@@ -109,4 +109,5 @@
 
 .checkbox:checked {
   background-image: url('data:image/svg+xml,<svg viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z"/></svg>');
+  background-position: center;
 }

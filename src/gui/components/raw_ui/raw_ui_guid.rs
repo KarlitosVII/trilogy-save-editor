@@ -20,7 +20,7 @@ impl Props {
         self.guid.borrow()
     }
 
-    fn guid_mut(&self) -> RefMut<'_, Guid> {
+    fn guid_mut(&mut self) -> RefMut<'_, Guid> {
         self.guid.borrow_mut()
     }
 }

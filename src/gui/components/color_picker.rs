@@ -30,7 +30,7 @@ impl Props {
         self.color.borrow()
     }
 
-    fn color_mut(&self) -> RefMut<'_, LinearColor> {
+    fn color_mut(&mut self) -> RefMut<'_, LinearColor> {
         self.color.borrow_mut()
     }
 }

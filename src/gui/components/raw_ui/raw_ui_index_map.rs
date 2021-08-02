@@ -4,8 +4,9 @@ use yew::prelude::*;
 use yewtil::NeqAssign;
 
 use crate::gui::{
-    components::{CallbackType, InputNumber, InputText, NumberType, RawUiStruct, Table},
-    RawUi, RcUi,
+    components::{raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table},
+    raw_ui::RawUi,
+    RcUi,
 };
 
 #[derive(Clone, From)]
@@ -87,13 +88,13 @@ where
             }
             Msg::Add => {
                 match self.props.index_map {
-                    IndexMapKeyType::I32(ref index_map) => {
+                    IndexMapKeyType::I32(ref mut index_map) => {
                         // Open added item
                         self.new_item_idx = index_map.borrow().len();
 
                         index_map.borrow_mut().entry(-1).or_default();
                     }
-                    IndexMapKeyType::String(ref index_map) => {
+                    IndexMapKeyType::String(ref mut index_map) => {
                         // Open added item
                         self.new_item_idx = index_map.borrow().len();
 
@@ -104,17 +105,17 @@ where
             }
             Msg::Remove(idx) => {
                 match self.props.index_map {
-                    IndexMapKeyType::I32(ref index_map) => {
+                    IndexMapKeyType::I32(ref mut index_map) => {
                         index_map.borrow_mut().shift_remove_index(idx);
                     }
-                    IndexMapKeyType::String(ref index_map) => {
+                    IndexMapKeyType::String(ref mut index_map) => {
                         index_map.borrow_mut().shift_remove_index(idx);
                     }
                 }
                 true
             }
             Msg::EditKey(idx, new_key) => match self.props.index_map {
-                IndexMapKeyType::I32(ref index_map) => match new_key {
+                IndexMapKeyType::I32(ref mut index_map) => match new_key {
                     CallbackType::Integer(new_key) => {
                         if let Some((key, _)) = index_map.borrow_mut().get_index_mut(idx) {
                             *key = new_key;
@@ -123,7 +124,7 @@ where
                     }
                     _ => false,
                 },
-                IndexMapKeyType::String(ref index_map) => match new_key {
+                IndexMapKeyType::String(ref mut index_map) => match new_key {
                     CallbackType::String(new_key) => {
                         if let Some((key, _)) = index_map.borrow_mut().get_index_mut(idx) {
                             *key = new_key;
