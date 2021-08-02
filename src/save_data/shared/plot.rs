@@ -2,19 +2,19 @@ use anyhow::Result;
 use bitvec::prelude::*;
 use derive_more::{Deref, DerefMut, Display};
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub type BoolSlice = BitSlice<Lsb0, u32>;
 
 #[derive(Deref, DerefMut, Clone)]
 pub struct BoolVec(BitVec<Lsb0, u32>);
 
-impl<'de> serde::Deserialize<'de> for BoolVec {
+impl<'de> Deserialize<'de> for BoolVec {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let bitfields: Vec<u32> = serde::Deserialize::deserialize(deserializer)?;
+        let bitfields: Vec<u32> = Deserialize::deserialize(deserializer)?;
         let bitvec = BitVec::from_vec(bitfields);
         Ok(BoolVec(bitvec))
     }
@@ -23,7 +23,7 @@ impl<'de> serde::Deserialize<'de> for BoolVec {
 impl serde::Serialize for BoolVec {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         let bitfields = self.0.clone().into_vec();
         serializer.collect_seq(bitfields)

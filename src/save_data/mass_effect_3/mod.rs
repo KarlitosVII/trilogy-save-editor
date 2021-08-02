@@ -58,12 +58,12 @@ pub struct Me3SaveGame {
 #[derive(Serialize, Clone)]
 pub struct Me3Version(i32);
 
-impl<'de> serde::Deserialize<'de> for Me3Version {
+impl<'de> Deserialize<'de> for Me3Version {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let version: i32 = serde::Deserialize::deserialize(deserializer)?;
+        let version: i32 = Deserialize::deserialize(deserializer)?;
 
         if version != 59 {
             return Err(de::Error::custom(

@@ -42,10 +42,10 @@ impl Player {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Player {
+impl<'de> Deserialize<'de> for Player {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct PlayerVisitor;
         impl<'de> de::Visitor<'de> for PlayerVisitor {
@@ -122,7 +122,7 @@ impl<'de> serde::Deserialize<'de> for Player {
 impl serde::Serialize for Player {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         use serde::ser::Error;
         let Player {

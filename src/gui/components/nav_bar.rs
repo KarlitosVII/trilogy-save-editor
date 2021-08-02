@@ -1,16 +1,24 @@
 use web_sys::HtmlElement;
-use yew::{prelude::*, services::ConsoleService};
+use yew::prelude::*;
+use yewtil::NeqAssign;
 
+#[allow(clippy::enum_variant_names)]
 pub enum Msg {
-    Open,
-    Save,
-    Reload,
-    AboutMenuOpen,
-    AboutMenuClose,
-    AboutMenuBlur,
+    MenuOpen,
+    MenuClose,
+    MenuBlur,
+}
+
+#[derive(Properties, Clone, PartialEq)]
+pub struct Props {
+    pub save_loaded: bool,
+    pub onopen: Callback<()>,
+    pub onsave: Callback<()>,
+    pub onreload: Callback<()>,
 }
 
 pub struct NavBar {
+    props: Props,
     link: ComponentLink<Self>,
     about_opened: bool,
     about_ref: NodeRef,
@@ -18,36 +26,23 @@ pub struct NavBar {
 
 impl Component for NavBar {
     type Message = Msg;
-    type Properties = ();
+    type Properties = Props;
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        NavBar { link, about_opened: false, about_ref: Default::default() }
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        NavBar { props, link, about_opened: false, about_ref: Default::default() }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        let log = ConsoleService::log;
         match msg {
-            Msg::Open => {
-                log("Open");
-                false
-            }
-            Msg::Save => {
-                log("Save");
-                false
-            }
-            Msg::Reload => {
-                log("Reload");
-                false
-            }
-            Msg::AboutMenuOpen => {
+            Msg::MenuOpen => {
                 self.about_opened = true;
                 true
             }
-            Msg::AboutMenuClose => {
+            Msg::MenuClose => {
                 self.about_opened = false;
                 true
             }
-            Msg::AboutMenuBlur => {
+            Msg::MenuBlur => {
                 if let Some(about) = self.about_ref.cast::<HtmlElement>() {
                     let _ = about.blur();
                 }
@@ -56,24 +51,34 @@ impl Component for NavBar {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {
-        html! {
-            <nav class="bg-menu-bar select-none">
-                <div class="flex items-center gap-2 px-1">
-                    <button class="btn" onclick=self.link.callback(|_| Msg::Open)>
-                        {"Open"}
-                    </button>
-                    <button class="btn" onclick=self.link.callback(|_| Msg::Save)>
+        let loaded_buttons = self
+            .props
+            .save_loaded
+            .then(|| {
+                html! { <>
+                    <button class="btn" onclick=self.props.onsave.reform(|_| ())>
                         {"Save"}
                     </button>
                     <span>{"-"}</span>
-                    <button class="btn" onclick=self.link.callback(|_| Msg::Reload)>
+                    <button class="btn" onclick=self.props.onreload.reform(|_| ())>
                         {"Reload"}
                     </button>
+                </> }
+            })
+            .unwrap_or_default();
+
+        html! {
+            <nav class="bg-menu-bar select-none">
+                <div class="flex items-center gap-2 px-1">
+                    <button class="btn" onclick=self.props.onopen.reform(|_| ())>
+                        {"Open"}
+                    </button>
+                    { loaded_buttons }
                     { self.view_about_menu() }
                 </div>
             </nav>
@@ -84,14 +89,14 @@ impl Component for NavBar {
 impl NavBar {
     fn view_about_menu(&self) -> Html {
         let onclick = if !self.about_opened {
-            self.link.callback(|_| Msg::AboutMenuOpen)
+            self.link.callback(|_| Msg::MenuOpen)
         } else {
-            self.link.callback(|_| Msg::AboutMenuBlur)
+            self.link.callback(|_| Msg::MenuBlur)
         };
 
         html! {
             <div class="relative" tabindex="0"
-                onblur=self.about_opened.then(||self.link.callback(|_| Msg::AboutMenuClose))
+                onblur=self.about_opened.then(||self.link.callback(|_| Msg::MenuClose))
                 ref=self.about_ref.clone()
             >
                 <a

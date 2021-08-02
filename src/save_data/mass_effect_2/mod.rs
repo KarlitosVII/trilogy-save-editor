@@ -1,6 +1,6 @@
 use anyhow::Result;
 use derive_more::Display;
-use serde::{de, Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 
 use super::{
     shared::{
@@ -51,12 +51,12 @@ pub struct Me2SaveGame {
 #[derive(Serialize, Clone)]
 pub struct Me2Version(i32);
 
-impl<'de> serde::Deserialize<'de> for Me2Version {
+impl<'de> Deserialize<'de> for Me2Version {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let version: i32 = serde::Deserialize::deserialize(deserializer)?;
+        let version: i32 = Deserialize::deserialize(deserializer)?;
 
         if version != 29 {
             return Err(de::Error::custom(
@@ -111,12 +111,12 @@ struct Me1ImportBonus {
 #[derive(Serialize, Clone)]
 pub struct Me2LeVersion(i32);
 
-impl<'de> serde::Deserialize<'de> for Me2LeVersion {
+impl<'de> Deserialize<'de> for Me2LeVersion {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let version: i32 = serde::Deserialize::deserialize(deserializer)?;
+        let version: i32 = Deserialize::deserialize(deserializer)?;
 
         if version != 30 {
             return Err(de::Error::custom(

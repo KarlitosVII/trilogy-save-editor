@@ -22,20 +22,14 @@ where
 {
     fn eq(&self, other: &IndexMapKeyType<T>) -> bool {
         match self {
-            IndexMapKeyType::I32(index_map) => {
-                if let IndexMapKeyType::I32(other) = other {
-                    index_map.ptr_eq(other)
-                } else {
-                    false
-                }
-            }
-            IndexMapKeyType::String(index_map) => {
-                if let IndexMapKeyType::String(other) = other {
-                    index_map.ptr_eq(other)
-                } else {
-                    false
-                }
-            }
+            IndexMapKeyType::I32(index_map) => match other {
+                IndexMapKeyType::I32(other) => index_map.ptr_eq(other),
+                _ => false,
+            },
+            IndexMapKeyType::String(index_map) => match other {
+                IndexMapKeyType::String(other) => index_map.ptr_eq(other),
+                _ => false,
+            },
         }
     }
 }
@@ -157,7 +151,7 @@ where
         let content = self
             .opened
             .then(|| {
-                let item = |idx, label, key, value| {
+                let view = |idx, label, key, value| {
                     html_nested! {
                         <div class="flex gap-1">
                             <div class="py-px">
@@ -182,11 +176,11 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputNumber label=String::from("Key") value=NumberType::Integer(RcUi::new(*key))
+                                <InputNumber label="Key" value=NumberType::Integer(RcUi::new(*key))
                                     onchange=self.link.callback(move |callback| Msg::EditKey(idx, callback))
                                 />
                             };
-                            item(idx, key.to_string(), input_k, value)
+                            view(idx, key.to_string(), input_k, value)
                         })
                         .collect::<Vec<_>>(),
                     IndexMapKeyType::String(ref index_map) => index_map
@@ -195,16 +189,12 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputText label=String::from("Key") value=RcUi::new(key.to_owned())
+                                <InputText label="Key" value=RcUi::new(key.to_owned())
                                     oninput=self.link.callback(move |callback| Msg::EditKey(idx, callback))
                                 />
                             };
-                            let label = if !key.is_empty() {
-                                key.to_owned()
-                            } else {
-                                String::from("<empty>")
-                            };
-                            item(idx, label, input_k, value)
+                            let label = if !key.is_empty() { key } else { "<empty>" };
+                            view(idx, label.to_owned(), input_k, value)
                         })
                         .collect::<Vec<_>>(),
                 };

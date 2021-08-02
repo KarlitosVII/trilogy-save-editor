@@ -3,7 +3,7 @@ use derive_more::{Deref, DerefMut, Display, From};
 use serde::{
     de,
     ser::{self, SerializeSeq},
-    Serialize,
+    Deserialize, Deserializer, Serialize, Serializer,
 };
 use std::fmt;
 use uuid::Uuid;
@@ -25,10 +25,10 @@ impl<const LEN: usize> Default for Dummy<LEN> {
     }
 }
 
-impl<'de, const LEN: usize> serde::Deserialize<'de> for Dummy<LEN> {
+impl<'de, const LEN: usize> Deserialize<'de> for Dummy<LEN> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct DummyVisitor<const LEN: usize>;
         impl<'de, const LEN: usize> de::Visitor<'de> for DummyVisitor<LEN> {
@@ -58,7 +58,7 @@ impl<'de, const LEN: usize> serde::Deserialize<'de> for Dummy<LEN> {
 impl<const LEN: usize> serde::Serialize for Dummy<LEN> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         serializer.serialize_bytes(&self.0)
     }
@@ -79,10 +79,10 @@ where
     }
 }
 
-impl<'de> serde::Deserialize<'de> for List<u8> {
+impl<'de> Deserialize<'de> for List<u8> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct ByteListVisitor;
         impl<'de> de::Visitor<'de> for ByteListVisitor {
@@ -109,7 +109,7 @@ where
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         let mut s = serializer.serialize_seq(None)?;
         for element in &self.0 {
@@ -128,12 +128,12 @@ impl Default for Guid {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Guid {
+impl<'de> Deserialize<'de> for Guid {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let bytes: [u8; 16] = serde::Deserialize::deserialize(deserializer)?;
+        let bytes: [u8; 16] = Deserialize::deserialize(deserializer)?;
         let guid = Uuid::from_bytes(bytes);
 
         Ok(Guid(guid.to_hyphenated().to_string()))
@@ -143,7 +143,7 @@ impl<'de> serde::Deserialize<'de> for Guid {
 impl serde::Serialize for Guid {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         let guid =
             Uuid::parse_str(&self.0).map_err(|err| ser::Error::custom(format!("GUID: {}", err)))?;

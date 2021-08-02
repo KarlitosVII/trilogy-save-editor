@@ -89,10 +89,10 @@ impl Me1SaveGame {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for Me1SaveGame {
+impl<'de> Deserialize<'de> for Me1SaveGame {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct Me1SaveGameVisitor;
         impl<'de> de::Visitor<'de> for Me1SaveGameVisitor {
@@ -136,7 +136,7 @@ impl<'de> serde::Deserialize<'de> for Me1SaveGame {
 impl serde::Serialize for Me1SaveGame {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         use serde::ser::Error;
         let Me1SaveGame {

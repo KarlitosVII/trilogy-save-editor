@@ -48,10 +48,10 @@ pub struct Me1LeSaveGame {
     uncompressed_size: u32,
 }
 
-impl<'de> serde::Deserialize<'de> for Me1LeSaveGame {
+impl<'de> Deserialize<'de> for Me1LeSaveGame {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct Me1LeSaveGameVisitor;
         impl<'de> de::Visitor<'de> for Me1LeSaveGameVisitor {
@@ -129,7 +129,7 @@ impl<'de> serde::Deserialize<'de> for Me1LeSaveGame {
 impl serde::Serialize for Me1LeSaveGame {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         let Me1LeSaveGame {
             magic_number,
@@ -205,12 +205,12 @@ pub struct Me1LeSaveData {
 #[derive(Serialize, Clone)]
 pub struct Me1LeVersion(i32);
 
-impl<'de> serde::Deserialize<'de> for Me1LeVersion {
+impl<'de> Deserialize<'de> for Me1LeVersion {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let version: i32 = serde::Deserialize::deserialize(deserializer)?;
+        let version: i32 = Deserialize::deserialize(deserializer)?;
 
         if version != 50 {
             return Err(de::Error::custom(
@@ -237,10 +237,10 @@ impl RawUi for NoExport {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for NoExport {
+impl<'de> Deserialize<'de> for NoExport {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct NoExportVisitor;
         impl<'de> de::Visitor<'de> for NoExportVisitor {
@@ -252,9 +252,9 @@ impl<'de> serde::Deserialize<'de> for NoExport {
 
             fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
             where
-                D: serde::Deserializer<'de>,
+                D: Deserializer<'de>,
             {
-                let no_export_data: NoExportData = serde::Deserialize::deserialize(deserializer)?;
+                let no_export_data: NoExportData = Deserialize::deserialize(deserializer)?;
                 Ok(NoExport(Some(no_export_data)))
             }
 
@@ -272,7 +272,7 @@ impl<'de> serde::Deserialize<'de> for NoExport {
 impl serde::Serialize for NoExport {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         match self.0 {
             Some(ref no_export_data) => no_export_data.serialize(serializer),

@@ -54,8 +54,10 @@ impl Component for Select {
             if let Some(select) = self.select_ref.cast::<HtmlElement>() {
                 let _ = select.blur();
             }
+            true
+        } else {
+            false
         }
-        false
     }
 
     fn view(&self) -> Html {

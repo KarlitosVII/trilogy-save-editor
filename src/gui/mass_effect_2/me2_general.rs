@@ -2,11 +2,11 @@ use std::cell::Ref;
 use yew::prelude::*;
 
 use crate::{
-    gui::{components::*, RawUi, RcUi},
+    gui::{components::*, Me2Type, RawUi, RcUi},
     save_data::{
         mass_effect_2::{
             player::{Player, Power},
-            Difficulty, Me2LeSaveGame, Me2SaveGame,
+            Difficulty,
         },
         shared::{
             player::{Notoriety, Origin},
@@ -15,12 +15,6 @@ use crate::{
         },
     },
 };
-
-#[derive(Clone)]
-pub enum Me2Type {
-    Vanilla(RcUi<Me2SaveGame>),
-    Legendary(RcUi<Me2LeSaveGame>),
-}
 
 #[derive(Clone, RawUi)]
 enum Me2Class {
@@ -223,8 +217,14 @@ impl Component for Me2General {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        todo!()
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        let Props { save_game } = &props;
+        if self.props.save_game != *save_game {
+            self.props = props;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {
@@ -278,7 +278,7 @@ impl Me2General {
                         current_idx=*player.is_female() as usize
                         onselect=self.link.callback(Msg::Gender)
                     />
-                    {"Gender <?>"}
+                    {"Gender //TODO: (?)"}
                 </div>
                 <div class="flex gap-1 cursor-default">
                     <Select
@@ -296,7 +296,7 @@ impl Me2General {
                     />
                     {"Notoriety"}
                 </div>
-                { player.face_code.view("Identity Code <?>") }
+                { player.face_code.view("Identity Code //TODO: (?)") }
             </Table>
         }
     }
@@ -392,7 +392,6 @@ impl Me2General {
                         "hover:bg-theme-hover",
                         "active:bg-theme-active",
                         "px-1",
-                        // "-ml-1",
                         "w-full",
                         "text-left",
                         selected.then(|| "bg-theme-bg"),
@@ -405,7 +404,7 @@ impl Me2General {
         });
 
         html! {
-            <Table title=Some(String::from("Bonus Powers <?>"))>
+            <Table title=Some(String::from("Bonus Powers //TODO: (?)"))>
                 { for selectables }
             </Table>
         }

@@ -1,6 +1,6 @@
 use anyhow::Result;
 use indexmap::IndexMap;
-use serde::{ser::SerializeTupleStruct, Deserialize, Serialize};
+use serde::{ser::SerializeTupleStruct, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::Vector;
 
@@ -54,15 +54,15 @@ pub struct LinearColor {
     pub a: f32,
 }
 
-impl<'de> serde::Deserialize<'de> for LinearColor {
+impl<'de> Deserialize<'de> for LinearColor {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         #[derive(Deserialize)]
         struct LinearColor(f32, f32, f32, f32);
 
-        let LinearColor(r, g, b, a) = serde::Deserialize::deserialize(deserializer)?;
+        let LinearColor(r, g, b, a) = Deserialize::deserialize(deserializer)?;
         Ok(Self { r, g, b, a })
     }
 }
@@ -70,7 +70,7 @@ impl<'de> serde::Deserialize<'de> for LinearColor {
 impl serde::Serialize for LinearColor {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         let mut linear_color = serializer.serialize_tuple_struct("LinearColor", 4)?;
         linear_color.serialize_field(&self.r)?;

@@ -102,7 +102,9 @@
 }
 
 .checkbox {
-  @apply appearance-none select-none rounded-none bg-origin-border bg-theme-bg hover:bg-theme-hover active:bg-theme-active w-4 h-4;
+  @apply appearance-none select-none rounded-none bg-origin-border bg-theme-bg hover:bg-theme-hover active:bg-theme-active;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .checkbox:checked {

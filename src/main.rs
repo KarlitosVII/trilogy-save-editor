@@ -10,12 +10,13 @@ extern crate raw_ui_derive;
 // mod compare;
 // mod databases;
 // mod event_handler;
+mod agents;
 mod gui;
 mod save_data;
 mod unreal;
 
-use gui::Gui;
+use gui::App;
 
 fn main() {
-    yew::start_app::<Gui>();
+    yew::start_app::<App>();
 }

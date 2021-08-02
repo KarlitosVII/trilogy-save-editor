@@ -61,7 +61,7 @@ pub async fn event_loop(rx: Receiver<MainEvent>, ui_addr: Sender<UiEvent>) {
 async fn open_save(file_path: String, ui_addr: Sender<UiEvent>) -> Result<()> {
     let input = fs::read(&file_path).await?;
 
-    let save_game = if input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
+    let save_game = if input.len() >= 4 && input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
         // ME1 Legendary
         SaveGame::MassEffect1Le {
             file_path,

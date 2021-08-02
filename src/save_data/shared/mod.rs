@@ -1,5 +1,5 @@
 use derive_more::Display;
-use serde::{de, Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::Guid;
 
@@ -15,12 +15,12 @@ pub enum EndGameState {
     LivedToFightAgain,
 }
 
-impl<'de> serde::Deserialize<'de> for EndGameState {
+impl<'de> Deserialize<'de> for EndGameState {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
-        let idx: u32 = serde::Deserialize::deserialize(deserializer)?;
+        let idx: u32 = Deserialize::deserialize(deserializer)?;
 
         let end_game_state = match idx {
             0 => EndGameState::NotFinished,
@@ -35,7 +35,7 @@ impl<'de> serde::Deserialize<'de> for EndGameState {
 impl serde::Serialize for EndGameState {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer,
+        S: Serializer,
     {
         serializer.serialize_u32(self.clone() as u32)
     }

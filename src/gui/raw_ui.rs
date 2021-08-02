@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     cell::{Ref, RefCell, RefMut},
     fmt::{self, Display},
@@ -29,7 +29,7 @@ where
 //     fn draw_fields<'a>(&'a mut self, gui: &'a Gui) -> Vec<Box<dyn FnMut() + 'a>>;
 // }
 
-#[derive(Deserialize, Serialize, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct RcUi<T>(Rc<RefCell<T>>);
 
 impl<T> RcUi<T> {
@@ -47,6 +47,25 @@ impl<T> RcUi<T> {
 
     pub fn ptr_eq(&self, other: &RcUi<T>) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for RcUi<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let inner: T = Deserialize::deserialize(deserializer)?;
+        Ok(RcUi::new(inner))
+    }
+}
+
+impl<T: Serialize> serde::Serialize for RcUi<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.borrow().serialize(serializer)
     }
 }
 

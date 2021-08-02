@@ -22,10 +22,10 @@ impl RawUi for State {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for State {
+impl<'de> Deserialize<'de> for State {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct StateVisitor;
         impl<'de> de::Visitor<'de> for StateVisitor {

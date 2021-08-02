@@ -50,7 +50,7 @@ web-sys = { version="0.3", features=["CssStyleDeclaration"] }
 yew = "0.18"
 yewtil = "0.4"
 # (De)Serialization
-serde = { version = "1.0", features = ["derive", "rc"], default-features = false }
+serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.6", features = ["indexmap"], default-features = false }
 # serde_json = "1.0"
 # clap = "2.0"

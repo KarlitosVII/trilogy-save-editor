@@ -93,10 +93,10 @@ impl RawUi for Vec<BaseObject> {
     }
 }
 
-impl<'de> serde::Deserialize<'de> for BaseObject {
+impl<'de> Deserialize<'de> for BaseObject {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de>,
+        D: Deserializer<'de>,
     {
         struct BaseObjectVisitor;
         impl<'de> de::Visitor<'de> for BaseObjectVisitor {

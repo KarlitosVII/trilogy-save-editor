@@ -6,7 +6,7 @@ use serde::{
     },
     Deserialize,
 };
-use std::{convert::TryInto, mem::size_of};
+use std::mem::size_of;
 
 use super::Result;
 
@@ -20,13 +20,13 @@ impl<'de> Deserializer<'de> {
         T::deserialize(&mut deserializer)
     }
 
-    fn read(&mut self, num_bytes: usize) -> Result<&[u8]> {
-        if num_bytes > self.input.len() {
+    fn read(&mut self, len: usize) -> Result<&[u8]> {
+        if len > self.input.len() {
             return Err(super::Error::Eof);
         }
 
-        let slice = &self.input[..num_bytes];
-        self.input = &self.input[num_bytes..];
+        let (slice, remaining) = self.input.split_at(len);
+        self.input = remaining;
 
         Ok(slice)
     }
@@ -54,8 +54,12 @@ macro_rules! impl_deserialize {
             V: Visitor<'de>,
         {
             const SIZE: usize = size_of::<$type>();
-            let bytes = self.read(SIZE)?;
-            let value = <$type>::from_le_bytes(bytes.try_into().map_err(Error::custom)?);
+            let slice = self.read(SIZE)?;
+
+            let mut bytes = [0; SIZE];
+            bytes.copy_from_slice(slice);
+
+            let value = <$type>::from_le_bytes(bytes);
             visitor.$visit_type(value)
         }
     };
