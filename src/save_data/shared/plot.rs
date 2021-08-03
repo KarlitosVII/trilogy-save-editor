@@ -3,7 +3,6 @@ use bitvec::prelude::*;
 use derive_more::{Deref, DerefMut, Display};
 use indexmap::IndexMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::rc::Rc;
 
 #[derive(Deref, DerefMut, Clone)]
 pub struct BitVec(bitvec::vec::BitVec<Lsb0, u32>);

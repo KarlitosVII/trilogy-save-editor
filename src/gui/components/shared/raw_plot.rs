@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use std::{rc::Rc, time::Duration};
+use std::{cell::Ref, rc::Rc, time::Duration};
 use web_sys::HtmlElement;
 use yew::{
     prelude::*,
@@ -9,7 +9,7 @@ use yewtil::NeqAssign;
 
 use crate::{
     gui::{
-        components::{CallbackType, CheckBox, InputText},
+        components::{CheckBox, InputText},
         raw_ui::RawUi,
         RcUi,
     },
@@ -21,7 +21,7 @@ use super::{FloatPlotType, IntegerPlotType, PlotType};
 pub enum Msg {
     Throttle,
     Scrolled,
-    Filter(CallbackType),
+    Filter,
     ChangeBool(usize, bool),
 }
 
@@ -29,6 +29,13 @@ pub enum Msg {
 pub struct Props {
     pub plots: PlotType,
     pub plot_db: Rc<RawPlotDb>,
+    pub filter: RcUi<String>,
+}
+
+impl Props {
+    fn filter(&self) -> Ref<'_, String> {
+        self.filter.borrow()
+    }
 }
 
 pub struct RawPlot {
@@ -43,7 +50,6 @@ pub struct RawPlot {
     skip: usize,
     take: usize,
     label_list: Option<IndexMap<usize, Option<String>>>,
-    filter: Option<String>,
 }
 
 impl Component for RawPlot {
@@ -66,7 +72,6 @@ impl Component for RawPlot {
             skip: 0,
             take: 0,
             label_list: None,
-            filter: None,
         };
         this.add_missing_plots();
         this.update_label_list();
@@ -110,9 +115,7 @@ impl Component for RawPlot {
                 }
                 false
             }
-            Msg::Filter(CallbackType::String(filter)) => {
-                self.filter = (!filter.is_empty()).then(|| filter);
-
+            Msg::Filter => {
                 self.update_label_list();
 
                 self.link.send_message(Msg::Scrolled);
@@ -126,7 +129,6 @@ impl Component for RawPlot {
                 }
                 false
             }
-            _ => false,
         }
     }
 
@@ -140,7 +142,6 @@ impl Component for RawPlot {
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         if self.props.neq_assign(props) {
-            self.filter = None;
             self.add_missing_plots();
             self.update_label_list();
 
@@ -202,11 +203,10 @@ impl Component for RawPlot {
             });
 
         let len = label_list.map(|list| list.len()).unwrap_or(0);
-        let filter = self.filter.as_ref().map(|f| f.to_owned()).unwrap_or_default();
         html! {
             <div class="flex-auto flex flex-col gap-1">
                 <div>
-                    <InputText label="Filter" value=RcUi::new(filter) oninput=self.link.callback(Msg::Filter) />
+                    <InputText label="Filter" value=RcUi::clone(&self.props.filter) oninput=self.link.callback(|_| Msg::Filter) />
                     <hr class="border-t border-default-border" />
                 </div>
                 <div class="flex-auto h-0 overflow-y-auto"
@@ -228,7 +228,7 @@ impl Component for RawPlot {
 
 impl RawPlot {
     fn add_missing_plots(&mut self) {
-        let Props { plots, plot_db } = &mut self.props;
+        let Props { plots, plot_db, .. } = &mut self.props;
 
         match plots {
             PlotType::Boolean(ref mut booleans) => {
@@ -273,7 +273,7 @@ impl RawPlot {
     }
 
     fn update_label_list(&mut self) {
-        let Props { plots, plot_db } = &self.props;
+        let Props { plots, plot_db, .. } = &self.props;
 
         let mut label_list: IndexMap<usize, Option<String>> = match plots {
             PlotType::Boolean(ref bitvec) => {
@@ -311,15 +311,15 @@ impl RawPlot {
         };
 
         label_list.sort_keys();
-
-        if let Some(ref filter) = self.filter {
+        let filter = self.props.filter();
+        if !filter.is_empty() {
             let filter_lowercase = filter.to_lowercase();
             label_list.retain(|idx, label| {
                 label
                     .as_ref()
                     .map(|l| l.to_lowercase().contains(&filter_lowercase))
                     .unwrap_or(false)
-                    || idx.to_string().contains(filter)
+                    || idx.to_string().contains(&*filter)
             });
         }
 

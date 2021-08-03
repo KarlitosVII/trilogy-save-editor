@@ -33,6 +33,9 @@ pub struct Me2RawPlot {
     _link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
     plot_db: Option<Rc<RawPlotDb>>,
+    boolean_filter: RcUi<String>,
+    integer_filter: RcUi<String>,
+    float_filter: RcUi<String>,
 }
 
 impl Component for Me2RawPlot {
@@ -49,7 +52,15 @@ impl Component for Me2RawPlot {
 
         database_service.send(Request::Database(Type::Me2RawPlot));
 
-        Me2RawPlot { props, _link: link, _database_service: database_service, plot_db: None }
+        Me2RawPlot {
+            props,
+            _link: link,
+            _database_service: database_service,
+            plot_db: None,
+            boolean_filter: Default::default(),
+            integer_filter: Default::default(),
+            float_filter: Default::default(),
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -80,18 +91,21 @@ impl Component for Me2RawPlot {
                         <RawPlot
                             plots=PlotType::Boolean(RcUi::clone(booleans))
                             plot_db=Rc::clone(plot_db)
+                            filter=RcUi::clone(&self.boolean_filter)
                         />
                     </Tab>
                     <Tab title="Integers">
                         <RawPlot
                             plots=PlotType::Integer(integers.clone())
                             plot_db=Rc::clone(plot_db)
+                            filter=RcUi::clone(&self.integer_filter)
                         />
                     </Tab>
                     <Tab title="Floats">
                         <RawPlot
                             plots=PlotType::Float(floats.clone())
                             plot_db=Rc::clone(plot_db)
+                            filter=RcUi::clone(&self.float_filter)
                         />
                     </Tab>
                 </TabBar>

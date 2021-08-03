@@ -46,7 +46,7 @@ impl Component for TabBar {
                 <button
                     class=classes![
                         "btn",
-                        "leading-[1.15em]",
+                        "leading-[1.2em]",
                         "!rounded-t",
                         (idx == self.props.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
