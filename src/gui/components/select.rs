@@ -6,6 +6,7 @@ pub enum Msg {
     Open,
     Close,
     Blur,
+    Select(usize),
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -46,18 +47,23 @@ impl Component for Select {
                 }
                 false
             }
+            Msg::Select(idx) => {
+                self.props.current_idx = idx;
+                self.props.onselect.emit(idx);
+                self.link.send_message(Msg::Blur);
+                false
+            }
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         if self.props.neq_assign(props) {
-            if let Some(select) = self.select_ref.cast::<HtmlElement>() {
-                let _ = select.blur();
+            if !self.opened {
+                return true;
             }
-            true
-        } else {
-            false
+            self.link.send_message(Msg::Blur);
         }
+        false
     }
 
     fn view(&self) -> Html {
@@ -73,7 +79,7 @@ impl Component for Select {
                         "whitespace-nowrap",
                         (idx == self.props.current_idx).then(|| "bg-theme-bg"),
                     ]
-                    onclick=self.props.onselect.reform(move |_| idx)
+                    onclick=self.link.callback(move |_| Msg::Select(idx))
                 >
                     { option }
                 </a>

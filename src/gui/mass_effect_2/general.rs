@@ -1,13 +1,18 @@
 use std::cell::Ref;
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::{
-    gui::{components::*, raw_ui::RawUi, RcUi},
-    save_data::{
-        mass_effect_2::{
-            player::{Player, Power},
-            Difficulty,
+    gui::{
+        components::{
+            shared::{BonusPowerType, BonusPowers},
+            Select, Table,
         },
+        raw_ui::RawUi,
+        RcUi,
+    },
+    save_data::{
+        mass_effect_2::{player::Player, Difficulty},
         shared::{
             player::{Notoriety, Origin},
             plot::PlotTable,
@@ -46,10 +51,9 @@ pub enum Msg {
     Origin(usize),
     Notoriety(usize),
     PlayerClass(usize),
-    ToggleBonusPower(String),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub save_game: Me2Type,
 }
@@ -98,7 +102,7 @@ impl Component for Me2General {
                     *is_female = gender;
                 }
 
-                true
+                false
             }
             Msg::Origin(origin_idx) => {
                 // Player
@@ -147,7 +151,7 @@ impl Component for Me2General {
                     *me1_origin.borrow_mut() = origin_idx as i32;
                 }
 
-                true
+                false
             }
             Msg::Notoriety(notoriety_idx) => {
                 // Player
@@ -196,38 +200,17 @@ impl Component for Me2General {
                     *me1_notoriety.borrow_mut() = notoriety_idx as i32;
                 }
 
-                true
+                false
             }
             Msg::PlayerClass(class_idx) => {
                 *player.class_name_mut() = Me2Class::names()[class_idx].to_owned();
-                true
-            }
-            Msg::ToggleBonusPower(power_class_name) => {
-                let idx = player.powers().iter().enumerate().find_map(|(i, power)| {
-                    unicase::eq(&power_class_name, &power.borrow().power_class_name()).then(|| i)
-                });
-
-                if let Some(idx) = idx {
-                    player.powers_mut().remove(idx);
-                } else {
-                    let mut power = Power::default();
-                    *power.power_class_name.borrow_mut() = power_class_name;
-                    player.powers_mut().push(RcUi::new(power));
-                }
-
-                true
+                false
             }
         }
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { save_game } = &props;
-        if self.props.save_game != *save_game {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {
@@ -366,7 +349,7 @@ impl Me2General {
     }
 
     fn bonus_powers(&self, player: Ref<'_, Player>) -> Html {
-        let powers = &[
+        let power_list: &'static [(&'static str, &'static str)] = &[
             ("SFXGameContent_Powers.SFXPower_Crush_Player", "Slam"),
             ("SFXGameContent_Powers.SFXPower_Barrier_Player", "Barrier"),
             ("SFXGameContent_Powers.SFXPower_WarpAmmo_Player", "Warp Ammo"),
@@ -383,33 +366,8 @@ impl Me2General {
             ("SFXGameContentLiara.SFXPower_StasisNew", "Stasis"),
         ];
 
-        let selectables = powers.iter().map(|&(power_class_name, power_name)| {
-            let selected = player.powers()
-                .iter()
-                .any(|power| unicase::eq(power_class_name, &power.borrow().power_class_name()));
-
-            html_nested! {
-                <button
-                    class=classes![
-                        "rounded-none",
-                        "hover:bg-theme-hover",
-                        "active:bg-theme-active",
-                        "px-1",
-                        "w-full",
-                        "text-left",
-                        selected.then(|| "bg-theme-bg"),
-                    ]
-                    onclick=self.link.callback(move |_| Msg::ToggleBonusPower(power_class_name.to_owned()))
-                >
-                    {power_name}
-                </button>
-            }
-        });
-
         html! {
-            <Table title=String::from("Bonus Powers //TODO: (?)")>
-                { for selectables }
-            </Table>
+            <BonusPowers power_list=power_list powers=BonusPowerType::Me2(RcUi::clone(&player.powers)) />
         }
     }
 }

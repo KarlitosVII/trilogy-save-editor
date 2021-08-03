@@ -44,9 +44,9 @@ impl Component for App {
             Response::Error(err) => Msg::Error(err),
         }));
 
-        let _dbs_service = DatabaseService::bridge(
-            link.callback(|_| Msg::Error(anyhow!("should not send a message to App component"))),
-        );
+        let _dbs_service = DatabaseService::bridge(link.callback(|_| {
+            Msg::Error(anyhow!("Database service should not send a message to App component"))
+        }));
 
         App { props, link, save_handle, _dbs_service }
     }
@@ -166,27 +166,33 @@ impl App {
     }
 
     fn mass_effect_2(&self, me2: Me2Type) -> Html {
-        let (raw_data, plot) = match me2 {
-            Me2Type::Vanilla(ref me2) => {
-                (me2.view_opened("Mass Effect 2", true), RcUi::clone(&me2.borrow().plot))
-            }
-            Me2Type::Legendary(ref me2) => {
-                (me2.view_opened("Mass Effect 2", true), RcUi::clone(&me2.borrow().plot))
-            }
+        let (raw_data, plot, me1_plot) = match me2 {
+            Me2Type::Vanilla(ref me2) => (
+                me2.view_opened("Mass Effect 2", true),
+                RcUi::clone(&me2.borrow().plot),
+                RcUi::clone(&me2.borrow().me1_plot),
+            ),
+            Me2Type::Legendary(ref me2) => (
+                me2.view_opened("Mass Effect 2", true),
+                RcUi::clone(&me2.borrow().plot),
+                RcUi::clone(&me2.borrow().me1_plot),
+            ),
         };
 
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar>
+                    <Tab title="Général">
+                        <Me2General save_game=Me2Type::clone(&me2) />
+                    </Tab>
                     <Tab title="Plot">
                         <Me2Plot
                             booleans=RcUi::clone(&plot.borrow().booleans)
                             integers=RcUi::clone(&plot.borrow().integers)
+                            me1_booleans=RcUi::clone(&me1_plot.borrow().booleans)
+                            me1_integers=RcUi::clone(&me1_plot.borrow().integers)
                             onerror=self.link.callback(Msg::Error)
                         />
-                    </Tab>
-                    <Tab title="Général">
-                        <Me2General save_game=Me2Type::clone(&me2) />
                     </Tab>
                     <Tab title="Raw Data">
                         { raw_data }

@@ -66,7 +66,8 @@ impl Component for TabBar {
             .find_map(|(idx, content)| {
                 (idx == self.props.current_tab).then(|| {
                     html! {
-                        <div class=classes!["flex-auto",
+                        <div class=classes![
+                            "flex-1",
                             "flex",
                             "flex-col",
                             "h-0",

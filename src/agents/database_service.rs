@@ -1,5 +1,5 @@
 use anyhow::{Context as AnyhowContext, Error, Result};
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 use yew::{
     format::Nothing,
     services::{
@@ -10,18 +10,8 @@ use yew::{
 };
 
 use crate::save_data::{
-    // mass_effect_1::{item_db::Me1ItemDb, plot_db::Me1PlotDb},
-    mass_effect_2::plot_db::Me2PlotDb,
-    // mass_effect_3::plot_db::Me3PlotDb,
-    shared::plot::RawPlotDb,
+    mass_effect_1::plot_db::Me1PlotDb, mass_effect_2::plot_db::Me2PlotDb, shared::plot::RawPlotDb,
 };
-
-// lazy_static! {
-// ME1
-// static ref ME1_PLOT_DB: Result<Me1PlotDb> = {
-//     let input = fs::read_to_string("databases/me1_plot_db.ron")?;
-//     ron::from_str(&input).map_err(Error::from)
-// }.context("Failed to parse `databases/me1_plot_db.ron`");
 
 // static ref ME1_RAW_PLOT_DB: Result<RawPlotDb> = {
 //     let input = fs::read_to_string("databases/me1_raw_plot_db.ron")?;
@@ -43,14 +33,15 @@ use crate::save_data::{
 //     let input = fs::read_to_string("databases/me3_raw_plot_db.ron")?;
 //     ron::from_str(&input).map_err(Error::from)
 // }.context("Failed to parse `databases/me3_raw_plot_db.ron`");
-// }
 
 pub enum Type {
+    Me1Plot,
     Me2Plot,
     Me2RawPlot,
 }
 
 pub enum Database {
+    Me1Plot(Rc<Me1PlotDb>),
     Me2Plot(Rc<Me2PlotDb>),
     Me2RawPlot(Rc<RawPlotDb>),
 }
@@ -65,19 +56,21 @@ pub enum Response {
 }
 
 pub enum Msg {
-    DatabaseLoaded(HandlerId, Database),
-    Error(HandlerId, Error),
+    DatabaseLoaded(usize, HandlerId, Database),
+    Error(Option<usize>, HandlerId, Error),
 }
 
 #[derive(Default)]
 struct Databases {
+    me1_plot: Option<Rc<Me1PlotDb>>,
     me2_plot: Option<Rc<Me2PlotDb>>,
     me2_raw_plot: Option<Rc<RawPlotDb>>,
 }
 
 pub struct DatabaseService {
     link: AgentLink<Self>,
-    tasks: Vec<FetchTask>,
+    task_counter: usize,
+    tasks: HashMap<usize, FetchTask>,
     dbs: Databases,
 }
 
@@ -88,20 +81,32 @@ impl Agent for DatabaseService {
     type Output = Response;
 
     fn create(link: AgentLink<Self>) -> Self {
-        Self { link, tasks: Default::default(), dbs: Default::default() }
+        Self { link, task_counter: 0, tasks: Default::default(), dbs: Default::default() }
     }
 
     fn update(&mut self, msg: Self::Message) {
         match msg {
-            Msg::DatabaseLoaded(who, Database::Me2Plot(db)) => {
-                self.dbs.me2_plot = Some(Rc::clone(&db));
-                self.respond_db(who, Database::Me2Plot(db));
+            Msg::DatabaseLoaded(task_id, who, db) => {
+                self.tasks.remove(&task_id);
+                match db {
+                    Database::Me1Plot(ref db) => {
+                        self.dbs.me1_plot = Some(Rc::clone(&db));
+                    }
+                    Database::Me2Plot(ref db) => {
+                        self.dbs.me2_plot = Some(Rc::clone(&db));
+                    }
+                    Database::Me2RawPlot(ref db) => {
+                        self.dbs.me2_raw_plot = Some(Rc::clone(&db));
+                    }
+                }
+                self.respond_db(who, db);
             }
-            Msg::DatabaseLoaded(who, Database::Me2RawPlot(db)) => {
-                self.dbs.me2_raw_plot = Some(Rc::clone(&db));
-                self.respond_db(who, Database::Me2RawPlot(db));
+            Msg::Error(task_id, who, err) => {
+                if let Some(task_id) = task_id {
+                    self.tasks.remove(&task_id);
+                }
+                self.link.respond(who, Response::Error(err));
             }
-            Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
         }
     }
 
@@ -109,29 +114,34 @@ impl Agent for DatabaseService {
         let handle_request = || match msg {
             Request::Database(db_type) => {
                 match db_type {
+                    Type::Me1Plot => match self.dbs.me1_plot {
+                        Some(ref db) => self.respond_db(who, Database::Me1Plot(Rc::clone(db))),
+                        None => self.fetch(who, "/databases/me1_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me1Plot(Rc::new(db)))
+                        })?,
+                    },
                     Type::Me2Plot => match self.dbs.me2_plot {
                         Some(ref db) => self.respond_db(who, Database::Me2Plot(Rc::clone(db))),
                         None => self.fetch(who, "/databases/me2_plot_db.ron", |response| {
-                            let db = ron::from_str(&response)
-                                .context("Failed to parse `databases/me2_plot_db.ron`")?;
+                            let db = ron::from_str(&response)?;
                             Ok(Database::Me2Plot(Rc::new(db)))
                         })?,
                     },
                     Type::Me2RawPlot => match self.dbs.me2_raw_plot {
                         Some(ref db) => self.respond_db(who, Database::Me2RawPlot(Rc::clone(db))),
                         None => self.fetch(who, "/databases/me2_raw_plot_db.ron", |response| {
-                            let db = ron::from_str(&response)
-                                .context("Failed to parse `databases/me2_raw_plot_db.ron`")?;
+                            let db = ron::from_str(&response)?;
                             Ok(Database::Me2RawPlot(Rc::new(db)))
                         })?,
                     },
                 }
-                Ok(())
+                Ok::<_, Error>(())
             }
         };
 
-        if let Err(err) = handle_request() {
-            self.link.send_message(Msg::Error(who, err));
+        if let Err(err) = handle_request().context("Error while loading database") {
+            self.link.send_message(Msg::Error(None, who, err));
         }
     }
 }
@@ -147,17 +157,19 @@ impl DatabaseService {
     {
         let get_request = fetch::Request::get(path).body(Nothing)?;
 
-        let task = FetchService::fetch(
-            get_request,
-            self.link.callback(move |response: fetch::Response<Result<String>>| {
-                let handle_db = || deserialize(response.into_body()?);
-                match handle_db() {
-                    Ok(db) => Msg::DatabaseLoaded(who, db),
-                    Err(err) => Msg::Error(who, err),
-                }
-            }),
-        )?;
-        self.tasks.push(task);
+        let path = path.to_owned();
+        let task_id = self.task_counter;
+        let callback = self.link.callback(move |response: fetch::Response<Result<String>>| {
+            let handle_db = || deserialize(response.into_body()?);
+            match handle_db().context(format!("Failed to parse `{}`", path)) {
+                Ok(db) => Msg::DatabaseLoaded(task_id, who, db),
+                Err(err) => Msg::Error(Some(task_id), who, err),
+            }
+        });
+
+        let task = FetchService::fetch(get_request, callback)?;
+        self.tasks.insert(task_id, task);
+        self.task_counter += 1;
         Ok(())
     }
 }

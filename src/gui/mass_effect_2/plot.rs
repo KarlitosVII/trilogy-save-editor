@@ -4,20 +4,13 @@ use std::rc::Rc;
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::{
-    database_service::{Database, DatabaseService, Request, Response, Type},
-    gui::{
-        components::{
+use crate::{database_service::{Database, DatabaseService, Request, Response, Type}, gui::{RcUi, Theme, components::{
             shared::{PlotCategory, PlotType},
             Tab, TabBar,
-        },
-        RcUi, Theme,
-    },
-    save_data::{
+        }, mass_effect_1::Me1Plot}, save_data::{
         mass_effect_2::plot_db::Me2PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-    },
-};
+    }};
 
 pub enum Msg {
     PlotDb(Rc<Me2PlotDb>),
@@ -28,12 +21,14 @@ pub enum Msg {
 pub struct Props {
     pub booleans: RcUi<BitVec>,
     pub integers: RcUi<Vec<RcUi<i32>>>,
+    pub me1_booleans: RcUi<BitVec>,
+    pub me1_integers: RcUi<Vec<RcUi<i32>>>,
     pub onerror: Callback<Error>,
 }
 
 pub struct Me2Plot {
     props: Props,
-    _link: ComponentLink<Self>,
+    link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
     plot_db: Option<Rc<Me2PlotDb>>,
 }
@@ -52,7 +47,7 @@ impl Component for Me2Plot {
 
         database_service.send(Request::Database(Type::Me2Plot));
 
-        Me2Plot { props, _link: link, _database_service: database_service, plot_db: None }
+        Me2Plot { props, link, _database_service: database_service, plot_db: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -74,7 +69,12 @@ impl Component for Me2Plot {
 
     fn view(&self) -> Html {
         if let Some(ref plot_db) = self.plot_db {
-            let (booleans, integers) = (&self.props.booleans, &self.props.integers);
+            let (booleans, integers, me1_booleans, me1_integers) = (
+                &self.props.booleans,
+                &self.props.integers,
+                &self.props.me1_booleans,
+                &self.props.me1_integers,
+            );
             let Me2PlotDb {
                 player,
                 crew,
@@ -123,6 +123,29 @@ impl Component for Me2Plot {
                 })
             });
 
+            let mass_effect_1 = if !me1_booleans.borrow().is_empty() {
+                html! {
+                    <>
+                        <div>
+                            { "If you change these plots this will ONLY take effect after a new game +" }
+                            <hr class="border-t border-default-border" />
+                        </div>
+                        <Me1Plot
+                            booleans=RcUi::clone(&me1_booleans)
+                            integers=RcUi::clone(&me1_integers)
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </>
+                }
+            } else {
+                html! {
+                    <div>
+                        { "You cannot edit ME1 plot if you have not imported a ME1 save." }
+                        <hr class="border-t border-default-border" />
+                    </div>
+                }
+            };
+
             html! {
                 <TabBar>
                     <Tab title="Player">
@@ -158,11 +181,7 @@ impl Component for Me2Plot {
                     </Tab>
                     <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
                         <div class="flex flex-col gap-1">
-                            <div>
-                                { "// TODO: ME1 tip" }
-                                <hr class="border-t border-default-border" />
-                            </div>
-                                { "// TODO: ME1" }
+                            { mass_effect_1 }
                         </div>
                     </Tab>
                 </TabBar>

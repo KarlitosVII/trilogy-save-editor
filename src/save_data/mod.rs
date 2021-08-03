@@ -8,7 +8,7 @@ use serde::{
 use std::fmt;
 use uuid::Uuid;
 
-// pub mod mass_effect_1;
+pub mod mass_effect_1;
 // pub mod mass_effect_1_le;
 pub mod mass_effect_2;
 // pub mod mass_effect_3;

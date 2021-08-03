@@ -1,7 +1,7 @@
+use crate::save_data::mass_effect_2::{Me2LeSaveGame, Me2SaveGame};
+
 mod general;
 mod plot;
-
-use crate::save_data::mass_effect_2::{Me2LeSaveGame, Me2SaveGame};
 
 pub use self::{general::*, plot::*};
 

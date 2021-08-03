@@ -3,6 +3,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 mod app;
 pub mod components;
+mod mass_effect_1;
 mod mass_effect_2;
 pub mod raw_ui;
 

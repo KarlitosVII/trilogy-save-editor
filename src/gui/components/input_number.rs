@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use yewtil::NeqAssign;
 
 use crate::gui::RcUi;
 
@@ -34,7 +35,7 @@ pub enum Msg {
     Change(ChangeData),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub label: String,
     pub value: NumberType,
@@ -96,16 +97,7 @@ impl Component for InputNumber {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let Props { label, value, onchange } = &props;
-        if self.props.label != *label
-            || self.props.value != *value
-            || self.props.onchange != *onchange
-        {
-            self.props = props;
-            true
-        } else {
-            false
-        }
+        self.props.neq_assign(props)
     }
 
     fn view(&self) -> Html {

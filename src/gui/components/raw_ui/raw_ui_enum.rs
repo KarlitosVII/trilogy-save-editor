@@ -53,7 +53,7 @@ where
         match msg {
             Msg::Changed(idx) => {
                 *self.props.value_mut() = T::from(idx);
-                true
+                false
             }
         }
     }
