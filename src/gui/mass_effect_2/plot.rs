@@ -4,13 +4,21 @@ use std::rc::Rc;
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::{database_service::{Database, DatabaseService, Request, Response, Type}, gui::{RcUi, Theme, components::{
-            shared::{PlotCategory, PlotType},
+use crate::{
+    database_service::{Database, DatabaseService, Request, Response, Type},
+    gui::{
+        components::{
+            shared::{IntegerPlotType, PlotCategory},
             Tab, TabBar,
-        }, mass_effect_1::Me1Plot}, save_data::{
+        },
+        mass_effect_1::Me1Plot,
+        RcUi, Theme,
+    },
+    save_data::{
         mass_effect_2::plot_db::Me2PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-    }};
+    },
+};
 
 pub enum Msg {
     PlotDb(Rc<Me2PlotDb>),
@@ -20,9 +28,9 @@ pub enum Msg {
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub booleans: RcUi<BitVec>,
-    pub integers: RcUi<Vec<RcUi<i32>>>,
+    pub integers: IntegerPlotType,
     pub me1_booleans: RcUi<BitVec>,
-    pub me1_integers: RcUi<Vec<RcUi<i32>>>,
+    pub me1_integers: IntegerPlotType,
     pub onerror: Callback<Error>,
 }
 
@@ -95,7 +103,7 @@ impl Component for Me2Plot {
                             <PlotCategory
                                 title=title.to_owned()
                                 booleans=RcUi::clone(booleans)
-                                integers=PlotType::Vec(RcUi::clone(integers))
+                                integers=IntegerPlotType::clone(integers)
                                 category=category.clone()
                             />
                         }
@@ -116,7 +124,7 @@ impl Component for Me2Plot {
                 #[allow(unused_braces)]
                 (html_nested! {
                     <Tab title=tab.to_owned()>
-                        <div class="flex flex-col gap-1">
+                        <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>
                     </Tab>
@@ -131,8 +139,8 @@ impl Component for Me2Plot {
                             <hr class="border-t border-default-border" />
                         </div>
                         <Me1Plot
-                            booleans=RcUi::clone(&me1_booleans)
-                            integers=RcUi::clone(&me1_integers)
+                            booleans=RcUi::clone(me1_booleans)
+                            integers=IntegerPlotType::clone(me1_integers)
                             onerror=self.link.callback(Msg::Error)
                         />
                     </>
@@ -151,14 +159,14 @@ impl Component for Me2Plot {
                     <Tab title="Player">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=PlotType::Vec(RcUi::clone(integers))
+                            integers=IntegerPlotType::clone(integers)
                             category=player.clone()
                         />
                     </Tab>
                     <Tab title="Rewards">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=PlotType::Vec(RcUi::clone(integers))
+                            integers=IntegerPlotType::clone(integers)
                             category=rewards.clone()
                         />
                     </Tab>
@@ -166,12 +174,12 @@ impl Component for Me2Plot {
                     <Tab title="Captain's cabin">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=PlotType::Vec(RcUi::clone(integers))
+                            integers=IntegerPlotType::clone(integers)
                             category=captains_cabin.clone()
                         />
                     </Tab>
                     <Tab title="Imported ME1" theme=Theme::MassEffect1>
-                        <div class="flex flex-col gap-1">
+                        <div class="flex-auto flex flex-col gap-1">
                             <div>
                                 { "For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix : //TODO: (?)" }
                                 <hr class="border-t border-default-border" />
@@ -180,7 +188,7 @@ impl Component for Me2Plot {
                         </div>
                     </Tab>
                     <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
-                        <div class="flex flex-col gap-1">
+                        <div class="flex-auto flex flex-col gap-1">
                             { mass_effect_1 }
                         </div>
                     </Tab>

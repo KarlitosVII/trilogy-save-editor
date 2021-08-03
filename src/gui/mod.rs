@@ -1,5 +1,9 @@
-use std::{cell::{Ref, RefCell, RefMut}, fmt::{self, Display}, rc::Rc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::{
+    cell::{Ref, RefCell, RefMut},
+    fmt::{self, Display},
+    rc::Rc,
+};
 
 mod app;
 pub mod components;

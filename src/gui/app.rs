@@ -5,8 +5,11 @@ use yew::{prelude::*, services::ConsoleService};
 use crate::{
     database_service::DatabaseService,
     gui::{
-        components::{NavBar, Tab, TabBar, Table},
-        mass_effect_2::{Me2General, Me2Plot, Me2Type},
+        components::{
+            shared::{FloatPlotType, IntegerPlotType},
+            NavBar, Tab, TabBar, Table,
+        },
+        mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
         raw_ui::RawUi,
         RcUi, Theme,
     },
@@ -140,7 +143,7 @@ impl App {
                         _ => {}
                     }
                 } else {
-                    changelog.push((version, mem::replace(&mut changes, Vec::new())));
+                    changelog.push((version, mem::take(&mut changes)));
                 }
             }
             changelog
@@ -188,14 +191,22 @@ impl App {
                     <Tab title="Plot">
                         <Me2Plot
                             booleans=RcUi::clone(&plot.borrow().booleans)
-                            integers=RcUi::clone(&plot.borrow().integers)
+                            integers=IntegerPlotType::Vec(RcUi::clone(&plot.borrow().integers))
                             me1_booleans=RcUi::clone(&me1_plot.borrow().booleans)
-                            me1_integers=RcUi::clone(&me1_plot.borrow().integers)
+                            me1_integers=IntegerPlotType::Vec(RcUi::clone(&me1_plot.borrow().integers))
                             onerror=self.link.callback(Msg::Error)
                         />
                     </Tab>
                     <Tab title="Raw Data">
                         { raw_data }
+                    </Tab>
+                    <Tab title="Raw Plot">
+                        <Me2RawPlot
+                            booleans=RcUi::clone(&plot.borrow().booleans)
+                            integers=IntegerPlotType::Vec(RcUi::clone(&plot.borrow().integers))
+                            floats=FloatPlotType::Vec(RcUi::clone(&plot.borrow().floats))
+                            onerror=self.link.callback(Msg::Error)
+                        />
                     </Tab>
                 </TabBar>
             </section>

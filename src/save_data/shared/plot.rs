@@ -3,6 +3,7 @@ use bitvec::prelude::*;
 use derive_more::{Deref, DerefMut, Display};
 use indexmap::IndexMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::rc::Rc;
 
 #[derive(Deref, DerefMut, Clone)]
 pub struct BitVec(bitvec::vec::BitVec<Lsb0, u32>);
@@ -73,13 +74,13 @@ pub struct PlotCodexPage {
     is_new: bool,
 }
 
-#[derive(Deserialize, Clone, PartialEq)]
+#[derive(Deserialize, Clone, PartialEq, Eq)]
 pub struct PlotCategory {
     pub booleans: IndexMap<usize, String>,
     pub integers: IndexMap<usize, String>,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, PartialEq, Eq)]
 pub struct RawPlotDb {
     pub booleans: IndexMap<usize, String>,
     pub integers: IndexMap<usize, String>,

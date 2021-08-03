@@ -1,5 +1,4 @@
 mod check_box;
-mod clipper;
 mod color_picker;
 mod input_number;
 mod input_text;
@@ -11,8 +10,8 @@ mod tab_bar;
 mod table;
 
 pub use self::{
-    check_box::*, clipper::*, color_picker::*, input_number::*, input_text::*, nav_bar::*,
-    select::*, tab_bar::*, table::*,
+    check_box::*, color_picker::*, input_number::*, input_text::*, nav_bar::*, select::*,
+    tab_bar::*, table::*,
 };
 
 pub enum CallbackType {

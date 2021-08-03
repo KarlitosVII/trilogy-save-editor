@@ -2,8 +2,9 @@ use crate::save_data::mass_effect_2::{Me2LeSaveGame, Me2SaveGame};
 
 mod general;
 mod plot;
+mod raw_plot;
 
-pub use self::{general::*, plot::*};
+pub use self::{general::*, plot::*, raw_plot::*};
 
 use super::RcUi;
 

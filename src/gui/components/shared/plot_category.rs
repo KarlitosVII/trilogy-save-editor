@@ -1,4 +1,3 @@
-use indexmap::IndexMap;
 use std::cell::RefMut;
 use yew::prelude::*;
 use yewtil::NeqAssign;
@@ -12,26 +11,7 @@ use crate::{
     save_data::shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
 };
 
-#[derive(Clone)]
-pub enum PlotType {
-    Vec(RcUi<Vec<RcUi<i32>>>),
-    IndexMap(RcUi<IndexMap<i32, RcUi<i32>>>),
-}
-
-impl PartialEq for PlotType {
-    fn eq(&self, other: &PlotType) -> bool {
-        match self {
-            PlotType::Vec(vec) => match other {
-                PlotType::Vec(other) => vec == other,
-                _ => false,
-            },
-            PlotType::IndexMap(index_map) => match other {
-                PlotType::IndexMap(other) => index_map == other,
-                _ => false,
-            },
-        }
-    }
-}
+use super::IntegerPlotType;
 
 pub enum Msg {
     ChangeBool(usize, bool),
@@ -41,7 +21,7 @@ pub enum Msg {
 pub struct Props {
     pub title: Option<String>,
     pub booleans: RcUi<BitVec>,
-    pub integers: PlotType,
+    pub integers: IntegerPlotType,
     pub category: PlotCategoryDb,
     #[prop_or(false)]
     pub me3_imported_me1: bool,
@@ -105,7 +85,7 @@ impl Component for PlotCategory {
                         onchange=self.link.callback(move |value| Msg::ChangeBool(idx, value))
                     />
                 },
-                None => Default::default(),
+                None => Html::default(),
             }
         });
 
@@ -115,14 +95,14 @@ impl Component for PlotCategory {
                 idx += 10_000;
             }
             let value = match integers {
-                PlotType::Vec(vec) => vec.borrow().get(idx).map(RcUi::clone),
-                PlotType::IndexMap(index_map) => {
+                IntegerPlotType::Vec(vec) => vec.borrow().get(idx).map(RcUi::clone),
+                IntegerPlotType::IndexMap(index_map) => {
                     index_map.borrow().get(&(idx as i32)).map(RcUi::clone)
                 }
             };
             match value {
                 Some(value) => value.view(label),
-                None => Default::default(),
+                None => Html::default(),
             }
         });
 
@@ -141,7 +121,7 @@ impl PlotCategory {
         let PlotCategoryDb { booleans: bool_db, integers: int_db } = &category;
 
         // Booleans
-        if let Some(mut max) = bool_db.keys().copied().max() {
+        if let Some(&(mut max)) = bool_db.keys().max() {
             if *me3_imported_me1 {
                 max += 10_000;
             }
@@ -154,8 +134,8 @@ impl PlotCategory {
 
         // Integers
         match integers {
-            PlotType::Vec(ref mut vec) => {
-                if let Some(mut max) = int_db.keys().copied().max() {
+            IntegerPlotType::Vec(ref mut vec) => {
+                if let Some(&(mut max)) = int_db.keys().max() {
                     if *me3_imported_me1 {
                         max += 10_000;
                     }
@@ -166,7 +146,7 @@ impl PlotCategory {
                     };
                 }
             }
-            PlotType::IndexMap(ref mut index_map) => {
+            IntegerPlotType::IndexMap(ref mut index_map) => {
                 for mut key in int_db.keys().copied() {
                     if *me3_imported_me1 {
                         key += 10_000;

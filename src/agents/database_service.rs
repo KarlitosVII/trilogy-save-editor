@@ -90,13 +90,13 @@ impl Agent for DatabaseService {
                 self.tasks.remove(&task_id);
                 match db {
                     Database::Me1Plot(ref db) => {
-                        self.dbs.me1_plot = Some(Rc::clone(&db));
+                        self.dbs.me1_plot = Some(Rc::clone(db));
                     }
                     Database::Me2Plot(ref db) => {
-                        self.dbs.me2_plot = Some(Rc::clone(&db));
+                        self.dbs.me2_plot = Some(Rc::clone(db));
                     }
                     Database::Me2RawPlot(ref db) => {
-                        self.dbs.me2_raw_plot = Some(Rc::clone(&db));
+                        self.dbs.me2_raw_plot = Some(Rc::clone(db));
                     }
                 }
                 self.respond_db(who, db);

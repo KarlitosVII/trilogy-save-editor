@@ -67,7 +67,7 @@ impl Component for TabBar {
                 (idx == self.props.current_tab).then(|| {
                     html! {
                         <div class=classes![
-                            "flex-1",
+                            "flex-auto",
                             "flex",
                             "flex-col",
                             "h-0",
