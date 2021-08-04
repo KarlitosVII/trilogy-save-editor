@@ -1,5 +1,9 @@
-use indexmap::IndexMap;
-use std::{cell::Ref, rc::Rc, time::Duration};
+use indexmap::{map::Entry, IndexMap};
+use std::{
+    cell::{Ref, RefMut},
+    rc::Rc,
+    time::Duration,
+};
 use web_sys::HtmlElement;
 use yew::{
     prelude::*,
@@ -9,7 +13,7 @@ use yewtil::NeqAssign;
 
 use crate::{
     gui::{
-        components::{CheckBox, InputText},
+        components::{CheckBox, InputNumber, NumberType},
         raw_ui::RawUi,
         RcUi,
     },
@@ -21,20 +25,32 @@ use super::{FloatPlotType, IntegerPlotType, PlotType};
 pub enum Msg {
     Throttle,
     Scrolled,
-    Filter,
     ChangeBool(usize, bool),
+    Filter(String),
+    Add,
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub plots: PlotType,
     pub plot_db: Rc<RawPlotDb>,
-    pub filter: RcUi<String>,
+    #[prop_or_default]
+    filter: RcUi<String>,
+    #[prop_or_default]
+    add_id: RcUi<i32>,
 }
 
 impl Props {
     fn filter(&self) -> Ref<'_, String> {
         self.filter.borrow()
+    }
+
+    fn filter_mut(&mut self) -> RefMut<'_, String> {
+        self.filter.borrow_mut()
+    }
+
+    fn add_id(&self) -> Ref<'_, i32> {
+        self.add_id.borrow()
     }
 }
 
@@ -79,7 +95,7 @@ impl Component for RawPlot {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        const TRHOTTLE: Duration = Duration::from_millis(15);
+        const TRHOTTLE: Duration = Duration::from_millis(30);
         match msg {
             Msg::Scrolled => {
                 if self.throttle.is_none() {
@@ -87,8 +103,8 @@ impl Component for RawPlot {
                         let scroll_top = scroll.scroll_top();
                         let offset_height = scroll.offset_height();
                         let num_rows = offset_height / self.row_height + 1;
-                        let overflow_begin = num_rows / 4;
-                        let overflow_end = num_rows / 3;
+                        let overflow_begin = num_rows / 2;
+                        let overflow_end = num_rows;
 
                         let len = self.label_list.as_ref().map(|list| list.len()).unwrap_or(0);
                         let start = scroll_top / self.row_height;
@@ -115,17 +131,77 @@ impl Component for RawPlot {
                 }
                 false
             }
-            Msg::Filter => {
-                self.update_label_list();
-
-                self.link.send_message(Msg::Scrolled);
-                false
-            }
             Msg::ChangeBool(idx, value) => {
                 if let PlotType::Boolean(ref mut booleans) = self.props.plots {
                     if let Some(mut plot) = booleans.borrow_mut().get_mut(idx) {
                         *plot = value;
                     }
+                }
+                false
+            }
+            Msg::Filter(filter) => {
+                *self.props.filter_mut() = filter;
+                self.update_label_list();
+
+                self.link.send_message(Msg::Scrolled);
+                false
+            }
+            Msg::Add => {
+                let new_plot = *self.props.add_id() as usize;
+                let added = match self.props.plots {
+                    PlotType::Boolean(ref mut booleans) => {
+                        let mut booleans = booleans.borrow_mut();
+                        if new_plot >= booleans.len() {
+                            booleans.resize(new_plot + 1, Default::default());
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    PlotType::Integer(ref mut integers) => match integers {
+                        IntegerPlotType::Vec(ref mut vec) => {
+                            let mut vec = vec.borrow_mut();
+                            if new_plot >= vec.len() {
+                                vec.resize(new_plot + 1, Default::default());
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        IntegerPlotType::IndexMap(ref mut index_map) => {
+                            match index_map.borrow_mut().entry(new_plot as i32) {
+                                Entry::Vacant(plot) => {
+                                    plot.insert(Default::default());
+                                    true
+                                }
+                                Entry::Occupied(_) => false,
+                            }
+                        }
+                    },
+                    PlotType::Float(ref mut floats) => match floats {
+                        FloatPlotType::Vec(ref mut vec) => {
+                            let mut vec = vec.borrow_mut();
+                            if new_plot >= vec.len() {
+                                vec.resize(new_plot + 1, Default::default());
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                        FloatPlotType::IndexMap(ref mut index_map) => {
+                            match index_map.borrow_mut().entry(new_plot as i32) {
+                                Entry::Vacant(plot) => {
+                                    plot.insert(Default::default());
+                                    true
+                                }
+                                Entry::Occupied(_) => false,
+                            }
+                        }
+                    },
+                };
+                if added {
+                    self.update_label_list();
+                    self.link.send_message(Msg::Scrolled);
                 }
                 false
             }
@@ -169,54 +245,75 @@ impl Component for RawPlot {
                     .unwrap_or_else(|| idx.to_string());
 
                 let row = match self.props.plots {
-                PlotType::Boolean(ref list) => list.borrow().get(idx).map(|plot| {
-                    html! {
-                        <CheckBox
-                            label=label
-                            value=RcUi::new(*plot)
-                            onchange=self.link.callback(move |value| Msg::ChangeBool(idx, value))
-                        />
-                    }
-                }),
-                PlotType::Integer(ref integers) => match integers {
-                    IntegerPlotType::Vec(ref list) => {
-                        list.borrow().get(idx).map(|plot| plot.view(&label))
-                    }
-                    IntegerPlotType::IndexMap(ref list) => {
-                        list.borrow().get(&(idx as i32)).map(|plot| plot.view(&label))
-                    }
-                },
-                PlotType::Float(ref floats) => match floats {
-                    FloatPlotType::Vec(ref list) => {
-                        list.borrow().get(idx).map(|plot| plot.view(&label))
-                    }
-                    FloatPlotType::IndexMap(ref list) => {
-                        list.borrow().get(&(idx as i32)).map(|plot| plot.view(&label))
-                    }
-                },
-            };
+                    PlotType::Boolean(ref booleans) => booleans.borrow().get(idx).map(|plot| {
+                        html! {
+                            <CheckBox
+                                label=label
+                                value=RcUi::new(*plot)
+                                onchange=self.link.callback(move |value| Msg::ChangeBool(idx, value))
+                            />
+                        }
+                    }),
+                    PlotType::Integer(ref integers) => match integers {
+                        IntegerPlotType::Vec(ref vec) => {
+                            vec.borrow().get(idx).map(|plot| plot.view(&label))
+                        }
+                        IntegerPlotType::IndexMap(ref index_map) => {
+                            index_map.borrow().get(&(idx as i32)).map(|plot| plot.view(&label))
+                        }
+                    },
+                    PlotType::Float(ref floats) => match floats {
+                        FloatPlotType::Vec(ref vec) => {
+                            vec.borrow().get(idx).map(|plot| plot.view(&label))
+                        }
+                        FloatPlotType::IndexMap(ref index_map) => {
+                            index_map.borrow().get(&(idx as i32)).map(|plot| plot.view(&label))
+                        }
+                    },
+                };
                 html_nested! {
-                    <div class="clipper-row">
+                    <div class="raw-plot-row">
                         { row.unwrap_or_default() }
                     </div>
                 }
             });
 
+        let add_helper = match self.props.plots {
+            PlotType::Boolean(_)
+            | PlotType::Integer(IntegerPlotType::Vec(_))
+            | PlotType::Float(FloatPlotType::Vec(_)) => html! { "// TODO: (?)" },
+            _ => Html::default(),
+        };
         let len = label_list.map(|list| list.len()).unwrap_or(0);
         html! {
             <div class="flex-auto flex flex-col gap-1">
-                <div>
-                    <InputText label="Filter" value=RcUi::clone(&self.props.filter) oninput=self.link.callback(|_| Msg::Filter) />
-                    <hr class="border-t border-default-border" />
+                <div class="flex gap-3 w-2/3">
+                    <label class="flex-auto flex items-center gap-1">
+                        <input type="text" class="flex-auto input" placeholder="<empty>" value=self.props.filter().to_owned()
+                            oninput=self.link.callback(|data: InputData| Msg::Filter(data.value))
+                        />
+                        { "Filter" }
+                    </label>
+                    <form class="flex gap-1"
+                        onsubmit=self.link.callback(|e: FocusEvent| {
+                            e.prevent_default();
+                            Msg::Add
+                        })
+                    >
+                        <InputNumber label=String::default() value=NumberType::Integer(RcUi::clone(&self.props.add_id)) />
+                        <input type="submit" class="btn" value="Add" />
+                        { add_helper }
+                    </form>
                 </div>
+                <hr class="border-t border-default-border" />
                 <div class="flex-auto h-0 overflow-y-auto"
                     onscroll=self.link.callback(|_| Msg::Scrolled)
                     ref=self.scroll_ref.clone()
                 >
-                    <div class="relative w-full border border-default-border clipper-bg"
+                    <div class="relative w-full border border-default-border raw-plot-bg"
                         style=format!("height: {}px;", len as i32 * self.row_height + 2)
                     >
-                        <div class="absolute w-full" ref=self.content_ref.clone()>
+                        <div class="absolute min-w-[33.333333%]" ref=self.content_ref.clone()>
                             { for rows }
                         </div>
                     </div>
@@ -311,13 +408,14 @@ impl RawPlot {
         };
 
         label_list.sort_keys();
+
         let filter = self.props.filter();
         if !filter.is_empty() {
             let filter_lowercase = filter.to_lowercase();
             label_list.retain(|idx, label| {
                 label
                     .as_ref()
-                    .map(|l| l.to_lowercase().contains(&filter_lowercase))
+                    .map(|label| label.to_lowercase().contains(&filter_lowercase))
                     .unwrap_or(false)
                     || idx.to_string().contains(&*filter)
             });

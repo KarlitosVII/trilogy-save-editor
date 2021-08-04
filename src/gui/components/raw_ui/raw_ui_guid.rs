@@ -56,7 +56,7 @@ impl Component for RawUiGuid {
 
     fn view(&self) -> Html {
         html! {
-            <label class="flex items-center gap-1 align-bottom">
+            <label class="flex items-center gap-1">
                 <input type="text" class="input w-1/3" placeholder="<empty>" value=self.props.guid().to_string()
                     onchange=self.link.callback(Msg::Change)
                 />

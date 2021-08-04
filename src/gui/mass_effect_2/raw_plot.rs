@@ -33,9 +33,6 @@ pub struct Me2RawPlot {
     _link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
     plot_db: Option<Rc<RawPlotDb>>,
-    boolean_filter: RcUi<String>,
-    integer_filter: RcUi<String>,
-    float_filter: RcUi<String>,
 }
 
 impl Component for Me2RawPlot {
@@ -57,9 +54,6 @@ impl Component for Me2RawPlot {
             _link: link,
             _database_service: database_service,
             plot_db: None,
-            boolean_filter: Default::default(),
-            integer_filter: Default::default(),
-            float_filter: Default::default(),
         }
     }
 
@@ -88,25 +82,13 @@ impl Component for Me2RawPlot {
             html! {
                 <TabBar>
                     <Tab title="Booleans">
-                        <RawPlot
-                            plots=PlotType::Boolean(RcUi::clone(booleans))
-                            plot_db=Rc::clone(plot_db)
-                            filter=RcUi::clone(&self.boolean_filter)
-                        />
+                        <RawPlot plots=PlotType::Boolean(RcUi::clone(booleans)) plot_db=Rc::clone(plot_db) />
                     </Tab>
                     <Tab title="Integers">
-                        <RawPlot
-                            plots=PlotType::Integer(integers.clone())
-                            plot_db=Rc::clone(plot_db)
-                            filter=RcUi::clone(&self.integer_filter)
-                        />
+                        <RawPlot plots=PlotType::Integer(integers.clone()) plot_db=Rc::clone(plot_db) />
                     </Tab>
                     <Tab title="Floats">
-                        <RawPlot
-                            plots=PlotType::Float(floats.clone())
-                            plot_db=Rc::clone(plot_db)
-                            filter=RcUi::clone(&self.float_filter)
-                        />
+                        <RawPlot plots=PlotType::Float(floats.clone()) plot_db=Rc::clone(plot_db) />
                     </Tab>
                 </TabBar>
             }

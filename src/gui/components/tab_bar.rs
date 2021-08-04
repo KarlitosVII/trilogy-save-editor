@@ -3,8 +3,10 @@ use yewtil::NeqAssign;
 
 use crate::gui::Theme;
 
+const MAIN_BUTTON: i16 = 0;
+
 pub enum Msg {
-    TabClicked(usize),
+    TabClicked(MouseEvent, usize),
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -29,9 +31,13 @@ impl Component for TabBar {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::TabClicked(idx) => {
-                self.props.current_tab = idx;
-                true
+            Msg::TabClicked(event, idx) => {
+                if event.button() == MAIN_BUTTON {
+                    self.props.current_tab = idx;
+                    true
+                } else {
+                    false
+                }
             }
         }
     }
@@ -51,7 +57,7 @@ impl Component for TabBar {
                         (idx == self.props.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
                     ]
-                    onmousedown=(idx != self.props.current_tab).then(|| self.link.callback(move |_| Msg::TabClicked(idx)))
+                    onmousedown=(idx != self.props.current_tab).then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)))
                 >
                     { child.props.title }
                 </button>

@@ -55,7 +55,7 @@
 
 /* Button */
 .btn {
-  @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active px-1;
+  @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active cursor-pointer px-1;
 }
 
 /* NavBar */
@@ -86,13 +86,13 @@
 }
 
 /* Clipper */
-.clipper-bg {
+.raw-plot-bg {
   background: linear-gradient(0, theme("colors.table.even") 50%, theme("colors.table.odd") 50%);
   background-size: 100% 46px;
   background-repeat: repeat;
 }
 
-.clipper-row {
+.raw-plot-row {
   @apply p-[1.5px] px-1 w-full h-[23px];
 }
 

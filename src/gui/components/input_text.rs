@@ -44,7 +44,7 @@ impl Component for InputText {
         match msg {
             Msg::Input(value) => {
                 if let Some(ref callback) = self.props.oninput {
-                    callback.emit(CallbackType::String(value.clone()));
+                    callback.emit(CallbackType::String(value.to_owned()));
                 }
 
                 *self.props.value_mut() = value;
@@ -59,7 +59,7 @@ impl Component for InputText {
 
     fn view(&self) -> Html {
         html! {
-            <label class="flex items-center gap-1 align-bottom">
+            <label class="flex items-center gap-1">
                 <input type="text" class="input w-2/3" placeholder="<empty>" value=self.props.value().to_owned()
                     oninput=self.link.callback(|data: InputData| Msg::Input(data.value))
                 />
