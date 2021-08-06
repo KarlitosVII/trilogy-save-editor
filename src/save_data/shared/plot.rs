@@ -50,7 +50,7 @@ pub struct PlotTable {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", quest_counter)]
 pub struct PlotQuest {
     quest_counter: i32,
@@ -59,14 +59,14 @@ pub struct PlotQuest {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
 pub struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", page)]
 pub struct PlotCodexPage {
     page: i32,

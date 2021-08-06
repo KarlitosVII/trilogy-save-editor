@@ -10,7 +10,8 @@ use yew::{
 };
 
 use crate::save_data::{
-    mass_effect_1::plot_db::Me1PlotDb, mass_effect_2::plot_db::Me2PlotDb, shared::plot::RawPlotDb,
+    mass_effect_1::plot_db::Me1PlotDb, mass_effect_2::plot_db::Me2PlotDb,
+    mass_effect_3::plot_db::Me3PlotDb, shared::plot::RawPlotDb,
 };
 
 // static ref ME1_RAW_PLOT_DB: Result<RawPlotDb> = {
@@ -23,27 +24,20 @@ use crate::save_data::{
 //     ron::from_str(&input).map_err(Error::from)
 // }.context("Failed to parse `databases/me1_item_db.ron`");
 
-// ME3
-// static ref ME3_PLOT_DB: Result<Me3PlotDb> = {
-//     let input = fs::read_to_string("databases/me3_plot_db.ron")?;
-//     ron::from_str(&input).map_err(Error::from)
-// }.context("Failed to parse `databases/me3_plot_db.ron`");
-
-// static ref ME3_RAW_PLOT_DB: Result<RawPlotDb> = {
-//     let input = fs::read_to_string("databases/me3_raw_plot_db.ron")?;
-//     ron::from_str(&input).map_err(Error::from)
-// }.context("Failed to parse `databases/me3_raw_plot_db.ron`");
-
 pub enum Type {
     Me1Plot,
     Me2Plot,
     Me2RawPlot,
+    Me3Plot,
+    Me3RawPlot,
 }
 
 pub enum Database {
     Me1Plot(Rc<Me1PlotDb>),
     Me2Plot(Rc<Me2PlotDb>),
     Me2RawPlot(Rc<RawPlotDb>),
+    Me3Plot(Rc<Me3PlotDb>),
+    Me3RawPlot(Rc<RawPlotDb>),
 }
 
 pub enum Request {
@@ -65,6 +59,8 @@ struct Databases {
     me1_plot: Option<Rc<Me1PlotDb>>,
     me2_plot: Option<Rc<Me2PlotDb>>,
     me2_raw_plot: Option<Rc<RawPlotDb>>,
+    me3_plot: Option<Rc<Me3PlotDb>>,
+    me3_raw_plot: Option<Rc<RawPlotDb>>,
 }
 
 pub struct DatabaseService {
@@ -97,6 +93,12 @@ impl Agent for DatabaseService {
                     }
                     Database::Me2RawPlot(ref db) => {
                         self.dbs.me2_raw_plot = Some(Rc::clone(db));
+                    }
+                    Database::Me3Plot(ref db) => {
+                        self.dbs.me3_plot = Some(Rc::clone(db));
+                    }
+                    Database::Me3RawPlot(ref db) => {
+                        self.dbs.me3_raw_plot = Some(Rc::clone(db));
                     }
                 }
                 self.respond_db(who, db);
@@ -133,6 +135,20 @@ impl Agent for DatabaseService {
                         None => self.fetch(who, "/databases/me2_raw_plot_db.ron", |response| {
                             let db = ron::from_str(&response)?;
                             Ok(Database::Me2RawPlot(Rc::new(db)))
+                        })?,
+                    },
+                    Type::Me3Plot => match self.dbs.me3_plot {
+                        Some(ref db) => self.respond_db(who, Database::Me3Plot(Rc::clone(db))),
+                        None => self.fetch(who, "/databases/me3_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me3Plot(Rc::new(db)))
+                        })?,
+                    },
+                    Type::Me3RawPlot => match self.dbs.me3_raw_plot {
+                        Some(ref db) => self.respond_db(who, Database::Me3RawPlot(Rc::clone(db))),
+                        None => self.fetch(who, "/databases/me3_raw_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me3RawPlot(Rc::new(db)))
                         })?,
                     },
                 }

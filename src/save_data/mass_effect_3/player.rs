@@ -1,3 +1,4 @@
+use derive_more::Display;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
@@ -6,10 +7,11 @@ use crate::save_data::{
         appearance::Appearance,
         player::{Notoriety, Origin, WeaponLoadout},
     },
-    Dummy, String,
+    Dummy,
 };
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Player {
     pub is_female: bool,
     pub class_name: String,
@@ -52,7 +54,9 @@ pub struct Player {
     _character_guid: Dummy<16>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", name)]
 pub struct Power {
     name: String,
     rank: f32,
@@ -66,7 +70,9 @@ pub struct Power {
     wheel_display_index: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", class_name)]
 pub struct Weapon {
     class_name: String,
     ammo_used_count: i32,
@@ -77,13 +83,17 @@ pub struct Weapon {
     ammo_power_source_tag: String,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", weapon_class_name)]
 pub struct WeaponMod {
     weapon_class_name: String,
     weapon_mod_class_names: Vec<String>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 struct Hotkey {
     pawn_name: String,
     power_name: String,

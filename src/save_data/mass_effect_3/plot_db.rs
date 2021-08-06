@@ -16,7 +16,7 @@ pub struct Me3PlotDb {
     pub intel: PlotCategory,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, PartialEq, Eq)]
 pub struct PlotVariable {
     pub booleans: IndexMap<usize, String>,
     pub variables: IndexMap<String, String>,

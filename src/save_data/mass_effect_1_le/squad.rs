@@ -4,7 +4,8 @@ use crate::save_data::String;
 
 use super::player::{ComplexTalent, Item, SimpleTalent};
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct Henchman {
     pub tag: String,
     simple_talents: Vec<SimpleTalent>,

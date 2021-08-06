@@ -138,7 +138,7 @@ pub enum Difficulty {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", name)]
 struct DependentDlc {
     id: i32,

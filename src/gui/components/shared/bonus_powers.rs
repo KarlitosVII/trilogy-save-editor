@@ -3,13 +3,15 @@ use yewtil::NeqAssign;
 
 use crate::{
     gui::{components::Table, RcUi},
-    save_data::mass_effect_2::player::Power as Me2Power,
+    save_data::{
+        mass_effect_2::player::Power as Me2Power, mass_effect_3::player::Power as Me3Power,
+    },
 };
 
 #[derive(Clone)]
 pub enum BonusPowerType {
     Me2(RcUi<Vec<RcUi<Me2Power>>>),
-    Me3(RcUi<Vec<RcUi<Me2Power>>>),
+    Me3(RcUi<Vec<RcUi<Me3Power>>>),
 }
 
 impl PartialEq for BonusPowerType {
@@ -77,7 +79,7 @@ impl Component for BonusPowers {
                         if let Some(idx) = idx {
                             powers.borrow_mut().remove(idx);
                         } else {
-                            let mut power = Me2Power::default();
+                            let mut power = Me3Power::default();
                             *power.power_class_name.borrow_mut() = power_class_name;
                             powers.borrow_mut().push(RcUi::new(power));
                         }

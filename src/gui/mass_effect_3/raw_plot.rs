@@ -28,28 +28,28 @@ pub struct Props {
     pub onerror: Callback<Error>,
 }
 
-pub struct Me2RawPlot {
+pub struct Me3RawPlot {
     props: Props,
     _link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
     plot_db: Option<Rc<RawPlotDb>>,
 }
 
-impl Component for Me2RawPlot {
+impl Component for Me3RawPlot {
     type Message = Msg;
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let mut database_service =
             DatabaseService::bridge(link.callback(|response| match response {
-                Response::Database(Database::Me2RawPlot(db)) => Msg::PlotDb(db),
+                Response::Database(Database::Me3RawPlot(db)) => Msg::PlotDb(db),
                 Response::Error(err) => Msg::Error(err),
                 _ => unreachable!(),
             }));
 
-        database_service.send(Request::Database(Type::Me2RawPlot));
+        database_service.send(Request::Database(Type::Me3RawPlot));
 
-        Me2RawPlot { props, _link: link, _database_service: database_service, plot_db: None }
+        Me3RawPlot { props, _link: link, _database_service: database_service, plot_db: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {

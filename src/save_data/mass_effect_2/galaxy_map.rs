@@ -10,7 +10,7 @@ pub struct GalaxyMap {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", id)]
 pub struct Planet {
     id: i32,

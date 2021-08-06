@@ -10,9 +10,11 @@ use crate::{
             NavBar, Tab, TabBar, Table,
         },
         mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
+        mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
         raw_ui::RawUi,
         RcUi, Theme,
     },
+    save_data::mass_effect_3::Me3SaveGame,
     save_handler::{Request, Response, SaveGame, SaveHandler},
 };
 
@@ -69,9 +71,10 @@ impl Component for App {
                 let file_path = match self.props.save_game {
                     Some(
                         SaveGame::MassEffect2 { ref file_path, .. }
-                        | SaveGame::MassEffect2Le { ref file_path, .. },
+                        | SaveGame::MassEffect2Le { ref file_path, .. }
+                        | SaveGame::MassEffect3 { ref file_path, .. },
                     ) => file_path.to_owned(),
-                    None => return false,
+                    None => unreachable!(),
                 };
 
                 self.save_handle.send(Request::OpenSave(file_path));
@@ -99,6 +102,9 @@ impl Component for App {
                     App::mass_effect_2(self, Me2Type::Legendary(RcUi::clone(save_game))),
                     Theme::MassEffect2,
                 ),
+                SaveGame::MassEffect3 { save_game, .. } => {
+                    (App::mass_effect_3(self, RcUi::clone(save_game)), Theme::MassEffect3)
+                }
             }
         } else {
             (App::changelog(), Theme::MassEffect3)
@@ -168,8 +174,8 @@ impl App {
         }
     }
 
-    fn mass_effect_2(&self, me2: Me2Type) -> Html {
-        let (raw_data, plot, me1_plot) = match me2 {
+    fn mass_effect_2(&self, save_game: Me2Type) -> Html {
+        let (raw_data, plot, me1_plot) = match save_game {
             Me2Type::Vanilla(ref me2) => (
                 me2.view_opened("Mass Effect 2", true),
                 RcUi::clone(&me2.borrow().plot),
@@ -186,7 +192,7 @@ impl App {
             <section class="flex-auto flex p-1">
                 <TabBar>
                     <Tab title="Général">
-                        <Me2General save_game=Me2Type::clone(&me2) />
+                        <Me2General save_game=Me2Type::clone(&save_game) />
                     </Tab>
                     <Tab title="Plot">
                         <Me2Plot
@@ -205,6 +211,40 @@ impl App {
                             booleans=RcUi::clone(&plot.borrow().booleans)
                             integers=IntegerPlotType::Vec(RcUi::clone(&plot.borrow().integers))
                             floats=FloatPlotType::Vec(RcUi::clone(&plot.borrow().floats))
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </Tab>
+                </TabBar>
+            </section>
+        }
+    }
+
+    fn mass_effect_3(&self, save_game: RcUi<Me3SaveGame>) -> Html {
+        let me3 = save_game.borrow();
+        let plot = me3.plot();
+
+        html! {
+            <section class="flex-auto flex p-1">
+                <TabBar>
+                    <Tab title="Général">
+                        <Me3General save_game=RcUi::clone(&save_game) />
+                    </Tab>
+                    <Tab title="Plot">
+                        <Me3Plot
+                            booleans=RcUi::clone(&plot.booleans)
+                            integers=IntegerPlotType::IndexMap(RcUi::clone(&plot.integers))
+                            variables=RcUi::clone(&me3.player_variables)
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </Tab>
+                    <Tab title="Raw Data">
+                        { save_game.view_opened("Mass Effect 3", true) }
+                    </Tab>
+                    <Tab title="Raw Plot">
+                        <Me3RawPlot
+                            booleans=RcUi::clone(&plot.booleans)
+                            integers=IntegerPlotType::IndexMap(RcUi::clone(&plot.integers))
+                            floats=FloatPlotType::IndexMap(RcUi::clone(&plot.floats))
                             onerror=self.link.callback(Msg::Error)
                         />
                     </Tab>

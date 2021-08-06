@@ -182,7 +182,8 @@ impl serde::Serialize for Me1LeSaveGame {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Me1LeSaveData {
     _version: Me1LeVersion,
     character_id: String,
@@ -287,7 +288,8 @@ struct NoExportData {
     mako: Vehicle,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 struct Vehicle {
     first_name: String,
     localized_last_name: i32,

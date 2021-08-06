@@ -8,7 +8,8 @@ use crate::save_data::{
     Dummy, String,
 };
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Player {
     pub is_female: bool,
     localized_class_name: i32,
@@ -89,7 +90,7 @@ pub struct Inventory {
 }
 
 #[allow(clippy::upper_case_acronyms)]
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum ItemLevel {
     None,
     I,

@@ -1,14 +1,18 @@
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 use crate::save_data::shared::Vector2d;
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct GalaxyMap {
     planets: Vec<Planet>,
     systems: Vec<System>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", id)]
 pub struct Planet {
     id: i32,
     visited: bool,
@@ -16,7 +20,9 @@ pub struct Planet {
     show_as_scanned: bool,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", id)]
 pub struct System {
     id: i32,
     reaper_alert_level: f32,

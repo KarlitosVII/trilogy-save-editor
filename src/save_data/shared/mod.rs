@@ -51,7 +51,7 @@ pub struct SaveTimeStamp {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
 pub struct Vector {
     x: f32,
@@ -60,7 +60,7 @@ pub struct Vector {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
 pub struct Vector2d {
     x: f32,
@@ -76,7 +76,7 @@ pub struct Rotator {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", name)]
 pub struct Level {
     name: String,
@@ -85,7 +85,7 @@ pub struct Level {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", name)]
 pub struct StreamingState {
     name: String,
@@ -93,7 +93,7 @@ pub struct StreamingState {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
 pub struct Kismet {
     guid: Guid,
@@ -101,7 +101,7 @@ pub struct Kismet {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
 pub struct Door {
     guid: Guid,

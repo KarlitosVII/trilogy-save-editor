@@ -1,10 +1,14 @@
 use anyhow::Result;
+use derive_more::Display;
 use indexmap::IndexMap;
-use serde::{de, Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 
 use super::{
-    shared::{Door, EndGameState, Guid, Kismet, Level, Rotator, SaveTimeStamp, Vector},
-    String,
+    shared::{
+        plot::Me1PlotTable, Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp,
+        StreamingState, Vector,
+    },
+    Guid,
 };
 
 pub mod player;
@@ -21,7 +25,8 @@ pub mod plot_db;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUiRoot)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Me3SaveGame {
     _version: Me3Version,
     debug_name: String,
@@ -36,7 +41,7 @@ pub struct Me3SaveGame {
     rotation: Rotator,
     current_loading_tip: i32,
     levels: Vec<Level>,
-    streaming_states: IndexMap<String, bool>,
+    streaming_states: Vec<StreamingState>,
     kismet_records: Vec<Kismet>,
     doors: Vec<Door>,
     placeables: Vec<Placeable>,
@@ -75,7 +80,7 @@ impl<'de> Deserialize<'de> for Me3Version {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum Difficulty {
     Narrative,
     Casual,
@@ -84,14 +89,16 @@ pub enum Difficulty {
     Insanity,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 pub struct Placeable {
     guid: Guid,
     is_destroyed: PlaceableState,
     is_deactivated: PlaceableState,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum PlaceableState {
     No,
     Yes,
@@ -103,14 +110,18 @@ impl Default for PlaceableState {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", name)]
 struct DependentDlc {
     id: i32,
     name: String,
     canonical_name: String,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", level_name)]
 struct LevelTreasure {
     level_name: String,
     credits: i32,
@@ -119,14 +130,16 @@ struct LevelTreasure {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub enum AutoReplyModeOptions {
     AllDecisions,
     MajorDecisions,
     NoDecisions,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 struct ObjectiveMarker {
     marker_owned_data: String,
     marker_offset: Vector,
@@ -135,7 +148,7 @@ struct ObjectiveMarker {
     marker_icon_type: ObjectiveMarkerIconType,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 enum ObjectiveMarkerIconType {
     None,
     Attack,

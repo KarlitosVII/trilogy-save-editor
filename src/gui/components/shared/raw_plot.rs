@@ -410,6 +410,7 @@ impl RawPlot {
         label_list.sort_keys();
 
         let filter = self.props.filter();
+        let is_number = filter.parse::<usize>().is_ok();
         if !filter.is_empty() {
             let filter_lowercase = filter.to_lowercase();
             label_list.retain(|idx, label| {
@@ -417,7 +418,7 @@ impl RawPlot {
                     .as_ref()
                     .map(|label| label.to_lowercase().contains(&filter_lowercase))
                     .unwrap_or(false)
-                    || idx.to_string().contains(&*filter)
+                    || (is_number && idx.to_string().contains(&*filter))
             });
         }
 

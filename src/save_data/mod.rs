@@ -1,17 +1,13 @@
 use anyhow::Result;
 use derive_more::{Deref, DerefMut, Display, From};
-use serde::{
-    de,
-    ser::{self, SerializeSeq},
-    Deserialize, Deserializer, Serialize, Serializer,
-};
+use serde::{de, ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use uuid::Uuid;
 
 pub mod mass_effect_1;
 // pub mod mass_effect_1_le;
 pub mod mass_effect_2;
-// pub mod mass_effect_3;
+pub mod mass_effect_3;
 pub mod shared;
 
 // Raw Ui
@@ -120,11 +116,18 @@ where
 }
 
 #[derive(Clone, From, Display)]
-pub struct Guid(String);
+#[display(fmt = "")]
+pub struct Guid(Uuid);
+
+impl Guid {
+    pub fn hyphenated(&self) -> String {
+        self.0.to_hyphenated().to_string()
+    }
+}
 
 impl Default for Guid {
     fn default() -> Self {
-        Guid(Uuid::default().to_hyphenated().to_string())
+        Guid(Uuid::default())
     }
 }
 
@@ -135,8 +138,7 @@ impl<'de> Deserialize<'de> for Guid {
     {
         let bytes: [u8; 16] = Deserialize::deserialize(deserializer)?;
         let guid = Uuid::from_bytes(bytes);
-
-        Ok(Guid(guid.to_hyphenated().to_string()))
+        Ok(Guid(guid))
     }
 }
 
@@ -145,9 +147,6 @@ impl serde::Serialize for Guid {
     where
         S: Serializer,
     {
-        let guid =
-            Uuid::parse_str(&self.0).map_err(|err| ser::Error::custom(format!("GUID: {}", err)))?;
-
-        serde::Serialize::serialize(guid.as_bytes(), serializer)
+        serde::Serialize::serialize(self.0.as_bytes(), serializer)
     }
 }

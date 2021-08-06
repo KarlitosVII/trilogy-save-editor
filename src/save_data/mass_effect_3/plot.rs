@@ -1,11 +1,13 @@
+use derive_more::Display;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::shared::plot::{BoolVec, PlotCodex};
+use crate::save_data::shared::plot::{BitVec, PlotCodex};
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct PlotTable {
-    pub booleans: BoolVec,
+    pub booleans: BitVec,
     pub integers: IndexMap<i32, i32>,
     pub floats: IndexMap<i32, f32>,
     quest_progress_counter: i32,
@@ -15,14 +17,9 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone)]
-pub struct Me1PlotTable {
-    booleans: BoolVec,
-    integers: IndexMap<i32, i32>,
-    floats: IndexMap<i32, f32>,
-}
-
-#[derive(Deserialize, Serialize, RawUi, Default, Clone)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", quest_counter)]
 pub struct PlotQuest {
     quest_counter: i32,
     quest_updated: bool,

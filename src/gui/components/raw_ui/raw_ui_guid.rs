@@ -42,7 +42,7 @@ impl Component for RawUiGuid {
         match msg {
             Msg::Change(ChangeData::Value(value)) => {
                 if let Ok(guid) = Uuid::parse_str(&value) {
-                    *self.props.guid_mut() = Guid::from(guid.to_hyphenated().to_string());
+                    *self.props.guid_mut() = Guid::from(guid);
                 }
                 true
             }
@@ -56,8 +56,8 @@ impl Component for RawUiGuid {
 
     fn view(&self) -> Html {
         html! {
-            <label class="flex items-center gap-1">
-                <input type="text" class="input w-1/3" placeholder="<empty>" value=self.props.guid().to_string()
+            <label class="flex-auto flex items-center gap-1">
+                <input type="text" class="input w-1/3" placeholder="<empty>" value=self.props.guid().hyphenated()
                     onchange=self.link.callback(Msg::Change)
                 />
                 { &self.props.label }

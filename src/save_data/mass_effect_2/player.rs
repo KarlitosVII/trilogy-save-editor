@@ -39,7 +39,7 @@ pub struct Player {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", name)]
 pub struct Power {
     name: String,
@@ -49,7 +49,7 @@ pub struct Power {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "{}", class_name)]
 struct Weapon {
     class_name: String,
@@ -61,7 +61,7 @@ struct Weapon {
 }
 
 #[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Default, Clone, Display)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
 struct Hotkey {
     pawn_name: String,

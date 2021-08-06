@@ -9,6 +9,7 @@ mod app;
 pub mod components;
 mod mass_effect_1;
 mod mass_effect_2;
+mod mass_effect_3;
 pub mod raw_ui;
 
 pub use self::app::*;

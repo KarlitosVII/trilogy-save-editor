@@ -12,16 +12,18 @@ use crate::{
             Tab, TabBar,
         },
         mass_effect_1::Me1Plot,
+        mass_effect_2::Me2Plot,
+        mass_effect_3::PlotVariable,
         RcUi, Theme,
     },
     save_data::{
-        mass_effect_2::plot_db::Me2PlotDb,
+        mass_effect_3::plot_db::Me3PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
     },
 };
 
 pub enum Msg {
-    PlotDb(Rc<Me2PlotDb>),
+    PlotDb(Rc<Me3PlotDb>),
     Error(Error),
 }
 
@@ -29,33 +31,32 @@ pub enum Msg {
 pub struct Props {
     pub booleans: RcUi<BitVec>,
     pub integers: IntegerPlotType,
-    pub me1_booleans: Option<RcUi<BitVec>>,
-    pub me1_integers: Option<IntegerPlotType>,
+    pub variables: RcUi<IndexMap<String, RcUi<i32>>>,
     pub onerror: Callback<Error>,
 }
 
-pub struct Me2Plot {
+pub struct Me3Plot {
     props: Props,
     link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
-    plot_db: Option<Rc<Me2PlotDb>>,
+    plot_db: Option<Rc<Me3PlotDb>>,
 }
 
-impl Component for Me2Plot {
+impl Component for Me3Plot {
     type Message = Msg;
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let mut database_service =
             DatabaseService::bridge(link.callback(|response| match response {
-                Response::Database(Database::Me2Plot(db)) => Msg::PlotDb(db),
+                Response::Database(Database::Me3Plot(db)) => Msg::PlotDb(db),
                 Response::Error(err) => Msg::Error(err),
                 _ => unreachable!(),
             }));
 
-        database_service.send(Request::Database(Type::Me2Plot));
+        database_service.send(Request::Database(Type::Me3Plot));
 
-        Me2Plot { props, link, _database_service: database_service, plot_db: None }
+        Me3Plot { props, link, _database_service: database_service, plot_db: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -77,22 +78,18 @@ impl Component for Me2Plot {
 
     fn view(&self) -> Html {
         if let Some(ref plot_db) = self.plot_db {
-            let (booleans, integers, me1_booleans, me1_integers) = (
-                &self.props.booleans,
-                &self.props.integers,
-                &self.props.me1_booleans,
-                &self.props.me1_integers,
-            );
-            let Me2PlotDb {
-                player,
+            let (booleans, integers, variables) =
+                (&self.props.booleans, &self.props.integers, &self.props.variables);
+            let Me3PlotDb {
+                general,
                 crew,
                 romance,
                 missions,
-                loyalty_missions,
-                research_upgrades,
-                rewards,
-                captains_cabin,
-                imported_me1,
+                citadel_dlc,
+                normandy,
+                appearances,
+                weapons_powers,
+                intel,
             } = plot_db.as_ref();
 
             let view_categories = |categories: &IndexMap<String, PlotCategoryDb>| {
@@ -115,8 +112,9 @@ impl Component for Me2Plot {
                 ("Crew", crew),
                 ("Romance", romance),
                 ("Missions", missions),
-                ("Loyalty missions", loyalty_missions),
-                ("Research / Upgrades", research_upgrades),
+                ("Normandy", normandy),
+                ("Citadel DLC", citadel_dlc),
+                ("Appearances", appearances),
             ];
 
             let categories = categories.iter().map(|(tab, categories)| {
@@ -131,72 +129,54 @@ impl Component for Me2Plot {
                 })
             });
 
-            let mass_effect_1 = me1_booleans.as_ref().map(|me1_booleans| {
-                if !me1_booleans.borrow().is_empty() {
-                    let me1_integers = me1_integers.as_ref().unwrap();
-                    // Workaround for unused_braces warning
-                    #[allow(unused_braces)]
-                    (html_nested! {
-                            <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
-                                <div class="flex-auto flex flex-col gap-1">
-                                    <div>
-                                        { "If you change these plots this will ONLY take effect after a new game +" }
-                                        <hr class="border-t border-default-border" />
-                                    </div>
-                                    <Me1Plot
-                                        booleans=RcUi::clone(me1_booleans)
-                                        integers=IntegerPlotType::clone(me1_integers)
-                                        onerror=self.link.callback(Msg::Error)
-                                    />
-                                </div>
-                            </Tab>
-                        })
-                    } else {
-                    // Workaround for unused_braces warning
-                    #[allow(unused_braces)]
-                    (html_nested! {
-                        <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
-                            { "You cannot edit ME1 plot if you have not imported a ME1 save." }
-                            <hr class="border-t border-default-border" />
-                        </Tab>
-                    })
+            let weapons_powers = weapons_powers.iter().map(|(title, variable)| {
+                html! {
+                    <PlotVariable
+                        title=title.to_owned()
+                        booleans=RcUi::clone(booleans)
+                        variables=RcUi::clone(variables)
+                        plot_variable=variable.clone()
+                    />
                 }
-            }).into_iter();
+            });
 
             html! {
                 <TabBar>
-                    <Tab title="Player">
+                    <Tab title="General">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
                             integers=IntegerPlotType::clone(integers)
-                            category=player.clone()
-                        />
-                    </Tab>
-                    <Tab title="Rewards">
-                        <PlotCategory
-                            booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
-                            category=rewards.clone()
+                            category=general.clone()
                         />
                     </Tab>
                     { for categories }
-                    <Tab title="Captain's cabin">
+                    <Tab title="Weapons / Powers">
+                        <div class="flex-auto flex flex-col gap-1">
+                            { for weapons_powers }
+                        </div>
+                    </Tab>
+                    <Tab title="Intel">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
                             integers=IntegerPlotType::clone(integers)
-                            category=captains_cabin.clone()
+                            category=intel.clone()
                         />
                     </Tab>
-                    <Tab title="Imported ME1" theme=Theme::MassEffect1>
-                        <div class="flex-auto flex flex-col gap-1">
-                            <div>
-                                { "For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix : //TODO: (?)" }
-                                <hr class="border-t border-default-border" />
-                            </div>
-                            { for view_categories(imported_me1) }
-                        </div>
+                    <Tab title="Mass Effect 2" theme=Theme::MassEffect2>
+                        <Me2Plot
+                            booleans=RcUi::clone(booleans)
+                            integers=IntegerPlotType::clone(integers)
+                            onerror=self.link.callback(Msg::Error)
+                        />
                     </Tab>
-                    { for mass_effect_1 }
+                    <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
+                        <Me1Plot
+                            me3_imported_me1=true
+                            booleans=RcUi::clone(booleans)
+                            integers=IntegerPlotType::clone(integers)
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </Tab>
                 </TabBar>
             }
         } else {

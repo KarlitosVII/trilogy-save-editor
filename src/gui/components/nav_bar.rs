@@ -129,7 +129,7 @@ impl NavBar {
                     </span>
                     <hr class="border-default-border mb-px" />
                     <a class="px-1 hover:bg-theme-hover whitespace-nowrap cursor-pointer relative navbar-chevron">
-                        {"License"}
+                        {"License"} // TODO: Licenses
                     </a>
                 </div>
             </div>
