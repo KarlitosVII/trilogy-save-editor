@@ -9,7 +9,7 @@ use crate::{
     gui::{
         components::{
             shared::{IntegerPlotType, PlotCategory},
-            Tab, TabBar,
+            Helper, Tab, TabBar,
         },
         mass_effect_1::Me1Plot,
         RcUi, Theme,
@@ -140,7 +140,7 @@ impl Component for Me2Plot {
                             <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
                                 <div class="flex-auto flex flex-col gap-1">
                                     <div>
-                                        { "If you change these plots this will ONLY take effect after a new game +" }
+                                        { "If you change these plots this will ONLY take effect after a new game +." }
                                         <hr class="border-t border-default-border" />
                                     </div>
                                     <Me1Plot
@@ -190,7 +190,14 @@ impl Component for Me2Plot {
                     <Tab title="Imported ME1" theme=Theme::MassEffect1>
                         <div class="flex-auto flex flex-col gap-1">
                             <div>
-                                { "For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix : //TODO: (?)" }
+                                <div class="flex items-center gap-1">
+                                    { "For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix :" }
+                                    <Helper text=
+                                        "• Untick `[The Fan] Intimidated him`\n\
+                                        • Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\
+                                        • Only works if you didn't talk to Aethyta"
+                                    />
+                                </div>
                                 <hr class="border-t border-default-border" />
                             </div>
                             { for view_categories(imported_me1) }

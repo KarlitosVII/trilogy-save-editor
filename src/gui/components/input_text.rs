@@ -2,7 +2,7 @@ use std::cell::{Ref, RefMut};
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::gui::RcUi;
+use crate::gui::{components::Helper, RcUi};
 
 use super::CallbackType;
 
@@ -14,6 +14,7 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: RcUi<String>,
+    pub helper: Option<&'static str>,
     pub oninput: Option<Callback<CallbackType>>,
 }
 
@@ -58,12 +59,23 @@ impl Component for InputText {
     }
 
     fn view(&self) -> Html {
+        let helper = self
+            .props
+            .helper
+            .as_ref()
+            .map(|&helper| {
+                html! {
+                    <Helper text=helper />
+                }
+            })
+            .unwrap_or_default();
         html! {
-            <label class="flex items-center gap-1">
+            <label class="flex-auto flex items-center gap-1">
                 <input type="text" class="input w-2/3" placeholder="<empty>" value=self.props.value().to_owned()
                     oninput=self.link.callback(|data: InputData| Msg::Input(data.value))
                 />
                 { &self.props.label }
+                { helper }
             </label>
         }
     }

@@ -37,6 +37,7 @@ pub enum Msg {
 pub struct Props {
     pub power_list: &'static [(&'static str, &'static str)], // TODO: add name
     pub powers: BonusPowerType,
+    pub helper: Option<&'static str>,
 }
 
 pub struct BonusPowers {
@@ -96,7 +97,7 @@ impl Component for BonusPowers {
     }
 
     fn view(&self) -> Html {
-        let Props { power_list, powers } = &self.props;
+        let Props { power_list, powers, helper } = &self.props;
 
         let selectables = power_list.iter().map(|&(power_class_name, power_name)| {
             let selected = match powers {
@@ -127,7 +128,7 @@ impl Component for BonusPowers {
         });
 
         html! {
-            <Table title=String::from("Bonus Powers //TODO: (?)")>
+            <Table title=String::from("Bonus Powers") helper=*helper>
                 { for selectables }
             </Table>
         }

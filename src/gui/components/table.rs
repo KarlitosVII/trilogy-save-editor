@@ -1,6 +1,8 @@
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
+use crate::gui::components::Helper;
+
 pub enum Msg {
     Toggle,
 }
@@ -11,6 +13,7 @@ pub struct Props {
     pub children: Children,
     #[prop_or(true)]
     pub opened: bool,
+    pub helper: Option<&'static str>,
 }
 
 pub struct Table {
@@ -48,11 +51,23 @@ impl Component for Table {
             .as_ref()
             .map(|title| {
                 let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
-
+                let helper = self
+                    .props
+                    .helper
+                    .as_ref()
+                    .map(|&helper| {
+                        html! {
+                            <Helper text=helper />
+                        }
+                    })
+                    .unwrap_or_default();
                 html! {
                     <div class="flex-1 bg-table-odd p-px">
                         <button
                             class=classes![
+                                "flex",
+                                "items-center",
+                                "gap-1",
                                 "rounded-none",
                                 "hover:bg-theme-hover",
                                 "active:bg-theme-active",
@@ -64,7 +79,8 @@ impl Component for Table {
                             ]
                             onclick=self.link.callback(|_| Msg::Toggle)
                         >
-                            {title}
+                            { title }
+                            { helper }
                         </button>
                     </div>
                 }
@@ -92,8 +108,8 @@ impl Component for Table {
 
         html! {
             <div class="flex flex-col border border-default-border">
-                {title}
-                {rows}
+                { title }
+                { rows }
             </div>
         }
     }

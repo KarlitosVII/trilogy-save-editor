@@ -6,7 +6,7 @@ use crate::{
     gui::{
         components::{
             shared::{BonusPowerType, BonusPowers},
-            Select, Table,
+            Helper, InputText, Select, Table,
         },
         raw_ui::RawUi,
         RcUi,
@@ -258,15 +258,19 @@ impl Me2General {
         html! {
             <Table title=String::from("Role-Play")>
                 { player.first_name.view("Name") }
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=genders
                         current_idx=*player.is_female() as usize
                         onselect=self.link.callback(Msg::Gender)
                     />
-                    {"Gender //TODO: (?)"}
+                    {"Gender"}
+                    <Helper text=
+                        "If you change your gender, disable the head morph or import an appropriate one. \
+                        Otherwise, the Collectors will be the least of your worries..."
+                    />
                 </div>
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=Origin::variants()
                         current_idx=player.origin().clone() as usize
@@ -274,7 +278,7 @@ impl Me2General {
                     />
                     {"Origin"}
                 </div>
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=Notoriety::variants()
                         current_idx=player.notoriety().clone() as usize
@@ -282,7 +286,12 @@ impl Me2General {
                     />
                     {"Notoriety"}
                 </div>
-                { player.face_code.view("Identity Code //TODO: (?)") }
+                <InputText label="Identity Code" value=RcUi::clone(&player.face_code) helper=
+                    "If you change this you can display whatever you want in the menus \
+                    in place of your `Identity Code`.\n\
+                    This will NOT change your face, you have to edit your head morph \
+                    or import one to do so."
+                />
             </Table>
         }
     }
@@ -307,7 +316,7 @@ impl Me2General {
 
         html! {
             <Table title=String::from("Gameplay")>
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=Me2Class::variants()
                         current_idx=class_idx
@@ -367,7 +376,14 @@ impl Me2General {
         ];
 
         html! {
-            <BonusPowers power_list=power_list powers=BonusPowerType::Me2(RcUi::clone(&player.powers)) />
+            <BonusPowers power_list=power_list powers=BonusPowerType::Me2(RcUi::clone(&player.powers)) helper=
+                "You can use as many bonus powers as you want and customize your build \
+                to your liking. The only restriction is the size of your screen !\n\
+                If you want to remove a bonus power you need to reset your talents \
+                `before` or you will lose some talent points.\n\
+                Unlike Mass Effect 3, the game will never recalculate your points. \
+                At level 30 you have `51` points to spend."
+            />
         }
     }
 }

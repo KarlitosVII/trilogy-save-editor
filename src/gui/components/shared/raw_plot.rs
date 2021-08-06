@@ -13,7 +13,7 @@ use yewtil::NeqAssign;
 
 use crate::{
     gui::{
-        components::{CheckBox, InputNumber, NumberType},
+        components::{CheckBox, Helper, InputNumber, NumberType},
         raw_ui::RawUi,
         RcUi,
     },
@@ -281,7 +281,14 @@ impl Component for RawPlot {
         let add_helper = match self.props.plots {
             PlotType::Boolean(_)
             | PlotType::Integer(IntegerPlotType::Vec(_))
-            | PlotType::Float(FloatPlotType::Vec(_)) => html! { "// TODO: (?)" },
+            | PlotType::Float(FloatPlotType::Vec(_)) => html! {
+                <Helper text=
+                    "Be careful when adding a new plot.\n\
+                    Because of the way the data is stored, adding a new plot will add as many plots as the plot id.\n\
+                    For example, if you have `40 000` plots, adding the plot `1 000 000` will add up to `960 000` plots !\n
+                    This can bloat your save and significantly reduce the performance of the filter."
+                />
+            },
             _ => Html::default(),
         };
         let len = label_list.map(|list| list.len()).unwrap_or(0);

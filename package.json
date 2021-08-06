@@ -4,9 +4,9 @@
   "license": "CECILL-2.1",
   "description": "A save editor for Mass Effect Trilogy (and Legendary)",
   "dependencies": {
-    "autoprefixer": "^10.0",
-    "postcss": "^8.0",
-    "tailwindcss": "^2.0"
+    "autoprefixer": "^10.3.1",
+    "postcss": "^8.3.6",
+    "tailwindcss": "^2.2.7"
   },
   "scripts": {
     "build": "tailwindcss -i public/index.css -o target/index.css --jit",

@@ -48,9 +48,9 @@ impl Agent for SaveHandler {
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
         let handle_request = || match msg {
             Request::OpenSave(file_path) => {
-                let save_game: RcUi<Me3SaveGame> =
-                    unreal::Deserializer::from_bytes(include_bytes!("../../test/ME3Save.pcsav"))?;
-                let response = SaveGame::MassEffect3 { file_path, save_game };
+                let save_game: RcUi<Me2SaveGame> =
+                    unreal::Deserializer::from_bytes(include_bytes!("../../test/ME2Save.pcsav"))?;
+                let response = SaveGame::MassEffect2 { file_path, save_game };
                 self.link.respond(who, Response::SaveOpened(response));
                 Ok(())
             }

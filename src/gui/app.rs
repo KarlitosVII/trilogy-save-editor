@@ -24,6 +24,7 @@ pub enum Msg {
     SaveSave,
     ReloadSave,
     Error(Error),
+    Notification(String),
 }
 
 #[derive(Properties, Clone, Default)]
@@ -81,7 +82,12 @@ impl Component for App {
                 false
             }
             Msg::Error(err) => {
+                // TODO: Error
                 ConsoleService::warn(&err.to_string());
+                false
+            }
+            Msg::Notification(_) => {
+                // TODO: Notification
                 false
             }
         }
@@ -191,7 +197,7 @@ impl App {
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar>
-                    <Tab title="Général">
+                    <Tab title="General">
                         <Me2General save_game=Me2Type::clone(&save_game) />
                     </Tab>
                     <Tab title="Plot">
@@ -226,7 +232,7 @@ impl App {
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar>
-                    <Tab title="Général">
+                    <Tab title="General">
                         <Me3General save_game=RcUi::clone(&save_game) />
                     </Tab>
                     <Tab title="Plot">

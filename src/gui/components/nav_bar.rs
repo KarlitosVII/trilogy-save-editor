@@ -116,7 +116,7 @@ impl NavBar {
                     "left-0",
                     "flex",
                     "flex-col",
-                    "bg-popup/80",
+                    "bg-popup/90",
                     "border",
                     "border-default-border",
                     "p-1",

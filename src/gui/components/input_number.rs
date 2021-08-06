@@ -1,7 +1,7 @@
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::gui::RcUi;
+use crate::gui::{components::Helper, RcUi};
 
 use super::CallbackType;
 
@@ -39,6 +39,7 @@ pub enum Msg {
 pub struct Props {
     pub label: String,
     pub value: NumberType,
+    pub helper: Option<&'static str>,
     pub onchange: Option<Callback<CallbackType>>,
 }
 
@@ -110,6 +111,17 @@ impl Component for InputNumber {
             }
         };
 
+        let helper = self
+            .props
+            .helper
+            .as_ref()
+            .map(|&helper| {
+                html! {
+                    <Helper text=helper />
+                }
+            })
+            .unwrap_or_default();
+
         html! {
             <label class="flex items-center gap-1">
                 <input type="number" class="input w-[120px]" step="any"
@@ -118,6 +130,7 @@ impl Component for InputNumber {
                     onchange=self.link.callback(Msg::Change)
                 />
                 { &self.props.label }
+                { helper }
             </label>
         }
     }

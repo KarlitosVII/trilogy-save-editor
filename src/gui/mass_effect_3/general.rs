@@ -6,7 +6,7 @@ use crate::{
     gui::{
         components::{
             shared::{BonusPowerType, BonusPowers},
-            Select, Table,
+            Helper, InputText, Select, Table,
         },
         raw_ui::RawUi,
         RcUi,
@@ -262,15 +262,19 @@ impl Me3General {
         html! {
             <Table title=String::from("Role-Play")>
                 { player.first_name.view("Name") }
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=genders
                         current_idx=*player.is_female() as usize
                         onselect=self.link.callback(Msg::Gender)
                     />
-                    {"Gender //TODO: (?)"}
+                    {"Gender"}
+                    <Helper text=
+                        "If you change your gender, disable the head morph or import an appropriate one. \
+                        Otherwise, the Reapers will be the least of your worries..."
+                    />
                 </div>
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=Origin::variants()
                         current_idx=player.origin().clone() as usize
@@ -278,7 +282,7 @@ impl Me3General {
                     />
                     {"Origin"}
                 </div>
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=Notoriety::variants()
                         current_idx=player.notoriety().clone() as usize
@@ -286,7 +290,12 @@ impl Me3General {
                     />
                     {"Notoriety"}
                 </div>
-                { player.face_code.view("Identity Code //TODO: (?)") }
+                <InputText label="Identity Code" value=RcUi::clone(&player.face_code) helper=
+                    "If you change this you can display whatever you want in the menus \
+                    in place of your `Identity Code`.\n\
+                    This will NOT change your face, you have to edit your head morph \
+                    or import one to do so."
+                />
             </Table>
         }
     }
@@ -322,7 +331,7 @@ impl Me3General {
 
         html! {
             <Table title=String::from("Gameplay")>
-                <div class="flex gap-1 cursor-default">
+                <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options=Me3Class::variants()
                         current_idx=class_idx
@@ -379,7 +388,10 @@ impl Me3General {
         ];
 
         html! {
-            <BonusPowers power_list=power_list powers=BonusPowerType::Me3(RcUi::clone(&player.powers)) />
+            <BonusPowers power_list=power_list powers=BonusPowerType::Me3(RcUi::clone(&player.powers)) helper=
+                "You can use as many bonus powers as you want and customize your build to your liking. \
+                The only restriction is the size of your screen !"
+            />
         }
     }
 }

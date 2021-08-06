@@ -29,7 +29,7 @@ unicase = "2.6"
 uuid = "0.8"
 ryu = "1.0"
 # Wasm
-web-sys = { version="0.3", features=["CssStyleDeclaration"] }
+web-sys = { version="0.3", features=["CssStyleDeclaration", "DomRect"] }
 # Yew
 yew = "0.18"
 yewtil = "0.4"

@@ -105,7 +105,7 @@ where
 // Shared
 impl RawUi for RcUi<BitVec> {
     fn view(&self, label: &str) -> yew::Html {
-        // TODO
+        // TODO: RawUi BitVec
         html! {
             {label}
         }

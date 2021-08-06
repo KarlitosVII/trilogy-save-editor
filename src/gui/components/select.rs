@@ -20,6 +20,7 @@ pub struct Select {
     props: Props,
     link: ComponentLink<Self>,
     select_ref: NodeRef,
+    drop_down_ref: NodeRef,
     opened: bool,
 }
 
@@ -28,7 +29,13 @@ impl Component for Select {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Select { props, link, select_ref: Default::default(), opened: false }
+        Select {
+            props,
+            link,
+            select_ref: Default::default(),
+            drop_down_ref: Default::default(),
+            opened: false,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -66,6 +73,29 @@ impl Component for Select {
         false
     }
 
+    fn rendered(&mut self, _first_render: bool) {
+        // Drop down open upward if bottom > viewport_height
+        if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
+            let viewport_height = web_sys::window()
+                .unwrap()
+                .document()
+                .unwrap()
+                .document_element()
+                .unwrap()
+                .client_height();
+            let bottom = drop_down.get_bounding_client_rect().bottom() as i32;
+
+            if bottom > viewport_height {
+                if let Some(select) = self.select_ref.cast::<HtmlElement>() {
+                    let height = select.offset_height();
+                    let _ = drop_down.style().set_property("bottom", &format!("{}px", height));
+                }
+            } else {
+                let _ = drop_down.style().set_property("bottom", "auto");
+            }
+        }
+    }
+
     fn view(&self) -> Html {
         let options = self.props.options.iter().enumerate().map(|(idx, option)| {
             html_nested! {
@@ -97,7 +127,7 @@ impl Component for Select {
                 onblur=self.opened.then(||self.link.callback(|_| Msg::Close))
                 ref=self.select_ref.clone()
             >
-                <a class="block bg-theme-bg hover:bg-theme-hover active:bg-theme-active px-1 cursor-pointer min-w-full relative select-chevron"
+                <a class="block bg-theme-bg hover:bg-theme-hover active:bg-theme-active px-1 cursor-pointer min-w-full select-chevron"
                     onclick=onclick
                 >
                     { self.props.options[self.props.current_idx] }
@@ -105,17 +135,17 @@ impl Component for Select {
                 <div
                     class=classes![
                         "absolute",
-                        "left-0",
                         "flex",
                         "flex-col",
-                        "p-px",
-                        "bg-popup/90",
+                        "bg-popup/95",
                         "border",
                         "border-default-border",
+                        "p-px",
                         "min-w-full",
                         "z-40",
                         (!self.opened).then(|| "hidden" ),
                     ]
+                    ref=self.drop_down_ref.clone()
                 >
                     { for options }
                 </div>
