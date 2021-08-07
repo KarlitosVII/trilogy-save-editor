@@ -8,7 +8,7 @@ use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
         components::{
-            shared::{IntegerPlotType, PlotCategory},
+            shared::{IntPlotType, PlotCategory},
             Tab, TabBar,
         },
         RcUi,
@@ -27,7 +27,7 @@ pub enum Msg {
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub booleans: RcUi<BitVec>,
-    pub integers: IntegerPlotType,
+    pub integers: IntPlotType,
     #[prop_or(false)]
     pub me3_imported_me1: bool,
     pub onerror: Callback<Error>,
@@ -87,7 +87,7 @@ impl Component for Me1Plot {
                             <PlotCategory
                                 title=title.to_owned()
                                 booleans=RcUi::clone(booleans)
-                                integers=IntegerPlotType::clone(integers)
+                                integers=IntPlotType::clone(integers)
                                 category=category.clone()
                                 me3_imported_me1=self.props.me3_imported_me1
                             />

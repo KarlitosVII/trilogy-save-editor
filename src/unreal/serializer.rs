@@ -12,7 +12,7 @@ pub struct Serializer {
 
 impl Serializer {
     #[allow(clippy::wrong_self_convention)]
-    pub fn to_byte_buf<T>(value: &T) -> Result<Vec<u8>>
+    pub fn to_vec<T>(value: &T) -> Result<Vec<u8>>
     where
         T: Serialize,
     {

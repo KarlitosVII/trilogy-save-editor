@@ -4,6 +4,7 @@ use yew::agent::{Agent, AgentLink, HandlerId, Job};
 use crate::{
     gui::RcUi,
     save_data::{
+        mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
         mass_effect_2::{Me2LeSaveGame, Me2SaveGame},
         mass_effect_3::Me3SaveGame,
     },
@@ -13,8 +14,8 @@ use crate::{
 #[derive(Clone)]
 pub enum SaveGame {
     // MassEffect1 { file_path: String, save_game: RcUi<Me1SaveGame> },
-    // MassEffect1Le { file_path: String, save_game: RcUi<Me1LeSaveGame> },
-    // MassEffect1LePs4 { file_path: String, save_game: RcUi<Me1LeSaveData> },
+    MassEffect1Le { file_path: String, save_game: RcUi<Me1LeSaveGame> },
+    MassEffect1LePs4 { file_path: String, save_game: RcUi<Me1LeSaveData> },
     MassEffect2 { file_path: String, save_game: RcUi<Me2SaveGame> },
     MassEffect2Le { file_path: String, save_game: RcUi<Me2LeSaveGame> },
     MassEffect3 { file_path: String, save_game: RcUi<Me3SaveGame> },
@@ -48,9 +49,10 @@ impl Agent for SaveHandler {
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
         let handle_request = || match msg {
             Request::OpenSave(file_path) => {
-                let save_game: RcUi<Me2SaveGame> =
-                    unreal::Deserializer::from_bytes(include_bytes!("../../test/ME2Save.pcsav"))?;
-                let response = SaveGame::MassEffect2 { file_path, save_game };
+                let save_game: RcUi<Me1LeSaveGame> = unreal::Deserializer::from_bytes(
+                    include_bytes!("../../test/ME1Le00_QuickSave.pcsav"),
+                )?;
+                let response = SaveGame::MassEffect1Le { file_path, save_game };
                 self.link.respond(who, Response::SaveOpened(response));
                 Ok(())
             }

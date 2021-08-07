@@ -1,13 +1,13 @@
-use imgui::im_str;
+use derive_more::Display;
 use indexmap::IndexMap;
-use serde::{de, Deserialize, Serialize};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::fmt;
 
 use crate::{
-    gui::{imgui_utils::Table, Gui},
+    gui::RcUi,
     save_data::{
         shared::{Rotator, Vector},
-        Dummy, String, RawUi, RawUiMe1Legacy,
+        Dummy,
     },
 };
 
@@ -20,77 +20,28 @@ use self::inventory::*;
 mod art_placeable;
 use self::art_placeable::*;
 
-#[derive(Deserialize, Serialize, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, RawUiMe1Legacy)]
 pub struct Map {
-    levels: IndexMap<String, Level>,
-    world: Option<BaseObject>,
+    pub levels: IndexMap<String, Level>,
+    pub world: Option<BaseObject>,
 }
 
-impl RawUi for Map {
-    fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
-        let Map { levels, world } = self;
-        levels.draw_raw_ui(gui, "Levels");
-        world.draw_raw_ui(gui, "World");
-    }
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, RawUiMe1Legacy)]
+pub struct Level {
+    pub objects: Vec<BaseObject>,
+    pub actors: Vec<String>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Default)]
-struct Level {
-    objects: Vec<BaseObject>,
-    actors: Vec<String>,
-}
-
-impl RawUi for Level {
-    fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
-        let Level { objects, actors } = self;
-        objects.draw_raw_ui(gui, "Objects");
-        Table::next_row();
-        actors.draw_raw_ui(gui, "Actors");
-    }
-}
-
-#[derive(Serialize, Clone)]
+#[rcize_fields]
+#[derive(Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", owner_name)]
 pub struct BaseObject {
-    class_name: String,
-    owner_name: String,
-    owner_class: Option<String>,
-    object: Object,
-}
-
-impl RawUi for BaseObject {
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        let BaseObject { class_name, owner_name, owner_class, object } = self;
-        let class_name = Box::new(|| gui.draw_text(class_name, Some(im_str!("Class Name"))));
-        let owner_name = Box::new(|| owner_name.draw_raw_ui(gui, "Owner Name"));
-        let owner_class = Box::new(|| owner_class.draw_raw_ui(gui, "Owner Class"));
-
-        let object = match object {
-            Object::PawnBehavior(pawn_behavior) => pawn_behavior.draw_fields(gui),
-            Object::Pawn(pawn) => pawn.draw_fields(gui),
-            Object::BaseSquad(squad) => squad.draw_fields(gui),
-            Object::Shop(shop) => shop.draw_fields(gui),
-            Object::Inventory(inventory) => inventory.draw_fields(gui),
-            Object::Item(item) => item.draw_fields(gui),
-            Object::ItemMod(item_mod) => item_mod.draw_fields(gui),
-            Object::ArtPlaceableBehavior(art_placeable_behavior) => {
-                art_placeable_behavior.draw_fields(gui)
-            }
-            Object::ArtPlaceable(art_placeable) => art_placeable.draw_fields(gui),
-            Object::VehicleBehavior(vehicle_behavior) => vehicle_behavior.draw_fields(gui),
-            Object::Vehicle(vehicle) => vehicle.draw_fields(gui),
-            Object::World(world) => world.draw_fields(gui),
-        };
-
-        let mut base_object: Vec<Box<dyn FnMut()>> = vec![class_name, owner_name, owner_class];
-        base_object.extend(object);
-        gui.draw_struct(ident, &mut base_object);
-    }
-}
-
-impl RawUi for Vec<BaseObject> {
-    fn draw_raw_ui(&mut self, gui: &Gui, ident: &str) {
-        gui.draw_vec_no_edit(ident, self);
-    }
+    pub _class_name: String,
+    pub owner_name: String,
+    pub owner_class: Option<String>,
+    pub _object: Object,
 }
 
 impl<'de> Deserialize<'de> for BaseObject {
@@ -113,7 +64,7 @@ impl<'de> Deserialize<'de> for BaseObject {
                 let class_name: String = seq.next_element()?.unwrap();
                 let owner_name = seq.next_element()?.unwrap();
                 let owner_class = seq.next_element()?.unwrap();
-                let object = match class_name.to_str() {
+                let object = match class_name.as_str() {
                     "BioPawnBehaviorSaveObject" => {
                         Object::PawnBehavior(seq.next_element()?.unwrap())
                     }
@@ -137,7 +88,7 @@ impl<'de> Deserialize<'de> for BaseObject {
                     _ => unreachable!(),
                 };
 
-                Ok(BaseObject { class_name, owner_name, owner_class, object })
+                Ok(BaseObject { _class_name: class_name, owner_name, owner_class, _object: object })
             }
         }
         deserializer.deserialize_tuple_struct("BaseObject", 4, BaseObjectVisitor)
@@ -145,31 +96,47 @@ impl<'de> Deserialize<'de> for BaseObject {
 }
 
 #[derive(Serialize, Clone)]
-enum Object {
-    PawnBehavior(PawnBehavior),
-    Pawn(Pawn),
-    BaseSquad(BaseSquad),
-    Shop(Shop),
-    Inventory(Inventory),
-    Item(Item),
-    ItemMod(ItemMod),
-    ArtPlaceableBehavior(ArtPlaceableBehavior),
-    ArtPlaceable(ArtPlaceable),
-    VehicleBehavior(VehicleBehavior),
-    Vehicle(Vehicle),
-    World(World),
+pub enum Object {
+    PawnBehavior(RcUi<PawnBehavior>),
+    Pawn(RcUi<Pawn>),
+    BaseSquad(RcUi<BaseSquad>),
+    Shop(RcUi<Shop>),
+    Inventory(RcUi<Inventory>),
+    Item(RcUi<Item>),
+    ItemMod(RcUi<ItemMod>),
+    ArtPlaceableBehavior(RcUi<ArtPlaceableBehavior>),
+    ArtPlaceable(RcUi<ArtPlaceable>),
+    VehicleBehavior(RcUi<VehicleBehavior>),
+    Vehicle(RcUi<Vehicle>),
+    World(RcUi<World>),
+    Default,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
-struct VehicleBehavior {
+impl Default for Object {
+    fn default() -> Self {
+        Object::Default
+    }
+}
+
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
+pub struct HasObject {
+    pub has_object: Option<BaseObject>,
+}
+
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
+pub struct VehicleBehavior {
     actor_type: String,
     powertrain_enabled: bool,
     vehicle_fonction_enabled: bool,
-    owner: Box<Option<BaseObject>>,
+    owner: Option<BaseObject>,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
-struct Vehicle {
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
+pub struct Vehicle {
     location: Vector,
     rotation: Rotator,
     velocity: Vector,
@@ -184,14 +151,17 @@ struct Vehicle {
     _unknown: Dummy<16>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", name)]
 struct WorldStreamingState {
     name: String,
     enabled: u8,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
-struct World {
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
+pub struct World {
     streaming_states: Vec<WorldStreamingState>,
     destination_area_map: String,
     destination: Vector,
@@ -209,5 +179,5 @@ struct World {
     current_tip_id: i32,
     override_tip: i32,
     _browser_alerts: Dummy<8>, // [u8; 8]
-    pending_loot: Box<Option<BaseObject>>,
+    pending_loot: Option<BaseObject>,
 }

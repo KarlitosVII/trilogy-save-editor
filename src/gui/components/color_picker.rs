@@ -110,10 +110,10 @@ impl Component for ColorPicker {
 
         html! {
             <div class="flex gap-2">
-                <InputNumber label="R" value=NumberType::Byte(RcUi::new(r)) onchange=self.link.callback(Msg::R) />
-                <InputNumber label="G" value=NumberType::Byte(RcUi::new(g)) onchange=self.link.callback(Msg::G) />
-                <InputNumber label="B" value=NumberType::Byte(RcUi::new(b)) onchange=self.link.callback(Msg::B) />
-                <InputNumber label="A" value=NumberType::Byte(RcUi::new(a)) onchange=self.link.callback(Msg::A) />
+                <InputNumber label="R" value=NumberType::Byte(r.into()) onchange=self.link.callback(Msg::R) />
+                <InputNumber label="G" value=NumberType::Byte(g.into()) onchange=self.link.callback(Msg::G) />
+                <InputNumber label="B" value=NumberType::Byte(b.into()) onchange=self.link.callback(Msg::B) />
+                <InputNumber label="A" value=NumberType::Byte(a.into()) onchange=self.link.callback(Msg::A) />
                 <label class="flex-auto flex items-center gap-1">
                     <span class="border border-default-border w-5 h-5" style=format!("background-color: {}", hex_color)>
                         <input type="color"

@@ -1,12 +1,18 @@
 use derive_more::From;
 use indexmap::IndexMap;
+use std::any::Any;
 use yew::prelude::*;
 use yewtil::NeqAssign;
 
-use crate::gui::{
-    components::{raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table},
-    raw_ui::RawUi,
-    RcUi,
+use crate::{
+    gui::{
+        components::{
+            raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table,
+        },
+        raw_ui::{RawUi, RawUiMe1Legacy},
+        RcUi,
+    },
+    save_data::mass_effect_1_le::legacy::{Level, Map},
 };
 
 #[derive(Clone, From)]
@@ -23,15 +29,10 @@ where
     T: RawUi + Default,
 {
     fn eq(&self, other: &IndexMapKeyType<T>) -> bool {
-        match self {
-            IndexMapKeyType::I32(index_map) => match other {
-                IndexMapKeyType::I32(other) => index_map == other,
-                _ => false,
-            },
-            IndexMapKeyType::String(index_map) => match other {
-                IndexMapKeyType::String(other) => index_map == other,
-                _ => false,
-            },
+        match (self, other) {
+            (IndexMapKeyType::I32(integer), IndexMapKeyType::I32(other)) => integer == other,
+            (IndexMapKeyType::String(string), IndexMapKeyType::String(other)) => string == other,
+            _ => false,
         }
     }
 }
@@ -148,6 +149,16 @@ where
             .opened
             .then(|| {
                 let view = |idx, label, key, value| {
+                    // Exceptions
+                    let any  = value as &dyn Any;
+                    let value = if let Some(map) = any.downcast_ref::<RcUi<Map>>() {
+                        map.children()
+                    } else if let Some(level) = any.downcast_ref::<RcUi<Level>>() {
+                        level.children()
+                    } else {
+                        vec![RawUi::view(value, "Value")]
+                    };
+
                     html_nested! {
                         <div class="flex gap-1">
                             <div class="py-px">
@@ -159,7 +170,7 @@ where
                             </div>
                             <RawUiStruct label=label opened=self.new_item_idx == idx>
                                 { key }
-                                { RawUi::view(value, "Value") }
+                                { for value.into_iter() }
                             </RawUiStruct>
                         </div>
                     }
@@ -172,7 +183,7 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputNumber label="Key" value=NumberType::Integer(RcUi::new(*key))
+                                <InputNumber label="Key" value=NumberType::Integer((*key).into())
                                     onchange=self.link.callback(move |callback| Msg::EditKey(idx, callback))
                                 />
                             };

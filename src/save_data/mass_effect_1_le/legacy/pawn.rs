@@ -1,18 +1,20 @@
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 use crate::save_data::{
     shared::{Rotator, Vector},
-    Dummy, String,
+    Dummy,
 };
 
-use super::BaseObject;
+use super::{BaseObject, HasObject};
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct PawnBehavior {
     is_dead: bool,
     generated_treasure: bool,
     challenge_scaled: bool,
-    owner: Box<Option<BaseObject>>,
+    owner: Option<BaseObject>,
     health_current: f32,
     shield_current: f32,
     first_name: String,
@@ -31,8 +33,8 @@ pub struct PawnBehavior {
     precision: i32,
     coordination: i32,
     quick_slot_current: u8,
-    squad: Box<Option<BaseObject>>,
-    inventory: Box<Option<BaseObject>>,
+    squad: Option<BaseObject>,
+    inventory: Option<BaseObject>,
     _unknown: Dummy<3>,
     experience: i32,
     talent_points: i32,
@@ -57,17 +59,21 @@ pub struct PawnBehavior {
     head_gear_visible_preference: bool,
     simple_talents: Vec<SimpleTalent>,
     complex_talents: Vec<ComplexTalent>,
-    quick_slots: Vec<Option<BaseObject>>,
-    equipment: Vec<Option<BaseObject>>,
+    quick_slots: Vec<HasObject>,
+    equipment: Vec<HasObject>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", talent_id)]
 struct SimpleTalent {
     talent_id: i32,
     current_rank: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", talent_id)]
 struct ComplexTalent {
     talent_id: i32,
     current_rank: i32,
@@ -79,7 +85,8 @@ struct ComplexTalent {
     prereq_talent_ranks: Vec<i32>,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Pawn {
     location: Vector,
     rotation: Rotator,
@@ -94,7 +101,8 @@ pub struct Pawn {
     head_gear_visible_preference: bool,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct BaseSquad {
-    inventory: Box<Option<BaseObject>>,
+    inventory: Option<BaseObject>,
 }

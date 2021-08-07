@@ -1,10 +1,11 @@
 use indexmap::IndexMap;
-use std::fmt::Display;
+use std::{any::Any, fmt::Display};
 use yew::prelude::*;
 
 use crate::{
     gui::components::{raw_ui::*, *},
     save_data::{
+        mass_effect_1_le::legacy::BaseObject,
         shared::{appearance::LinearColor, plot::BitVec},
         Guid,
     },
@@ -22,9 +23,12 @@ where
     }
 }
 
-// pub trait RawUiMe1Legacy {
-//     fn draw_fields<'a>(&'a mut self, gui: &'a Gui) -> Vec<Box<dyn FnMut() + 'a>>;
-// }
+pub trait RawUiMe1Legacy
+where
+    Self: Clone + PartialEq + 'static,
+{
+    fn children(&self) -> Vec<yew::Html>;
+}
 
 // Implémentation des types std
 impl RawUi for RcUi<u8> {
@@ -83,8 +87,10 @@ where
     T: RawUi + Default + Display,
 {
     fn view(&self, label: &str) -> yew::Html {
+        // Make Vec of BaseObject not editable
+        let is_editable = !(self as &dyn Any).is::<RcUi<Vec<RcUi<BaseObject>>>>();
         html! {
-            <RawUiVec<T> label=label.to_owned() vec=RcUi::clone(self) />
+            <RawUiVec<T> label=label.to_owned() vec=RcUi::clone(self) is_editable=is_editable />
         }
     }
 }

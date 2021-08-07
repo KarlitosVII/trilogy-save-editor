@@ -8,7 +8,7 @@ use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
         components::{
-            shared::{IntegerPlotType, PlotCategory},
+            shared::{IntPlotType, PlotCategory},
             Helper, Tab, TabBar,
         },
         mass_effect_1::Me1Plot,
@@ -28,9 +28,9 @@ pub enum Msg {
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub booleans: RcUi<BitVec>,
-    pub integers: IntegerPlotType,
+    pub integers: IntPlotType,
     pub me1_booleans: Option<RcUi<BitVec>>,
-    pub me1_integers: Option<IntegerPlotType>,
+    pub me1_integers: Option<IntPlotType>,
     pub onerror: Callback<Error>,
 }
 
@@ -103,7 +103,7 @@ impl Component for Me2Plot {
                             <PlotCategory
                                 title=title.to_owned()
                                 booleans=RcUi::clone(booleans)
-                                integers=IntegerPlotType::clone(integers)
+                                integers=IntPlotType::clone(integers)
                                 category=category.clone()
                             />
                         }
@@ -145,7 +145,7 @@ impl Component for Me2Plot {
                                     </div>
                                     <Me1Plot
                                         booleans=RcUi::clone(me1_booleans)
-                                        integers=IntegerPlotType::clone(me1_integers)
+                                        integers=IntPlotType::clone(me1_integers)
                                         onerror=self.link.callback(Msg::Error)
                                     />
                                 </div>
@@ -168,14 +168,14 @@ impl Component for Me2Plot {
                     <Tab title="Player">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             category=player.clone()
                         />
                     </Tab>
                     <Tab title="Rewards">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             category=rewards.clone()
                         />
                     </Tab>
@@ -183,7 +183,7 @@ impl Component for Me2Plot {
                     <Tab title="Captain's cabin">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             category=captains_cabin.clone()
                         />
                     </Tab>

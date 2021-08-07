@@ -14,19 +14,11 @@ pub enum NumberType {
 
 impl PartialEq for NumberType {
     fn eq(&self, other: &NumberType) -> bool {
-        match self {
-            NumberType::Byte(byte) => match other {
-                NumberType::Byte(other) => byte == other,
-                _ => false,
-            },
-            NumberType::Integer(integer) => match other {
-                NumberType::Integer(other) => integer == other,
-                _ => false,
-            },
-            NumberType::Float(float) => match other {
-                NumberType::Float(other) => float == other,
-                _ => false,
-            },
+        match (self, other) {
+            (NumberType::Byte(byte), NumberType::Byte(other)) => byte == other,
+            (NumberType::Integer(integer), NumberType::Integer(other)) => integer == other,
+            (NumberType::Float(float), NumberType::Float(other)) => float == other,
+            _ => false,
         }
     }
 }

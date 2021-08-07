@@ -11,7 +11,7 @@ use crate::{
     save_data::shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
 };
 
-use super::IntegerPlotType;
+use super::IntPlotType;
 
 pub enum Msg {
     ChangeBool(usize, bool),
@@ -21,7 +21,7 @@ pub enum Msg {
 pub struct Props {
     pub title: Option<String>,
     pub booleans: RcUi<BitVec>,
-    pub integers: IntegerPlotType,
+    pub integers: IntPlotType,
     pub category: PlotCategoryDb,
     #[prop_or(false)]
     pub me3_imported_me1: bool,
@@ -95,8 +95,8 @@ impl Component for PlotCategory {
                 idx += 10_000;
             }
             let value = match integers {
-                IntegerPlotType::Vec(vec) => vec.borrow().get(idx).map(RcUi::clone),
-                IntegerPlotType::IndexMap(index_map) => {
+                IntPlotType::Vec(vec) => vec.borrow().get(idx).map(RcUi::clone),
+                IntPlotType::IndexMap(index_map) => {
                     index_map.borrow().get(&(idx as i32)).map(RcUi::clone)
                 }
             };
@@ -134,7 +134,7 @@ impl PlotCategory {
 
         // Integers
         match integers {
-            IntegerPlotType::Vec(ref mut vec) => {
+            IntPlotType::Vec(ref mut vec) => {
                 if let Some(&(mut max)) = int_db.keys().max() {
                     if *me3_imported_me1 {
                         max += 10_000;
@@ -146,7 +146,7 @@ impl PlotCategory {
                     };
                 }
             }
-            IntegerPlotType::IndexMap(ref mut index_map) => {
+            IntPlotType::IndexMap(ref mut index_map) => {
                 for mut key in int_db.keys().copied() {
                     if *me3_imported_me1 {
                         key += 10_000;

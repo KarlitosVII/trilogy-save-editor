@@ -16,15 +16,10 @@ pub enum Me2Type {
 
 impl PartialEq for Me2Type {
     fn eq(&self, other: &Me2Type) -> bool {
-        match self {
-            Me2Type::Vanilla(me2) => match other {
-                Me2Type::Vanilla(other) => me2 == other,
-                _ => false,
-            },
-            Me2Type::Legendary(me2) => match other {
-                Me2Type::Legendary(other) => me2 == other,
-                _ => false,
-            },
+        match (self, other) {
+            (Me2Type::Vanilla(vanilla), Me2Type::Vanilla(other)) => vanilla == other,
+            (Me2Type::Legendary(legendary), Me2Type::Legendary(other)) => legendary == other,
+            _ => false,
         }
     }
 }

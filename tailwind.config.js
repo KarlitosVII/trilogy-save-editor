@@ -9,7 +9,8 @@ module.exports = {
   darkMode: false, // or "media" or "class"
   theme: {
     fontFamily: {
-      mono: ["Proggy Clean", ...defaultTheme.fontFamily.mono],
+      // default: ["Proggy Clean", ...defaultTheme.fontFamily.mono],
+      default: [defaultTheme.fontFamily.mono],
     },
     colors: {
       black: "#000000",

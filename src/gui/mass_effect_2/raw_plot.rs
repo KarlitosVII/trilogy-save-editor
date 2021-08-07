@@ -7,7 +7,7 @@ use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
         components::{
-            shared::{FloatPlotType, IntegerPlotType, PlotType, RawPlot},
+            shared::{FloatPlotType, IntPlotType, PlotType, RawPlot},
             Tab, TabBar,
         },
         RcUi,
@@ -23,7 +23,7 @@ pub enum Msg {
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub booleans: RcUi<BitVec>,
-    pub integers: IntegerPlotType,
+    pub integers: IntPlotType,
     pub floats: FloatPlotType,
     pub onerror: Callback<Error>,
 }

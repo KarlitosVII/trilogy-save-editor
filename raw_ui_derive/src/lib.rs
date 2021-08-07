@@ -9,6 +9,12 @@ use syn::{
 };
 
 #[proc_macro_attribute]
+pub fn rcize_fields(_: TokenStream, input: TokenStream) -> TokenStream {
+    let args = quote! { None };
+    rcize_fields_derive(args.into(), input)
+}
+
+#[proc_macro_attribute]
 pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(input as DeriveInput);
 
@@ -196,8 +202,10 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
             let derive_name = arg.to_string();
             match derive_name.as_str() {
                 "RawUi" | "RawUiRoot" | "RawUiMe1Legacy" => {
-                    Ident::new(&derive_name, Span::call_site())
+                    let derive_name = Ident::new(&derive_name, Span::call_site());
+                    quote! { #[derive(#derive_name)] }
                 }
+                "None" => Default::default(),
                 _ => panic!("{} not supported", arg),
             }
         }
@@ -207,7 +215,7 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
     let name = &ast.ident;
 
     (quote! {
-        #[derive(#derive)]
+        #derive
         #ast
 
         impl #name {
@@ -217,53 +225,23 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
     .into()
 }
 
+#[allow(clippy::enum_variant_names)]
+enum Derive {
+    RawUi,
+    RawUiRoot,
+    RawUiMe1Legacy,
+}
+
 #[proc_macro_derive(RawUi)]
 pub fn raw_ui_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
 
     match ast.data {
-        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields),
+        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields, Derive::RawUi),
         syn::Data::Enum(ref e) => impl_raw_ui_enum(&ast, &e.variants),
         _ => panic!("union not supported"),
     }
     .into()
-}
-
-fn impl_raw_ui_struct(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStream {
-    let fields = match *fields {
-        Fields::Named(ref fields) => &fields.named,
-        _ => panic!("non named fields not supported"),
-    };
-
-    let name = &ast.ident;
-
-    let view_fields = fields.iter().filter_map(|field| {
-        (!field.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
-            let field_name = &field.ident;
-            let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
-            quote! {
-                crate::gui::raw_ui::RawUi::view(&self.borrow().#field_name, #field_string)
-            }
-        })
-    });
-
-    quote! {
-        impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
-            fn view(&self, label: &str) -> yew::Html {
-                self.view_opened(label, false)
-            }
-
-            fn view_opened(&self, label: &str, opened: bool) -> yew::Html {
-                use crate::gui::components::raw_ui::RawUiStruct;
-                let fields = [#(#view_fields),*];
-                yew::html! {
-                    <RawUiStruct label=label.to_owned() opened=opened>
-                        { for fields }
-                    </RawUiStruct>
-                }
-            }
-        }
-    }
 }
 
 #[proc_macro_derive(RawUiRoot)]
@@ -271,13 +249,26 @@ pub fn raw_ui_derive_root(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
 
     match ast.data {
-        syn::Data::Struct(ref s) => impl_raw_ui_root(&ast, &s.fields),
+        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields, Derive::RawUiRoot),
         _ => panic!("enum / union not supported"),
     }
     .into()
 }
 
-fn impl_raw_ui_root(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStream {
+#[proc_macro_derive(RawUiMe1Legacy)]
+pub fn raw_ui_me1_legacy_derive(input: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(input as DeriveInput);
+
+    match ast.data {
+        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields, Derive::RawUiMe1Legacy),
+        _ => panic!("enum / union not supported"),
+    }
+    .into()
+}
+
+fn impl_raw_ui_struct(
+    ast: &DeriveInput, fields: &Fields, raw_ui_impl: Derive,
+) -> proc_macro2::TokenStream {
     let fields = match *fields {
         Fields::Named(ref fields) => &fields.named,
         _ => panic!("non named fields not supported"),
@@ -295,22 +286,48 @@ fn impl_raw_ui_root(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStr
         })
     });
 
-    quote! {
-        impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
-            fn view(&self, label: &str) -> yew::Html {
-                self.view_opened(label, false)
-            }
+    match raw_ui_impl {
+        Derive::RawUi => quote! {
+            impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
+                fn view(&self, label: &str) -> yew::Html {
+                    self.view_opened(label, false)
+                }
 
-            fn view_opened(&self, _: &str, _: bool) -> yew::Html {
-                use crate::gui::components::Table;
-                let fields = [#(#view_fields),*];
-                yew::html! {
-                    <Table>
-                        { for fields }
-                    </Table>
+                fn view_opened(&self, label: &str, opened: bool) -> yew::Html {
+                    use crate::gui::components::raw_ui::RawUiStruct;
+                    let fields = [#(#view_fields),*];
+                    yew::html! {
+                        <RawUiStruct label=label.to_owned() opened=opened>
+                            { for fields }
+                        </RawUiStruct>
+                    }
                 }
             }
-        }
+        },
+        Derive::RawUiRoot => quote! {
+            impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
+                fn view(&self, label: &str) -> yew::Html {
+                    self.view_opened(label, false)
+                }
+
+                fn view_opened(&self, _: &str, _: bool) -> yew::Html {
+                    use crate::gui::components::Table;
+                    let fields = [#(#view_fields),*];
+                    yew::html! {
+                        <Table>
+                            { for fields }
+                        </Table>
+                    }
+                }
+            }
+        },
+        Derive::RawUiMe1Legacy => quote! {
+            impl crate::gui::raw_ui::RawUiMe1Legacy for crate::gui::RcUi<#name> {
+                fn children(&self) -> Vec<yew::Html> {
+                    vec![#(#view_fields),*]
+                }
+            }
+        },
     }
 }
 
@@ -371,54 +388,6 @@ fn impl_raw_ui_enum(
                 yew::html!{
                     <RawUiEnum<#name> label=label.to_owned() items=#name::variants() value=self.clone() />
                 }
-            }
-        }
-    }
-}
-
-#[proc_macro_derive(RawUiMe1Legacy)]
-pub fn raw_ui_me1_legacy_derive(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as DeriveInput);
-
-    match ast.data {
-        syn::Data::Struct(ref s) => impl_raw_ui_me1_legacy(&ast, &s.fields),
-        _ => panic!("enum / union not supported"),
-    }
-    .into()
-}
-
-fn impl_raw_ui_me1_legacy(ast: &DeriveInput, fields: &Fields) -> proc_macro2::TokenStream {
-    let fields = match *fields {
-        Fields::Named(ref fields) => &fields.named,
-        _ => panic!("non named fields not supported"),
-    };
-
-    let name = &ast.ident;
-
-    let draw_lets = fields.iter().filter_map(|field| {
-        (!field.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
-            let field_name = &field.ident;
-            quote! {
-                let #field_name = &mut self.#field_name;
-            }
-        })
-    });
-
-    let draw_fields = fields.iter().filter_map(|field| {
-        (!field.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
-            let field_name = &field.ident;
-            let field_string = field_name.as_ref().unwrap().to_string().to_title_case();
-            quote! {
-                Box::new(move || { crate::gui::raw_ui::RawUi::view(#field_name, #field_string) })
-            }
-        })
-    });
-
-    quote! {
-        impl crate::gui::raw_ui::RawUiMe1Legacy for #name {
-            fn draw_fields<'a>(&'a mut self: &'a crate::gui::Gui) -> Vec<Box<dyn FnMut() + 'a>> {
-                #(#draw_lets)*
-                vec![#(#draw_fields),*]
             }
         }
     }

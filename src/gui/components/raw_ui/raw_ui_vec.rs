@@ -1,4 +1,5 @@
 use std::{
+    any::Any,
     cell::{Ref, RefMut},
     fmt::Display,
 };
@@ -20,6 +21,8 @@ where
 {
     pub label: String,
     pub vec: RcUi<Vec<T>>,
+    #[prop_or(true)]
+    pub is_editable: bool,
 }
 
 impl<T> Props<T>
@@ -91,11 +94,12 @@ where
             .opened
             .then(|| {
                 let vec = self.props.vec();
+                let is_editable = self.props.is_editable;
 
                 // Exceptions
                 macro_rules! display_idx {
                     ($vec:ident => $($type:ty)*) => {
-                        $((&*$vec as &dyn std::any::Any).is::<Vec<RcUi<$type>>>()) ||*
+                        $((&*$vec as &dyn Any).is::<Vec<RcUi<$type>>>()) ||*
                     }
                 }
                 let display_idx = display_idx!(vec => u8 i32 f32 bool String);
@@ -109,29 +113,40 @@ where
                         item.view_opened(&label, opened)
                     };
 
-                    html_nested! {
+                    let remove = is_editable.then(|| html!{
+                        <div class="py-px">
+                            <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
+                                onclick=self.link.callback(move |_| Msg::Remove(idx))
+                            >
+                                {"remove"}
+                            </a>
+                        </div>
+                    }).unwrap_or_default();
+
+                    html! {
                         <div class="flex gap-1">
-                            <div class="py-px">
-                                <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
-                                    onclick=self.link.callback(move |_| Msg::Remove(idx))
-                                >
-                                    {"remove"}
-                                </a>
-                            </div>
+                            { remove }
                             { item }
                         </div>
                     }
                 });
 
+                let empty = (!is_editable && vec.is_empty()).then(|| html!{ "<empty>" }).into_iter();
+
+                let add = is_editable.then(|| html!{
+                    <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
+                        onclick=self.link.callback(|_| Msg::Add)
+                    >
+                        {"add"}
+                    </button>
+                }).into_iter();
+
                 html! {
                     <div class="p-1">
                         <Table>
                             { for items }
-                            <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
-                                onclick=self.link.callback(|_| Msg::Add)
-                            >
-                                {"add"}
-                            </button>
+                            { for empty }
+                            { for add }
                         </Table>
                     </div>
                 }

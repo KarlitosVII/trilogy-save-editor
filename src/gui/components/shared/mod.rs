@@ -9,22 +9,17 @@ mod raw_plot;
 pub use self::{bonus_powers::*, plot_category::*, raw_plot::*};
 
 #[derive(Clone)]
-pub enum IntegerPlotType {
+pub enum IntPlotType {
     Vec(RcUi<Vec<RcUi<i32>>>),
     IndexMap(RcUi<IndexMap<i32, RcUi<i32>>>),
 }
 
-impl PartialEq for IntegerPlotType {
-    fn eq(&self, other: &IntegerPlotType) -> bool {
-        match self {
-            IntegerPlotType::Vec(vec) => match other {
-                IntegerPlotType::Vec(other) => vec == other,
-                _ => false,
-            },
-            IntegerPlotType::IndexMap(index_map) => match other {
-                IntegerPlotType::IndexMap(other) => index_map == other,
-                _ => false,
-            },
+impl PartialEq for IntPlotType {
+    fn eq(&self, other: &IntPlotType) -> bool {
+        match (self, other) {
+            (IntPlotType::Vec(vec), IntPlotType::Vec(other)) => vec == other,
+            (IntPlotType::IndexMap(index_map), IntPlotType::IndexMap(other)) => index_map == other,
+            _ => false,
         }
     }
 }
@@ -37,15 +32,12 @@ pub enum FloatPlotType {
 
 impl PartialEq for FloatPlotType {
     fn eq(&self, other: &FloatPlotType) -> bool {
-        match self {
-            FloatPlotType::Vec(vec) => match other {
-                FloatPlotType::Vec(other) => vec == other,
-                _ => false,
-            },
-            FloatPlotType::IndexMap(index_map) => match other {
-                FloatPlotType::IndexMap(other) => index_map == other,
-                _ => false,
-            },
+        match (self, other) {
+            (FloatPlotType::Vec(vec), FloatPlotType::Vec(other)) => vec == other,
+            (FloatPlotType::IndexMap(index_map), FloatPlotType::IndexMap(other)) => {
+                index_map == other
+            }
+            _ => false,
         }
     }
 }
@@ -53,25 +45,17 @@ impl PartialEq for FloatPlotType {
 #[derive(Clone)]
 pub enum PlotType {
     Boolean(RcUi<BitVec>),
-    Integer(IntegerPlotType),
+    Integer(IntPlotType),
     Float(FloatPlotType),
 }
 
 impl PartialEq for PlotType {
     fn eq(&self, other: &PlotType) -> bool {
-        match self {
-            PlotType::Boolean(boolean) => match other {
-                PlotType::Boolean(other) => boolean == other,
-                _ => false,
-            },
-            PlotType::Integer(integer) => match other {
-                PlotType::Integer(other) => integer == other,
-                _ => false,
-            },
-            PlotType::Float(float) => match other {
-                PlotType::Float(other) => float == other,
-                _ => false,
-            },
+        match (self, other) {
+            (PlotType::Boolean(booleans), PlotType::Boolean(other)) => booleans == other,
+            (PlotType::Integer(integers), PlotType::Integer(other)) => integers == other,
+            (PlotType::Float(floats), PlotType::Float(other)) => floats == other,
+            _ => false,
         }
     }
 }

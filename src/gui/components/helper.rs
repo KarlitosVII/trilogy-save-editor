@@ -88,13 +88,13 @@ impl Component for Helper {
                         "flex-col",
                         "gap-1",
                         "absolute",
-                        "bg-popup/95",
+                        "bg-popup/90",
                         "border",
                         "border-default-border",
                         "px-2",
                         "py-1",
                         "w-[480px]",
-                        "z-30",
+                        "z-40",
                         (!self.hovered).then(|| "hidden" ),
                     ]
                     ref=self.popup_ref.clone()

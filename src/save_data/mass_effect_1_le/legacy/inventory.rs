@@ -1,17 +1,20 @@
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 use crate::save_data::mass_effect_1_le::player::ItemLevel;
 
-use super::BaseObject;
+use super::{BaseObject, HasObject};
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Shop {
     last_player_level: i32,
     is_initialized: bool,
-    inventory: Vec<Option<BaseObject>>,
+    inventory: Vec<HasObject>,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Inventory {
     items: Vec<BaseObject>,
     plot_items: Vec<PlotItem>,
@@ -21,7 +24,9 @@ pub struct Inventory {
     omnigel: f32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 struct PlotItem {
     localized_name: i32,
     localized_desc: i32,
@@ -31,7 +36,8 @@ struct PlotItem {
     plot_conditional_id: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Item {
     item_id: i32,
     item_level: ItemLevel,
@@ -40,13 +46,16 @@ pub struct Item {
     slot_specs: Vec<ModdableSlotSpec>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 struct ModdableSlotSpec {
     type_id: i32,
-    mods: Vec<Option<BaseObject>>,
+    mods: Vec<HasObject>,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct ItemMod {
     item_id: i32,
     item_level: ItemLevel,

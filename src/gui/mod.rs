@@ -8,6 +8,7 @@ use std::{
 mod app;
 pub mod components;
 mod mass_effect_1;
+mod mass_effect_1_le;
 mod mass_effect_2;
 mod mass_effect_3;
 pub mod raw_ui;
@@ -32,13 +33,19 @@ impl<T> RcUi<T> {
     }
 }
 
+impl<T> From<T> for RcUi<T> {
+    fn from(from: T) -> Self {
+        Self::new(from)
+    }
+}
+
 impl<'de, T: Deserialize<'de>> Deserialize<'de> for RcUi<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
         let inner: T = Deserialize::deserialize(deserializer)?;
-        Ok(RcUi::new(inner))
+        Ok(inner.into())
     }
 }
 

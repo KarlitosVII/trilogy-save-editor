@@ -1,15 +1,16 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::{Dummy, String};
+use crate::save_data::Dummy;
 
 use super::BaseObject;
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct ArtPlaceableBehavior {
     is_dead: bool,
     generated_treasure: bool,
     challenge_scaled: bool,
-    owner: Box<Option<BaseObject>>,
+    owner: Option<BaseObject>,
     health: f32,
     current_health: f32,
     enabled: bool,
@@ -21,12 +22,13 @@ pub struct ArtPlaceableBehavior {
     use_case_override: bool,
     player_only: bool,
     skill_difficulty: u8,
-    inventory: Box<Option<BaseObject>>,
+    inventory: Option<BaseObject>,
     skill_game_failed: bool,
     skill_game_xp_awarded: bool,
 }
 
-#[derive(Deserialize, Serialize, RawUiMe1Legacy, Clone)]
+#[rcize_fields_derive(RawUiMe1Legacy)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct ArtPlaceable {
     _unknown: Dummy<60>,
 }

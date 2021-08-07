@@ -6,15 +6,17 @@ use crate::{
     database_service::DatabaseService,
     gui::{
         components::{
-            shared::{FloatPlotType, IntegerPlotType},
+            shared::{FloatPlotType, IntPlotType},
             NavBar, Tab, TabBar, Table,
         },
+        mass_effect_1::{Me1Plot, Me1RawPlot},
+        mass_effect_1_le::Me1LeGeneral,
         mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
         mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
         raw_ui::RawUi,
         RcUi, Theme,
     },
-    save_data::mass_effect_3::Me3SaveGame,
+    save_data::{mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame},
     save_handler::{Request, Response, SaveGame, SaveHandler},
 };
 
@@ -71,7 +73,9 @@ impl Component for App {
             Msg::ReloadSave => {
                 let file_path = match self.props.save_game {
                     Some(
-                        SaveGame::MassEffect2 { ref file_path, .. }
+                        SaveGame::MassEffect1Le { ref file_path, .. }
+                        | SaveGame::MassEffect1LePs4 { ref file_path, .. }
+                        | SaveGame::MassEffect2 { ref file_path, .. }
                         | SaveGame::MassEffect2Le { ref file_path, .. }
                         | SaveGame::MassEffect3 { ref file_path, .. },
                     ) => file_path.to_owned(),
@@ -100,6 +104,13 @@ impl Component for App {
     fn view(&self) -> Html {
         let (content, theme) = if let Some(ref save_game) = self.props.save_game {
             match save_game {
+                SaveGame::MassEffect1Le { save_game, .. } => (
+                    App::mass_effect_1_le(self, RcUi::clone(&save_game.borrow().save_data)),
+                    Theme::MassEffect1,
+                ),
+                SaveGame::MassEffect1LePs4 { save_game, .. } => {
+                    (App::mass_effect_1_le(self, RcUi::clone(save_game)), Theme::MassEffect1)
+                }
                 SaveGame::MassEffect2 { save_game, .. } => (
                     App::mass_effect_2(self, Me2Type::Vanilla(RcUi::clone(save_game))),
                     Theme::MassEffect2,
@@ -121,9 +132,9 @@ impl Component for App {
                 "h-screen",
                 "flex",
                 "flex-col",
-                "font-mono",
-                "text-base",
-                "leading-tight",
+                "font-default",
+                "text-[80%]",
+                "leading-[20px]",
                 "text-white",
                 theme,
             ]>
@@ -180,6 +191,39 @@ impl App {
         }
     }
 
+    fn mass_effect_1_le(&self, save_game: RcUi<Me1LeSaveData>) -> Html {
+        let me1 = save_game.borrow();
+        let plot = me1.plot();
+
+        html! {
+            <section class="flex-auto flex p-1">
+                <TabBar>
+                    <Tab title="General">
+                        <Me1LeGeneral save_game=RcUi::clone(&save_game) />
+                    </Tab>
+                    <Tab title="Plot">
+                        <Me1Plot
+                            booleans=RcUi::clone(&plot.booleans)
+                            integers=IntPlotType::Vec(RcUi::clone(&plot.integers))
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </Tab>
+                    <Tab title="Raw Data">
+                        { save_game.view_opened("Mass Effect 1", true) }
+                    </Tab>
+                    <Tab title="Raw Plot">
+                        <Me1RawPlot
+                            booleans=RcUi::clone(&plot.booleans)
+                            integers=IntPlotType::Vec(RcUi::clone(&plot.integers))
+                            floats=FloatPlotType::Vec(RcUi::clone(&plot.floats))
+                            onerror=self.link.callback(Msg::Error)
+                        />
+                    </Tab>
+                </TabBar>
+            </section>
+        }
+    }
+
     fn mass_effect_2(&self, save_game: Me2Type) -> Html {
         let (raw_data, plot, me1_plot) = match save_game {
             Me2Type::Vanilla(ref me2) => (
@@ -203,9 +247,9 @@ impl App {
                     <Tab title="Plot">
                         <Me2Plot
                             booleans=RcUi::clone(&plot.borrow().booleans)
-                            integers=IntegerPlotType::Vec(RcUi::clone(&plot.borrow().integers))
+                            integers=IntPlotType::Vec(RcUi::clone(&plot.borrow().integers))
                             me1_booleans=RcUi::clone(&me1_plot.borrow().booleans)
-                            me1_integers=IntegerPlotType::Vec(RcUi::clone(&me1_plot.borrow().integers))
+                            me1_integers=IntPlotType::Vec(RcUi::clone(&me1_plot.borrow().integers))
                             onerror=self.link.callback(Msg::Error)
                         />
                     </Tab>
@@ -215,7 +259,7 @@ impl App {
                     <Tab title="Raw Plot">
                         <Me2RawPlot
                             booleans=RcUi::clone(&plot.borrow().booleans)
-                            integers=IntegerPlotType::Vec(RcUi::clone(&plot.borrow().integers))
+                            integers=IntPlotType::Vec(RcUi::clone(&plot.borrow().integers))
                             floats=FloatPlotType::Vec(RcUi::clone(&plot.borrow().floats))
                             onerror=self.link.callback(Msg::Error)
                         />
@@ -238,7 +282,7 @@ impl App {
                     <Tab title="Plot">
                         <Me3Plot
                             booleans=RcUi::clone(&plot.booleans)
-                            integers=IntegerPlotType::IndexMap(RcUi::clone(&plot.integers))
+                            integers=IntPlotType::IndexMap(RcUi::clone(&plot.integers))
                             variables=RcUi::clone(&me3.player_variables)
                             onerror=self.link.callback(Msg::Error)
                         />
@@ -249,7 +293,7 @@ impl App {
                     <Tab title="Raw Plot">
                         <Me3RawPlot
                             booleans=RcUi::clone(&plot.booleans)
-                            integers=IntegerPlotType::IndexMap(RcUi::clone(&plot.integers))
+                            integers=IntPlotType::IndexMap(RcUi::clone(&plot.integers))
                             floats=FloatPlotType::IndexMap(RcUi::clone(&plot.floats))
                             onerror=self.link.callback(Msg::Error)
                         />

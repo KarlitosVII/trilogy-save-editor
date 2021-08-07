@@ -77,9 +77,9 @@ where
                 </div>
             },
             None => html! {
-                <div class="flex items-center gap-1">
+                <div class="flex-auto flex items-center gap-1">
                     <span class="w-2/3">{ "None" }</span>
-                    <span>{ &self.props.label }</span>
+                    { &self.props.label }
                 </div>
             },
         }

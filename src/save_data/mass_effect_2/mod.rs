@@ -168,7 +168,7 @@ mod test {
         let now = Instant::now();
 
         // Serialize
-        let mut output = unreal::Serializer::to_byte_buf(&me2_save_game)?;
+        let mut output = unreal::Serializer::to_vec(&me2_save_game)?;
 
         // Checksum
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);
@@ -204,7 +204,7 @@ mod test {
         let now = Instant::now();
 
         // Serialize
-        let mut output = unreal::Serializer::to_byte_buf(&me2_save_game)?;
+        let mut output = unreal::Serializer::to_vec(&me2_save_game)?;
 
         // Checksum
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);

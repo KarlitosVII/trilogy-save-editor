@@ -5,9 +5,9 @@
 @layer base {
   @font-face {
     font-family: "Proggy Clean";
-    src: url(/ProggyClean.ttf) format("truetype");
+    src: url(/ProggyClean.ttf) format("TrueType");
   }
-    
+  
   .chevron {
     background-size: 1.0em 1.0em;
     background-repeat: no-repeat;

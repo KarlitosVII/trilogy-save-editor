@@ -1,3 +1,4 @@
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 use crate::save_data::{
@@ -5,7 +6,7 @@ use crate::save_data::{
         appearance::HeadMorph,
         player::{Notoriety, Origin},
     },
-    Dummy, String,
+    Dummy,
 };
 
 #[rcize_fields_derive(RawUi)]
@@ -63,13 +64,17 @@ pub struct Player {
     secondary_weapon: String,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", talent_id)]
 pub struct SimpleTalent {
     talent_id: i32,
     current_rank: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "{}", talent_id)]
 pub struct ComplexTalent {
     talent_id: i32,
     pub current_rank: i32,
@@ -81,7 +86,8 @@ pub struct ComplexTalent {
     prereq_talent_ranks: Vec<i32>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct Inventory {
     pub equipment: Vec<Item>,
     pub quick_slots: Vec<Item>,
@@ -111,7 +117,9 @@ impl Default for ItemLevel {
     }
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 pub struct Item {
     pub item_id: i32,
     pub item_level: ItemLevel,
@@ -122,7 +130,9 @@ pub struct Item {
     attached_mods: Vec<ItemMod>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 struct ItemMod {
     item_id: i32,
     item_level: ItemLevel,
@@ -130,7 +140,9 @@ struct ItemMod {
     plot_conditional_id: i32,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Clone, Default)]
+#[rcize_fields_derive(RawUi)]
+#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[display(fmt = "")]
 struct Hotkey {
     pawn: i32,
     event: i32,

@@ -20,7 +20,7 @@ use crate::{
     save_data::shared::plot::RawPlotDb,
 };
 
-use super::{FloatPlotType, IntegerPlotType, PlotType};
+use super::{FloatPlotType, IntPlotType, PlotType};
 
 pub enum Msg {
     Throttle,
@@ -95,7 +95,7 @@ impl Component for RawPlot {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        const TRHOTTLE: Duration = Duration::from_millis(30);
+        const TRHOTTLE: Duration = Duration::from_millis(15);
         match msg {
             Msg::Scrolled => {
                 if self.throttle.is_none() {
@@ -103,8 +103,8 @@ impl Component for RawPlot {
                         let scroll_top = scroll.scroll_top();
                         let offset_height = scroll.offset_height();
                         let num_rows = offset_height / self.row_height + 1;
-                        let overflow_begin = num_rows / 2;
-                        let overflow_end = num_rows;
+                        let overflow_begin = num_rows / 4;
+                        let overflow_end = num_rows / 2;
 
                         let len = self.label_list.as_ref().map(|list| list.len()).unwrap_or(0);
                         let start = scroll_top / self.row_height;
@@ -159,7 +159,7 @@ impl Component for RawPlot {
                         }
                     }
                     PlotType::Integer(ref mut integers) => match integers {
-                        IntegerPlotType::Vec(ref mut vec) => {
+                        IntPlotType::Vec(ref mut vec) => {
                             let mut vec = vec.borrow_mut();
                             if new_plot >= vec.len() {
                                 vec.resize(new_plot + 1, Default::default());
@@ -168,7 +168,7 @@ impl Component for RawPlot {
                                 false
                             }
                         }
-                        IntegerPlotType::IndexMap(ref mut index_map) => {
+                        IntPlotType::IndexMap(ref mut index_map) => {
                             match index_map.borrow_mut().entry(new_plot as i32) {
                                 Entry::Vacant(plot) => {
                                     plot.insert(Default::default());
@@ -205,14 +205,6 @@ impl Component for RawPlot {
                 }
                 false
             }
-        }
-    }
-
-    fn rendered(&mut self, _first_render: bool) {
-        if let Some(content) = self.content_ref.cast::<HtmlElement>() {
-            let _ = content
-                .style()
-                .set_property("top", &format!("{}px", self.skip * self.row_height as usize));
         }
     }
 
@@ -255,10 +247,10 @@ impl Component for RawPlot {
                         }
                     }),
                     PlotType::Integer(ref integers) => match integers {
-                        IntegerPlotType::Vec(ref vec) => {
+                        IntPlotType::Vec(ref vec) => {
                             vec.borrow().get(idx).map(|plot| plot.view(&label))
                         }
-                        IntegerPlotType::IndexMap(ref index_map) => {
+                        IntPlotType::IndexMap(ref index_map) => {
                             index_map.borrow().get(&(idx as i32)).map(|plot| plot.view(&label))
                         }
                     },
@@ -280,7 +272,7 @@ impl Component for RawPlot {
 
         let add_helper = match self.props.plots {
             PlotType::Boolean(_)
-            | PlotType::Integer(IntegerPlotType::Vec(_))
+            | PlotType::Integer(IntPlotType::Vec(_))
             | PlotType::Float(FloatPlotType::Vec(_)) => html! {
                 <Helper text=
                     "Be careful when adding a new plot.\n\
@@ -318,9 +310,12 @@ impl Component for RawPlot {
                     ref=self.scroll_ref.clone()
                 >
                     <div class="relative w-full border border-default-border raw-plot-bg"
-                        style=format!("height: {}px;", len as i32 * self.row_height + 2)
+                        style=format!("height: {}px;", len * self.row_height as usize + 2)
                     >
-                        <div class="absolute min-w-[33.333333%]" ref=self.content_ref.clone()>
+                        <div class="absolute min-w-[33.333333%]"
+                            style=format!("will-change: transform; transform: translateY({}px)", self.skip * self.row_height as usize)
+                            ref=self.content_ref.clone()
+                        >
                             { for rows }
                         </div>
                     </div>
@@ -344,7 +339,7 @@ impl RawPlot {
                 }
             }
             PlotType::Integer(ref mut integers) => match integers {
-                IntegerPlotType::Vec(ref mut vec) => {
+                IntPlotType::Vec(ref mut vec) => {
                     if let Some(&max) = plot_db.integers.keys().max() {
                         let mut vec = vec.borrow_mut();
                         if max >= vec.len() {
@@ -352,7 +347,7 @@ impl RawPlot {
                         };
                     }
                 }
-                IntegerPlotType::IndexMap(ref mut index_map) => {
+                IntPlotType::IndexMap(ref mut index_map) => {
                     for key in plot_db.integers.keys().copied() {
                         index_map.borrow_mut().entry(key as i32).or_default();
                     }
@@ -387,10 +382,10 @@ impl RawPlot {
             PlotType::Integer(ref integers) => {
                 let label_list = plot_db.integers.iter().map(|(&k, v)| (k, Some(v.to_owned())));
                 match integers {
-                    IntegerPlotType::Vec(ref vec) => {
+                    IntPlotType::Vec(ref vec) => {
                         (0..vec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
                     }
-                    IntegerPlotType::IndexMap(ref index_map) => index_map
+                    IntPlotType::IndexMap(ref index_map) => index_map
                         .borrow()
                         .keys()
                         .map(|&idx| (idx as usize, None))

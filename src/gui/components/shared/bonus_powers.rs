@@ -16,15 +16,10 @@ pub enum BonusPowerType {
 
 impl PartialEq for BonusPowerType {
     fn eq(&self, other: &BonusPowerType) -> bool {
-        match self {
-            BonusPowerType::Me2(powers) => match other {
-                BonusPowerType::Me2(other) => powers == other,
-                _ => false,
-            },
-            BonusPowerType::Me3(powers) => match other {
-                BonusPowerType::Me3(other) => powers == other,
-                _ => false,
-            },
+        match (self, other) {
+            (BonusPowerType::Me2(me2_powers), BonusPowerType::Me2(other)) => me2_powers == other,
+            (BonusPowerType::Me3(me3_powers), BonusPowerType::Me3(other)) => me3_powers == other,
+            _ => false,
         }
     }
 }
@@ -68,7 +63,7 @@ impl Component for BonusPowers {
                         } else {
                             let mut power = Me2Power::default();
                             *power.power_class_name.borrow_mut() = power_class_name;
-                            powers.borrow_mut().push(RcUi::new(power));
+                            powers.borrow_mut().push(power.into());
                         }
                     }
                     BonusPowerType::Me3(ref mut powers) => {
@@ -82,7 +77,7 @@ impl Component for BonusPowers {
                         } else {
                             let mut power = Me3Power::default();
                             *power.power_class_name.borrow_mut() = power_class_name;
-                            powers.borrow_mut().push(RcUi::new(power));
+                            powers.borrow_mut().push(power.into());
                         }
                     }
                 }

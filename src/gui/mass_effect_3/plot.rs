@@ -8,7 +8,7 @@ use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
         components::{
-            shared::{IntegerPlotType, PlotCategory},
+            shared::{IntPlotType, PlotCategory},
             Tab, TabBar,
         },
         mass_effect_1::Me1Plot,
@@ -30,7 +30,7 @@ pub enum Msg {
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub booleans: RcUi<BitVec>,
-    pub integers: IntegerPlotType,
+    pub integers: IntPlotType,
     pub variables: RcUi<IndexMap<String, RcUi<i32>>>,
     pub onerror: Callback<Error>,
 }
@@ -100,7 +100,7 @@ impl Component for Me3Plot {
                             <PlotCategory
                                 title=title.to_owned()
                                 booleans=RcUi::clone(booleans)
-                                integers=IntegerPlotType::clone(integers)
+                                integers=IntPlotType::clone(integers)
                                 category=category.clone()
                             />
                         }
@@ -145,7 +145,7 @@ impl Component for Me3Plot {
                     <Tab title="General">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             category=general.clone()
                         />
                     </Tab>
@@ -158,14 +158,14 @@ impl Component for Me3Plot {
                     <Tab title="Intel">
                         <PlotCategory
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             category=intel.clone()
                         />
                     </Tab>
                     <Tab title="Mass Effect 2" theme=Theme::MassEffect2>
                         <Me2Plot
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             onerror=self.link.callback(Msg::Error)
                         />
                     </Tab>
@@ -173,7 +173,7 @@ impl Component for Me3Plot {
                         <Me1Plot
                             me3_imported_me1=true
                             booleans=RcUi::clone(booleans)
-                            integers=IntegerPlotType::clone(integers)
+                            integers=IntPlotType::clone(integers)
                             onerror=self.link.callback(Msg::Error)
                         />
                     </Tab>

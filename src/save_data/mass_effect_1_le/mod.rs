@@ -3,23 +3,19 @@ use flate2::{
     read::{ZlibDecoder, ZlibEncoder},
     Compression,
 };
-use imgui::im_str;
 use indexmap::IndexMap;
 use serde::{
     de,
     ser::{self, SerializeStruct},
-    Deserialize, Serialize,
+    Deserialize, Deserializer, Serialize, Serializer,
 };
 use std::{fmt, io::Read};
 
-use crate::{
-    gui::{imgui_utils::Table, Gui},
-    unreal,
-};
+use crate::{gui::RcUi, unreal};
 
 use super::{
     shared::{plot::PlotTable, Rotator, SaveTimeStamp, Vector},
-    String, List,
+    List,
 };
 
 pub mod player;
@@ -42,7 +38,7 @@ pub struct Me1LeSaveGame {
     magic_number: u32,
     block_size: u32,
     headers: List<ChunkHeader>,
-    pub save_data: Me1LeSaveData,
+    pub save_data: RcUi<Me1LeSaveData>,
     checksum: u32,
     compression_flag: u32, // 1 = ZLIB
     uncompressed_size: u32,
@@ -115,7 +111,7 @@ impl<'de> Deserialize<'de> for Me1LeSaveGame {
                     magic_number,
                     block_size,
                     headers: headers.into(),
-                    save_data,
+                    save_data: save_data.into(),
                     checksum,
                     compression_flag,
                     uncompressed_size,
@@ -143,8 +139,7 @@ impl serde::Serialize for Me1LeSaveGame {
 
         let mut headers = Vec::new();
 
-        let uncompressed =
-            unreal::Serializer::to_byte_buf(save_data).map_err(ser::Error::custom)?;
+        let uncompressed = unreal::Serializer::to_vec(save_data).map_err(ser::Error::custom)?;
 
         headers
             .push(ChunkHeader { compressed_size: 0, uncompressed_size: uncompressed.len() as u32 });
@@ -182,25 +177,25 @@ impl serde::Serialize for Me1LeSaveGame {
     }
 }
 
-#[rcize_fields_derive(RawUi)]
+#[rcize_fields]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Me1LeSaveData {
     _version: Me1LeVersion,
-    character_id: String,
-    created_date: SaveTimeStamp,
+    pub character_id: String,
+    pub created_date: SaveTimeStamp,
     pub plot: PlotTable,
-    timestamp: SaveTimeStamp,
-    seconds_played: i32,
+    pub timestamp: SaveTimeStamp,
+    pub seconds_played: i32,
     pub player: Player,
-    base_level_name: String,
-    map_name: String,
-    parent_map_name: String,
-    location: Vector,
-    rotation: Rotator,
+    pub base_level_name: String,
+    pub map_name: String,
+    pub parent_map_name: String,
+    pub location: Vector,
+    pub rotation: Rotator,
     pub squad: Vec<Henchman>,
-    display_name: String,
-    file_name: String,
-    no_export: NoExport, // Only serialized for normal savegames, not for character export
+    pub display_name: String,
+    pub file_name: String,
+    pub no_export: NoExport, // Only serialized for normal savegames, not for character export
 }
 
 #[derive(Serialize, Clone)]
@@ -224,17 +219,11 @@ impl<'de> Deserialize<'de> for Me1LeVersion {
 }
 
 #[derive(Clone)]
-struct NoExport(Option<NoExportData>);
+pub struct NoExport(Option<RcUi<NoExportData>>);
 
-impl RawUi for NoExport {
-    fn draw_raw_ui(&mut self, gui: &Gui, _: &str) {
-        if let Some(NoExportData { legacy_maps, mako }) = &mut self.0 {
-            legacy_maps.draw_raw_ui(gui, "Legacy Maps");
-            Table::next_row();
-            mako.draw_raw_ui(gui, "Mako");
-        } else {
-            gui.draw_text(im_str!("Export save"), None);
-        }
+impl NoExport {
+    pub fn as_ref(&self) -> Option<&RcUi<NoExportData>> {
+        self.0.as_ref()
     }
 }
 
@@ -256,7 +245,7 @@ impl<'de> Deserialize<'de> for NoExport {
                 D: Deserializer<'de>,
             {
                 let no_export_data: NoExportData = Deserialize::deserialize(deserializer)?;
-                Ok(NoExport(Some(no_export_data)))
+                Ok(NoExport(Some(no_export_data.into())))
             }
 
             fn visit_none<E>(self) -> Result<Self::Value, E>
@@ -282,15 +271,16 @@ impl serde::Serialize for NoExport {
     }
 }
 
+#[rcize_fields_derive(RawUiMe1Legacy)]
 #[derive(Deserialize, Serialize, Clone)]
-struct NoExportData {
-    legacy_maps: IndexMap<String, Map>,
-    mako: Vehicle,
+pub struct NoExportData {
+    pub legacy_maps: IndexMap<String, Map>,
+    pub mako: Vehicle,
 }
 
 #[rcize_fields_derive(RawUi)]
 #[derive(Deserialize, Serialize, Clone)]
-struct Vehicle {
+pub struct Vehicle {
     first_name: String,
     localized_last_name: i32,
     health_current: f32,
@@ -326,7 +316,7 @@ mod test {
             let now = Instant::now();
 
             // Serialize
-            let mut output = unreal::Serializer::to_byte_buf(&me1_save_game)?;
+            let mut output = unreal::Serializer::to_vec(&me1_save_game)?;
 
             // Checksum
             {
@@ -349,7 +339,7 @@ mod test {
             let now = Instant::now();
 
             // Serialize (again)
-            let mut output_2 = unreal::Serializer::to_byte_buf(&me1_save_game)?;
+            let mut output_2 = unreal::Serializer::to_vec(&me1_save_game)?;
 
             // Checksum
             {

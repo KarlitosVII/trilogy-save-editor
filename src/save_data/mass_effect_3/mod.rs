@@ -185,7 +185,7 @@ mod test {
         let now = Instant::now();
 
         // Serialize
-        let mut output = unreal::Serializer::to_byte_buf(&me3_save_game)?;
+        let mut output = unreal::Serializer::to_vec(&me3_save_game)?;
 
         // Checksum
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);

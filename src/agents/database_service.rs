@@ -14,11 +14,6 @@ use crate::save_data::{
     mass_effect_3::plot_db::Me3PlotDb, shared::plot::RawPlotDb,
 };
 
-// static ref ME1_RAW_PLOT_DB: Result<RawPlotDb> = {
-//     let input = fs::read_to_string("databases/me1_raw_plot_db.ron")?;
-//     ron::from_str(&input).map_err(Error::from)
-// }.context("Failed to parse `databases/me1_raw_plot_db.ron`");
-
 // static ref ME1_ITEM_DB: Result<Me1ItemDb> = {
 //     let input = fs::read_to_string("databases/me1_item_db.ron")?;
 //     ron::from_str(&input).map_err(Error::from)
@@ -26,6 +21,7 @@ use crate::save_data::{
 
 pub enum Type {
     Me1Plot,
+    Me1RawPlot,
     Me2Plot,
     Me2RawPlot,
     Me3Plot,
@@ -34,6 +30,7 @@ pub enum Type {
 
 pub enum Database {
     Me1Plot(Rc<Me1PlotDb>),
+    Me1RawPlot(Rc<RawPlotDb>),
     Me2Plot(Rc<Me2PlotDb>),
     Me2RawPlot(Rc<RawPlotDb>),
     Me3Plot(Rc<Me3PlotDb>),
@@ -57,6 +54,7 @@ pub enum Msg {
 #[derive(Default)]
 struct Databases {
     me1_plot: Option<Rc<Me1PlotDb>>,
+    me1_raw_plot: Option<Rc<RawPlotDb>>,
     me2_plot: Option<Rc<Me2PlotDb>>,
     me2_raw_plot: Option<Rc<RawPlotDb>>,
     me3_plot: Option<Rc<Me3PlotDb>>,
@@ -87,6 +85,9 @@ impl Agent for DatabaseService {
                 match db {
                     Database::Me1Plot(ref db) => {
                         self.dbs.me1_plot = Some(Rc::clone(db));
+                    }
+                    Database::Me1RawPlot(ref db) => {
+                        self.dbs.me1_raw_plot = Some(Rc::clone(db));
                     }
                     Database::Me2Plot(ref db) => {
                         self.dbs.me2_plot = Some(Rc::clone(db));
@@ -121,6 +122,13 @@ impl Agent for DatabaseService {
                         None => self.fetch(who, "/databases/me1_plot_db.ron", |response| {
                             let db = ron::from_str(&response)?;
                             Ok(Database::Me1Plot(Rc::new(db)))
+                        })?,
+                    },
+                    Type::Me1RawPlot => match self.dbs.me1_raw_plot {
+                        Some(ref db) => self.respond_db(who, Database::Me1RawPlot(Rc::clone(db))),
+                        None => self.fetch(who, "/databases/me1_raw_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me1RawPlot(Rc::new(db)))
                         })?,
                     },
                     Type::Me2Plot => match self.dbs.me2_plot {
