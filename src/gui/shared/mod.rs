@@ -1,12 +1,15 @@
 use indexmap::IndexMap;
+use yew::prelude::*;
 
-use crate::{gui::RcUi, save_data::shared::plot::BitVec};
+use crate::{gui::RcUi, save_data::shared::plot::{BitVec, PlotTable}};
 
 mod bonus_powers;
 mod plot_category;
 mod raw_plot;
 
 pub use self::{bonus_powers::*, plot_category::*, raw_plot::*};
+
+use super::raw_ui::RawUi;
 
 #[derive(Clone)]
 pub enum IntPlotType {
@@ -57,5 +60,11 @@ impl PartialEq for PlotType {
             (PlotType::Float(floats), PlotType::Float(other)) => floats == other,
             _ => false,
         }
+    }
+}
+
+impl RawUi for RcUi<PlotTable>{
+    fn view(&self, _: &str) -> yew::Html {
+        html! { "// TODO: Link to Raw Plot" }
     }
 }

@@ -6,8 +6,8 @@ use yewtil::NeqAssign;
 use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
-        components::{
             shared::{FloatPlotType, IntPlotType, PlotType, RawPlot},
+        components::{
             Tab, TabBar,
         },
         RcUi,

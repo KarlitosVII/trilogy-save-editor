@@ -5,8 +5,8 @@ use yew::{prelude::*, services::ConsoleService};
 use crate::{
     database_service::DatabaseService,
     gui::{
-        components::{
             shared::{FloatPlotType, IntPlotType},
+        components::{
             NavBar, Tab, TabBar, Table,
         },
         mass_effect_1::{Me1Plot, Me1RawPlot},

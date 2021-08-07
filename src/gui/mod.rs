@@ -12,6 +12,7 @@ mod mass_effect_1_le;
 mod mass_effect_2;
 mod mass_effect_3;
 pub mod raw_ui;
+pub mod shared;
 
 pub use self::app::*;
 

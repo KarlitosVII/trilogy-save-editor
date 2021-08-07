@@ -39,7 +39,7 @@ pub struct Player {
     secondary_weapon: String,
     loadout_weapon_group: Vec<i32>,
     hotkeys: Vec<Hotkey>,
-    current_health: f32,
+    health: f32,
     pub credits: i32,
     pub medigel: i32,
     eezo: i32,

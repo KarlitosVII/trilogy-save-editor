@@ -109,15 +109,6 @@ where
 }
 
 // Shared
-impl RawUi for RcUi<BitVec> {
-    fn view(&self, label: &str) -> yew::Html {
-        // TODO: RawUi BitVec
-        html! {
-            {label}
-        }
-    }
-}
-
 impl RawUi for RcUi<Guid> {
     fn view(&self, label: &str) -> yew::Html {
         html! {

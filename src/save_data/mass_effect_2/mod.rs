@@ -4,7 +4,7 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 
 use super::{
     shared::{
-        plot::{Me1PlotTable, PlotTable},
+        plot::{Codex, Journal, PlotTable},
         Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp, StreamingState, Vector,
     },
     Guid,
@@ -43,7 +43,9 @@ pub struct Me2SaveGame {
     pub player: Player,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
-    pub me1_plot: Me1PlotTable,
+    journal: Journal,
+    codex: Codex,
+    pub me1_plot: PlotTable,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
 }
@@ -91,7 +93,9 @@ pub struct Me2LeSaveGame {
     me1_import_bonus: Me1ImportBonus,
     squad: Vec<Henchman>,
     pub plot: PlotTable,
-    pub me1_plot: Me1PlotTable,
+    journal: Journal,
+    codex: Codex,
+    pub me1_plot: PlotTable,
     galaxy_map: GalaxyMap,
     dependant_dlcs: Vec<DependentDlc>,
 }

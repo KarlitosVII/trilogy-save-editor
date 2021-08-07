@@ -4,8 +4,8 @@ use yewtil::NeqAssign;
 
 use crate::{
     gui::{
-        components::{
             shared::{BonusPowerType, BonusPowers},
+        components::{
             Helper, InputText, Select, Table,
         },
         raw_ui::RawUi,

@@ -29,8 +29,8 @@ impl serde::Serialize for BitVec {
 }
 
 #[rcize_fields]
-#[derive(Deserialize, Serialize, Clone, RawUi)]
-pub struct Me1PlotTable {
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PlotTable {
     pub booleans: BitVec,
     pub integers: Vec<i32>,
     pub floats: Vec<f32>,
@@ -38,13 +38,15 @@ pub struct Me1PlotTable {
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, RawUi)]
-pub struct PlotTable {
-    pub booleans: BitVec,
-    pub integers: Vec<i32>,
-    pub floats: Vec<f32>,
+pub struct Journal {
     quest_progress_counter: i32,
     quest_progress: Vec<PlotQuest>,
     quest_ids: Vec<i32>,
+}
+
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
+pub struct Codex {
     codex_entries: Vec<PlotCodex>,
     codex_ids: Vec<i32>,
 }

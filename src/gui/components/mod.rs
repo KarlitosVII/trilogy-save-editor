@@ -6,7 +6,6 @@ mod input_text;
 mod nav_bar;
 pub mod raw_ui;
 mod select;
-pub mod shared;
 mod tab_bar;
 mod table;
 

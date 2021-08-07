@@ -106,7 +106,8 @@ impl Component for RawPlot {
                         let overflow_begin = num_rows / 4;
                         let overflow_end = num_rows / 2;
 
-                        let len = self.label_list.as_ref().map(|list| list.len()).unwrap_or(0);
+                        let len =
+                            self.label_list.as_ref().map(|list| list.len()).unwrap_or_else(|| 0);
                         let start = scroll_top / self.row_height;
                         self.skip = (start - overflow_begin).max(0) as usize;
                         self.take = (num_rows + overflow_end).min(len as i32) as usize;
@@ -283,7 +284,7 @@ impl Component for RawPlot {
             },
             _ => Html::default(),
         };
-        let len = label_list.map(|list| list.len()).unwrap_or(0);
+        let len = label_list.map(|list| list.len()).unwrap_or_else(|| 0);
         html! {
             <div class="flex-auto flex flex-col gap-1">
                 <div class="flex gap-3 w-2/3">
@@ -419,7 +420,7 @@ impl RawPlot {
                 label
                     .as_ref()
                     .map(|label| label.to_lowercase().contains(&filter_lowercase))
-                    .unwrap_or(false)
+                    .unwrap_or_else(|| false)
                     || (is_number && idx.to_string().contains(&*filter))
             });
         }

@@ -4,7 +4,7 @@ use std::fmt;
 
 use crate::{
     gui::Gui,
-    save_data::{shared::plot::Me1PlotTable, Dummy, String, List, RawUi},
+    save_data::{shared::plot::PlotTable, Dummy, String, List, RawUi},
 };
 
 #[derive(Serialize, Clone)]
@@ -12,7 +12,7 @@ pub struct State {
     _begin: Dummy<12>,
     base_level_name: String,
     _osef1: Dummy<24>,
-    pub plot: Me1PlotTable,
+    pub plot: PlotTable,
     _osef2: List<u8>,
 }
 

@@ -1,3 +1,6 @@
+## Unreleased
+- You can now add and edit all your plots in `Raw plot` tab (no longer only labelled ones)
+
 ## 1.13.1
 - ME2: Added all armors plots
 - Various small fixes and additions

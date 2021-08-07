@@ -421,7 +421,7 @@ impl<'ui> Gui<'ui> {
                 manufacturer_id: current_item.manufacturer_id,
             })
             .map(|i| i.as_str())
-            .unwrap_or("Unknown item");
+            .unwrap_or_else(|| "Unknown item");
 
         // Item name
         let label = im_str!("##item-name-{}", ident);

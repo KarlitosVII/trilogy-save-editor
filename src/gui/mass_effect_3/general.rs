@@ -4,11 +4,9 @@ use yewtil::NeqAssign;
 
 use crate::{
     gui::{
-        components::{
-            shared::{BonusPowerType, BonusPowers},
-            Helper, InputText, Select, Table,
-        },
+        components::{Helper, InputText, Select, Table},
         raw_ui::RawUi,
+        shared::{BonusPowerType, BonusPowers},
         RcUi,
     },
     save_data::{
@@ -117,8 +115,8 @@ impl Component for Me3General {
                 }
 
                 // Loco / Lola
-                let is_loco = plot.booleans().get(19578).map(|b| *b).unwrap_or(false);
-                let is_lola = plot.booleans().get(19579).map(|b| *b).unwrap_or(false);
+                let is_loco = plot.booleans().get(19578).map(|b| *b).unwrap_or_else(|| false);
+                let is_lola = plot.booleans().get(19579).map(|b| *b).unwrap_or_else(|| false);
 
                 if is_loco || is_lola {
                     if let Some(mut is_loco) = plot.booleans_mut().get_mut(19578) {

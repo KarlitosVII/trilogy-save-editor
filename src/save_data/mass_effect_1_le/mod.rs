@@ -14,7 +14,10 @@ use std::{fmt, io::Read};
 use crate::{gui::RcUi, unreal};
 
 use super::{
-    shared::{plot::PlotTable, Rotator, SaveTimeStamp, Vector},
+    shared::{
+        plot::{Codex, Journal, PlotTable},
+        Rotator, SaveTimeStamp, Vector,
+    },
     List,
 };
 
@@ -184,6 +187,8 @@ pub struct Me1LeSaveData {
     character_id: String,
     created_date: SaveTimeStamp,
     pub plot: PlotTable,
+    journal: Journal,
+    codex: Codex,
     timestamp: SaveTimeStamp,
     seconds_played: i32,
     pub player: Player,
@@ -283,8 +288,8 @@ pub struct NoExportData {
 pub struct Vehicle {
     first_name: String,
     localized_last_name: i32,
-    health_current: f32,
-    shield_current: f32,
+    health: f32,
+    shield: f32,
 }
 
 #[cfg(test)]
