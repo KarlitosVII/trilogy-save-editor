@@ -5,8 +5,8 @@ use crate::save_data::shared::player::WeaponLoadout;
 
 use super::player::Power;
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", tag)]
 pub struct Henchman {
     tag: String,

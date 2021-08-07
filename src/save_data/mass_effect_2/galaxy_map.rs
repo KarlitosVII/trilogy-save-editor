@@ -3,14 +3,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_data::shared::Vector2d;
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct GalaxyMap {
     planets: Vec<Planet>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", id)]
 pub struct Planet {
     id: i32,

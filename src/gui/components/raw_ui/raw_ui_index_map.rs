@@ -9,7 +9,7 @@ use crate::{
         components::{
             raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table,
         },
-        raw_ui::{RawUi, RawUiMe1Legacy},
+        raw_ui::{RawUi, RawUiChildren},
         RcUi,
     },
     save_data::mass_effect_1_le::legacy::{Level, Map},

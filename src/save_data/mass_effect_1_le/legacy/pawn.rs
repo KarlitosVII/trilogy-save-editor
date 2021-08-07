@@ -6,10 +6,10 @@ use crate::save_data::{
     Dummy,
 };
 
-use super::{BaseObject, HasObject};
+use super::{BaseObject, OptionObjectProxy};
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct PawnBehavior {
     is_dead: bool,
     generated_treasure: bool,
@@ -59,20 +59,20 @@ pub struct PawnBehavior {
     head_gear_visible_preference: bool,
     simple_talents: Vec<SimpleTalent>,
     complex_talents: Vec<ComplexTalent>,
-    quick_slots: Vec<HasObject>,
-    equipment: Vec<HasObject>,
+    quick_slots: Vec<OptionObjectProxy>,
+    equipment: Vec<OptionObjectProxy>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", talent_id)]
 struct SimpleTalent {
     talent_id: i32,
     current_rank: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", talent_id)]
 struct ComplexTalent {
     talent_id: i32,
@@ -85,8 +85,8 @@ struct ComplexTalent {
     prereq_talent_ranks: Vec<i32>,
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct Pawn {
     location: Vector,
     rotation: Rotator,
@@ -101,8 +101,8 @@ pub struct Pawn {
     head_gear_visible_preference: bool,
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct BaseSquad {
     inventory: Option<BaseObject>,
 }

@@ -25,8 +25,8 @@ pub mod plot_db;
 mod galaxy_map;
 use galaxy_map::*;
 
-#[rcize_fields_derive(RawUiRoot)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiRoot)]
 pub struct Me3SaveGame {
     _version: Me3Version,
     debug_name: String,
@@ -89,8 +89,8 @@ pub enum Difficulty {
     Insanity,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct Placeable {
     guid: Guid,
@@ -110,8 +110,8 @@ impl Default for PlaceableState {
     }
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 struct DependentDlc {
     id: i32,
@@ -119,8 +119,8 @@ struct DependentDlc {
     canonical_name: String,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", level_name)]
 struct LevelTreasure {
     level_name: String,
@@ -137,8 +137,8 @@ pub enum AutoReplyModeOptions {
     NoDecisions,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 struct ObjectiveMarker {
     marker_owned_data: String,

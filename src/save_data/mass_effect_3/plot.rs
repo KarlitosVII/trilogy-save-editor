@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::save_data::shared::plot::{BitVec, PlotCodex};
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct PlotTable {
     pub booleans: BitVec,
     pub integers: IndexMap<i32, i32>,
@@ -17,8 +17,8 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", quest_counter)]
 pub struct PlotQuest {
     quest_counter: i32,

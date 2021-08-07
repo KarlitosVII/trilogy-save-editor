@@ -41,8 +41,8 @@ impl serde::Serialize for EndGameState {
     }
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct SaveTimeStamp {
     seconds_since_midnight: i32,
     day: i32,
@@ -50,8 +50,8 @@ pub struct SaveTimeStamp {
     year: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct Vector {
     x: f32,
@@ -59,24 +59,24 @@ pub struct Vector {
     z: f32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct Vector2d {
     x: f32,
     y: f32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct Rotator {
     pitch: i32,
     yaw: i32,
     roll: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 pub struct Level {
     name: String,
@@ -84,24 +84,24 @@ pub struct Level {
     should_be_visible: bool,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 pub struct StreamingState {
     name: String,
     is_active: bool,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct Kismet {
     guid: Guid,
     value: bool,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct Door {
     guid: Guid,

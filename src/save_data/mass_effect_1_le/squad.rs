@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use super::player::{ComplexTalent, Item, SimpleTalent};
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", tag)]
 pub struct Henchman {
     pub tag: String,

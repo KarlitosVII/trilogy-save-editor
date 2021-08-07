@@ -4,8 +4,8 @@ use crate::save_data::Dummy;
 
 use super::BaseObject;
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct ArtPlaceableBehavior {
     is_dead: bool,
     generated_treasure: bool,
@@ -27,8 +27,8 @@ pub struct ArtPlaceableBehavior {
     skill_game_xp_awarded: bool,
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct ArtPlaceable {
     _unknown: Dummy<60>,
 }

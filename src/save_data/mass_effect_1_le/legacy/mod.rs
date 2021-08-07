@@ -20,15 +20,15 @@ use self::inventory::*;
 mod art_placeable;
 use self::art_placeable::*;
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, RawUiMe1Legacy)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, RawUi, RawUiChildren)]
 pub struct Map {
     pub levels: IndexMap<String, Level>,
     pub world: Option<BaseObject>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, RawUiMe1Legacy)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, RawUi, RawUiChildren)]
 pub struct Level {
     pub objects: Vec<BaseObject>,
     pub actors: Vec<String>,
@@ -121,12 +121,12 @@ impl Default for Object {
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, Default, Display)]
 #[display(fmt = "")]
-pub struct HasObject {
-    pub has_object: Option<BaseObject>,
+pub struct OptionObjectProxy {
+    pub proxy: Option<BaseObject>,
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct VehicleBehavior {
     actor_type: String,
     powertrain_enabled: bool,
@@ -134,8 +134,8 @@ pub struct VehicleBehavior {
     owner: Option<BaseObject>,
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct Vehicle {
     location: Vector,
     rotation: Rotator,
@@ -151,16 +151,16 @@ pub struct Vehicle {
     _unknown: Dummy<16>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 struct WorldStreamingState {
     name: String,
     enabled: u8,
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct World {
     streaming_states: Vec<WorldStreamingState>,
     destination_area_map: String,

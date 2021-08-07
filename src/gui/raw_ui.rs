@@ -23,7 +23,7 @@ where
     }
 }
 
-pub trait RawUiMe1Legacy
+pub trait RawUiChildren
 where
     Self: Clone + PartialEq + 'static,
 {

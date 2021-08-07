@@ -10,12 +10,6 @@ use syn::{
 
 #[proc_macro_attribute]
 pub fn rcize_fields(_: TokenStream, input: TokenStream) -> TokenStream {
-    let args = quote! { None };
-    rcize_fields_derive(args.into(), input)
-}
-
-#[proc_macro_attribute]
-pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(input as DeriveInput);
 
     if !matches!(ast.data, syn::Data::Struct(_)) {
@@ -197,25 +191,9 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
         _ => panic!("non named fields not supported"),
     };
 
-    let derive = match args.into_iter().next() {
-        Some(arg) => {
-            let derive_name = arg.to_string();
-            match derive_name.as_str() {
-                "RawUi" | "RawUiRoot" | "RawUiMe1Legacy" => {
-                    let derive_name = Ident::new(&derive_name, Span::call_site());
-                    quote! { #[derive(#derive_name)] }
-                }
-                "None" => Default::default(),
-                _ => panic!("{} not supported", arg),
-            }
-        }
-        None => panic!("args required"),
-    };
-
     let name = &ast.ident;
 
     (quote! {
-        #derive
         #ast
 
         impl #name {
@@ -229,7 +207,7 @@ pub fn rcize_fields_derive(args: TokenStream, input: TokenStream) -> TokenStream
 enum Derive {
     RawUi,
     RawUiRoot,
-    RawUiMe1Legacy,
+    RawUiChildren,
 }
 
 #[proc_macro_derive(RawUi)]
@@ -255,12 +233,12 @@ pub fn raw_ui_derive_root(input: TokenStream) -> TokenStream {
     .into()
 }
 
-#[proc_macro_derive(RawUiMe1Legacy)]
-pub fn raw_ui_me1_legacy_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(RawUiChildren)]
+pub fn raw_ui_children_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
 
     match ast.data {
-        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields, Derive::RawUiMe1Legacy),
+        syn::Data::Struct(ref s) => impl_raw_ui_struct(&ast, &s.fields, Derive::RawUiChildren),
         _ => panic!("enum / union not supported"),
     }
     .into()
@@ -321,8 +299,8 @@ fn impl_raw_ui_struct(
                 }
             }
         },
-        Derive::RawUiMe1Legacy => quote! {
-            impl crate::gui::raw_ui::RawUiMe1Legacy for crate::gui::RcUi<#name> {
+        Derive::RawUiChildren => quote! {
+            impl crate::gui::raw_ui::RawUiChildren for crate::gui::RcUi<#name> {
                 fn children(&self) -> Vec<yew::Html> {
                     vec![#(#view_fields),*]
                 }

@@ -28,16 +28,16 @@ impl serde::Serialize for BitVec {
     }
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct Me1PlotTable {
     pub booleans: BitVec,
     pub integers: Vec<i32>,
     pub floats: Vec<f32>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct PlotTable {
     pub booleans: BitVec,
     pub integers: Vec<i32>,
@@ -49,8 +49,8 @@ pub struct PlotTable {
     codex_ids: Vec<i32>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", quest_counter)]
 pub struct PlotQuest {
     quest_counter: i32,
@@ -58,15 +58,15 @@ pub struct PlotQuest {
     history: Vec<i32>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct PlotCodex {
     pages: Vec<PlotCodexPage>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", page)]
 pub struct PlotCodexPage {
     page: i32,

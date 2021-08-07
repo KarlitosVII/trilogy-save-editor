@@ -9,8 +9,8 @@ use crate::save_data::{
     Dummy,
 };
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct Player {
     pub is_female: bool,
     localized_class_name: i32,
@@ -64,16 +64,16 @@ pub struct Player {
     secondary_weapon: String,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", talent_id)]
 pub struct SimpleTalent {
     talent_id: i32,
     current_rank: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", talent_id)]
 pub struct ComplexTalent {
     talent_id: i32,
@@ -86,8 +86,8 @@ pub struct ComplexTalent {
     prereq_talent_ranks: Vec<i32>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, RawUi)]
 pub struct Inventory {
     pub equipment: Vec<Item>,
     pub quick_slots: Vec<Item>,
@@ -117,8 +117,8 @@ impl Default for ItemLevel {
     }
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 pub struct Item {
     pub item_id: i32,
@@ -130,8 +130,8 @@ pub struct Item {
     attached_mods: Vec<ItemMod>,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 struct ItemMod {
     item_id: i32,
@@ -140,8 +140,8 @@ struct ItemMod {
     plot_conditional_id: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 struct Hotkey {
     pawn: i32,

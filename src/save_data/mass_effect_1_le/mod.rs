@@ -178,23 +178,23 @@ impl serde::Serialize for Me1LeSaveGame {
 }
 
 #[rcize_fields]
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct Me1LeSaveData {
     _version: Me1LeVersion,
-    pub character_id: String,
-    pub created_date: SaveTimeStamp,
+    character_id: String,
+    created_date: SaveTimeStamp,
     pub plot: PlotTable,
-    pub timestamp: SaveTimeStamp,
-    pub seconds_played: i32,
+    timestamp: SaveTimeStamp,
+    seconds_played: i32,
     pub player: Player,
-    pub base_level_name: String,
-    pub map_name: String,
-    pub parent_map_name: String,
-    pub location: Vector,
-    pub rotation: Rotator,
+    base_level_name: String,
+    map_name: String,
+    parent_map_name: String,
+    location: Vector,
+    rotation: Rotator,
     pub squad: Vec<Henchman>,
-    pub display_name: String,
-    pub file_name: String,
+    display_name: String,
+    file_name: String,
     pub no_export: NoExport, // Only serialized for normal savegames, not for character export
 }
 
@@ -271,15 +271,15 @@ impl serde::Serialize for NoExport {
     }
 }
 
-#[rcize_fields_derive(RawUiMe1Legacy)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUiChildren)]
 pub struct NoExportData {
-    pub legacy_maps: IndexMap<String, Map>,
-    pub mako: Vehicle,
+    legacy_maps: IndexMap<String, Map>,
+    mako: Vehicle,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct Vehicle {
     first_name: String,
     localized_last_name: i32,

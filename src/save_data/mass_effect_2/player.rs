@@ -6,8 +6,8 @@ use crate::save_data::shared::{
     player::{Notoriety, Origin, WeaponLoadout},
 };
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, RawUi)]
 pub struct Player {
     pub is_female: bool,
     pub class_name: String,
@@ -38,8 +38,8 @@ pub struct Player {
     localized_class_name: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 pub struct Power {
     name: String,
@@ -48,8 +48,8 @@ pub struct Power {
     wheel_display_index: i32,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", class_name)]
 struct Weapon {
     class_name: String,
@@ -60,8 +60,8 @@ struct Weapon {
     ammo_power_name: String,
 }
 
-#[rcize_fields_derive(RawUi)]
-#[derive(Deserialize, Serialize, Clone, Default, Display)]
+#[rcize_fields]
+#[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "")]
 struct Hotkey {
     pawn_name: String,

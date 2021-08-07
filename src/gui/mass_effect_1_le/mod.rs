@@ -3,11 +3,11 @@ use yew::prelude::*;
 use crate::{
     gui::{
         components::{raw_ui::RawUiStruct, Table},
-        raw_ui::{RawUi, RawUiMe1Legacy},
+        raw_ui::{RawUi, RawUiChildren},
     },
     save_data::mass_effect_1_le::{
-        legacy::{BaseObject, HasObject, Object},
-        Me1LeSaveData,
+        legacy::{BaseObject, Object, OptionObjectProxy},
+        Me1LeSaveData, NoExport,
     },
 };
 
@@ -19,51 +19,28 @@ pub use self::general::*;
 
 impl RawUi for RcUi<Me1LeSaveData> {
     fn view(&self, _: &str) -> yew::Html {
-        let Me1LeSaveData {
-            character_id,
-            created_date,
-            plot,
-            timestamp,
-            seconds_played,
-            player,
-            base_level_name,
-            map_name,
-            parent_map_name,
-            location,
-            rotation,
-            squad,
-            display_name,
-            file_name,
-            no_export,
-            ..
-        } = &*self.borrow();
-
-        let no_export = no_export
+        let no_export = self
             .borrow()
+            .no_export()
             .as_ref()
             .map(|no_export_data| no_export_data.children())
             .unwrap_or_else(|| vec![html! { "Export Save" }])
             .into_iter();
 
+        let children = self.children();
+        let len = children.len();
         html! {
             <Table>
-                { character_id.view("Character Id") }
-                { created_date.view("Created Date") }
-                { plot.view("Plot") }
-                { timestamp.view("Timestamp") }
-                { seconds_played.view("Seconds Played") }
-                { player.view("Player") }
-                { base_level_name.view("Base Level Name") }
-                { map_name.view("Map Name") }
-                { parent_map_name.view("Parent Map Name") }
-                { location.view("Location") }
-                { rotation.view("Rotation") }
-                { squad.view("Squad") }
-                { display_name.view("Display Name") }
-                { file_name.view("File Name") }
+                { for children.into_iter().take(len - 1) }
                 { for no_export }
             </Table>
         }
+    }
+}
+
+impl RawUi for RcUi<NoExport> {
+    fn view(&self, _: &str) -> yew::Html {
+        Default::default()
     }
 }
 
@@ -103,8 +80,8 @@ impl RawUi for RcUi<BaseObject> {
     }
 }
 
-impl RawUi for RcUi<HasObject> {
+impl RawUi for RcUi<OptionObjectProxy> {
     fn view(&self, label: &str) -> yew::Html {
-        self.borrow().has_object.view(label)
+        self.borrow().proxy.view(label)
     }
 }
