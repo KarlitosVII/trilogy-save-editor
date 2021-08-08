@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Error};
+use gloo_console::warn;
 use std::mem;
-use yew::{prelude::*, services::ConsoleService};
+use yew::{prelude::*};
 
 use crate::{
     database_service::DatabaseService,
@@ -85,9 +86,16 @@ impl Component for App {
                 self.save_handle.send(Request::OpenSave(file_path));
                 false
             }
-            Msg::Error(err) => {
+            Msg::Error(error) => {
                 // TODO: Error
-                ConsoleService::warn(&err.to_string());
+                warn!(error.to_string());
+
+                let chain = error.chain().skip(1);
+                if chain.len() != 0 {
+                    for error in chain {
+                        warn!(error.to_string());
+                    }
+                }
                 false
             }
             Msg::Notification(_) => {

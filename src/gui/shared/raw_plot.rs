@@ -1,14 +1,12 @@
+use gloo_events::EventListener;
+use gloo_timers::callback::Timeout;
 use indexmap::{map::Entry, IndexMap};
 use std::{
     cell::{Ref, RefMut},
     rc::Rc,
-    time::Duration,
 };
 use web_sys::HtmlElement;
-use yew::{
-    prelude::*,
-    services::{resize::ResizeTask, timeout::TimeoutTask, ResizeService, TimeoutService},
-};
+use yew::prelude::*;
 use yewtil::NeqAssign;
 
 use crate::{
@@ -57,10 +55,10 @@ impl Props {
 pub struct RawPlot {
     props: Props,
     link: ComponentLink<Self>,
-    _resize_task: ResizeTask,
+    _resize_listener: EventListener,
     scroll_ref: NodeRef,
     content_ref: NodeRef,
-    throttle: Option<TimeoutTask>,
+    throttle: Option<Timeout>,
     queued_scroll: bool,
     row_height: i32,
     skip: usize,
@@ -73,13 +71,18 @@ impl Component for RawPlot {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let _resize_task = ResizeService::register(link.callback(|_| Msg::Scrolled));
+        let _resize_listener = {
+            let link = link.clone();
+            EventListener::new(&web_sys::window().unwrap(), "resize", move |_| {
+                link.send_message(Msg::Scrolled)
+            })
+        };
         link.send_message(Msg::Scrolled);
 
         let mut this = RawPlot {
             props,
             link,
-            _resize_task,
+            _resize_listener,
             scroll_ref: Default::default(),
             content_ref: Default::default(),
             throttle: None,
@@ -95,7 +98,6 @@ impl Component for RawPlot {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        const TRHOTTLE: Duration = Duration::from_millis(15);
         match msg {
             Msg::Scrolled => {
                 if self.throttle.is_none() {
@@ -103,8 +105,8 @@ impl Component for RawPlot {
                         let scroll_top = scroll.scroll_top();
                         let offset_height = scroll.offset_height();
                         let num_rows = offset_height / self.row_height + 1;
-                        let overflow_begin = num_rows / 4;
-                        let overflow_end = num_rows / 2;
+                        let overflow_begin = num_rows / 2;
+                        let overflow_end = num_rows;
 
                         let len =
                             self.label_list.as_ref().map(|list| list.len()).unwrap_or_else(|| 0);
@@ -112,10 +114,9 @@ impl Component for RawPlot {
                         self.skip = (start - overflow_begin).max(0) as usize;
                         self.take = (num_rows + overflow_end).min(len as i32) as usize;
 
-                        self.throttle = Some(TimeoutService::spawn(
-                            TRHOTTLE,
-                            self.link.callback(|_| Msg::Throttle),
-                        ));
+                        let link = self.link.clone();
+                        self.throttle =
+                            Some(Timeout::new(30, move || link.send_message(Msg::Throttle)));
 
                         return true;
                     }

@@ -4,11 +4,7 @@ use yew::prelude::*;
 
 use crate::{
     gui::components::{raw_ui::*, *},
-    save_data::{
-        mass_effect_1_le::legacy::BaseObject,
-        shared::{appearance::LinearColor, plot::BitVec},
-        Guid,
-    },
+    save_data::{mass_effect_1_le::legacy::BaseObject, shared::appearance::LinearColor, Guid},
 };
 
 use super::RcUi;

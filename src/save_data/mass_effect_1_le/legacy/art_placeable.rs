@@ -12,7 +12,7 @@ pub struct ArtPlaceableBehavior {
     challenge_scaled: bool,
     owner: Option<BaseObject>,
     health: f32,
-    health: f32,
+    current_health: f32,
     enabled: bool,
     current_fsm_state_name: String,
     is_destroyed: bool,
