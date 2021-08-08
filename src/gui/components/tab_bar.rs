@@ -1,5 +1,4 @@
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::Theme;
 
@@ -50,49 +49,43 @@ impl Component for TabBar {
         let tabs = self.props.children.iter().enumerate().map(|(idx, child)| {
             html_nested! {
                 <button
-                    class=classes![
+                    class={classes![
                         "btn",
                         "leading-[19px]",
                         "!rounded-t",
                         (idx == self.props.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
-                    ]
-                    onmousedown=(idx != self.props.current_tab).then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)))
+                    ]}
+                    onmousedown={(idx != self.props.current_tab).then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)))}
                 >
                     { child.props.title }
                 </button>
             }
         });
 
-        let content = self
-            .props
-            .children
-            .iter()
-            .enumerate()
-            .find_map(|(idx, content)| {
-                (idx == self.props.current_tab).then(|| {
-                    html! {
-                        <div class=classes![
-                            "flex-auto",
-                            "flex",
-                            "flex-col",
-                            "h-0",
-                            "overflow-y-auto",
-                            content.props.theme.clone()
-                        ]>
-                            { content }
-                        </div>
-                    }
-                })
+        let content = self.props.children.iter().enumerate().find_map(|(idx, content)| {
+            (idx == self.props.current_tab).then(|| {
+                html! {
+                    <div class={classes![
+                        "flex-auto",
+                        "flex",
+                        "flex-col",
+                        "h-0",
+                        "overflow-y-auto",
+                        content.props.theme.clone()
+                    ]}>
+                        { content }
+                    </div>
+                }
             })
-            .unwrap_or_default();
+        });
 
         html! {
             <div class="flex flex-col flex-nowrap flex-auto">
                 <div class="flex flex-wrap gap-1 border-b border-theme-active mb-1">
                     { for tabs }
                 </div>
-                { content }
+                { for content }
             </div>
         }
     }

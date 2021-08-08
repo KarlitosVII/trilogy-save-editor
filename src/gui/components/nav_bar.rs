@@ -1,6 +1,5 @@
 use web_sys::HtmlElement;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 #[allow(clippy::enum_variant_names)]
 pub enum Msg {
@@ -56,29 +55,25 @@ impl Component for NavBar {
     }
 
     fn view(&self) -> Html {
-        let loaded_buttons = self
-            .props
-            .save_loaded
-            .then(|| {
-                html! { <>
-                    <button class="btn" onclick=self.props.onsave.reform(|_| ())>
-                        {"Save"}
-                    </button>
-                    <span>{"-"}</span>
-                    <button class="btn" onclick=self.props.onreload.reform(|_| ())>
-                        {"Reload"}
-                    </button>
-                </> }
-            })
-            .unwrap_or_default();
+        let loaded_buttons = self.props.save_loaded.then(|| {
+            html! { <>
+                <button class="btn" onclick={self.props.onsave.reform(|_| ())}>
+                    {"Save"}
+                </button>
+                <span>{"-"}</span>
+                <button class="btn" onclick={self.props.onreload.reform(|_| ())}>
+                    {"Reload"}
+                </button>
+            </> }
+        });
 
         html! {
             <nav class="bg-menu-bar select-none">
                 <div class="flex items-center gap-2 px-1">
-                    <button class="btn" onclick=self.props.onopen.reform(|_| ())>
+                    <button class="btn" onclick={self.props.onopen.reform(|_| ())}>
                         {"Open"}
                     </button>
-                    { loaded_buttons }
+                    { for loaded_buttons }
                     { self.view_about_menu() }
                 </div>
             </nav>
@@ -96,22 +91,22 @@ impl NavBar {
 
         html! {
             <div class="relative" tabindex="0"
-                onblur=self.about_opened.then(||self.link.callback(|_| Msg::MenuClose))
-                ref=self.about_ref.clone()
+                onblur={self.about_opened.then(||self.link.callback(|_| Msg::MenuClose))}
+                ref={self.about_ref.clone()}
             >
                 <a
-                    class=classes![
+                    class={classes![
                         "hover:bg-theme-hover",
                         "px-2",
                         "py-px",
                         "cursor-pointer",
                         self.about_opened.then(|| "bg-theme-hover" )
-                    ]
-                    onclick=onclick
+                    ]}
+                    {onclick}
                 >
                     {"About"}
                 </a>
-                <div class=classes![
+                <div class={classes![
                     "absolute",
                     "left-0",
                     "flex",
@@ -122,7 +117,7 @@ impl NavBar {
                     "p-1",
                     "z-50",
                     (!self.about_opened).then(|| "hidden" )
-                ]>
+                ]}>
                     <hr class="border-default-border" />
                     <span class="px-1 whitespace-nowrap">
                         {"© 2021 Karlitos"}

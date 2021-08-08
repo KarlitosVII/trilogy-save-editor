@@ -1,7 +1,6 @@
 use std::cell::{Ref, RefMut};
 use uuid::Uuid;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{gui::RcUi, save_data::Guid};
 
@@ -57,8 +56,8 @@ impl Component for RawUiGuid {
     fn view(&self) -> Html {
         html! {
             <label class="flex-auto flex items-center gap-1">
-                <input type="text" class="input w-1/3" placeholder="<empty>" value=self.props.guid().hyphenated()
-                    onchange=self.link.callback(Msg::Change)
+                <input type="text" class="input w-1/3" placeholder="<empty>" value={self.props.guid().hyphenated()}
+                    onchange={self.link.callback(Msg::Change)}
                 />
                 { &self.props.label }
             </label>

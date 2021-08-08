@@ -38,8 +38,8 @@ gloo-timers = "0.2"
 gloo-events = "0.1"
 gloo-console = "0.1"
 # Yew
-yew = "0.18"
-yewtil = "0.4"
+yew = { git = "https://github.com/yewstack/yew/" }
+yew-agent = { git = "https://github.com/yewstack/yew/" }
 # (De)Serialization
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.6", features = ["indexmap"], default-features = false }

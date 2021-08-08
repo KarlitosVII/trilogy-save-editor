@@ -1,8 +1,7 @@
 use derive_more::From;
 use indexmap::IndexMap;
 use std::any::Any;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{
     gui::{
@@ -163,12 +162,12 @@ where
                         <div class="flex gap-1">
                             <div class="py-px">
                                 <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
-                                    onclick=self.link.callback(move |_| Msg::Remove(idx))
+                                    onclick={self.link.callback(move |_| Msg::Remove(idx))}
                                 >
                                     {"remove"}
                                 </a>
                             </div>
-                            <RawUiStruct label=label opened=self.new_item_idx == idx>
+                            <RawUiStruct {label} opened={self.new_item_idx == idx}>
                                 { key }
                                 { for value.into_iter() }
                             </RawUiStruct>
@@ -183,8 +182,8 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputNumber label="Key" value=NumberType::Integer((*key).into())
-                                    onchange=self.link.callback(move |callback| Msg::EditKey(idx, callback))
+                                <InputNumber label="Key" value={NumberType::Integer((*key).into())}
+                                    onchange={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };
                             view(idx, key.to_string(), input_k, value)
@@ -196,8 +195,8 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputText label="Key" value=RcUi::new(key.to_owned())
-                                    oninput=self.link.callback(move |callback| Msg::EditKey(idx, callback))
+                                <InputText label="Key" value={RcUi::new(key.to_owned())}
+                                    oninput={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };
                             let label = if !key.is_empty() { key } else { "<empty>" };
@@ -211,21 +210,20 @@ where
                         <Table>
                             { for items }
                             <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
-                                onclick=self.link.callback(|_| Msg::Add)
+                                onclick={self.link.callback(|_| Msg::Add)}
                             >
                                 {"add"}
                             </button>
                         </Table>
                     </div>
                 }
-            })
-            .unwrap_or_default();
+            });
 
         html! {
             <div class="flex-auto flex flex-col">
                 <div class="p-px">
                     <button
-                        class=classes![
+                        class={classes![
                             "rounded-none",
                             "hover:bg-theme-hover",
                             "active:bg-theme-active",
@@ -234,13 +232,13 @@ where
                             "w-full",
                             "text-left",
                             chevron,
-                        ]
-                        onclick=self.link.callback(|_| Msg::Toggle)
+                        ]}
+                        onclick={self.link.callback(|_| Msg::Toggle)}
                     >
                         { &self.props.label }
                     </button>
                 </div>
-                { content }
+                { for content }
             </div>
         }
     }

@@ -1,17 +1,15 @@
 use anyhow::Error;
 use indexmap::IndexMap;
 use std::rc::Rc;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
+use yew_agent::{Bridge, Bridged};
 
 use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
-            shared::{IntPlotType, PlotCategory},
-        components::{
-            Helper, Tab, TabBar,
-        },
+        components::{Helper, Tab, TabBar},
         mass_effect_1::Me1Plot,
+        shared::{IntPlotType, PlotCategory},
         RcUi, Theme,
     },
     save_data::{
@@ -101,10 +99,10 @@ impl Component for Me2Plot {
                     .map(|(title, category)| {
                         html! {
                             <PlotCategory
-                                title=title.to_owned()
-                                booleans=RcUi::clone(booleans)
-                                integers=IntPlotType::clone(integers)
-                                category=category.clone()
+                                title={title.to_owned()}
+                                booleans={RcUi::clone(booleans)}
+                                integers={IntPlotType::clone(integers)}
+                                category={category.clone()}
                             />
                         }
                     })
@@ -123,7 +121,7 @@ impl Component for Me2Plot {
                 // Workaround for unused_braces warning
                 #[allow(unused_braces)]
                 (html_nested! {
-                    <Tab title=tab.to_owned()>
+                    <Tab title={tab.to_owned()}>
                         <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>
@@ -137,16 +135,16 @@ impl Component for Me2Plot {
                     // Workaround for unused_braces warning
                     #[allow(unused_braces)]
                     (html_nested! {
-                            <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
+                            <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                                 <div class="flex-auto flex flex-col gap-1">
                                     <div>
                                         { "If you change these plots this will ONLY take effect after a new game +." }
                                         <hr class="border-t border-default-border" />
                                     </div>
                                     <Me1Plot
-                                        booleans=RcUi::clone(me1_booleans)
-                                        integers=IntPlotType::clone(me1_integers)
-                                        onerror=self.link.callback(Msg::Error)
+                                        booleans={RcUi::clone(me1_booleans)}
+                                        integers={IntPlotType::clone(me1_integers)}
+                                        onerror={self.link.callback(Msg::Error)}
                                     />
                                 </div>
                             </Tab>
@@ -155,7 +153,7 @@ impl Component for Me2Plot {
                     // Workaround for unused_braces warning
                     #[allow(unused_braces)]
                     (html_nested! {
-                        <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
+                        <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                             { "You cannot edit ME1 plot if you have not imported a ME1 save." }
                             <hr class="border-t border-default-border" />
                         </Tab>
@@ -167,27 +165,27 @@ impl Component for Me2Plot {
                 <TabBar>
                     <Tab title="Player">
                         <PlotCategory
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            category=player.clone()
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            category={player.clone()}
                         />
                     </Tab>
                     <Tab title="Rewards">
                         <PlotCategory
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            category=rewards.clone()
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            category={rewards.clone()}
                         />
                     </Tab>
                     { for categories }
                     <Tab title="Captain's cabin">
                         <PlotCategory
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            category=captains_cabin.clone()
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            category={captains_cabin.clone()}
                         />
                     </Tab>
-                    <Tab title="Imported ME1" theme=Theme::MassEffect1>
+                    <Tab title="Imported ME1" theme={Theme::MassEffect1}>
                         <div class="flex-auto flex flex-col gap-1">
                             <div>
                                 <div class="flex items-center gap-1">

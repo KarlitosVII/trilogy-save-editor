@@ -67,7 +67,7 @@ impl RawUi for RcUi<BaseObject> {
         };
 
         html! {
-            <RawUiStruct label=label.to_owned()>
+            <RawUiStruct label={label.to_owned()}>
                 <div class="flex-auto flex items-center gap-1">
                     <span class="w-2/3">{ &_class_name }</span>
                     { "Class Name" }

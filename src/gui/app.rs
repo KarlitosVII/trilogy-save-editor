@@ -1,20 +1,19 @@
 use anyhow::{anyhow, Error};
 use gloo_console::warn;
 use std::mem;
-use yew::{prelude::*};
+use yew::prelude::*;
+use yew_agent::{Bridge, Bridged};
 
 use crate::{
     database_service::DatabaseService,
     gui::{
-            shared::{FloatPlotType, IntPlotType},
-        components::{
-            NavBar, Tab, TabBar, Table,
-        },
+        components::{NavBar, Tab, TabBar, Table},
         mass_effect_1::{Me1Plot, Me1RawPlot},
         mass_effect_1_le::Me1LeGeneral,
         mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
         mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
         raw_ui::RawUi,
+        shared::{FloatPlotType, IntPlotType},
         RcUi, Theme,
     },
     save_data::{mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame},
@@ -136,7 +135,7 @@ impl Component for App {
         };
 
         html! {
-            <div class=classes![
+            <div class={classes![
                 "h-screen",
                 "flex",
                 "flex-col",
@@ -145,12 +144,12 @@ impl Component for App {
                 "leading-[20px]",
                 "text-white",
                 theme,
-            ]>
+            ]}>
                 <NavBar
-                    save_loaded=self.props.save_game.is_some()
-                    onopen=self.link.callback(|_| Msg::OpenSave)
-                    onsave=self.link.callback(|_| Msg::SaveSave)
-                    onreload=self.link.callback(|_| Msg::ReloadSave)
+                    save_loaded={self.props.save_game.is_some()}
+                    onopen={self.link.callback(|_| Msg::OpenSave)}
+                    onsave={self.link.callback(|_| Msg::SaveSave)}
+                    onreload={self.link.callback(|_| Msg::ReloadSave)}
                 />
                 { content }
             </div>
@@ -182,7 +181,7 @@ impl App {
 
         let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
             html! {
-                <Table title=version.to_owned() opened=i==0>
+                <Table title={version.to_owned()} opened={i==0}>
                     { for changes }
                 </Table>
             }
@@ -207,13 +206,13 @@ impl App {
             <section class="flex-auto flex p-1">
                 <TabBar>
                     <Tab title="General">
-                        <Me1LeGeneral save_game=RcUi::clone(&save_game) />
+                        <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
                     </Tab>
                     <Tab title="Plot">
                         <Me1Plot
-                            booleans=RcUi::clone(&plot.booleans)
-                            integers=IntPlotType::Vec(RcUi::clone(&plot.integers))
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -221,10 +220,10 @@ impl App {
                     </Tab>
                     <Tab title="Raw Plot">
                         <Me1RawPlot
-                            booleans=RcUi::clone(&plot.booleans)
-                            integers=IntPlotType::Vec(RcUi::clone(&plot.integers))
-                            floats=FloatPlotType::Vec(RcUi::clone(&plot.floats))
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>
@@ -245,20 +244,21 @@ impl App {
                 RcUi::clone(&me2.borrow().me1_plot),
             ),
         };
+        let (plot, me1_plot) = (plot.borrow(), me1_plot.borrow());
 
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar>
                     <Tab title="General">
-                        <Me2General save_game=Me2Type::clone(&save_game) />
+                        <Me2General save_game={Me2Type::clone(&save_game)} />
                     </Tab>
                     <Tab title="Plot">
                         <Me2Plot
-                            booleans=RcUi::clone(&plot.borrow().booleans)
-                            integers=IntPlotType::Vec(RcUi::clone(&plot.borrow().integers))
-                            me1_booleans=RcUi::clone(&me1_plot.borrow().booleans)
-                            me1_integers=IntPlotType::Vec(RcUi::clone(&me1_plot.borrow().integers))
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            me1_booleans={RcUi::clone(&me1_plot.booleans)}
+                            me1_integers={IntPlotType::Vec(RcUi::clone(&me1_plot.integers))}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -266,10 +266,10 @@ impl App {
                     </Tab>
                     <Tab title="Raw Plot">
                         <Me2RawPlot
-                            booleans=RcUi::clone(&plot.borrow().booleans)
-                            integers=IntPlotType::Vec(RcUi::clone(&plot.borrow().integers))
-                            floats=FloatPlotType::Vec(RcUi::clone(&plot.borrow().floats))
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>
@@ -285,14 +285,14 @@ impl App {
             <section class="flex-auto flex p-1">
                 <TabBar>
                     <Tab title="General">
-                        <Me3General save_game=RcUi::clone(&save_game) />
+                        <Me3General save_game={RcUi::clone(&save_game)} />
                     </Tab>
                     <Tab title="Plot">
                         <Me3Plot
-                            booleans=RcUi::clone(&plot.booleans)
-                            integers=IntPlotType::IndexMap(RcUi::clone(&plot.integers))
-                            variables=RcUi::clone(&me3.player_variables)
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
+                            variables={RcUi::clone(&me3.player_variables)}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -300,10 +300,10 @@ impl App {
                     </Tab>
                     <Tab title="Raw Plot">
                         <Me3RawPlot
-                            booleans=RcUi::clone(&plot.booleans)
-                            integers=IntPlotType::IndexMap(RcUi::clone(&plot.integers))
-                            floats=FloatPlotType::IndexMap(RcUi::clone(&plot.floats))
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
+                            floats={FloatPlotType::IndexMap(RcUi::clone(&plot.floats))}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>

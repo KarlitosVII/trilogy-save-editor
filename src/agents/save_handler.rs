@@ -1,5 +1,5 @@
 use anyhow::Error;
-use yew::agent::{Agent, AgentLink, HandlerId, Job};
+use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
 use crate::{
     gui::RcUi,

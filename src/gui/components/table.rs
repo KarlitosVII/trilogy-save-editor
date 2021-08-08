@@ -1,5 +1,4 @@
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::components::Helper;
 
@@ -45,71 +44,60 @@ impl Component for Table {
     fn view(&self) -> Html {
         let opened = self.props.title.is_none() || self.props.opened;
 
-        let title = self
-            .props
-            .title
-            .as_ref()
-            .map(|title| {
-                let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
-                let helper = self
-                    .props
-                    .helper
-                    .as_ref()
-                    .map(|&helper| {
-                        html! {
-                            <Helper text=helper />
-                        }
-                    })
-                    .unwrap_or_default();
+        let title = self.props.title.as_ref().map(|title| {
+            let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
+            let helper = self.props.helper.as_ref().map(|&helper| {
                 html! {
-                    <div class="flex-1 bg-table-odd p-px">
-                        <button
-                            class=classes![
-                                "flex",
-                                "items-center",
-                                "gap-1",
-                                "rounded-none",
-                                "hover:bg-theme-hover",
-                                "active:bg-theme-active",
-                                "px-1",
-                                "w-full",
-                                "text-left",
-                                "pl-6",
-                                chevron,
-                            ]
-                            onclick=self.link.callback(|_| Msg::Toggle)
-                        >
-                            { title }
-                            { helper }
-                        </button>
-                    </div>
+                    <Helper text={helper} />
                 }
-            })
-            .unwrap_or_default();
+            });
 
-        let rows = opened
-            .then(|| {
-                self.props
-                    .children
-                    .iter()
-                    .map(|child| {
-                        html_nested! {
-                            <div class=classes![
-                                "table-row",
-                                self.props.title.is_some().then(|| "!pl-6"),
-                            ]>
-                                {child}
-                            </div>
-                        }
-                    })
-                    .collect::<Html>()
-            })
-            .unwrap_or_default();
+            html! {
+                <div class="flex-1 bg-table-odd p-px">
+                    <button
+                        class={classes![
+                            "flex",
+                            "items-center",
+                            "gap-1",
+                            "rounded-none",
+                            "hover:bg-theme-hover",
+                            "active:bg-theme-active",
+                            "px-1",
+                            "w-full",
+                            "text-left",
+                            "pl-6",
+                            chevron,
+                        ]}
+                        onclick={self.link.callback(|_| Msg::Toggle)}
+                    >
+                        { title }
+                        { for helper }
+                    </button>
+                </div>
+            }
+        });
+
+        let rows = opened.then(|| {
+            self.props
+                .children
+                .iter()
+                .map(|child| {
+                    html_nested! {
+                        <div class={classes![
+                            "table-row",
+                            self.props.title.is_some().then(|| "!pl-6"),
+                        ]}>
+                            {child}
+                        </div>
+                    }
+                })
+                .collect::<Html>()
+        });
 
         html! {
             <div class="flex flex-col border border-default-border">
-                { title }
-                { rows }
+                { for title }
+                { for rows }
             </div>
         }
     }

@@ -1,14 +1,11 @@
 use std::cell::Ref;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{
     gui::{
-            shared::{BonusPowerType, BonusPowers},
-        components::{
-            Helper, InputText, Select, Table,
-        },
+        components::{Helper, InputText, Select, Table},
         raw_ui::RawUi,
+        shared::{BonusPowerType, BonusPowers},
         RcUi,
     },
     save_data::{
@@ -256,13 +253,13 @@ impl Me2General {
     fn role_play(&self, player: Ref<'_, Player>) -> Html {
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
-            <Table title=String::from("Role-Play")>
+            <Table title={String::from("Role-Play")}>
                 { player.first_name.view("Name") }
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=genders
-                        current_idx=*player.is_female() as usize
-                        onselect=self.link.callback(Msg::Gender)
+                        options={genders}
+                        current_idx={*player.is_female() as usize}
+                        onselect={self.link.callback(Msg::Gender)}
                     />
                     {"Gender"}
                     <Helper text=
@@ -272,21 +269,21 @@ impl Me2General {
                 </div>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=Origin::variants()
-                        current_idx=player.origin().clone() as usize
-                        onselect=self.link.callback(Msg::Origin)
+                        options={Origin::variants()}
+                        current_idx={player.origin().clone() as usize}
+                        onselect={self.link.callback(Msg::Origin)}
                     />
                     {"Origin"}
                 </div>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=Notoriety::variants()
-                        current_idx=player.notoriety().clone() as usize
-                        onselect=self.link.callback(Msg::Notoriety)
+                        options={Notoriety::variants()}
+                        current_idx={player.notoriety().clone() as usize}
+                        onselect={self.link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}
                 </div>
-                <InputText label="Identity Code" value=RcUi::clone(&player.face_code) helper=
+                <InputText label="Identity Code" value={RcUi::clone(&player.face_code)} helper=
                     "If you change this you can display whatever you want in the menus \
                     in place of your `Identity Code`.\n\
                     This will NOT change your face, you have to edit your head morph \
@@ -298,9 +295,9 @@ impl Me2General {
 
     fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
         html! {
-            <Table title=String::from("Morality")>
-                { plot.integers().get(2).map(|paragon| paragon.view("Paragon")).unwrap_or_default() }
-                { plot.integers().get(3).map(|renegade| renegade.view("Renegade")).unwrap_or_default() }
+            <Table title={String::from("Morality")}>
+                { for plot.integers().get(2).map(|paragon| paragon.view("Paragon")) }
+                { for plot.integers().get(3).map(|renegade| renegade.view("Renegade")) }
             </Table>
         }
     }
@@ -315,12 +312,12 @@ impl Me2General {
             .unwrap_or_default();
 
         html! {
-            <Table title=String::from("Gameplay")>
+            <Table title={String::from("Gameplay")}>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=Me2Class::variants()
-                        current_idx=class_idx
-                        onselect=self.link.callback(Msg::PlayerClass)
+                        options={Me2Class::variants()}
+                        current_idx={class_idx}
+                        onselect={self.link.callback(Msg::PlayerClass)}
                     />
                     {"Class"}
                 </div>
@@ -337,7 +334,7 @@ impl Me2General {
         let Player { eezo, iridium, palladium, platinum, probes, current_fuel, .. } = &*player;
 
         html! {
-            <Table title=String::from("Resources")>
+            <Table title={String::from("Resources")}>
                 { eezo.view("Eezo") }
                 { iridium.view("Iridium") }
                 { palladium.view("Palladium") }
@@ -350,7 +347,7 @@ impl Me2General {
 
     fn general(&self, difficulty: RcUi<Difficulty>, end_game_state: RcUi<EndGameState>) -> Html {
         html! {
-            <Table title=String::from("General")>
+            <Table title={String::from("General")}>
                 { difficulty.view("Difficulty") }
                 { end_game_state.view("End Game Stage") }
             </Table>
@@ -376,7 +373,7 @@ impl Me2General {
         ];
 
         html! {
-            <BonusPowers power_list=power_list powers=BonusPowerType::Me2(RcUi::clone(&player.powers)) helper=
+            <BonusPowers {power_list} powers={BonusPowerType::Me2(RcUi::clone(&player.powers))} helper=
                 "You can use as many bonus powers as you want and customize your build \
                 to your liking. The only restriction is the size of your screen !\n\
                 If you want to remove a bonus power you need to reset your talents \

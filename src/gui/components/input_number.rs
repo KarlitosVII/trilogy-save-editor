@@ -1,5 +1,4 @@
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::{components::Helper, RcUi};
 
@@ -103,26 +102,21 @@ impl Component for InputNumber {
             }
         };
 
-        let helper = self
-            .props
-            .helper
-            .as_ref()
-            .map(|&helper| {
-                html! {
-                    <Helper text=helper />
-                }
-            })
-            .unwrap_or_default();
+        let helper = self.props.helper.as_ref().map(|&helper| {
+            html! {
+                <Helper text={helper} />
+            }
+        });
 
         html! {
             <label class="flex items-center gap-1">
                 <input type="number" class="input w-[120px]" step="any"
-                    placeholder=placeholder
-                    value=value
-                    onchange=self.link.callback(Msg::Change)
+                    {placeholder}
+                    {value}
+                    onchange={self.link.callback(Msg::Change)}
                 />
                 { &self.props.label }
-                { helper }
+                { for helper }
             </label>
         }
     }

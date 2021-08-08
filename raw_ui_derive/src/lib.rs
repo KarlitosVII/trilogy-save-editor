@@ -275,7 +275,7 @@ fn impl_raw_ui_struct(
                     use crate::gui::components::raw_ui::RawUiStruct;
                     let fields = [#(#view_fields),*];
                     yew::html! {
-                        <RawUiStruct label=label.to_owned() opened=opened>
+                        <RawUiStruct label={label.to_owned()} {opened}>
                             { for fields }
                         </RawUiStruct>
                     }
@@ -364,7 +364,7 @@ fn impl_raw_ui_enum(
                 use crate::gui::components::raw_ui::RawUiEnum;
 
                 yew::html!{
-                    <RawUiEnum<#name> label=label.to_owned() items=#name::variants() value=self.clone() />
+                    <RawUiEnum<#name> label={label.to_owned()} items={#name::variants()} value={self.clone()} />
                 }
             }
         }

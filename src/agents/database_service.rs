@@ -1,7 +1,7 @@
 use anyhow::{Context as AnyhowContext, Error, Result};
 use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
-use yew::worker::{Agent, AgentLink, Context, HandlerId};
+use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::save_data::{
     mass_effect_1::plot_db::Me1PlotDb, mass_effect_2::plot_db::Me2PlotDb,

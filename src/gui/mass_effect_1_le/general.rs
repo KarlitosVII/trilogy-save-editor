@@ -1,6 +1,5 @@
 use std::cell::{Ref, RefMut};
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{
     gui::{
@@ -153,13 +152,13 @@ impl Me1LeGeneral {
     fn role_play(&self, player: Ref<'_, Player>) -> Html {
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
-            <Table title=String::from("Role-Play")>
+            <Table title={String::from("Role-Play")}>
                 { player.first_name.view("Name") }
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=genders
-                        current_idx=*player.is_female() as usize
-                        onselect=self.link.callback(Msg::Gender)
+                        options={genders}
+                        current_idx={*player.is_female() as usize}
+                        onselect={self.link.callback(Msg::Gender)}
                     />
                     {"Gender"}
                     <Helper text=
@@ -169,21 +168,21 @@ impl Me1LeGeneral {
                 </div>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=Origin::variants()
-                        current_idx=player.origin().clone() as usize
-                        onselect=self.link.callback(Msg::Origin)
+                        options={Origin::variants()}
+                        current_idx={player.origin().clone() as usize}
+                        onselect={self.link.callback(Msg::Origin)}
                     />
                     {"Origin"}
                 </div>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=Notoriety::variants()
-                        current_idx=player.notoriety().clone() as usize
-                        onselect=self.link.callback(Msg::Notoriety)
+                        options={Notoriety::variants()}
+                        current_idx={player.notoriety().clone() as usize}
+                        onselect={self.link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}
                 </div>
-                <InputText label="Identity Code" value=RcUi::clone(&player.face_code) helper=
+                <InputText label="Identity Code" value={RcUi::clone(&player.face_code)} helper=
                     "If you change this you can display whatever you want in the menus \
                     in place of your `Identity Code`.\n\
                     This will NOT change your face, you have to edit your head morph \
@@ -195,9 +194,9 @@ impl Me1LeGeneral {
 
     fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
         html! {
-            <Table title=String::from("Morality")>
-                { plot.integers().get(47).map(|paragon| paragon.view("Paragon")).unwrap_or_default() }
-                { plot.integers().get(46).map(|renegade| renegade.view("Renegade")).unwrap_or_default() }
+            <Table title={String::from("Morality")}>
+                { for plot.integers().get(47).map(|paragon| paragon.view("Paragon")) }
+                { for plot.integers().get(46).map(|renegade| renegade.view("Renegade")) }
             </Table>
         }
     }
@@ -205,7 +204,7 @@ impl Me1LeGeneral {
     fn resources(&self, player: Ref<'_, Player>) -> Html {
         let Player { credits, medigel, grenades, omnigel, .. } = &*player;
         html! {
-            <Table title=String::from("Gameplay")>
+            <Table title={String::from("Gameplay")}>
                 { credits.view("Credits") }
                 { medigel.view("Medigel") }
                 { grenades.view("Grenades") }
@@ -220,12 +219,12 @@ impl Me1LeGeneral {
         let current_difficulty =
             game_options.get(0).map(|d| *d.borrow()).unwrap_or_default() as usize;
         html! {
-            <Table title=String::from("General")>
+            <Table title={String::from("General")}>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options=difficulty
-                        current_idx=current_difficulty
-                        onselect=self.link.callback(Msg::Difficulty)
+                        options={difficulty}
+                        current_idx={current_difficulty}
+                        onselect={self.link.callback(Msg::Difficulty)}
                     />
                     { "Difficulty" }
                 </div>
@@ -237,15 +236,15 @@ impl Me1LeGeneral {
         let Player { level, current_xp, .. } = &*player;
 
         html! {
-            <Table title=String::from("Gameplay")>
+            <Table title={String::from("Gameplay")}>
                 { level.view("Level") }
                 { current_xp.view("Current XP") }
                 <InputNumber
                     label="Talent Points"
-                    value=NumberType::Integer((*player.talent_points()).into())
-                    onchange=self.link.callback(Msg::TalentPoints)
+                    value={NumberType::Integer((*player.talent_points()).into())}
+                    onchange={self.link.callback(Msg::TalentPoints)}
                 />
-                <button class="btn" onclick=self.link.callback(|_| Msg::ResetTalents(None))>
+                <button class="btn" onclick={self.link.callback(|_| Msg::ResetTalents(None))}>
                     { "Reset player's talents" }
                 </button>
             </Table>
@@ -266,7 +265,7 @@ impl Me1LeGeneral {
             squad.iter().find_map(|character| {
                 (*character.borrow().tag() == tag).then(|| {
                     html! {
-                        <button class="btn" onclick=self.link.callback(move |_| Msg::ResetTalents(Some(tag)))>
+                        <button class="btn" onclick={self.link.callback(move |_| Msg::ResetTalents(Some(tag)))}>
                             { format!("Reset {}'s talents", name) }
                         </button>
                     }
@@ -275,7 +274,7 @@ impl Me1LeGeneral {
         });
 
         html! {
-            <Table title=String::from("Gameplay")>
+            <Table title={String::from("Gameplay")}>
                 { for characters }
             </Table>
         }

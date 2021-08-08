@@ -6,8 +6,7 @@ use std::{
     rc::Rc,
 };
 use web_sys::HtmlElement;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{
     gui::{
@@ -242,9 +241,9 @@ impl Component for RawPlot {
                     PlotType::Boolean(ref booleans) => booleans.borrow().get(idx).map(|plot| {
                         html! {
                             <CheckBox
-                                label=label
-                                value=RcUi::new(*plot)
-                                onchange=self.link.callback(move |value| Msg::ChangeBool(idx, value))
+                                {label}
+                                value={RcUi::new(*plot)}
+                                onchange={self.link.callback(move |value| Msg::ChangeBool(idx, value))}
                             />
                         }
                     }),
@@ -267,7 +266,7 @@ impl Component for RawPlot {
                 };
                 html_nested! {
                     <div class="raw-plot-row">
-                        { row.unwrap_or_default() }
+                        { for row }
                     </div>
                 }
             });
@@ -290,33 +289,33 @@ impl Component for RawPlot {
             <div class="flex-auto flex flex-col gap-1">
                 <div class="flex gap-3 w-2/3">
                     <label class="flex-auto flex items-center gap-1">
-                        <input type="text" class="flex-auto input" placeholder="<empty>" value=self.props.filter().to_owned()
-                            oninput=self.link.callback(|data: InputData| Msg::Filter(data.value))
+                        <input type="text" class="flex-auto input" placeholder="<empty>" value={self.props.filter().to_owned()}
+                            oninput={self.link.callback(|data: InputData| Msg::Filter(data.value))}
                         />
                         { "Filter" }
                     </label>
                     <form class="flex gap-1"
-                        onsubmit=self.link.callback(|e: FocusEvent| {
+                        onsubmit={self.link.callback(|e: FocusEvent| {
                             e.prevent_default();
                             Msg::Add
-                        })
+                        })}
                     >
-                        <InputNumber label=String::default() value=NumberType::Integer(RcUi::clone(&self.props.add_id)) />
+                        <InputNumber label={String::default()} value={NumberType::Integer(RcUi::clone(&self.props.add_id))} />
                         <input type="submit" class="btn" value="Add" />
                         { add_helper }
                     </form>
                 </div>
                 <hr class="border-t border-default-border" />
                 <div class="flex-auto h-0 overflow-y-auto"
-                    onscroll=self.link.callback(|_| Msg::Scrolled)
-                    ref=self.scroll_ref.clone()
+                    onscroll={self.link.callback(|_| Msg::Scrolled)}
+                    ref={self.scroll_ref.clone()}
                 >
                     <div class="relative w-full border border-default-border raw-plot-bg"
-                        style=format!("height: {}px;", len * self.row_height as usize + 2)
+                        style={format!("height: {}px;", len * self.row_height as usize + 2)}
                     >
                         <div class="absolute min-w-[33.333333%]"
-                            style=format!("will-change: transform; transform: translateY({}px)", self.skip * self.row_height as usize)
-                            ref=self.content_ref.clone()
+                            style={format!("will-change: transform; transform: translateY({}px)", self.skip * self.row_height as usize)}
+                            ref={self.content_ref.clone()}
                         >
                             { for rows }
                         </div>

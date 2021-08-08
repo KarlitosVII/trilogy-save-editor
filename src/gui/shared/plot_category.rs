@@ -1,6 +1,5 @@
 use std::cell::RefMut;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{
     gui::{
@@ -80,9 +79,9 @@ impl Component for PlotCategory {
             match booleans.borrow().get(idx) {
                 Some(value) => html! {
                     <CheckBox
-                        label=label.to_owned()
-                        value=RcUi::new(*value)
-                        onchange=self.link.callback(move |value| Msg::ChangeBool(idx, value))
+                        label={label.to_owned()}
+                        value={RcUi::new(*value)}
+                        onchange={self.link.callback(move |value| Msg::ChangeBool(idx, value))}
                     />
                 },
                 None => Html::default(),
@@ -107,7 +106,7 @@ impl Component for PlotCategory {
         });
 
         html! {
-            <Table title=title.clone() opened=title.is_none()>
+            <Table title={title.clone()} opened={title.is_none()}>
                 { for booleans }
                 { for integers }
             </Table>

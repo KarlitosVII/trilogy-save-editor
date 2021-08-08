@@ -1,7 +1,10 @@
 use indexmap::IndexMap;
 use yew::prelude::*;
 
-use crate::{gui::RcUi, save_data::shared::plot::{BitVec, PlotTable}};
+use crate::{
+    gui::RcUi,
+    save_data::shared::plot::{BitVec, PlotTable},
+};
 
 mod bonus_powers;
 mod plot_category;
@@ -63,7 +66,7 @@ impl PartialEq for PlotType {
     }
 }
 
-impl RawUi for RcUi<PlotTable>{
+impl RawUi for RcUi<PlotTable> {
     fn view(&self, _: &str) -> yew::Html {
         html! { "// TODO: Link to Raw Plot" }
     }

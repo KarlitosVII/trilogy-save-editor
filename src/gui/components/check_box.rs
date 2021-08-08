@@ -1,6 +1,5 @@
 use std::cell::{Ref, RefMut};
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::RcUi;
 
@@ -59,7 +58,7 @@ impl Component for CheckBox {
     fn view(&self) -> Html {
         html! {
             <label class="flex items-center gap-1">
-                <input type="checkbox" class="checkbox" checked=*self.props.value() onchange=self.link.callback(|_| Msg::Toggle) />
+                <input type="checkbox" class="checkbox" checked={*self.props.value()} onchange={self.link.callback(|_| Msg::Toggle)} />
                 { &self.props.label }
             </label>
         }

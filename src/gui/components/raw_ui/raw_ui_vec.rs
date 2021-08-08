@@ -3,8 +3,7 @@ use std::{
     cell::{Ref, RefMut},
     fmt::Display,
 };
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::{components::Table, raw_ui::RawUi, RcUi};
 
@@ -116,16 +115,16 @@ where
                     let remove = is_editable.then(|| html!{
                         <div class="py-px">
                             <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
-                                onclick=self.link.callback(move |_| Msg::Remove(idx))
+                                onclick={self.link.callback(move |_| Msg::Remove(idx))}
                             >
                                 {"remove"}
                             </a>
                         </div>
-                    }).unwrap_or_default();
+                    });
 
                     html! {
                         <div class="flex gap-1">
-                            { remove }
+                            { for remove }
                             { item }
                         </div>
                     }
@@ -135,7 +134,7 @@ where
 
                 let add = is_editable.then(|| html!{
                     <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
-                        onclick=self.link.callback(|_| Msg::Add)
+                        onclick={self.link.callback(|_| Msg::Add)}
                     >
                         {"add"}
                     </button>
@@ -150,14 +149,13 @@ where
                         </Table>
                     </div>
                 }
-            })
-            .unwrap_or_default();
+            });
 
         html! {
             <div class="flex-auto flex flex-col">
                 <div class="p-px">
                     <button
-                        class=classes![
+                        class={classes![
                             "rounded-none",
                             "hover:bg-theme-hover",
                             "active:bg-theme-active",
@@ -166,13 +164,13 @@ where
                             "w-full",
                             "text-left",
                             chevron,
-                        ]
-                        onclick=self.link.callback(|_| Msg::Toggle)
+                        ]}
+                        onclick={self.link.callback(|_| Msg::Toggle)}
                     >
                         { &self.props.label }
                     </button>
                 </div>
-                { content }
+                { for content }
             </div>
         }
     }

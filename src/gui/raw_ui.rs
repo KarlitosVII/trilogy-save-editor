@@ -30,7 +30,7 @@ where
 impl RawUi for RcUi<u8> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label=label.to_owned() value=NumberType::Byte(RcUi::clone(self)) />
+            <InputNumber label={label.to_owned()} value={NumberType::Byte(RcUi::clone(self))} />
         }
     }
 }
@@ -38,7 +38,7 @@ impl RawUi for RcUi<u8> {
 impl RawUi for RcUi<i32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label=label.to_owned() value=NumberType::Integer(RcUi::clone(self)) />
+            <InputNumber label={label.to_owned()} value={NumberType::Integer(RcUi::clone(self))} />
         }
     }
 }
@@ -46,7 +46,7 @@ impl RawUi for RcUi<i32> {
 impl RawUi for RcUi<f32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label=label.to_owned() value=NumberType::Float(RcUi::clone(self)) />
+            <InputNumber label={label.to_owned()} value={NumberType::Float(RcUi::clone(self))} />
         }
     }
 }
@@ -54,7 +54,7 @@ impl RawUi for RcUi<f32> {
 impl RawUi for RcUi<bool> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <CheckBox label=label.to_owned() value=RcUi::clone(self) />
+            <CheckBox label={label.to_owned()} value={RcUi::clone(self)} />
         }
     }
 }
@@ -62,7 +62,7 @@ impl RawUi for RcUi<bool> {
 impl RawUi for RcUi<String> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputText label=label.to_owned() value=RcUi::clone(self) />
+            <InputText label={label.to_owned()} value={RcUi::clone(self)} />
         }
     }
 }
@@ -73,7 +73,7 @@ where
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <RawUiOption<T> label=label.to_owned() option=RcUi::clone(self) />
+            <RawUiOption<T> label={label.to_owned()} option={RcUi::clone(self)} />
         }
     }
 }
@@ -86,7 +86,7 @@ where
         // Make Vec of BaseObject not editable
         let is_editable = !(self as &dyn Any).is::<RcUi<Vec<RcUi<BaseObject>>>>();
         html! {
-            <RawUiVec<T> label=label.to_owned() vec=RcUi::clone(self) is_editable=is_editable />
+            <RawUiVec<T> label={label.to_owned()} vec={RcUi::clone(self)} {is_editable} />
         }
     }
 }
@@ -99,7 +99,7 @@ where
 {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <RawUiIndexMap<V> label=label.to_owned() index_map=RcUi::clone(self).into() />
+            <RawUiIndexMap<V> label={label.to_owned()} index_map={RcUi::clone(self).into()} />
         }
     }
 }
@@ -108,7 +108,7 @@ where
 impl RawUi for RcUi<Guid> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <RawUiGuid label=label.to_owned() guid=RcUi::clone(self) />
+            <RawUiGuid label={label.to_owned()} guid={RcUi::clone(self)} />
         }
     }
 }
@@ -116,7 +116,7 @@ impl RawUi for RcUi<Guid> {
 impl RawUi for RcUi<LinearColor> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <ColorPicker label=label.to_owned() color=RcUi::clone(self) />
+            <ColorPicker label={label.to_owned()} color={RcUi::clone(self)} />
         }
     }
 }

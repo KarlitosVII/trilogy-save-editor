@@ -1,6 +1,5 @@
 use std::cell::{Ref, RefMut};
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::{raw_ui::RawUi, RcUi};
 
@@ -68,7 +67,7 @@ where
                 <div class="flex gap-1">
                     <div class="py-px">
                         <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
-                            onclick=self.link.callback(|_| Msg::Remove)
+                            onclick={self.link.callback(|_| Msg::Remove)}
                         >
                             {"remove"}
                         </a>

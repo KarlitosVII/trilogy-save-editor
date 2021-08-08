@@ -1,5 +1,4 @@
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 use crate::{
     gui::{components::Table, RcUi},
@@ -106,7 +105,7 @@ impl Component for BonusPowers {
 
             html_nested! {
                 <button
-                    class=classes![
+                    class={classes![
                         "rounded-none",
                         "hover:bg-theme-hover",
                         "active:bg-theme-active",
@@ -114,8 +113,8 @@ impl Component for BonusPowers {
                         "w-full",
                         "text-left",
                         selected.then(|| "bg-theme-bg"),
-                    ]
-                    onclick=self.link.callback(move |_| Msg::ToggleBonusPower(power_class_name.to_owned()))
+                    ]}
+                    onclick={self.link.callback(move |_| Msg::ToggleBonusPower(power_class_name.to_owned()))}
                 >
                     {power_name}
                 </button>
@@ -123,7 +122,7 @@ impl Component for BonusPowers {
         });
 
         html! {
-            <Table title=String::from("Bonus Powers") helper=*helper>
+            <Table title={String::from("Bonus Powers")} helper={*helper}>
                 { for selectables }
             </Table>
         }

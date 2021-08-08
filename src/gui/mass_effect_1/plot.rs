@@ -1,16 +1,14 @@
 use anyhow::Error;
 use indexmap::IndexMap;
 use std::rc::Rc;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
+use yew_agent::{Bridge, Bridged};
 
 use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
-            shared::{IntPlotType, PlotCategory},
-        components::{
-            Tab, TabBar,
-        },
+        components::{Tab, TabBar},
+        shared::{IntPlotType, PlotCategory},
         RcUi,
     },
     save_data::{
@@ -85,11 +83,11 @@ impl Component for Me1Plot {
                     .map(|(title, category)| {
                         html! {
                             <PlotCategory
-                                title=title.to_owned()
-                                booleans=RcUi::clone(booleans)
-                                integers=IntPlotType::clone(integers)
-                                category=category.clone()
-                                me3_imported_me1=self.props.me3_imported_me1
+                                title={title.to_owned()}
+                                booleans={RcUi::clone(booleans)}
+                                integers={IntPlotType::clone(integers)}
+                                category={category.clone()}
+                                me3_imported_me1={self.props.me3_imported_me1}
                             />
                         }
                     })
@@ -102,7 +100,7 @@ impl Component for Me1Plot {
                 // Workaround for unused_braces warning
                 #[allow(unused_braces)]
                 (html_nested! {
-                    <Tab title=tab.to_owned()>
+                    <Tab title={tab.to_owned()}>
                         <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>

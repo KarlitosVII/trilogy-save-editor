@@ -1,6 +1,5 @@
 use web_sys::HtmlElement;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 pub enum Msg {
     Hover,
@@ -77,13 +76,13 @@ impl Component for Helper {
         html! {
             <div class="relative">
                 <div class="text-white/50 select-none"
-                    onmouseover=self.link.callback(|_| Msg::Hover)
-                    onmouseout=self.link.callback(|_| Msg::Out)
+                    onmouseover={self.link.callback(|_| Msg::Hover)}
+                    onmouseout={self.link.callback(|_| Msg::Out)}
                 >
                     { "(?)" }
                 </div>
                 <div
-                    class=classes![
+                    class={classes![
                         "flex",
                         "flex-col",
                         "gap-1",
@@ -96,8 +95,8 @@ impl Component for Helper {
                         "w-[480px]",
                         "z-40",
                         (!self.hovered).then(|| "hidden" ),
-                    ]
-                    ref=self.popup_ref.clone()
+                    ]}
+                    ref={self.popup_ref.clone()}
                 >
                     { for text }
                 </div>

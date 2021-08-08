@@ -1,6 +1,5 @@
 use web_sys::HtmlElement;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
 
 pub enum Msg {
     Open,
@@ -100,7 +99,7 @@ impl Component for Select {
         let options = self.props.options.iter().enumerate().map(|(idx, option)| {
             html_nested! {
                 <a
-                    class=classes![
+                    class={classes![
                         "flex-1",
                         "px-1",
                         "hover:bg-theme-hover",
@@ -108,8 +107,8 @@ impl Component for Select {
                         "cursor-pointer",
                         "whitespace-nowrap",
                         (idx == self.props.current_idx).then(|| "bg-theme-bg"),
-                    ]
-                    onclick=self.link.callback(move |_| Msg::Select(idx))
+                    ]}
+                    onclick={self.link.callback(move |_| Msg::Select(idx))}
                 >
                     { option }
                 </a>
@@ -124,16 +123,16 @@ impl Component for Select {
 
         html! {
             <div class="relative w-[200px] select-none" tabindex="0"
-                onblur=self.opened.then(||self.link.callback(|_| Msg::Close))
-                ref=self.select_ref.clone()
+                onblur={self.opened.then(||self.link.callback(|_| Msg::Close))}
+                ref={self.select_ref.clone()}
             >
                 <a class="block bg-theme-bg hover:bg-theme-hover active:bg-theme-active px-1 cursor-pointer min-w-full select-chevron"
-                    onclick=onclick
+                    {onclick}
                 >
                     { self.props.options[self.props.current_idx] }
                 </a>
                 <div
-                    class=classes![
+                    class={classes![
                         "absolute",
                         "flex",
                         "flex-col",
@@ -144,8 +143,8 @@ impl Component for Select {
                         "min-w-full",
                         "z-30",
                         (!self.opened).then(|| "hidden" ),
-                    ]
-                    ref=self.drop_down_ref.clone()
+                    ]}
+                    ref={self.drop_down_ref.clone()}
                 >
                     { for options }
                 </div>

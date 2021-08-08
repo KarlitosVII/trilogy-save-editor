@@ -52,23 +52,21 @@ impl Component for RawUiStruct {
         let Props { ref label, ref children, opened } = self.props;
         let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
 
-        let content = opened
-            .then(|| {
-                html! {
-                    <div class="p-1">
-                        <Table>
-                            { children.clone() }
-                        </Table>
-                    </div>
-                }
-            })
-            .unwrap_or_default();
+        let content = opened.then(|| {
+            html! {
+                <div class="p-1">
+                    <Table>
+                        { children.clone() }
+                    </Table>
+                </div>
+            }
+        });
 
         html! {
             <div class="flex-auto flex flex-col">
                 <div class="p-px">
                     <button
-                        class=classes![
+                        class={classes![
                             "rounded-none",
                             "hover:bg-theme-hover",
                             "active:bg-theme-active",
@@ -77,13 +75,13 @@ impl Component for RawUiStruct {
                             "text-left",
                             "pl-6",
                             chevron,
-                        ]
-                        onclick=self.link.callback(|_| Msg::Toggle)
+                        ]}
+                        onclick={self.link.callback(|_| Msg::Toggle)}
                     >
                         { label }
                     </button>
                 </div>
-                { content }
+                { for content }
             </div>
         }
     }

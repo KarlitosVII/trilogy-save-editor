@@ -5,7 +5,7 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 
 use super::{
     shared::{
-        plot::{PlotTable as Me1PlotTable}, Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp,
+        plot::PlotTable as Me1PlotTable, Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp,
         StreamingState, Vector,
     },
     Guid,

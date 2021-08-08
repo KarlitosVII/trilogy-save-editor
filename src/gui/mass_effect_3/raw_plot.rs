@@ -1,15 +1,13 @@
 use anyhow::Error;
 use std::rc::Rc;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
+use yew_agent::{Bridge, Bridged};
 
 use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
-            shared::{FloatPlotType, IntPlotType, PlotType, RawPlot},
-        components::{
-            Tab, TabBar,
-        },
+        components::{Tab, TabBar},
+        shared::{FloatPlotType, IntPlotType, PlotType, RawPlot},
         RcUi,
     },
     save_data::shared::plot::{BitVec, RawPlotDb},
@@ -77,13 +75,13 @@ impl Component for Me3RawPlot {
             html! {
                 <TabBar>
                     <Tab title="Booleans">
-                        <RawPlot plots=PlotType::Boolean(RcUi::clone(booleans)) plot_db=Rc::clone(plot_db) />
+                        <RawPlot plots={PlotType::Boolean(RcUi::clone(booleans))} plot_db={Rc::clone(plot_db)} />
                     </Tab>
                     <Tab title="Integers">
-                        <RawPlot plots=PlotType::Integer(integers.clone()) plot_db=Rc::clone(plot_db) />
+                        <RawPlot plots={PlotType::Integer(integers.clone())} plot_db={Rc::clone(plot_db)} />
                     </Tab>
                     <Tab title="Floats">
-                        <RawPlot plots=PlotType::Float(floats.clone()) plot_db=Rc::clone(plot_db) />
+                        <RawPlot plots={PlotType::Float(floats.clone())} plot_db={Rc::clone(plot_db)} />
                     </Tab>
                 </TabBar>
             }

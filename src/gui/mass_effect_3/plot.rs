@@ -1,19 +1,17 @@
 use anyhow::Error;
 use indexmap::IndexMap;
 use std::rc::Rc;
-use yew::prelude::*;
-use yewtil::NeqAssign;
+use yew::{prelude::*, utils::NeqAssign};
+use yew_agent::{Bridge, Bridged};
 
 use crate::{
     database_service::{Database, DatabaseService, Request, Response, Type},
     gui::{
-            shared::{IntPlotType, PlotCategory},
-        components::{
-            Tab, TabBar,
-        },
+        components::{Tab, TabBar},
         mass_effect_1::Me1Plot,
         mass_effect_2::Me2Plot,
         mass_effect_3::PlotVariable,
+        shared::{IntPlotType, PlotCategory},
         RcUi, Theme,
     },
     save_data::{
@@ -98,10 +96,10 @@ impl Component for Me3Plot {
                     .map(|(title, category)| {
                         html! {
                             <PlotCategory
-                                title=title.to_owned()
-                                booleans=RcUi::clone(booleans)
-                                integers=IntPlotType::clone(integers)
-                                category=category.clone()
+                                title={title.to_owned()}
+                                booleans={RcUi::clone(booleans)}
+                                integers={IntPlotType::clone(integers)}
+                                category={category.clone()}
                             />
                         }
                     })
@@ -121,7 +119,7 @@ impl Component for Me3Plot {
                 // Workaround for unused_braces warning
                 #[allow(unused_braces)]
                 (html_nested! {
-                    <Tab title=tab.to_owned()>
+                    <Tab title={tab.to_owned()}>
                         <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>
@@ -132,10 +130,10 @@ impl Component for Me3Plot {
             let weapons_powers = weapons_powers.iter().map(|(title, variable)| {
                 html! {
                     <PlotVariable
-                        title=title.to_owned()
-                        booleans=RcUi::clone(booleans)
-                        variables=RcUi::clone(variables)
-                        plot_variable=variable.clone()
+                        title={title.to_owned()}
+                        booleans={RcUi::clone(booleans)}
+                        variables={RcUi::clone(variables)}
+                        plot_variable={variable.clone()}
                     />
                 }
             });
@@ -144,9 +142,9 @@ impl Component for Me3Plot {
                 <TabBar>
                     <Tab title="General">
                         <PlotCategory
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            category=general.clone()
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            category={general.clone()}
                         />
                     </Tab>
                     { for categories }
@@ -157,24 +155,24 @@ impl Component for Me3Plot {
                     </Tab>
                     <Tab title="Intel">
                         <PlotCategory
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            category=intel.clone()
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            category={intel.clone()}
                         />
                     </Tab>
-                    <Tab title="Mass Effect 2" theme=Theme::MassEffect2>
+                    <Tab title="Mass Effect 2" theme={Theme::MassEffect2}>
                         <Me2Plot
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            onerror=self.link.callback(Msg::Error)
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
-                    <Tab title="Mass Effect 1" theme=Theme::MassEffect1>
+                    <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                         <Me1Plot
-                            me3_imported_me1=true
-                            booleans=RcUi::clone(booleans)
-                            integers=IntPlotType::clone(integers)
-                            onerror=self.link.callback(Msg::Error)
+                            me3_imported_me1={true}
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>

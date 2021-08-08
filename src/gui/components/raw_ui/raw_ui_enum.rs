@@ -73,9 +73,9 @@ where
         html! {
             <div class="flex items-center gap-1 cursor-default">
                 <Select
-                    options=self.props.items
-                    current_idx=current_idx
-                    onselect=self.link.callback(Msg::Changed)
+                    options={self.props.items}
+                    current_idx={current_idx}
+                    onselect={self.link.callback(Msg::Changed)}
                 />
                 { &self.props.label }
             </div>
