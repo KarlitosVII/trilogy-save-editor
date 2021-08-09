@@ -54,11 +54,11 @@ impl Component for RawUiGuid {
     }
 
     fn view(&self) -> Html {
+        let value = self.props.guid().hyphenated();
+        let onchange = self.link.callback(Msg::Change);
         html! {
             <label class="flex-auto flex items-center gap-1">
-                <input type="text" class="input w-1/3" placeholder="<empty>" value={self.props.guid().hyphenated()}
-                    onchange={self.link.callback(Msg::Change)}
-                />
+                <input type="text" class="input w-1/3" placeholder="<empty>" {value} {onchange} />
                 { &self.props.label }
             </label>
         }

@@ -21,14 +21,12 @@ use super::{
     List,
 };
 
-pub mod player;
-use self::player::*;
-
-pub mod squad;
-use self::squad::*;
-
+pub mod item_db;
 pub mod legacy;
-use self::legacy::*;
+pub mod player;
+pub mod squad;
+
+use self::{legacy::*, player::*, squad::*};
 
 #[derive(Serialize, Clone)]
 struct ChunkHeader {

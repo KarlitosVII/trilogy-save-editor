@@ -2,6 +2,10 @@
 default_to_workspace = false
 
 # Utils
+[tasks.update]
+command = "cargo"
+args = ["update"]
+
 [tasks.fmt]
 install_crate = "rustfmt"
 command = "cargo"
@@ -19,22 +23,54 @@ command = "cargo"
 args = ["outdated", "-wR"]
 dependencies = ["update"]
 
-# Build
-[tasks.update]
-command = "cargo"
-args = ["update"]
-
 [tasks.test]
 command = "cargo"
 args = ["test"]
 dependencies = ["update"]
 
+# Serve
+[tasks.tailwind-watch]
+command = "npm"
+args = ["run", "watch"]
+
+[tasks.tailwind-watch.windows]
+command = "powershell"
+args = ["-Command", "npm", "run", "watch"]
+
+[tasks.trunk-serve]
+install_crate = "trunk"
+command = "trunk"
+args = ["serve"]
+
+[tasks.serve]
+run_task = { name = ["tailwind-watch", "trunk-serve"], parallel = true }
+
+# Build
 [tasks.copy-databases]
 script_runner = "@duckscript"
 script = '''
 rm -r ./target/release/databases
 cp ./databases ./target/release
 '''
+
+[tasks.tailwind-build]
+command = "npm"
+args = ["run", "build"]
+
+[tasks.tailwind-build.windows]
+command = "powershell"
+args = ["-Command", "npm", "run", "build"]
+
+[tasks.trunk-build]
+install_crate = "trunk"
+command = "trunk"
+args = ["build"]
+
+[tasks.build]
+clear = true
+# command = "cargo"
+# args = ["build"]
+dependencies = ["tailwind-build", "trunk-build"]
 
 [tasks.release]
 command = "cargo"
@@ -67,21 +103,3 @@ rm -r "./${dir}/"
 
 [tasks.cook]
 dependencies = ["fmt", "clippy", "test", "release", "zip"]
-
-# Serve
-[tasks.tailwind-watch]
-command = "npm"
-args = ["run", "watch"]
-windows_alias = "windows-tailwind-watch"
-
-[tasks.windows-tailwind-watch]
-command = "powershell"
-args = ["-Command", "npm", "run", "watch"]
-
-[tasks.trunk-serve]
-install_crate = "trunk"
-command = "trunk"
-args = ["serve"]
-
-[tasks.serve]
-run_task = { name = ["tailwind-watch", "trunk-serve"], parallel = true }

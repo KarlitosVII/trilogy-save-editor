@@ -1,5 +1,9 @@
 ## Unreleased
 - You can now add and edit all your plots in `Raw plot` tab (no longer only labelled ones)
+- Inventory filters
+- No ME1
+- No compare
+- // TODO: unobtainable ME1 item db
 
 ## 1.13.1
 - ME2: Added all armors plots

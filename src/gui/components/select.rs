@@ -13,6 +13,8 @@ pub struct Props {
     pub options: &'static [&'static str],
     pub current_idx: usize,
     pub onselect: Callback<usize>,
+    #[prop_or(true)]
+    pub sized: bool,
 }
 
 pub struct Select {
@@ -75,13 +77,8 @@ impl Component for Select {
     fn rendered(&mut self, _first_render: bool) {
         // Drop down open upward if bottom > viewport_height
         if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
-            let viewport_height = web_sys::window()
-                .unwrap()
-                .document()
-                .unwrap()
-                .document_element()
-                .unwrap()
-                .client_height();
+            let viewport_height =
+                yew::utils::document().document_element().unwrap().client_height();
             let bottom = drop_down.get_bounding_client_rect().bottom() as i32;
 
             if bottom > viewport_height {
@@ -97,6 +94,7 @@ impl Component for Select {
 
     fn view(&self) -> Html {
         let options = self.props.options.iter().enumerate().map(|(idx, option)| {
+            let selected = idx == self.props.current_idx;
             html_nested! {
                 <a
                     class={classes![
@@ -106,7 +104,7 @@ impl Component for Select {
                         "active:bg-theme-active",
                         "cursor-pointer",
                         "whitespace-nowrap",
-                        (idx == self.props.current_idx).then(|| "bg-theme-bg"),
+                        selected.then(|| "bg-theme-bg"),
                     ]}
                     onclick={self.link.callback(move |_| Msg::Select(idx))}
                 >
@@ -115,6 +113,8 @@ impl Component for Select {
             }
         });
 
+        let size = if self.props.sized { "w-[200px]" } else { "min-w-[60px]" };
+
         let onclick = if !self.opened {
             self.link.callback(|_| Msg::Open)
         } else {
@@ -122,11 +122,26 @@ impl Component for Select {
         };
 
         html! {
-            <div class="relative w-[200px] select-none" tabindex="0"
+            <div tabindex="0"
+                class={classes![
+                    "relative",
+                    "select-none",
+                    size,
+                ]}
                 onblur={self.opened.then(||self.link.callback(|_| Msg::Close))}
                 ref={self.select_ref.clone()}
             >
-                <a class="block bg-theme-bg hover:bg-theme-hover active:bg-theme-active px-1 cursor-pointer min-w-full select-chevron"
+                <a class={classes![
+                        "block",
+                        "bg-theme-bg",
+                        "hover:bg-theme-hover",
+                        "active:bg-theme-active",
+                        "px-1",
+                        "pr-5",
+                        "cursor-pointer",
+                        "min-w-full",
+                        "select-chevron",
+                    ]}
                     {onclick}
                 >
                     { self.props.options[self.props.current_idx] }

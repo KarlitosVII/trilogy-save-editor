@@ -4,18 +4,14 @@ use wasm_bindgen_futures::spawn_local;
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::save_data::{
-    mass_effect_1::plot_db::Me1PlotDb, mass_effect_2::plot_db::Me2PlotDb,
-    mass_effect_3::plot_db::Me3PlotDb, shared::plot::RawPlotDb,
+    mass_effect_1::plot_db::Me1PlotDb, mass_effect_1_le::item_db::Me1ItemDb,
+    mass_effect_2::plot_db::Me2PlotDb, mass_effect_3::plot_db::Me3PlotDb, shared::plot::RawPlotDb,
 };
-
-// static ref ME1_ITEM_DB: Result<Me1ItemDb> = {
-//     let input = fs::read_to_string("databases/me1_item_db.ron")?;
-//     ron::from_str(&input).map_err(Error::from)
-// }.context("Failed to parse `databases/me1_item_db.ron`");
 
 pub enum Type {
     Me1Plot,
     Me1RawPlot,
+    Me1ItemDb,
     Me2Plot,
     Me2RawPlot,
     Me3Plot,
@@ -25,6 +21,7 @@ pub enum Type {
 pub enum Database {
     Me1Plot(Rc<Me1PlotDb>),
     Me1RawPlot(Rc<RawPlotDb>),
+    Me1ItemDb(Rc<Me1ItemDb>),
     Me2Plot(Rc<Me2PlotDb>),
     Me2RawPlot(Rc<RawPlotDb>),
     Me3Plot(Rc<Me3PlotDb>),
@@ -49,6 +46,7 @@ pub enum Msg {
 struct Databases {
     me1_plot: Option<Rc<Me1PlotDb>>,
     me1_raw_plot: Option<Rc<RawPlotDb>>,
+    me1_item_db: Option<Rc<Me1ItemDb>>,
     me2_plot: Option<Rc<Me2PlotDb>>,
     me2_raw_plot: Option<Rc<RawPlotDb>>,
     me3_plot: Option<Rc<Me3PlotDb>>,
@@ -79,6 +77,9 @@ impl Agent for DatabaseService {
                     }
                     Database::Me1RawPlot(ref db) => {
                         self.dbs.me1_raw_plot = Some(Rc::clone(db));
+                    }
+                    Database::Me1ItemDb(ref db) => {
+                        self.dbs.me1_item_db = Some(Rc::clone(db));
                     }
                     Database::Me2Plot(ref db) => {
                         self.dbs.me2_plot = Some(Rc::clone(db));
@@ -116,6 +117,13 @@ impl Agent for DatabaseService {
                     None => self.fetch(who, "/databases/me1_raw_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me1RawPlot(Rc::new(db)))
+                    }),
+                },
+                Type::Me1ItemDb => match self.dbs.me1_item_db {
+                    Some(ref db) => self.respond_db(who, Database::Me1ItemDb(Rc::clone(db))),
+                    None => self.fetch(who, "/databases/me1_item_db.ron", |response| {
+                        let db = ron::from_str(&response)?;
+                        Ok(Database::Me1ItemDb(Rc::new(db)))
                     }),
                 },
                 Type::Me2Plot => match self.dbs.me2_plot {

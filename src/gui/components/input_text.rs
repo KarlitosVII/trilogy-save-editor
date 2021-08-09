@@ -63,12 +63,11 @@ impl Component for InputText {
                 <Helper text={helper} />
             }
         });
-
+        let value = self.props.value().to_owned();
+        let oninput = self.link.callback(|data: InputData| Msg::Input(data.value));
         html! {
             <label class="flex-auto flex items-center gap-1">
-                <input type="text" class="input w-2/3" placeholder="<empty>" value={self.props.value().to_owned()}
-                    oninput={self.link.callback(|data: InputData| Msg::Input(data.value))}
-                />
+                <input type="text" class="input w-2/3" placeholder="<empty>" {value} {oninput} />
                 { &self.props.label }
                 { for helper }
             </label>

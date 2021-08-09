@@ -1,14 +1,14 @@
-use derive_more::Deref;
+use derive_more::{Deref, From};
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-#[derive(Deserialize, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct DbItem {
     pub item_id: i32,
     pub manufacturer_id: i32,
 }
 
-#[derive(Deserialize, Deref)]
+#[derive(Deserialize, Deref, From, PartialEq, Eq)]
 pub struct Me1ItemDb(IndexMap<DbItem, String>);
 
 #[cfg(test)]

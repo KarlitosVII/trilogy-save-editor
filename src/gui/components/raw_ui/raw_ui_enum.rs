@@ -69,14 +69,12 @@ where
     }
 
     fn view(&self) -> Html {
+        let options = self.props.items;
         let current_idx: usize = self.props.value().clone().into();
+        let onselect = self.link.callback(Msg::Changed);
         html! {
             <div class="flex items-center gap-1 cursor-default">
-                <Select
-                    options={self.props.items}
-                    current_idx={current_idx}
-                    onselect={self.link.callback(Msg::Changed)}
-                />
+                <Select {options} {current_idx} {onselect} />
                 { &self.props.label }
             </div>
         }

@@ -9,7 +9,7 @@ use crate::{
     gui::{
         components::{NavBar, Tab, TabBar, Table},
         mass_effect_1::{Me1Plot, Me1RawPlot},
-        mass_effect_1_le::Me1LeGeneral,
+        mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
         mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
         mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
         raw_ui::RawUi,
@@ -212,6 +212,13 @@ impl App {
                         <Me1Plot
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            onerror={self.link.callback(Msg::Error)}
+                        />
+                    </Tab>
+                    <Tab title="Inventory">
+                        <Me1LeInventory
+                            player={RcUi::clone(&me1.player)}
+                            squad={RcUi::clone(&me1.squad)}
                             onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>

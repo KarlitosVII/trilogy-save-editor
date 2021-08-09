@@ -47,16 +47,17 @@ impl Component for TabBar {
 
     fn view(&self) -> Html {
         let tabs = self.props.children.iter().enumerate().map(|(idx, child)| {
+            let onmousedown = (idx != self.props.current_tab)
+                .then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)));
             html_nested! {
-                <button
-                    class={classes![
+                <button class={classes![
                         "btn",
                         "leading-[19px]",
                         "!rounded-t",
                         (idx == self.props.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
                     ]}
-                    onmousedown={(idx != self.props.current_tab).then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)))}
+                    {onmousedown}
                 >
                     { child.props.title }
                 </button>

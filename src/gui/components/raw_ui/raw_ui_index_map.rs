@@ -91,13 +91,11 @@ where
                     IndexMapKeyType::I32(ref mut index_map) => {
                         // Open added item
                         self.new_item_idx = index_map.borrow().len();
-
                         index_map.borrow_mut().entry(-1).or_default();
                     }
                     IndexMapKeyType::String(ref mut index_map) => {
                         // Open added item
                         self.new_item_idx = index_map.borrow().len();
-
                         index_map.borrow_mut().entry(Default::default()).or_default();
                     }
                 }
@@ -161,7 +159,16 @@ where
                     html_nested! {
                         <div class="flex gap-1">
                             <div class="py-px">
-                                <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
+                                <a class={classes![
+                                        "rounded-none",
+                                        "select-none",
+                                        "hover:bg-theme-hover",
+                                        "active:bg-theme-active",
+                                        "bg-theme-bg",
+                                        "px-1",
+                                        "py-0",
+                                        "cursor-pointer",
+                                    ]}
                                     onclick={self.link.callback(move |_| Msg::Remove(idx))}
                                 >
                                     {"remove"}
@@ -209,7 +216,13 @@ where
                     <div class="p-1">
                         <Table>
                             { for items }
-                            <button class="rounded-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1"
+                            <button class={classes![
+                                    "rounded-none",
+                                    "hover:bg-theme-hover",
+                                    "active:bg-theme-active",
+                                    "bg-theme-bg",
+                                    "px-1",
+                                ]}
                                 onclick={self.link.callback(|_| Msg::Add)}
                             >
                                 {"add"}
@@ -222,8 +235,7 @@ where
         html! {
             <div class="flex-auto flex flex-col">
                 <div class="p-px">
-                    <button
-                        class={classes![
+                    <button class={classes![
                             "rounded-none",
                             "hover:bg-theme-hover",
                             "active:bg-theme-active",

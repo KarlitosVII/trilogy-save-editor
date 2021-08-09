@@ -56,9 +56,11 @@ impl Component for CheckBox {
     }
 
     fn view(&self) -> Html {
+        let checked = *self.props.value();
+        let onchange = self.link.callback(|_| Msg::Toggle);
         html! {
             <label class="flex items-center gap-1">
-                <input type="checkbox" class="checkbox" checked={*self.props.value()} onchange={self.link.callback(|_| Msg::Toggle)} />
+                <input type="checkbox" class="checkbox" {checked} {onchange} />
                 { &self.props.label }
             </label>
         }

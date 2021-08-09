@@ -1,5 +1,4 @@
 use gloo_events::EventListener;
-use gloo_timers::callback::Timeout;
 use indexmap::{map::Entry, IndexMap};
 use std::{
     cell::{Ref, RefMut},
@@ -20,7 +19,6 @@ use crate::{
 use super::{FloatPlotType, IntPlotType, PlotType};
 
 pub enum Msg {
-    Throttle,
     Scrolled,
     ChangeBool(usize, bool),
     Filter(String),
@@ -56,9 +54,6 @@ pub struct RawPlot {
     link: ComponentLink<Self>,
     _resize_listener: EventListener,
     scroll_ref: NodeRef,
-    content_ref: NodeRef,
-    throttle: Option<Timeout>,
-    queued_scroll: bool,
     row_height: i32,
     skip: usize,
     take: usize,
@@ -83,9 +78,6 @@ impl Component for RawPlot {
             link,
             _resize_listener,
             scroll_ref: Default::default(),
-            content_ref: Default::default(),
-            throttle: None,
-            queued_scroll: false,
             row_height: 23,
             skip: 0,
             take: 0,
@@ -99,38 +91,19 @@ impl Component for RawPlot {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Scrolled => {
-                if self.throttle.is_none() {
-                    if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
-                        let scroll_top = scroll.scroll_top();
-                        let offset_height = scroll.offset_height();
-                        let num_rows = offset_height / self.row_height + 1;
-                        let overflow_begin = num_rows / 2;
-                        let overflow_end = num_rows;
+                if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
+                    let scroll_top = scroll.scroll_top();
+                    let offset_height = scroll.offset_height();
+                    let num_rows = offset_height / self.row_height + 1;
+                    let overflow_begin = num_rows / 4;
+                    let overflow_end = num_rows / 2;
 
-                        let len =
-                            self.label_list.as_ref().map(|list| list.len()).unwrap_or_else(|| 0);
-                        let start = scroll_top / self.row_height;
-                        self.skip = (start - overflow_begin).max(0) as usize;
-                        self.take = (num_rows + overflow_end).min(len as i32) as usize;
-
-                        let link = self.link.clone();
-                        self.throttle =
-                            Some(Timeout::new(30, move || link.send_message(Msg::Throttle)));
-
-                        return true;
-                    }
-                } else {
-                    self.queued_scroll = true;
+                    let len = self.label_list.as_ref().map(|list| list.len()).unwrap_or_else(|| 0);
+                    let start = scroll_top / self.row_height;
+                    self.skip = (start - overflow_begin).max(0) as usize;
+                    self.take = (num_rows + overflow_end).min(len as i32) as usize;
                 }
-                false
-            }
-            Msg::Throttle => {
-                self.throttle = None;
-                if self.queued_scroll {
-                    self.queued_scroll = false;
-                    self.link.send_message(Msg::Scrolled);
-                }
-                false
+                true
             }
             Msg::ChangeBool(idx, value) => {
                 if let PlotType::Boolean(ref mut booleans) = self.props.plots {
@@ -315,7 +288,6 @@ impl Component for RawPlot {
                     >
                         <div class="absolute min-w-[33.333333%]"
                             style={format!("will-change: transform; transform: translateY({}px)", self.skip * self.row_height as usize)}
-                            ref={self.content_ref.clone()}
                         >
                             { for rows }
                         </div>

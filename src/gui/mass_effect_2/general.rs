@@ -270,7 +270,7 @@ impl Me2General {
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={Origin::variants()}
-                        current_idx={player.origin().clone() as usize}
+                        current_idx={*player.origin() as usize}
                         onselect={self.link.callback(Msg::Origin)}
                     />
                     {"Origin"}
@@ -278,7 +278,7 @@ impl Me2General {
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={Notoriety::variants()}
-                        current_idx={player.notoriety().clone() as usize}
+                        current_idx={*player.notoriety() as usize}
                         onselect={self.link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}

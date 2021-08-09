@@ -114,7 +114,16 @@ where
 
                     let remove = is_editable.then(|| html!{
                         <div class="py-px">
-                            <a class="rounded-none select-none hover:bg-theme-hover active:bg-theme-active bg-theme-bg px-1 py-0 cursor-pointer"
+                            <a class={classes![
+                                    "rounded-none",
+                                    "select-none",
+                                    "hover:bg-theme-hover",
+                                    "active:bg-theme-active",
+                                    "bg-theme-bg",
+                                    "px-1",
+                                    "py-0",
+                                    "cursor-pointer",
+                                ]}
                                 onclick={self.link.callback(move |_| Msg::Remove(idx))}
                             >
                                 {"remove"}
@@ -154,8 +163,7 @@ where
         html! {
             <div class="flex-auto flex flex-col">
                 <div class="p-px">
-                    <button
-                        class={classes![
+                    <button class={classes![
                             "rounded-none",
                             "hover:bg-theme-hover",
                             "active:bg-theme-active",

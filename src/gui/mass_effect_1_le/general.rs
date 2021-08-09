@@ -169,7 +169,7 @@ impl Me1LeGeneral {
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={Origin::variants()}
-                        current_idx={player.origin().clone() as usize}
+                        current_idx={*player.origin() as usize}
                         onselect={self.link.callback(Msg::Origin)}
                     />
                     {"Origin"}
@@ -177,7 +177,7 @@ impl Me1LeGeneral {
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={Notoriety::variants()}
-                        current_idx={player.notoriety().clone() as usize}
+                        current_idx={*player.notoriety() as usize}
                         onselect={self.link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}
@@ -261,8 +261,8 @@ impl Me1LeGeneral {
             ("hench_krogan", "Wrex"),
         ];
 
-        let characters = characters.iter().filter_map(|&(tag, name)| {
-            squad.iter().find_map(|character| {
+        let characters = squad.iter().filter_map(|character| {
+            characters.iter().find_map(|&(tag, name)| {
                 (*character.borrow().tag() == tag).then(|| {
                     html! {
                         <button class="btn" onclick={self.link.callback(move |_| Msg::ResetTalents(Some(tag)))}>

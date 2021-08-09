@@ -157,7 +157,7 @@ impl<'ui> Gui<'ui> {
                 Table::next_row();
                 const ORIGIN_LIST: &[&ImStr] =
                     &[im_str!("None"), im_str!("Spacer"), im_str!("Colonist"), im_str!("Earthborn")];
-                let mut origin_idx = origin.clone() as usize;
+                let mut origin_idx = origin as usize;
                 if self.draw_edit_enum("Origin", &mut origin_idx, ORIGIN_LIST) {
                     // Enum
                     *origin = match origin_idx {
@@ -220,7 +220,7 @@ impl<'ui> Gui<'ui> {
                     im_str!("War Hero"),
                     im_str!("Ruthless"),
                 ];
-                let mut notoriety_idx = notoriety.clone() as usize;
+                let mut notoriety_idx = notoriety as usize;
                 if self.draw_edit_enum("Notoriety", &mut notoriety_idx, NOTORIETY_LIST) {
                     // Enum
                     *notoriety = match notoriety_idx {

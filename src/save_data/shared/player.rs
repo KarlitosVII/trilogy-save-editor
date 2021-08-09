@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Clone, RawUi)]
+#[derive(Deserialize, Serialize, Copy, Clone, RawUi)]
 pub enum Origin {
     None,
     Spacer,
@@ -8,7 +8,7 @@ pub enum Origin {
     Earthborn,
 }
 
-#[derive(Deserialize, Serialize, Clone, RawUi)]
+#[derive(Deserialize, Serialize, Copy, Clone, RawUi)]
 pub enum Notoriety {
     None,
     Survivor,

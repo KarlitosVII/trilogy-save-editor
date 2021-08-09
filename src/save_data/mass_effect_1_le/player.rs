@@ -92,11 +92,11 @@ pub struct Inventory {
     pub equipment: Vec<Item>,
     pub quick_slots: Vec<Item>,
     pub inventory: Vec<Item>,
-    pub buy_pack_items: Vec<Item>,
+    pub buy_pack: Vec<Item>,
 }
 
 #[allow(clippy::upper_case_acronyms)]
-#[derive(Deserialize, Serialize, Clone, RawUi)]
+#[derive(Deserialize, Serialize, Copy, Clone, RawUi)]
 pub enum ItemLevel {
     None,
     I,

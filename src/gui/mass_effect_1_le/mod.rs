@@ -14,8 +14,9 @@ use crate::{
 use super::RcUi;
 
 mod general;
+mod inventory;
 
-pub use self::general::*;
+pub use self::{general::*, inventory::*};
 
 impl RawUi for RcUi<Me1LeSaveData> {
     fn view(&self, _: &str) -> yew::Html {
