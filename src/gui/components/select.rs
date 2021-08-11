@@ -79,9 +79,12 @@ impl Component for Select {
         if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
             let viewport_height =
                 yew::utils::document().document_element().unwrap().client_height();
-            let bottom = drop_down.get_bounding_client_rect().bottom() as i32;
+            let rect = drop_down.get_bounding_client_rect();
+            let top = rect.top() as i32;
+            let bottom = rect.bottom() as i32;
+            let height = bottom - top;
 
-            if bottom > viewport_height {
+            if height < top - 70 && bottom > viewport_height - 10 {
                 if let Some(select) = self.select_ref.cast::<HtmlElement>() {
                     let height = select.offset_height();
                     let _ = drop_down.style().set_property("bottom", &format!("{}px", height));

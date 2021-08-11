@@ -90,6 +90,9 @@ impl Component for ItemSelect {
             Msg::ShouldClose => {
                 if !self.focused {
                     self.opened = false;
+                    if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
+                        let _ = drop_down.style().set_property("bottom", "auto");
+                    }
                     true
                 } else {
                     false
@@ -164,21 +167,29 @@ impl Component for ItemSelect {
             if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
                 let viewport_height =
                     yew::utils::document().document_element().unwrap().client_height();
-                let bottom = drop_down.get_bounding_client_rect().bottom() as i32;
+                let rect = drop_down.get_bounding_client_rect();
+                let top = rect.top() as i32;
+                let bottom = rect.bottom() as i32;
+                let height = bottom - top;
 
-                if bottom > viewport_height {
+                if height < top - 70 && bottom > viewport_height - 10 {
                     if let Some(select) = self.select_ref.cast::<HtmlElement>() {
                         let height = select.offset_height();
                         let _ = drop_down.style().set_property("bottom", &format!("{}px", height));
                     }
-                } else {
-                    let _ = drop_down.style().set_property("bottom", "auto");
                 }
             }
         }
     }
 
     fn view(&self) -> Html {
+        let current_item_name = self
+            .props
+            .item_db
+            .get(&self.props.current_item)
+            .map(|i| i.as_str())
+            .unwrap_or_else(|| "Unknown item");
+
         let options = self.opened.then(|| {
             let item_db = self.filtered_list.as_ref().unwrap_or(&self.props.item_db);
             let options = item_db.iter().skip(self.skip).take(self.take).map(|(&key, option)| {
@@ -237,7 +248,7 @@ impl Component for ItemSelect {
                     ]}
                     {onclick}
                 >
-                    { for self.props.item_db.get(&self.props.current_item) }
+                    { current_item_name }
                 </a>
                 <div class={classes![
                         "absolute",
@@ -251,6 +262,7 @@ impl Component for ItemSelect {
                         "z-30",
                         (!self.opened).then(|| "hidden")
                     ]}
+                    ref={self.drop_down_ref.clone()}
                 >
                     <label class="flex items-center gap-1 p-px pr-1">
                         <input type="text" class="flex-auto input" placeholder="<empty>"

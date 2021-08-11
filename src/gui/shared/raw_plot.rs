@@ -1,4 +1,5 @@
 use gloo_events::EventListener;
+use gloo_timers::callback::Timeout;
 use indexmap::{map::Entry, IndexMap};
 use std::{
     cell::{Ref, RefMut},
@@ -22,6 +23,7 @@ pub enum Msg {
     Scrolled,
     ChangeBool(usize, bool),
     Filter(String),
+    Filtered,
     Add,
 }
 
@@ -58,6 +60,8 @@ pub struct RawPlot {
     skip: usize,
     take: usize,
     label_list: Option<IndexMap<usize, Option<String>>>,
+    is_filtering: bool,
+    next_filter: Option<String>,
 }
 
 impl Component for RawPlot {
@@ -82,6 +86,8 @@ impl Component for RawPlot {
             skip: 0,
             take: 0,
             label_list: None,
+            is_filtering: false,
+            next_filter: None,
         };
         this.add_missing_plots();
         this.update_label_list();
@@ -114,10 +120,26 @@ impl Component for RawPlot {
                 false
             }
             Msg::Filter(filter) => {
-                *self.props.filter_mut() = filter;
-                self.update_label_list();
+                if !self.is_filtering {
+                    self.is_filtering = true;
+                    *self.props.filter_mut() = filter;
 
-                self.link.send_message(Msg::Scrolled);
+                    let link = self.link.clone();
+                    Timeout::new(100, move || link.send_message(Msg::Filtered)).forget();
+
+                    self.update_label_list();
+
+                    self.link.send_message(Msg::Scrolled);
+                } else {
+                    self.next_filter = Some(filter);
+                }
+                false
+            }
+            Msg::Filtered => {
+                self.is_filtering = false;
+                if let Some(filter) = self.next_filter.take() {
+                    self.link.send_message(Msg::Filter(filter))
+                }
                 false
             }
             Msg::Add => {

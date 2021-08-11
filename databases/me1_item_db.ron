@@ -689,11 +689,11 @@ Me1ItemDb({
     // Serrice Council
     DbItem(
         item_id: 288,
-        manufacturer_id: 581,
+        manufacturer_id: 509,
     ): "[Serrice Council] Phantom (Turian Light Armor)",
     DbItem(
         item_id: 284,
-        manufacturer_id: 581,
+        manufacturer_id: 509,
     ): "[Serrice Council] Phantom (Turian Medium Armor)",
     DbItem(
         item_id: 110,
