@@ -139,7 +139,6 @@ impl Me1LeInventory {
         };
         let current_level = *item.borrow().item_level() as usize;
         let onselect_item = {
-            // FIXME: Double clone ?
             let item = RcUi::clone(&item);
             self.link.callback(move |new_item| Msg::ChangeItem(RcUi::clone(&item), new_item))
         };

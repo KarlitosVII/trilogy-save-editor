@@ -1,3 +1,4 @@
+use gloo_timers::callback::Timeout;
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::components::Helper;
@@ -42,11 +43,12 @@ impl Component for Table {
     }
 
     fn view(&self) -> Html {
-        let opened = self.props.title.is_none() || self.props.opened;
+        let Props { title, children, opened, helper } = &self.props;
+        let opened = title.is_none() || *opened;
 
-        let title = self.props.title.as_ref().map(|title| {
+        let title = title.as_ref().map(|title| {
             let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
-            let helper = self.props.helper.as_ref().map(|&helper| {
+            let helper = helper.as_ref().map(|&helper| {
                 html! {
                     <Helper text={helper} />
                 }
@@ -77,28 +79,92 @@ impl Component for Table {
             }
         });
 
-        let rows = opened.then(|| {
-            self.props
-                .children
-                .iter()
-                .map(|child| {
-                    html_nested! {
-                        <div class={classes![
-                            "table-row",
-                            self.props.title.is_some().then(|| "!pl-6"),
-                        ]}>
-                            {child}
-                        </div>
-                    }
-                })
-                .collect::<Html>()
+        let chunks = opened.then(|| {
+            let mut rows = children.iter().map(|child| {
+                html_nested! {
+                    <div class={classes![
+                        "table-row",
+                        title.is_some().then(|| "!pl-6"),
+                    ]}>
+                        {child}
+                    </div>
+                }
+            });
+
+            const CHUNK_SIZE: usize = 40;
+            let chunks = (0..children.len() / CHUNK_SIZE + 1).map(|i| {
+                html! {
+                    <RowChunk position={i}>
+                        { for rows.by_ref().take(CHUNK_SIZE) }
+                    </RowChunk>
+                }
+            });
+
+            html! { for chunks }
         });
 
         html! {
             <div class="flex flex-col border border-default-border">
                 { for title }
-                { for rows }
+                { for chunks }
             </div>
         }
+    }
+}
+
+enum ChunkMsg {
+    Render,
+}
+
+#[derive(Properties, Clone, PartialEq)]
+struct ChunkProps {
+    children: Children,
+    position: usize,
+}
+
+struct RowChunk {
+    props: ChunkProps,
+    link: ComponentLink<Self>,
+    should_render: bool,
+}
+
+impl Component for RowChunk {
+    type Message = ChunkMsg;
+    type Properties = ChunkProps;
+
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let should_render = props.position == 0;
+        if !should_render {
+            let link = link.clone();
+            Timeout::new(17 * props.position as u32, move || link.send_message(ChunkMsg::Render))
+                .forget();
+        }
+        RowChunk { props, link, should_render }
+    }
+
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            ChunkMsg::Render => {
+                self.should_render = true;
+                true
+            }
+        }
+    }
+
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        if self.props.neq_assign(props) {
+            if self.props.position != 0 {
+                let link = self.link.clone();
+                Timeout::new(0, move || link.send_message(ChunkMsg::Render)).forget();
+            } else {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn view(&self) -> Html {
+        let content = self.should_render.then(|| self.props.children.iter().collect::<Html>());
+        html! { for content }
     }
 }
