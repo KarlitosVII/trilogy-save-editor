@@ -159,7 +159,7 @@ impl Component for Select {
                         "border-default-border",
                         "p-px",
                         "min-w-full",
-                        "z-30",
+                        "z-20",
                         (!self.opened).then(|| "hidden" ),
                     ]}
                     ref={self.drop_down_ref.clone()}

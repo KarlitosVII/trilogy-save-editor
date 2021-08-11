@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Error};
-use gloo_console::warn;
 use std::mem;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
@@ -26,6 +25,7 @@ pub enum Msg {
     SaveSave,
     ReloadSave,
     Error(Error),
+    CloseError,
     Notification(String),
 }
 
@@ -40,6 +40,7 @@ pub struct App {
     link: ComponentLink<Self>,
     save_handle: Box<dyn Bridge<SaveHandler>>,
     _dbs_service: Box<dyn Bridge<DatabaseService>>,
+    error: Option<Error>,
 }
 
 impl Component for App {
@@ -56,7 +57,7 @@ impl Component for App {
             Msg::Error(anyhow!("Database service should not send a message to App component"))
         }));
 
-        App { props, link, save_handle, _dbs_service }
+        App { props, link, save_handle, _dbs_service, error: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -86,16 +87,12 @@ impl Component for App {
                 false
             }
             Msg::Error(error) => {
-                // TODO: Error
-                warn!(error.to_string());
-
-                let chain = error.chain().skip(1);
-                if chain.len() != 0 {
-                    for error in chain {
-                        warn!(error.to_string());
-                    }
-                }
-                false
+                self.error = Some(error);
+                true
+            }
+            Msg::CloseError => {
+                self.error = None;
+                true
             }
             Msg::Notification(_) => {
                 // TODO: Notification
@@ -134,6 +131,8 @@ impl Component for App {
             (App::changelog(), Theme::MassEffect3)
         };
 
+        let error = self.error.as_ref().map(|error| App::error(self, error));
+
         html! {
             <div class={classes![
                 "h-screen",
@@ -152,12 +151,41 @@ impl Component for App {
                     onreload={self.link.callback(|_| Msg::ReloadSave)}
                 />
                 { content }
+                { for error }
             </div>
         }
     }
 }
 
 impl App {
+    fn error(&self, error: &Error) -> Html {
+        let chain = error.chain().skip(1).map(|error| {
+            html! {
+                <>
+                    <hr class="mt-0.5 border-t border-default-border" />
+                    { error }
+                </>
+            }
+        });
+        html! {
+            <div class="absolute w-screen h-screen grid place-content-center bg-white/30 z-50">
+                <div class="border border-default-border bg-default-bg">
+                    <div class="px-1 bg-theme-active select-none">{"Error"}</div>
+                    <div class="p-1 pt-0.5">
+                        { error }
+                        { for chain }
+                        <hr class="my-0.5 border-t border-default-border" />
+                        <button class="btn w-12"
+                            onclick={self.link.callback(|_| Msg::CloseError)}
+                        >
+                            {"OK"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
     fn changelog() -> Html {
         let changelog = {
             let file = include_str!("../../CHANGELOG.md");

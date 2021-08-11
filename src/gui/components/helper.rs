@@ -86,7 +86,7 @@ impl Component for Helper {
                         "px-2",
                         "py-1",
                         "w-[480px]",
-                        "z-40",
+                        "z-30",
                         (!self.hovered).then(|| "hidden" ),
                     ]}
                     ref={self.popup_ref.clone()}

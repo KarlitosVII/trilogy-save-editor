@@ -1,5 +1,5 @@
-use gloo_events::EventListener;
-use gloo_timers::callback::Timeout;
+use gloo::events::EventListener;
+use gloo::timers::callback::Timeout;
 use indexmap::{map::Entry, IndexMap};
 use std::{
     cell::{Ref, RefMut},

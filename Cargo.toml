@@ -34,9 +34,7 @@ reqwest = {version = "0.11", default-features = false }
 # Wasm
 wasm-bindgen-futures = "0.4"
 web-sys = { version="0.3", features=["CssStyleDeclaration", "DomRect"] }
-gloo-timers = "0.2"
-gloo-events = "0.1"
-gloo-console = "0.1"
+gloo = "0.3"
 # Yew
 yew = { git = "https://github.com/yewstack/yew/" }
 yew-agent = { git = "https://github.com/yewstack/yew/" }

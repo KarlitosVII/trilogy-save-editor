@@ -1,4 +1,4 @@
-use gloo_timers::callback::Timeout;
+use gloo::timers::callback::Timeout;
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::components::Helper;

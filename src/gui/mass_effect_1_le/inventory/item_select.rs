@@ -1,4 +1,4 @@
-use gloo_timers::callback::Timeout;
+use gloo::timers::callback::Timeout;
 use indexmap::IndexMap;
 use std::rc::Rc;
 use web_sys::HtmlElement;
@@ -259,7 +259,7 @@ impl Component for ItemSelect {
                         "border-default-border",
                         "min-w-full",
                         "max-h-[300px]",
-                        "z-30",
+                        "z-20",
                         (!self.opened).then(|| "hidden")
                     ]}
                     ref={self.drop_down_ref.clone()}
@@ -275,7 +275,7 @@ impl Component for ItemSelect {
                         { "Filter" }
                     </label>
                     <hr class="border-t border-default-border" />
-                    <div class="p-px overflow-y-auto z-30"
+                    <div class="p-px overflow-y-auto z-20"
                         onscroll={self.link.callback(|_| Msg::Scrolled)}
                         ref={self.scroll_ref.clone()}
                     >

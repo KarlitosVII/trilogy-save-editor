@@ -71,7 +71,7 @@ impl<T: Display> Display for RcUi<T> {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Theme {
     MassEffect1,
     MassEffect2,

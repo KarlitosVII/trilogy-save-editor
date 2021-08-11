@@ -9,30 +9,29 @@ pub enum Msg {
 }
 
 #[derive(Properties, Clone, PartialEq)]
-pub struct TabBarProps {
-    #[prop_or_default]
-    current_tab: usize,
+pub struct Props {
     pub children: ChildrenWithProps<Tab>,
 }
 
 pub struct TabBar {
-    props: TabBarProps,
+    props: Props,
     link: ComponentLink<Self>,
+    current_tab: usize,
 }
 
 impl Component for TabBar {
     type Message = Msg;
-    type Properties = TabBarProps;
+    type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        TabBar { props, link }
+        TabBar { props, link, current_tab: 0 }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::TabClicked(event, idx) => {
                 if event.button() == MAIN_BUTTON {
-                    self.props.current_tab = idx;
+                    self.current_tab = idx;
                     true
                 } else {
                     false
@@ -47,14 +46,14 @@ impl Component for TabBar {
 
     fn view(&self) -> Html {
         let tabs = self.props.children.iter().enumerate().map(|(idx, child)| {
-            let onmousedown = (idx != self.props.current_tab)
+            let onmousedown = (idx != self.current_tab)
                 .then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)));
             html_nested! {
                 <button class={classes![
                         "btn",
                         "leading-[19px]",
                         "!rounded-t",
-                        (idx == self.props.current_tab).then(|| "!bg-theme-active"),
+                        (idx == self.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
                     ]}
                     {onmousedown}
@@ -65,7 +64,7 @@ impl Component for TabBar {
         });
 
         let content = self.props.children.iter().enumerate().find_map(|(idx, content)| {
-            (idx == self.props.current_tab).then(|| {
+            (idx == self.current_tab).then(|| {
                 html! {
                     <div class={classes![
                         "flex-auto",
@@ -73,7 +72,7 @@ impl Component for TabBar {
                         "flex-col",
                         "h-0",
                         "overflow-y-auto",
-                        content.props.theme.clone()
+                        content.props.theme,
                     ]}>
                         { content }
                     </div>

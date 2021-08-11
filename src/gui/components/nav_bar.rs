@@ -115,7 +115,7 @@ impl NavBar {
                     "border",
                     "border-default-border",
                     "p-1",
-                    "z-50",
+                    "z-40",
                     (!self.about_opened).then(|| "hidden" )
                 ]}>
                     <hr class="border-default-border" />
