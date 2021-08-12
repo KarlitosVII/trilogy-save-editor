@@ -303,8 +303,8 @@ mod test {
     #[test]
     fn deserialize_serialize() -> Result<()> {
         let files = [
-            "test/ME1Le00_QuickSave.pcsav", // Normal save game
-            "test/ME1Le_Export.pcsav",      // Export save game
+            "test/ME1LeSave.pcsav",   // Normal save game
+            "test/ME1LeExport.pcsav", // Export save game
         ];
 
         for file in files {

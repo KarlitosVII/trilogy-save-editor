@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Error};
+use gloo::timers::future::TimeoutFuture;
 use std::mem;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
@@ -23,10 +24,12 @@ pub enum Msg {
     OpenSave,
     SaveOpened(SaveGame),
     SaveSave,
+    SaveSaved,
     ReloadSave,
+    Notification(&'static str),
+    CloseNotification,
     Error(Error),
     CloseError,
-    Notification(String),
 }
 
 #[derive(Properties, Clone, Default)]
@@ -40,6 +43,7 @@ pub struct App {
     link: ComponentLink<Self>,
     save_handle: Box<dyn Bridge<SaveHandler>>,
     _dbs_service: Box<dyn Bridge<DatabaseService>>,
+    notification: Option<&'static str>,
     error: Option<Error>,
 }
 
@@ -57,7 +61,7 @@ impl Component for App {
             Msg::Error(anyhow!("Database service should not send a message to App component"))
         }));
 
-        App { props, link, save_handle, _dbs_service, error: None }
+        App { props, link, save_handle, _dbs_service, notification: None, error: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -68,9 +72,17 @@ impl Component for App {
             }
             Msg::SaveOpened(save_game) => {
                 self.props.save_game = Some(save_game);
+                self.link.send_message(Msg::Notification("Opened"));
+                false
+            }
+            Msg::SaveSave => {
+                // TODO: Save
                 true
             }
-            Msg::SaveSave => false,
+            Msg::SaveSaved => {
+                self.link.send_message(Msg::Notification("Saved"));
+                false
+            }
             Msg::ReloadSave => {
                 let file_path = match self.props.save_game {
                     Some(
@@ -86,6 +98,18 @@ impl Component for App {
                 self.save_handle.send(Request::OpenSave(file_path));
                 false
             }
+            Msg::Notification(notification) => {
+                self.notification = Some(notification);
+                self.link.send_future(async {
+                    TimeoutFuture::new(1500).await;
+                    Msg::CloseNotification
+                });
+                true
+            }
+            Msg::CloseNotification => {
+                self.notification = None;
+                true
+            }
             Msg::Error(error) => {
                 self.error = Some(error);
                 true
@@ -93,10 +117,6 @@ impl Component for App {
             Msg::CloseError => {
                 self.error = None;
                 true
-            }
-            Msg::Notification(_) => {
-                // TODO: Notification
-                false
             }
         }
     }
@@ -131,6 +151,8 @@ impl Component for App {
             (App::changelog(), Theme::MassEffect3)
         };
 
+        let notification =
+            self.notification.as_ref().map(|notification| App::notification(self, notification));
         let error = self.error.as_ref().map(|error| App::error(self, error));
 
         html! {
@@ -151,6 +173,7 @@ impl Component for App {
                     onreload={self.link.callback(|_| Msg::ReloadSave)}
                 />
                 { content }
+                { for notification }
                 { for error }
             </div>
         }
@@ -158,6 +181,29 @@ impl Component for App {
 }
 
 impl App {
+    fn notification(&self, notification: &str) -> Html {
+        html! {
+            <div class={classes![
+                "absolute",
+                "top-1.5",
+                "left-1/2",
+                "-translate-x-1/2",
+                "border",
+                "border-default-border",
+                "bg-default-bg/50",
+                "p-2",
+                "pt-0.5",
+                "pb-1.5",
+                "z-50"
+            ]}>
+                { notification }
+                <div class="relative h-0.5 bg-theme-bg">
+                    <div class="absolute notification-animation w-full h-0.5 bg-white"></div>
+                </div>
+            </div>
+        }
+    }
+
     fn error(&self, error: &Error) -> Html {
         let chain = error.chain().skip(1).map(|error| {
             html! {

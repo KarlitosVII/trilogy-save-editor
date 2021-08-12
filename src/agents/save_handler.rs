@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{Error, Result};
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
 use crate::{
@@ -47,19 +47,22 @@ impl Agent for SaveHandler {
     fn update(&mut self, _msg: Self::Message) {}
 
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        let handle_request = || match msg {
-            Request::OpenSave(file_path) => {
-                let save_game: RcUi<Me3SaveGame> = unreal::Deserializer::from_bytes(
-                    include_bytes!("../../test/ME3Save.pcsav"),
-                )?;
-                let response = SaveGame::MassEffect3 { file_path, save_game };
-                self.link.respond(who, Response::SaveOpened(response));
-                Ok(())
-            }
+        let result = match msg {
+            Request::OpenSave(file_path) => self.open_save(who, file_path),
         };
 
-        if let Err(err) = handle_request() {
+        if let Err(err) = result {
             self.link.respond(who, Response::Error(err));
         }
+    }
+}
+
+impl SaveHandler {
+    fn open_save(&self, who: HandlerId, file_path: String) -> Result<()> {
+        let save_game: RcUi<Me3SaveGame> =
+            unreal::Deserializer::from_bytes(include_bytes!("../../test/ME3Save.pcsav"))?;
+        let response = SaveGame::MassEffect3 { file_path, save_game };
+        self.link.respond(who, Response::SaveOpened(response));
+        Ok(())
     }
 }

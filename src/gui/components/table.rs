@@ -1,4 +1,4 @@
-use gloo::timers::callback::Timeout;
+use gloo::timers::future::TimeoutFuture;
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::components::Helper;
@@ -135,9 +135,11 @@ impl Component for RowChunk {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let should_render = props.position == 0;
         if !should_render {
-            let link = link.clone();
-            Timeout::new(17 * props.position as u32, move || link.send_message(ChunkMsg::Render))
-                .forget();
+            let position = props.position as u32;
+            link.send_future(async move {
+                TimeoutFuture::new(17 * position).await;
+                ChunkMsg::Render
+            });
         }
         RowChunk { props, link, should_render }
     }
@@ -154,8 +156,10 @@ impl Component for RowChunk {
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         if self.props.neq_assign(props) {
             if self.props.position != 0 {
-                let link = self.link.clone();
-                Timeout::new(0, move || link.send_message(ChunkMsg::Render)).forget();
+                self.link.send_future(async {
+                    TimeoutFuture::new(0).await;
+                    ChunkMsg::Render
+                });
             } else {
                 return true;
             }

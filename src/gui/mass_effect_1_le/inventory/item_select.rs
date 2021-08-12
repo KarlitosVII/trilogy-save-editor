@@ -1,4 +1,4 @@
-use gloo::timers::callback::Timeout;
+use gloo::timers::future::TimeoutFuture;
 use indexmap::IndexMap;
 use std::rc::Rc;
 use web_sys::HtmlElement;
@@ -108,8 +108,10 @@ impl Component for ItemSelect {
                 // The drop down blur just before the filter focus
                 // so we delay the check until next event loop
                 // to avoid closing when clicking into filter's input
-                let link = self.link.clone();
-                Timeout::new(0, move || link.send_message(Msg::ShouldClose)).forget();
+                self.link.send_future(async {
+                    TimeoutFuture::new(0).await;
+                    Msg::ShouldClose
+                });
                 false
             }
             Msg::BlurAll => {

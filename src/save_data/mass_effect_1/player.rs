@@ -254,7 +254,7 @@ mod test {
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
-        let input = fs::read("test/Clare00_AutoSave.MassEffectSave")?;
+        let input = fs::read("test/ME1Save.MassEffectSave")?;
 
         let player_data = {
             let zip_offset = <u32>::from_le_bytes((&input[8..12]).try_into()?);

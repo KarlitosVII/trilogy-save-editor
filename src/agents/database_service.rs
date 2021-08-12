@@ -1,6 +1,5 @@
 use anyhow::{Context as AnyhowContext, Error, Result};
 use std::rc::Rc;
-use wasm_bindgen_futures::spawn_local;
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::save_data::{
@@ -168,18 +167,16 @@ impl DatabaseService {
     where
         F: Fn(String) -> Result<Database> + 'static,
     {
-        let link = self.link.clone();
-        spawn_local(async move {
+        self.link.send_future(async move {
             let handle_db = async {
                 let response =
                     reqwest::get(format!("http://127.0.0.1:8080{}", path)).await?.text().await?;
                 deserialize(response)
             };
-            let msg = match handle_db.await.context(format!("Failed to parse `{}`", path)) {
+            match handle_db.await.context(format!("Failed to parse `{}`", path)) {
                 Ok(db) => Msg::DatabaseLoaded(who, db),
                 Err(err) => Msg::Error(who, err),
-            };
-            link.send_message(msg);
+            }
         });
     }
 }

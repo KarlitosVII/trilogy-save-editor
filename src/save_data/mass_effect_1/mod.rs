@@ -173,8 +173,8 @@ pub mod plot_db;
 //     #[test]
 //     fn unzip_deserialize_serialize_zip() -> Result<()> {
 //         let files = [
-//             "test/Clare00_AutoSave.MassEffectSave", // Avec WorldSavePackage.sav
-//             "test/Char_01-60-3-2-2-26-6-2018-57-26.MassEffectSave", // Sans
+//             "test/ME1Save.MassEffectSave", // Normal save
+//             "test/ME1Export.MassEffectSave", // Export save
 //         ];
 
 //         for file in files {

@@ -1,5 +1,4 @@
-use gloo::events::EventListener;
-use gloo::timers::callback::Timeout;
+use gloo::{events::EventListener, timers::future::TimeoutFuture};
 use indexmap::{map::Entry, IndexMap};
 use std::{
     cell::{Ref, RefMut},
@@ -124,8 +123,10 @@ impl Component for RawPlot {
                     self.is_filtering = true;
                     *self.props.filter_mut() = filter;
 
-                    let link = self.link.clone();
-                    Timeout::new(100, move || link.send_message(Msg::Filtered)).forget();
+                    self.link.send_future(async {
+                        TimeoutFuture::new(100).await;
+                        Msg::Filtered
+                    });
 
                     self.update_label_list();
 
