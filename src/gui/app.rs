@@ -66,7 +66,7 @@ impl Component for App {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::OpenSave => {
-                self.save_handle.send(Request::OpenSave(String::from("test/ME2LeSave.pcsav")));
+                self.save_handle.send(Request::OpenSave);
                 false
             }
             Msg::SaveOpened(save_game) => {
@@ -94,7 +94,7 @@ impl Component for App {
                     None => unreachable!(),
                 };
 
-                self.save_handle.send(Request::OpenSave(file_path));
+                self.save_handle.send(Request::ReloadSave(file_path));
                 false
             }
             Msg::Notification(notification) => {
@@ -266,7 +266,9 @@ impl App {
                     { "Changelog" }
                     <hr class="border-t border-default-border" />
                 </div>
-                { for logs }
+                <div class="flex-auto flex flex-col gap-1 h-0 overflow-y-auto">
+                    { for logs }
+                </div>
             </section>
         }
     }

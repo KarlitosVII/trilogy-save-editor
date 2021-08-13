@@ -51,7 +51,10 @@ impl Component for BonusPowers {
                 match self.props.powers {
                     BonusPowerType::Me2(ref mut powers) => {
                         let idx = powers.borrow().iter().enumerate().find_map(|(i, power)| {
-                            unicase::eq(&power_class_name, &power.borrow().power_class_name())
+                            power
+                                .borrow()
+                                .power_class_name()
+                                .eq_ignore_ascii_case(&power_class_name)
                                 .then(|| i)
                         });
 
@@ -65,7 +68,10 @@ impl Component for BonusPowers {
                     }
                     BonusPowerType::Me3(ref mut powers) => {
                         let idx = powers.borrow().iter().enumerate().find_map(|(i, power)| {
-                            unicase::eq(&power_class_name, &power.borrow().power_class_name())
+                            power
+                                .borrow()
+                                .power_class_name()
+                                .eq_ignore_ascii_case(&power_class_name)
                                 .then(|| i)
                         });
 
@@ -95,10 +101,10 @@ impl Component for BonusPowers {
             let selected = match powers {
                 BonusPowerType::Me2(powers) => powers.borrow()
                 .iter()
-                .any(|power| unicase::eq(power_class_name, &power.borrow().power_class_name())),
+                .any(|power| power.borrow().power_class_name().eq_ignore_ascii_case(power_class_name)),
                 BonusPowerType::Me3(powers) => powers.borrow()
                 .iter()
-                .any(|power| unicase::eq(power_class_name, &power.borrow().power_class_name())),
+                .any(|power| power.borrow().power_class_name().eq_ignore_ascii_case(power_class_name)),
             };
 
             html_nested! {

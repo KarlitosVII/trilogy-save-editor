@@ -2,9 +2,18 @@
 default_to_workspace = false
 
 # Utils
+[tasks.npm-update]
+command = "npm"
+args = ["update"]
+
+[tasks.npm-update.windows]
+command = "powershell"
+args = ["-Command", "npm", "update"]
+
 [tasks.update]
 command = "cargo"
 args = ["update"]
+dependencies = ["npm-update"]
 
 [tasks.fmt]
 install_crate = "rustfmt"
@@ -68,8 +77,14 @@ args = ["build"]
 
 [tasks.build]
 clear = true
-# command = "cargo"
-# args = ["build"]
+command = "cargo"
+args = ["build", "-p", "app"]
+dependencies = ["tailwind-build", "trunk-build"]
+
+[tasks.run]
+clear = true
+command = "cargo"
+args = ["run", "-p", "app"]
 dependencies = ["tailwind-build", "trunk-build"]
 
 [tasks.release]

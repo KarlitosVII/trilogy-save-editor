@@ -1,0 +1,22 @@
+[package]
+name = "app"
+version = "2.0.0"
+edition = "2018"
+
+[[bin]]
+name = "trilogy-save-editor"
+path = "src/main.rs"
+
+[dependencies]
+# Std-like
+anyhow = "1.0"
+# Utils
+mime_guess = "2.0"
+rust-embed = { version = "6.0", default-features = false }
+dirs = "3.0"
+rfd = "0.4"
+base64 = "0.13"
+# (De)Serialize
+serde_json = "1.0"
+# WebView
+wry = { version = "0.12", features = ["protocol"], default-features = false }

@@ -322,7 +322,7 @@ impl Me3General {
         let class_idx = Me3Class::names()
             .iter()
             .enumerate()
-            .find_map(|(i, &name)| unicase::eq(name, &player.class_name()).then(|| i))
+            .find_map(|(i, name)| player.class_name().eq_ignore_ascii_case(name).then(|| i))
             .unwrap_or_default();
 
         html! {

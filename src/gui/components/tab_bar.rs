@@ -51,6 +51,7 @@ impl Component for TabBar {
             html_nested! {
                 <button class={classes![
                         "rounded-t",
+                        "rounded-b-none",
                         "cursor-pointer",
                         "leading-[19px]",
                         "px-1",

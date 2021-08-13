@@ -1,3 +1,5 @@
+#![warn(clippy::all)]
+
 use heck::TitleCase;
 use proc_macro::TokenStream;
 use proc_macro2::Span;

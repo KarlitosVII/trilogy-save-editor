@@ -81,10 +81,9 @@ impl Component for PlotVariable {
         });
 
         let variables = var_db.iter().map(|(db_key, label)| {
-            let value = variables
-                .borrow()
-                .iter()
-                .find_map(|(key, value)| unicase::eq(key, db_key).then(|| RcUi::clone(value)));
+            let value = variables.borrow().iter().find_map(|(key, value)| {
+                db_key.eq_ignore_ascii_case(key).then(|| RcUi::clone(value))
+            });
             match value {
                 Some(value) => value.view(label),
                 None => Html::default(),
@@ -115,7 +114,8 @@ impl PlotVariable {
 
         // Variables
         for db_key in var_db.keys().cloned() {
-            let contains_key = variables.borrow().iter().any(|(key, _)| unicase::eq(key, &db_key));
+            let contains_key =
+                variables.borrow().iter().any(|(key, _)| db_key.eq_ignore_ascii_case(key));
             if !contains_key {
                 variables.borrow_mut().entry(db_key).or_default();
             }

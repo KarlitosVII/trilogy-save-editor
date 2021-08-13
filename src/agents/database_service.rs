@@ -3,6 +3,7 @@ use std::rc::Rc;
 use anyhow::{Context as AnyhowContext, Error, Result};
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
+use crate::rpc;
 use crate::save_data::{
     mass_effect_1::plot_db::Me1PlotDb, mass_effect_1_le::item_db::Me1ItemDb,
     mass_effect_2::plot_db::Me2PlotDb, mass_effect_3::plot_db::Me3PlotDb, shared::plot::RawPlotDb,
@@ -96,9 +97,7 @@ impl Agent for DatabaseService {
                 }
                 self.respond_db(who, db);
             }
-            Msg::Error(who, err) => {
-                self.link.respond(who, Response::Error(err));
-            }
+            Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
         }
     }
 
@@ -107,49 +106,49 @@ impl Agent for DatabaseService {
             Request::Database(db_type) => match db_type {
                 Type::Me1Plot => match self.dbs.me1_plot {
                     Some(ref db) => self.respond_db(who, Database::Me1Plot(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me1_plot_db.ron", |response| {
+                    None => self.load_db(who, "databases/me1_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me1Plot(Rc::new(db)))
                     }),
                 },
                 Type::Me1RawPlot => match self.dbs.me1_raw_plot {
                     Some(ref db) => self.respond_db(who, Database::Me1RawPlot(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me1_raw_plot_db.ron", |response| {
+                    None => self.load_db(who, "databases/me1_raw_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me1RawPlot(Rc::new(db)))
                     }),
                 },
                 Type::Me1ItemDb => match self.dbs.me1_item_db {
                     Some(ref db) => self.respond_db(who, Database::Me1ItemDb(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me1_item_db.ron", |response| {
+                    None => self.load_db(who, "databases/me1_item_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me1ItemDb(Rc::new(db)))
                     }),
                 },
                 Type::Me2Plot => match self.dbs.me2_plot {
                     Some(ref db) => self.respond_db(who, Database::Me2Plot(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me2_plot_db.ron", |response| {
+                    None => self.load_db(who, "databases/me2_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me2Plot(Rc::new(db)))
                     }),
                 },
                 Type::Me2RawPlot => match self.dbs.me2_raw_plot {
                     Some(ref db) => self.respond_db(who, Database::Me2RawPlot(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me2_raw_plot_db.ron", |response| {
+                    None => self.load_db(who, "databases/me2_raw_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me2RawPlot(Rc::new(db)))
                     }),
                 },
                 Type::Me3Plot => match self.dbs.me3_plot {
                     Some(ref db) => self.respond_db(who, Database::Me3Plot(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me3_plot_db.ron", |response| {
+                    None => self.load_db(who, "databases/me3_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me3Plot(Rc::new(db)))
                     }),
                 },
                 Type::Me3RawPlot => match self.dbs.me3_raw_plot {
                     Some(ref db) => self.respond_db(who, Database::Me3RawPlot(Rc::clone(db))),
-                    None => self.fetch(who, "/databases/me3_raw_plot_db.ron", |response| {
+                    None => self.load_db(who, "databases/me3_raw_plot_db.ron", |response| {
                         let db = ron::from_str(&response)?;
                         Ok(Database::Me3RawPlot(Rc::new(db)))
                     }),
@@ -164,17 +163,17 @@ impl DatabaseService {
         self.link.respond(who, Response::Database(db))
     }
 
-    fn fetch<F>(&mut self, who: HandlerId, path: &'static str, deserialize: F)
+    fn load_db<F>(&mut self, who: HandlerId, path: &'static str, deserialize: F)
     where
         F: Fn(String) -> Result<Database> + 'static,
     {
         self.link.send_future(async move {
             let handle_db = async {
-                let response =
-                    reqwest::get(format!("http://127.0.0.1:8080{}", path)).await?.text().await?;
-                deserialize(response)
+                let response = rpc::load_database(path).await?;
+                let file = response.file.into_string()?;
+                deserialize(file)
             };
-            match handle_db.await.context(format!("Failed to parse `{}`", path)) {
+            match handle_db.await.context(format!("Failed to parse `/{}`", path)) {
                 Ok(db) => Msg::DatabaseLoaded(who, db),
                 Err(err) => Msg::Error(who, err),
             }
