@@ -1,11 +1,11 @@
-use serde::{de, ser};
+mod deserializer;
+mod serializer;
+
+pub use self::{deserializer::*, serializer::*};
+
 use std::fmt::{self, Display};
 
-mod serializer;
-pub use serializer::*;
-
-mod deserializer;
-pub use deserializer::*;
+use serde::{de, ser};
 
 pub type Result<T> = std::result::Result<T, Error>;
 

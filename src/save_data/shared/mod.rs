@@ -1,11 +1,11 @@
+pub mod appearance;
+pub mod player;
+pub mod plot;
+
 use derive_more::Display;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use super::Guid;
-
-pub mod appearance;
-pub mod player;
-pub mod plot;
 
 #[derive(Clone, RawUi)]
 #[repr(u32)]

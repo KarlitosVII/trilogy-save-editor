@@ -1,9 +1,8 @@
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::mass_effect_1_le::player::ItemLevel;
-
 use super::{BaseObject, OptionObjectProxy};
+use crate::save_data::mass_effect_1_le::player::ItemLevel;
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, RawUiChildren)]

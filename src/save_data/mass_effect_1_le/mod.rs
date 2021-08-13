@@ -1,32 +1,27 @@
-use anyhow::Result;
-use flate2::{
-    read::{ZlibDecoder, ZlibEncoder},
-    Compression,
-};
-use indexmap::IndexMap;
-use serde::{
-    de,
-    ser::{self, SerializeStruct},
-    Deserialize, Deserializer, Serialize, Serializer,
-};
-use std::{fmt, io::Read};
-
-use crate::{gui::RcUi, unreal};
-
-use super::{
-    shared::{
-        plot::{Codex, Journal, PlotTable},
-        Rotator, SaveTimeStamp, Vector,
-    },
-    List,
-};
-
 pub mod item_db;
 pub mod legacy;
 pub mod player;
 pub mod squad;
 
 use self::{legacy::*, player::*, squad::*};
+
+use std::fmt;
+use std::io::Read;
+
+use anyhow::Result;
+use flate2::read::{ZlibDecoder, ZlibEncoder};
+use flate2::Compression;
+use indexmap::IndexMap;
+use serde::de;
+use serde::ser::{self, SerializeStruct};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+use super::shared::{
+    plot::{Codex, Journal, PlotTable},
+    Rotator, SaveTimeStamp, Vector,
+};
+use super::List;
+use crate::{gui::RcUi, unreal};
 
 #[derive(Serialize, Clone)]
 struct ChunkHeader {
@@ -292,13 +287,14 @@ pub struct Vehicle {
 
 #[cfg(test)]
 mod test {
+    use std::fs;
+    use std::time::Instant;
+
     use anyhow::Result;
     use crc::{Crc, CRC_32_BZIP2};
-    use std::{fs, time::Instant};
-
-    use crate::unreal;
 
     use super::*;
+    use crate::unreal;
 
     #[test]
     fn deserialize_serialize() -> Result<()> {

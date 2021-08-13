@@ -1,29 +1,21 @@
+mod galaxy_map;
+pub mod player;
+pub mod plot;
+pub mod plot_db;
+mod squad;
+
+use self::{galaxy_map::*, player::*, plot::*, squad::*};
+
 use anyhow::Result;
 use derive_more::Display;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
-use super::{
-    shared::{
-        plot::PlotTable as Me1PlotTable, Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp,
-        StreamingState, Vector,
-    },
-    Guid,
+use super::shared::{
+    plot::PlotTable as Me1PlotTable, Door, EndGameState, Kismet, Level, Rotator, SaveTimeStamp,
+    StreamingState, Vector,
 };
-
-pub mod player;
-use player::*;
-
-mod squad;
-use squad::*;
-
-pub mod plot;
-use plot::*;
-
-pub mod plot_db;
-
-mod galaxy_map;
-use galaxy_map::*;
+use super::Guid;
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, RawUiRoot)]
@@ -166,13 +158,14 @@ impl Default for ObjectiveMarkerIconType {
 
 #[cfg(test)]
 mod test {
+    use std::fs;
+    use std::time::Instant;
+
     use anyhow::Result;
     use crc::{Crc, CRC_32_BZIP2};
-    use std::{fs, time::Instant};
-
-    use crate::unreal;
 
     use super::*;
+    use crate::unreal;
 
     #[test]
     fn deserialize_serialize() -> Result<()> {

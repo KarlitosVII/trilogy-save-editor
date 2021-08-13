@@ -1,20 +1,19 @@
+use std::rc::Rc;
+
 use anyhow::Error;
 use indexmap::IndexMap;
-use std::rc::Rc;
 use yew::{prelude::*, utils::NeqAssign};
 use yew_agent::{Bridge, Bridged};
 
-use crate::{
-    database_service::{Database, DatabaseService, Request, Response, Type},
-    gui::{
-        components::{Tab, TabBar},
-        shared::{IntPlotType, PlotCategory},
-        RcUi,
-    },
-    save_data::{
-        mass_effect_1::plot_db::Me1PlotDb,
-        shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-    },
+use crate::database_service::{Database, DatabaseService, Request, Response, Type};
+use crate::gui::{
+    components::{Tab, TabBar},
+    shared::{IntPlotType, PlotCategory},
+    RcUi,
+};
+use crate::save_data::{
+    mass_effect_1::plot_db::Me1PlotDb,
+    shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
 };
 
 pub enum Msg {

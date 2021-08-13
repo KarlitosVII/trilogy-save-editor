@@ -1,8 +1,7 @@
-use std::{
-    any::Any,
-    cell::{Ref, RefMut},
-    fmt::Display,
-};
+use std::any::Any;
+use std::cell::{Ref, RefMut};
+use std::fmt::Display;
+
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::{components::Table, raw_ui::RawUi, RcUi};

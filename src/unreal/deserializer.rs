@@ -1,12 +1,11 @@
-use encoding_rs::{UTF_16LE, WINDOWS_1252};
-use serde::{
-    de::{
-        self, DeserializeSeed, EnumAccess, Error, IntoDeserializer, MapAccess, SeqAccess,
-        VariantAccess, Visitor,
-    },
-    Deserialize,
-};
 use std::mem;
+
+use encoding_rs::{UTF_16LE, WINDOWS_1252};
+use serde::de::{
+    self, DeserializeSeed, EnumAccess, Error, IntoDeserializer, MapAccess, SeqAccess,
+    VariantAccess, Visitor,
+};
+use serde::Deserialize;
 
 use super::Result;
 

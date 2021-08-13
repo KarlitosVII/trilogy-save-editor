@@ -1,18 +1,17 @@
 use std::cell::{Ref, RefMut};
+
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{CallbackType, Helper, InputNumber, InputText, NumberType, Select, Table},
-        raw_ui::RawUi,
-        RcUi,
-    },
-    save_data::{
-        mass_effect_1_le::{player::Player, squad::Henchman, Me1LeSaveData},
-        shared::{
-            player::{Notoriety, Origin},
-            plot::PlotTable,
-        },
+use crate::gui::{
+    components::{CallbackType, Helper, InputNumber, InputText, NumberType, Select, Table},
+    raw_ui::RawUi,
+    RcUi,
+};
+use crate::save_data::{
+    mass_effect_1_le::{player::Player, squad::Henchman, Me1LeSaveData},
+    shared::{
+        player::{Notoriety, Origin},
+        plot::PlotTable,
     },
 };
 

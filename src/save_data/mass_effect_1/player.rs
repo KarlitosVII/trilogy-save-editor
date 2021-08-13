@@ -1,14 +1,12 @@
+use std::{cell::RefCell, fmt};
+
 use anyhow::Result;
 use derive_more::{Deref, DerefMut};
 use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
-use std::{cell::RefCell, fmt};
-
-use crate::{
-    save_data::{Dummy, String},
-    unreal,
-};
 
 use super::{data::Data, List};
+use crate::save_data::{Dummy, String};
+use crate::unreal;
 
 #[derive(Clone)]
 pub struct Player {
@@ -240,24 +238,21 @@ pub struct Object {
 
 #[cfg(test)]
 mod test {
+    use std::fs;
+    use std::io::{Cursor, Read};
+
     use anyhow::Result;
-    use std::{
-        convert::TryInto,
-        fs,
-        io::{Cursor, Read},
-    };
     use zip::ZipArchive;
 
-    use crate::unreal;
-
     use super::*;
+    use crate::unreal;
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
         let input = fs::read("test/ME1Save.MassEffectSave")?;
 
         let player_data = {
-            let zip_offset = <u32>::from_le_bytes((&input[8..12]).try_into()?);
+            let zip_offset = <u32>::from_le_bytes([0; 4].copy_from_slice(&input[8..12]));
             let mut zip = ZipArchive::new(Cursor::new(&input[zip_offset as usize..]))?;
 
             let mut bytes = Vec::new();

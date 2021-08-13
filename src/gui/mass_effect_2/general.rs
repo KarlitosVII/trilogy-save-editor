@@ -1,24 +1,22 @@
 use std::cell::Ref;
+
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{Helper, InputText, Select, Table},
-        raw_ui::RawUi,
-        shared::{BonusPowerType, BonusPowers},
-        RcUi,
-    },
-    save_data::{
-        mass_effect_2::{player::Player, Difficulty},
-        shared::{
-            player::{Notoriety, Origin},
-            plot::PlotTable,
-            EndGameState,
-        },
+use super::Me2Type;
+use crate::gui::{
+    components::{Helper, InputText, Select, Table},
+    raw_ui::RawUi,
+    shared::{BonusPowerType, BonusPowers},
+    RcUi,
+};
+use crate::save_data::{
+    mass_effect_2::{player::Player, Difficulty},
+    shared::{
+        player::{Notoriety, Origin},
+        plot::PlotTable,
+        EndGameState,
     },
 };
-
-use super::Me2Type;
 
 #[derive(Clone, RawUi)]
 enum Me2Class {

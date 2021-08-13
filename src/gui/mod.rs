@@ -1,10 +1,3 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    fmt::{self, Display},
-    rc::Rc,
-};
-
 mod app;
 pub mod components;
 mod mass_effect_1;
@@ -15,6 +8,12 @@ pub mod raw_ui;
 pub mod shared;
 
 pub use self::app::*;
+
+use std::cell::{Ref, RefCell, RefMut};
+use std::fmt::{self, Display};
+use std::rc::Rc;
+
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 // RcUi
 #[derive(Clone, Default)]

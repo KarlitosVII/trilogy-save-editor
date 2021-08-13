@@ -1,18 +1,15 @@
-use indexmap::IndexMap;
-use yew::prelude::*;
-
-use crate::{
-    gui::RcUi,
-    save_data::shared::plot::{BitVec, PlotTable},
-};
-
 mod bonus_powers;
 mod plot_category;
 mod raw_plot;
 
 pub use self::{bonus_powers::*, plot_category::*, raw_plot::*};
 
+use indexmap::IndexMap;
+use yew::prelude::*;
+
 use super::raw_ui::RawUi;
+use crate::gui::RcUi;
+use crate::save_data::shared::plot::{BitVec, PlotTable};
 
 #[derive(Clone)]
 pub enum IntPlotType {

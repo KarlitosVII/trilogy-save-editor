@@ -1,9 +1,8 @@
 use std::cell::{Ref, RefMut};
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::gui::{components::Helper, RcUi};
-
 use super::CallbackType;
+use crate::gui::{components::Helper, RcUi};
 
 pub enum Msg {
     Input(String),

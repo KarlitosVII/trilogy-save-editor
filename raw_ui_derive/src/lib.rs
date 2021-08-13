@@ -2,10 +2,12 @@ use heck::TitleCase;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
+use syn::parse_macro_input;
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
 use syn::{
-    self, parse_macro_input, punctuated::Punctuated, token::Comma, AngleBracketedGenericArguments,
-    Data, DataStruct, DeriveInput, Fields, GenericArgument, Ident, Path, PathArguments,
-    PathSegment, Token, Type, TypePath, Variant,
+    self, AngleBracketedGenericArguments, Data, DataStruct, DeriveInput, Fields, GenericArgument,
+    Ident, Path, PathArguments, PathSegment, Token, Type, TypePath, Variant,
 };
 
 #[proc_macro_attribute]

@@ -1,14 +1,13 @@
-use anyhow::bail;
 use std::cell::{Ref, RefMut};
+
+use anyhow::bail;
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{CallbackType, InputNumber, NumberType},
-        RcUi,
-    },
-    save_data::shared::appearance::LinearColor,
+use crate::gui::{
+    components::{CallbackType, InputNumber, NumberType},
+    RcUi,
 };
+use crate::save_data::shared::appearance::LinearColor;
 
 pub enum Msg {
     R(CallbackType),

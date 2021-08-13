@@ -1,13 +1,13 @@
-use indexmap::IndexMap;
 use std::{any::Any, fmt::Display};
+
+use indexmap::IndexMap;
 use yew::prelude::*;
 
-use crate::{
-    gui::components::{raw_ui::*, *},
-    save_data::{mass_effect_1_le::legacy::BaseObject, shared::appearance::LinearColor, Guid},
-};
-
 use super::RcUi;
+use crate::gui::components::{raw_ui::*, *};
+use crate::save_data::{
+    mass_effect_1_le::legacy::BaseObject, shared::appearance::LinearColor, Guid,
+};
 
 pub trait RawUi
 where

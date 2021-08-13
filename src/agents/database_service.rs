@@ -1,5 +1,6 @@
-use anyhow::{Context as AnyhowContext, Error, Result};
 use std::rc::Rc;
+
+use anyhow::{Context as AnyhowContext, Error, Result};
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
 use crate::save_data::{

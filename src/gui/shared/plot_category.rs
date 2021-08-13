@@ -1,16 +1,14 @@
 use std::cell::RefMut;
+
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{CheckBox, Table},
-        raw_ui::RawUi,
-        RcUi,
-    },
-    save_data::shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-};
-
 use super::IntPlotType;
+use crate::gui::{
+    components::{CheckBox, Table},
+    raw_ui::RawUi,
+    RcUi,
+};
+use crate::save_data::shared::plot::{BitVec, PlotCategory as PlotCategoryDb};
 
 pub enum Msg {
     ChangeBool(usize, bool),

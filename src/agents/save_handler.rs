@@ -1,15 +1,13 @@
 use anyhow::{Error, Result};
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
-use crate::{
-    gui::RcUi,
-    save_data::{
-        mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
-        mass_effect_2::{Me2LeSaveGame, Me2SaveGame},
-        mass_effect_3::Me3SaveGame,
-    },
-    unreal,
+use crate::gui::RcUi;
+use crate::save_data::{
+    mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
+    mass_effect_2::{Me2LeSaveGame, Me2SaveGame},
+    mass_effect_3::Me3SaveGame,
 };
+use crate::unreal;
 
 #[derive(Clone)]
 pub enum SaveGame {

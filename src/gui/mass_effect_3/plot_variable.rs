@@ -1,14 +1,15 @@
-use indexmap::IndexMap;
 use std::cell::RefMut;
+
+use indexmap::IndexMap;
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{CheckBox, Table},
-        raw_ui::RawUi,
-        RcUi,
-    },
-    save_data::{mass_effect_3::plot_db::PlotVariable as PlotVariableDb, shared::plot::BitVec},
+use crate::gui::{
+    components::{CheckBox, Table},
+    raw_ui::RawUi,
+    RcUi,
+};
+use crate::save_data::{
+    mass_effect_3::plot_db::PlotVariable as PlotVariableDb, shared::plot::BitVec,
 };
 
 pub enum Msg {

@@ -1,12 +1,11 @@
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
+use super::{BaseObject, OptionObjectProxy};
 use crate::save_data::{
     shared::{Rotator, Vector},
     Dummy,
 };
-
-use super::{BaseObject, OptionObjectProxy};
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, RawUiChildren)]

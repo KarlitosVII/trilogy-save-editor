@@ -1,23 +1,19 @@
+// pub mod data;
+// pub mod player;
+pub mod plot_db;
+// pub mod state;
+
+// use self::{player::*, state::*};
+
+// use std::fmt;
+// use std::io::{Cursor, Read, Write};
+
 // use anyhow::Result;
-// use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
-// use std::{
-//     fmt,
-//     io::{Cursor, Read, Write},
-// };
+// use serde::{de, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer};
 // use zip::{write::FileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
-// use crate::unreal;
-
 // use super::{Dummy, List};
-
-// pub mod player;
-// use self::player::*;
-
-// pub mod state;
-// use self::state::*;
-
-// pub mod data;
-pub mod plot_db;
+// use crate::unreal;
 
 // #[derive(Clone)]
 // pub struct Me1SaveGame {
@@ -163,12 +159,13 @@ pub mod plot_db;
 
 // #[cfg(test)]
 // mod test {
-//     use anyhow::Result;
-//     use std::{fs, time::Instant};
+//     use std::fs;
+//     use std::time::Instant;
 
-//     use crate::unreal;
+//     use anyhow::Result;
 
 //     use super::*;
+//     use crate::unreal;
 
 //     #[test]
 //     fn unzip_deserialize_serialize_zip() -> Result<()> {

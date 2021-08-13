@@ -1,8 +1,7 @@
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::gui::{components::Helper, RcUi};
-
 use super::CallbackType;
+use crate::gui::{components::Helper, RcUi};
 
 #[derive(Clone)]
 pub enum NumberType {

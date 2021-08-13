@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::Dummy;
-
 use super::BaseObject;
+use crate::save_data::Dummy;
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, RawUiChildren)]

@@ -1,8 +1,10 @@
 use std::cell::{Ref, RefMut};
+
 use uuid::Uuid;
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{gui::RcUi, save_data::Guid};
+use crate::gui::RcUi;
+use crate::save_data::Guid;
 
 pub enum Msg {
     Change(ChangeData),

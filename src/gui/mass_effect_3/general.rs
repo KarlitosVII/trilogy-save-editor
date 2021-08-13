@@ -1,21 +1,20 @@
 use std::cell::{Ref, RefMut};
+
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{Helper, InputText, Select, Table},
-        raw_ui::RawUi,
-        shared::{BonusPowerType, BonusPowers},
-        RcUi,
+use crate::gui::{
+    components::{Helper, InputText, Select, Table},
+    raw_ui::RawUi,
+    shared::{BonusPowerType, BonusPowers},
+    RcUi,
+};
+use crate::save_data::{
+    mass_effect_3::{
+        player::Player, plot::PlotTable, AutoReplyModeOptions, Difficulty, Me3SaveGame,
     },
-    save_data::{
-        mass_effect_3::{
-            player::Player, plot::PlotTable, AutoReplyModeOptions, Difficulty, Me3SaveGame,
-        },
-        shared::{
-            player::{Notoriety, Origin},
-            EndGameState,
-        },
+    shared::{
+        player::{Notoriety, Origin},
+        EndGameState,
     },
 };
 

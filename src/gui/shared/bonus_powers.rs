@@ -1,10 +1,8 @@
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{components::Table, RcUi},
-    save_data::{
-        mass_effect_2::player::Power as Me2Power, mass_effect_3::player::Power as Me3Power,
-    },
+use crate::gui::{components::Table, RcUi};
+use crate::save_data::{
+    mass_effect_2::player::Power as Me2Power, mass_effect_3::player::Power as Me3Power,
 };
 
 #[derive(Clone)]

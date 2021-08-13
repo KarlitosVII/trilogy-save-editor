@@ -1,8 +1,6 @@
 use encoding_rs::WINDOWS_1252;
-use serde::{
-    ser::{self, Error},
-    Serialize,
-};
+use serde::ser::{self, Error};
+use serde::Serialize;
 
 use super::Result;
 

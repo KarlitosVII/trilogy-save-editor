@@ -1,14 +1,15 @@
-use anyhow::Result;
-use derive_more::{Deref, DerefMut, Display, From};
-use serde::{de, ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
-use uuid::Uuid;
-
 pub mod mass_effect_1;
 pub mod mass_effect_1_le;
 pub mod mass_effect_2;
 pub mod mass_effect_3;
 pub mod shared;
+
+use std::fmt;
+
+use anyhow::Result;
+use derive_more::{Deref, DerefMut, Display, From};
+use serde::{de, ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
+use uuid::Uuid;
 
 // Raw Ui
 // Implémentation des dummy

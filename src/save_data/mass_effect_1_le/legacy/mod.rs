@@ -1,24 +1,20 @@
+mod art_placeable;
+mod inventory;
+mod pawn;
+
+use self::{art_placeable::*, inventory::*, pawn::*};
+
+use std::fmt;
+
 use derive_more::Display;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Deserializer, Serialize};
-use std::fmt;
 
-use crate::{
-    gui::RcUi,
-    save_data::{
-        shared::{Rotator, Vector},
-        Dummy,
-    },
+use crate::gui::RcUi;
+use crate::save_data::{
+    shared::{Rotator, Vector},
+    Dummy,
 };
-
-mod pawn;
-use self::pawn::*;
-
-mod inventory;
-use self::inventory::*;
-
-mod art_placeable;
-use self::art_placeable::*;
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, Default, RawUi, RawUiChildren)]

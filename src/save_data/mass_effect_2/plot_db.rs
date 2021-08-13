@@ -18,12 +18,12 @@ pub struct Me2PlotDb {
 
 #[cfg(test)]
 mod test {
-    use anyhow::Result;
     use std::fs;
 
-    use crate::save_data::shared::plot::RawPlotDb;
+    use anyhow::Result;
 
     use super::*;
+    use crate::save_data::shared::plot::RawPlotDb;
 
     #[test]
     fn deserialize_plot_db() -> Result<()> {

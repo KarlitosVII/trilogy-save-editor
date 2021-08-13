@@ -1,6 +1,7 @@
+use std::rc::Rc;
+
 use gloo::timers::future::TimeoutFuture;
 use indexmap::IndexMap;
-use std::rc::Rc;
 use web_sys::HtmlElement;
 use yew::{prelude::*, utils::NeqAssign};
 

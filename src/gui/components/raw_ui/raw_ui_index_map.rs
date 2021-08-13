@@ -1,18 +1,15 @@
+use std::any::Any;
+
 use derive_more::From;
 use indexmap::IndexMap;
-use std::any::Any;
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{
-            raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table,
-        },
-        raw_ui::{RawUi, RawUiChildren},
-        RcUi,
-    },
-    save_data::mass_effect_1_le::legacy::{Level, Map},
+use crate::gui::{
+    components::{raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table},
+    raw_ui::{RawUi, RawUiChildren},
+    RcUi,
 };
+use crate::save_data::mass_effect_1_le::legacy::{Level, Map};
 
 #[derive(Clone, From)]
 pub enum IndexMapKeyType<T>

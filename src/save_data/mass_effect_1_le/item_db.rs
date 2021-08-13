@@ -13,8 +13,9 @@ pub struct Me1ItemDb(IndexMap<DbItem, String>);
 
 #[cfg(test)]
 mod test {
-    use anyhow::Result;
     use std::fs;
+
+    use anyhow::Result;
 
     use super::*;
 

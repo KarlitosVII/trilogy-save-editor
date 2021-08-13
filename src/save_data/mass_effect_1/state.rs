@@ -1,11 +1,10 @@
-use anyhow::Result;
-use serde::{de, Serialize};
 use std::fmt;
 
-use crate::{
-    gui::Gui,
-    save_data::{shared::plot::PlotTable, Dummy, String, List, RawUi},
-};
+use anyhow::Result;
+use serde::{de, Serialize};
+
+use crate::gui::Gui;
+use crate::save_data::{shared::plot::PlotTable, Dummy, List, RawUi, String};
 
 #[derive(Serialize, Clone)]
 pub struct State {
@@ -53,24 +52,21 @@ impl<'de> Deserialize<'de> for State {
 
 #[cfg(test)]
 mod test {
+    use std::fs;
+    use std::io::{Cursor, Read};
+
     use anyhow::Result;
-    use std::{
-        convert::TryInto,
-        fs,
-        io::{Cursor, Read},
-    };
     use zip::ZipArchive;
 
-    use crate::unreal;
-
     use super::*;
+    use crate::unreal;
 
     #[test]
     fn deserialize_serialize() -> Result<()> {
         let input = fs::read("test/ME1Save.MassEffectSave")?;
 
         let state_data = {
-            let zip_offset = <u32>::from_le_bytes((&input[8..12]).try_into()?);
+            let zip_offset = <u32>::from_le_bytes([0; 4].copy_from_slice(&input[8..12]));
             let mut zip = ZipArchive::new(Cursor::new(&input[zip_offset as usize..]))?;
 
             let mut bytes = Vec::new();

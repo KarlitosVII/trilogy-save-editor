@@ -4,15 +4,12 @@ use anyhow::Result;
 use derive_more::{Deref, DerefMut};
 use serde::{de, Serialize};
 
-use crate::{
-    save_data::{
-        shared::{appearance::LinearColor, Rotator, Vector},
-        Dummy, String,
-    },
-    unreal,
-};
-
 use super::{player::Name, List};
+use crate::save_data::{
+    shared::{appearance::LinearColor, Rotator, Vector},
+    Dummy, String,
+};
+use crate::unreal;
 
 #[derive(Serialize, Deref, DerefMut, Clone)]
 pub struct Data {

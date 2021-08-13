@@ -1,24 +1,23 @@
+use std::mem;
+
 use anyhow::{anyhow, Error};
 use gloo::timers::future::TimeoutFuture;
-use std::mem;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
-use crate::{
-    database_service::DatabaseService,
-    gui::{
-        components::{NavBar, Tab, TabBar, Table},
-        mass_effect_1::{Me1Plot, Me1RawPlot},
-        mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
-        mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
-        mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
-        raw_ui::RawUi,
-        shared::{FloatPlotType, IntPlotType},
-        RcUi, Theme,
-    },
-    save_data::{mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame},
-    save_handler::{Request, Response, SaveGame, SaveHandler},
+use crate::database_service::DatabaseService;
+use crate::gui::{
+    components::{NavBar, Tab, TabBar, Table},
+    mass_effect_1::{Me1Plot, Me1RawPlot},
+    mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
+    mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
+    mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
+    raw_ui::RawUi,
+    shared::{FloatPlotType, IntPlotType},
+    RcUi, Theme,
 };
+use crate::save_data::{mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame};
+use crate::save_handler::{Request, Response, SaveGame, SaveHandler};
 
 pub enum Msg {
     OpenSave,

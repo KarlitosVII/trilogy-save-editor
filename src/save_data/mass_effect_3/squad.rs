@@ -1,9 +1,8 @@
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
-use crate::save_data::shared::player::WeaponLoadout;
-
 use super::player::{Power, Weapon, WeaponMod};
+use crate::save_data::shared::player::WeaponLoadout;
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]

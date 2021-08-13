@@ -1,22 +1,18 @@
+use std::cell::{Ref, RefMut};
+use std::rc::Rc;
+
 use gloo::{events::EventListener, timers::future::TimeoutFuture};
 use indexmap::{map::Entry, IndexMap};
-use std::{
-    cell::{Ref, RefMut},
-    rc::Rc,
-};
 use web_sys::HtmlElement;
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::{
-    gui::{
-        components::{CheckBox, Helper, InputNumber, NumberType},
-        raw_ui::RawUi,
-        RcUi,
-    },
-    save_data::shared::plot::RawPlotDb,
-};
-
 use super::{FloatPlotType, IntPlotType, PlotType};
+use crate::gui::{
+    components::{CheckBox, Helper, InputNumber, NumberType},
+    raw_ui::RawUi,
+    RcUi,
+};
+use crate::save_data::shared::plot::RawPlotDb;
 
 pub enum Msg {
     Scrolled,

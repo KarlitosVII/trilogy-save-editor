@@ -1,17 +1,14 @@
 use yew::prelude::*;
 
-use crate::{
-    gui::{
-        components::{raw_ui::RawUiStruct, Table},
-        raw_ui::{RawUi, RawUiChildren},
-    },
-    save_data::mass_effect_1_le::{
-        legacy::{BaseObject, Object, OptionObjectProxy},
-        Me1LeSaveData, NoExport,
-    },
-};
-
 use super::RcUi;
+use crate::gui::{
+    components::{raw_ui::RawUiStruct, Table},
+    raw_ui::{RawUi, RawUiChildren},
+};
+use crate::save_data::mass_effect_1_le::{
+    legacy::{BaseObject, Object, OptionObjectProxy},
+    Me1LeSaveData, NoExport,
+};
 
 mod general;
 mod inventory;
