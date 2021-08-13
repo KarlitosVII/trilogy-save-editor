@@ -55,13 +55,13 @@ pub fn rcize_fields(_: TokenStream, input: TokenStream) -> TokenStream {
                             let ty = path_type.path.segments.iter().next().unwrap().clone();
                             let segments = &mut path_type.path.segments;
 
-                            let old_type_name = ty.ident.to_string();
-                            *segments = match old_type_name.as_str() {
+                            let old_type = &ty.ident;
+                            *segments = match old_type.to_string().as_str() {
                                 "Vec" | "Option" => {
                                     // Vec<T> => Vec<RcUi<T>>
                                     let mut punctuated = Punctuated::new();
                                     punctuated.push(PathSegment {
-                                        ident: Ident::new(&old_type_name, Span::call_site()),
+                                        ident: old_type.clone(),
                                         arguments: path_to_args(&[Path {
                                             leading_colon: None,
                                             segments: rc_ui(ty.arguments),
@@ -85,7 +85,7 @@ pub fn rcize_fields(_: TokenStream, input: TokenStream) -> TokenStream {
 
                                     let mut punctuated = Punctuated::new();
                                     punctuated.push(PathSegment {
-                                        ident: Ident::new(&old_type_name, Span::call_site()),
+                                        ident: old_type.clone(),
                                         arguments: path_to_args(&[
                                             k,
                                             Path {
@@ -136,12 +136,12 @@ pub fn rcize_fields(_: TokenStream, input: TokenStream) -> TokenStream {
                     let ty = path_type.path.segments.iter().next().unwrap().clone();
                     let segments = &mut path_type.path.segments;
 
-                    let old_type_name = ty.ident.to_string();
-                    *segments = match old_type_name.as_str() {
+                    let old_type = &ty.ident;
+                    *segments = match old_type.to_string().as_str() {
                         "Vec" | "Option" => {
                             // Vec<T> => RcUI<Vec<RcUi<T>>>
                             let old_type = PathSegment {
-                                ident: Ident::new(&old_type_name, Span::call_site()),
+                                ident: old_type.clone(),
                                 arguments: path_to_args(&[Path {
                                     leading_colon: None,
                                     segments: rc_ui(ty.arguments),
@@ -166,7 +166,7 @@ pub fn rcize_fields(_: TokenStream, input: TokenStream) -> TokenStream {
                             };
 
                             let old_type = PathSegment {
-                                ident: Ident::new(&old_type_name, Span::call_site()),
+                                ident: old_type.clone(),
                                 arguments: path_to_args(&[
                                     k,
                                     Path {
@@ -329,7 +329,12 @@ fn impl_raw_ui_enum(
     });
 
     let array_variants = variants.iter().map(|variant| {
-        let variant_name = &variant.ident.to_string();
+        let variant_name = if name == "ItemLevel" {
+            // ItemLevel exception
+            variant.ident.to_string()
+        } else {
+            variant.ident.to_string().to_title_case()
+        };
         quote! {
             #variant_name
         }

@@ -191,7 +191,7 @@ impl App {
                 "border",
                 "border-default-border",
                 "bg-default-bg/50",
-                "p-2",
+                "px-2",
                 "pt-0.5",
                 "pb-1.5",
                 "z-50"
@@ -221,7 +221,7 @@ impl App {
                         { error }
                         { for chain }
                         <hr class="my-0.5 border-t border-default-border" />
-                        <button class="btn w-12"
+                        <button class="button w-12"
                             onclick={self.link.callback(|_| Msg::CloseError)}
                         >
                             {"OK"}

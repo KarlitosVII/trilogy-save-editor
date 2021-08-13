@@ -57,11 +57,11 @@ impl Component for NavBar {
     fn view(&self) -> Html {
         let loaded_buttons = self.props.save_loaded.then(|| {
             html! { <>
-                <button class="btn" onclick={self.props.onsave.reform(|_| ())}>
+                <button class="button" onclick={self.props.onsave.reform(|_| ())}>
                     {"Save"}
                 </button>
                 <span>{"-"}</span>
-                <button class="btn" onclick={self.props.onreload.reform(|_| ())}>
+                <button class="button" onclick={self.props.onreload.reform(|_| ())}>
                     {"Reload"}
                 </button>
             </> }
@@ -70,7 +70,7 @@ impl Component for NavBar {
         html! {
             <nav class="bg-menu-bar select-none">
                 <div class="flex items-center gap-2 px-1">
-                    <button class="btn" onclick={self.props.onopen.reform(|_| ())}>
+                    <button class="button" onclick={self.props.onopen.reform(|_| ())}>
                         {"Open"}
                     </button>
                     { for loaded_buttons }

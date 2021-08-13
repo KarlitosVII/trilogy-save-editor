@@ -149,7 +149,7 @@ impl Component for Me2Plot {
                                 </div>
                             </Tab>
                         })
-                    } else {
+                } else {
                     // Workaround for unused_braces warning
                     #[allow(unused_braces)]
                     (html_nested! {
@@ -170,19 +170,19 @@ impl Component for Me2Plot {
                             category={player.clone()}
                         />
                     </Tab>
-                    <Tab title="Rewards">
-                        <PlotCategory
-                            booleans={RcUi::clone(booleans)}
-                            integers={IntPlotType::clone(integers)}
-                            category={rewards.clone()}
-                        />
-                    </Tab>
                     { for categories }
                     <Tab title="Captain's cabin">
                         <PlotCategory
                             booleans={RcUi::clone(booleans)}
                             integers={IntPlotType::clone(integers)}
                             category={captains_cabin.clone()}
+                        />
+                    </Tab>
+                    <Tab title="Rewards">
+                        <PlotCategory
+                            booleans={RcUi::clone(booleans)}
+                            integers={IntPlotType::clone(integers)}
+                            category={rewards.clone()}
                         />
                     </Tab>
                     <Tab title="Imported ME1" theme={Theme::MassEffect1}>

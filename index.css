@@ -53,11 +53,6 @@
   --hover: theme("colors.me3.hover");
 }
 
-/* Button */
-.btn {
-  @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active cursor-pointer px-1;
-}
-
 /* NavBar */
 .navbar-chevron {
   @apply chevron-right;
@@ -94,6 +89,11 @@
 
 .raw-plot-row {
   @apply p-[1.5px] px-1 w-full h-[23px];
+}
+
+/* Button */
+.button {
+  @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active cursor-pointer px-1;
 }
 
 /* Inputs */

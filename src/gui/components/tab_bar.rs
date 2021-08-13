@@ -50,9 +50,12 @@ impl Component for TabBar {
                 .then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)));
             html_nested! {
                 <button class={classes![
-                        "btn",
+                        "rounded-t",
+                        "cursor-pointer",
                         "leading-[19px]",
-                        "!rounded-t",
+                        "px-1",
+                        "bg-theme-default",
+                        "hover:!bg-theme-hover",
                         (idx == self.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
                     ]}

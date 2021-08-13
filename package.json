@@ -9,8 +9,8 @@
     "tailwindcss": "^2.2.7"
   },
   "scripts": {
-    "build": "tailwindcss -i public/index.css -o target/index.css --jit",
-    "watch": "tailwindcss -i public/index.css -o target/index.css --jit --watch"
+    "build": "tailwindcss -i index.css -o target/index.css --jit",
+    "watch": "tailwindcss -i index.css -o target/index.css --jit --watch"
   },
   "repository": {
     "type": "git"

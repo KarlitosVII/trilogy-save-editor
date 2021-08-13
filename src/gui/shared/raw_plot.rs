@@ -297,7 +297,7 @@ impl Component for RawPlot {
                         })}
                     >
                         <InputNumber label={String::default()} value={NumberType::Integer(RcUi::clone(&self.props.add_id))} />
-                        <input type="submit" class="btn" value="Add" />
+                        <input type="submit" class="button" value="Add" />
                         { add_helper }
                     </form>
                 </div>

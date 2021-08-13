@@ -244,7 +244,7 @@ impl Me1LeGeneral {
                     value={NumberType::Integer((*player.talent_points()).into())}
                     onchange={self.link.callback(Msg::TalentPoints)}
                 />
-                <button class="btn" onclick={self.link.callback(|_| Msg::ResetTalents(None))}>
+                <button class="button" onclick={self.link.callback(|_| Msg::ResetTalents(None))}>
                     { "Reset player's talents" }
                 </button>
             </Table>
@@ -265,7 +265,7 @@ impl Me1LeGeneral {
             characters.iter().find_map(|&(tag, name)| {
                 (*character.borrow().tag() == tag).then(|| {
                     html! {
-                        <button class="btn" onclick={self.link.callback(move |_| Msg::ResetTalents(Some(tag)))}>
+                        <button class="button" onclick={self.link.callback(move |_| Msg::ResetTalents(Some(tag)))}>
                             { format!("Reset {}'s talents", name) }
                         </button>
                     }

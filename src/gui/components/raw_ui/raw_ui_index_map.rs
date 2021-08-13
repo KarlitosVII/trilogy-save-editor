@@ -189,7 +189,7 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputNumber label="Key" value={NumberType::Integer((*key).into())}
+                                <InputNumber label="Id" value={NumberType::Integer((*key).into())}
                                     onchange={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };

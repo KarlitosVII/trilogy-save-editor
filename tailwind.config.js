@@ -9,7 +9,6 @@ module.exports = {
   darkMode: false, // or "media" or "class"
   theme: {
     fontFamily: {
-      // default: ["Proggy Clean", ...defaultTheme.fontFamily.mono],
       default: [defaultTheme.fontFamily.mono],
     },
     colors: {
@@ -25,7 +24,6 @@ module.exports = {
         even: "#1A1A1A",
       },
       popup: "#121212",
-      // TODO: Couleurs
       me1: {
         bg: "#1C526E",
         default: "#296B94",

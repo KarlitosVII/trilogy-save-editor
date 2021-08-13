@@ -33,7 +33,7 @@ pub struct Me3SaveGame {
     seconds_played: f32,
     disc: i32,
     base_level_name: String,
-    base_level_name_display_override_as_read: String,
+    base_level_name_display_override: String,
     pub difficulty: Difficulty,
     pub end_game_state: EndGameState,
     timestamp: SaveTimeStamp,
