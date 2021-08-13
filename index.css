@@ -27,28 +27,28 @@
 /* Themes */
 :root {
   --bg: theme("colors.me3.bg");
-  --default: theme("colors.me3.default");
+  --tab: theme("colors.me3.tab");
   --active: theme("colors.me3.active");
   --hover: theme("colors.me3.hover");
 }
 
 .mass-effect-1 {
   --bg: theme("colors.me1.bg");
-  --default: theme("colors.me1.default");
+  --tab: theme("colors.me1.tab");
   --active: theme("colors.me1.active");
   --hover: theme("colors.me1.hover");
 }
 
 .mass-effect-2 {
   --bg: theme("colors.me2.bg");
-  --default: theme("colors.me2.default");
+  --tab: theme("colors.me2.tab");
   --active: theme("colors.me2.active");
   --hover: theme("colors.me2.hover");
 }
 
 .mass-effect-3 {
   --bg: theme("colors.me3.bg");
-  --default: theme("colors.me3.default");
+  --tab: theme("colors.me3.tab");
   --active: theme("colors.me3.active");
   --hover: theme("colors.me3.hover");
 }

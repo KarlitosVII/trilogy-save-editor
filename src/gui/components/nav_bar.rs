@@ -1,11 +1,13 @@
 use web_sys::HtmlElement;
 use yew::{prelude::*, utils::NeqAssign};
 
-#[allow(clippy::enum_variant_names)]
+use crate::gui::components::{Tab, TabBar};
+
 pub enum Msg {
     MenuOpen,
     MenuClose,
     MenuBlur,
+    LicensesHover,
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -19,8 +21,9 @@ pub struct Props {
 pub struct NavBar {
     props: Props,
     link: ComponentLink<Self>,
-    about_opened: bool,
     about_ref: NodeRef,
+    about_opened: bool,
+    licenses_opened: bool,
 }
 
 impl Component for NavBar {
@@ -28,7 +31,13 @@ impl Component for NavBar {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        NavBar { props, link, about_opened: false, about_ref: Default::default() }
+        NavBar {
+            props,
+            link,
+            about_ref: Default::default(),
+            about_opened: false,
+            licenses_opened: false,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -39,6 +48,7 @@ impl Component for NavBar {
             }
             Msg::MenuClose => {
                 self.about_opened = false;
+                self.licenses_opened = false;
                 true
             }
             Msg::MenuBlur => {
@@ -46,6 +56,10 @@ impl Component for NavBar {
                     let _ = about.blur();
                 }
                 false
+            }
+            Msg::LicensesHover => {
+                self.licenses_opened = true;
+                true
             }
         }
     }
@@ -118,22 +132,58 @@ impl NavBar {
                     "z-40",
                     (!self.about_opened).then(|| "hidden" )
                 ]}>
-                    <hr class="border-default-border" />
-                    <span class="px-1 whitespace-nowrap">
-                        {"© 2021 Karlitos"}
-                    </span>
-                    <hr class="border-default-border mb-px" />
-                    <a class={classes![
-                        "px-1",
-                        "hover:bg-theme-hover",
-                        "whitespace-nowrap",
-                        "cursor-pointer",
-                        "relative",
-                        "navbar-chevron",
-                    ]}>
-                        {"License"} // TODO: Licenses
-                    </a>
+                        <hr class="border-default-border" />
+                        <span class="px-1 whitespace-nowrap">
+                            {"© 2021 Karlitos"}
+                        </span>
+                        <hr class="border-default-border mb-px" />
+                        <div class="relative flex">
+                            { self.view_licenses() }
+                            <a class={classes![
+                                    "flex-auto",
+                                    "px-1",
+                                    "hover:bg-theme-hover",
+                                    "whitespace-nowrap",
+                                    "cursor-pointer",
+                                    "navbar-chevron",
+                                ]}
+                                onmouseover={self.link.callback(|_| Msg::LicensesHover)}
+                            >
+                                {"License"}
+                            </a>
+                        </div>
                 </div>
+            </div>
+        }
+    }
+
+    fn view_licenses(&self) -> Html {
+        html! {
+            <div class={classes![
+                "absolute",
+                "left-full",
+                "flex",
+                "bg-popup/90",
+                "border",
+                "border-default-border",
+                "p-1",
+                "w-[570px]",
+                "h-[570px]",
+                "z-40",
+                (!self.licenses_opened).then(|| "hidden" )
+            ]}>
+                <TabBar>
+                    <Tab title="English">
+                        <pre class="px-2">
+                            { include_str!("../../../LICENSE.txt") }
+                        </pre>
+                    </Tab>
+                    <Tab title="French">
+                        <pre class="px-2">
+                            { include_str!("../../../LICENSE_FRENCH.txt") }
+                        </pre>
+                    </Tab>
+                </TabBar>
             </div>
         }
     }

@@ -49,13 +49,13 @@ impl Component for TabBar {
             let onmousedown = (idx != self.current_tab)
                 .then(|| self.link.callback(move |event| Msg::TabClicked(event, idx)));
             html_nested! {
-                <button class={classes![
-                        "rounded-t",
+                <a class={classes![
                         "rounded-b-none",
+                        "rounded-t",
                         "cursor-pointer",
                         "leading-[19px]",
                         "px-1",
-                        "bg-theme-default",
+                        "bg-theme-tab",
                         "hover:!bg-theme-hover",
                         (idx == self.current_tab).then(|| "!bg-theme-active"),
                         child.props.theme,
@@ -63,7 +63,7 @@ impl Component for TabBar {
                     {onmousedown}
                 >
                     { child.props.title }
-                </button>
+                </a>
             }
         });
 

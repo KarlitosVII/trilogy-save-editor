@@ -3,6 +3,7 @@
 - Inventory filters
 - No ME1
 - No compare
+- Better font for high DPI
 - // TODO: unobtainable ME1 item db
 
 ## 1.13.1
