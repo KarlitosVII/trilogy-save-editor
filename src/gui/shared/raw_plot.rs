@@ -281,7 +281,7 @@ impl Component for RawPlot {
             <div class="flex-auto flex flex-col gap-1">
                 <div class="flex gap-3 w-2/3">
                     <label class="flex-auto flex items-center gap-1">
-                        <input type="text" class="flex-auto input" placeholder="<empty>" value={self.props.filter().to_owned()}
+                        <input type="text" class="flex-auto input" placeholder="<empty>" value={self.props.filter().clone()}
                             oninput={self.link.callback(|data: InputData| Msg::Filter(data.value))}
                         />
                         { "Filter" }
@@ -368,11 +368,11 @@ impl RawPlot {
 
         let mut label_list: IndexMap<usize, Option<String>> = match plots {
             PlotType::Boolean(ref bitvec) => {
-                let label_list = plot_db.booleans.iter().map(|(&k, v)| (k, Some(v.to_owned())));
+                let label_list = plot_db.booleans.iter().map(|(&k, v)| (k, Some(v.clone())));
                 (0..bitvec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
             }
             PlotType::Integer(ref integers) => {
-                let label_list = plot_db.integers.iter().map(|(&k, v)| (k, Some(v.to_owned())));
+                let label_list = plot_db.integers.iter().map(|(&k, v)| (k, Some(v.clone())));
                 match integers {
                     IntPlotType::Vec(ref vec) => {
                         (0..vec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
@@ -386,7 +386,7 @@ impl RawPlot {
                 }
             }
             PlotType::Float(ref floats) => {
-                let label_list = plot_db.floats.iter().map(|(&k, v)| (k, Some(v.to_owned())));
+                let label_list = plot_db.floats.iter().map(|(&k, v)| (k, Some(v.clone())));
                 match floats {
                     FloatPlotType::Vec(ref vec) => {
                         (0..vec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()

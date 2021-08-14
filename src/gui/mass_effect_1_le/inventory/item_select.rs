@@ -132,7 +132,7 @@ impl Component for ItemSelect {
                         .item_db
                         .iter()
                         .filter_map(|(k, v)| {
-                            (v.to_lowercase().contains(&filter)).then(|| (*k, v.to_owned()))
+                            (v.to_lowercase().contains(&filter)).then(|| (*k, v.clone()))
                         })
                         .collect::<IndexMap<_, _>>();
                     self.filtered_list = Some(filtered_list.into());
@@ -144,7 +144,7 @@ impl Component for ItemSelect {
                 false
             }
             Msg::Select(key) => {
-                self.props.current_item = key.to_owned();
+                self.props.current_item = key.clone();
                 self.props.onselect.emit(key);
                 self.link.send_message(Msg::BlurAll);
                 false
@@ -269,7 +269,7 @@ impl Component for ItemSelect {
                 >
                     <label class="flex items-center gap-1 p-px pr-1">
                         <input type="text" class="flex-auto input" placeholder="<empty>"
-                            value={self.filter.to_owned()}
+                            value={self.filter.clone()}
                             oninput={self.link.callback(|data: InputData| Msg::Filter(data.value))}
                             onfocus={self.link.callback(|_| Msg::Focused)}
                             onblur={self.link.callback(|_| Msg::Blurred)}

@@ -95,7 +95,7 @@ impl Component for Me3Plot {
                     .map(|(title, category)| {
                         html! {
                             <PlotCategory
-                                title={title.to_owned()}
+                                title={title.clone()}
                                 booleans={RcUi::clone(booleans)}
                                 integers={IntPlotType::clone(integers)}
                                 category={category.clone()}
@@ -129,7 +129,7 @@ impl Component for Me3Plot {
             let weapons_powers = weapons_powers.iter().map(|(title, variable)| {
                 html! {
                     <PlotVariable
-                        title={title.to_owned()}
+                        title={title.clone()}
                         booleans={RcUi::clone(booleans)}
                         variables={RcUi::clone(variables)}
                         plot_variable={variable.clone()}

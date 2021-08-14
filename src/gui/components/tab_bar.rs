@@ -53,6 +53,7 @@ impl Component for TabBar {
                         "rounded-b-none",
                         "rounded-t",
                         "cursor-pointer",
+                        "select-none",
                         "leading-[19px]",
                         "px-1",
                         "bg-theme-tab",

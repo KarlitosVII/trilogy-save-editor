@@ -98,7 +98,7 @@ impl SaveHandler {
             | SaveGame::MassEffect1LePs4 { ref file_path, .. }
             | SaveGame::MassEffect2 { ref file_path, .. }
             | SaveGame::MassEffect2Le { ref file_path, .. }
-            | SaveGame::MassEffect3 { ref file_path, .. } => file_path.to_owned(),
+            | SaveGame::MassEffect3 { ref file_path, .. } => file_path.clone(),
         };
         self.link.send_future(async move {
             let handle_save = async {

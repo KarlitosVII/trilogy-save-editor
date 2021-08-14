@@ -112,7 +112,7 @@
 
 /* Button */
 .button {
-  @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active cursor-pointer px-1;
+  @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active cursor-pointer select-none px-1;
 }
 
 /* Inputs */

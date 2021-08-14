@@ -94,9 +94,9 @@ impl Component for App {
                         | SaveGame::MassEffect2Le { ref file_path, .. }
                         | SaveGame::MassEffect3 { ref file_path, .. },
                     ) => {
-                        self.save_handle.send(Request::ReloadSave(file_path.to_owned()));
+                        self.save_handle.send(Request::ReloadSave(file_path.clone()));
                     }
-                    None => (),
+                    _ => (),
                 }
                 false
             }

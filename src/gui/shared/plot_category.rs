@@ -77,7 +77,7 @@ impl Component for PlotCategory {
             match booleans.borrow().get(idx) {
                 Some(value) => html! {
                     <CheckBox
-                        label={label.to_owned()}
+                        label={label.clone()}
                         value={RcUi::new(*value)}
                         onchange={self.link.callback(move |value| Msg::ChangeBool(idx, value))}
                     />

@@ -43,7 +43,7 @@ impl Component for InputText {
         match msg {
             Msg::Input(value) => {
                 if let Some(ref callback) = self.props.oninput {
-                    callback.emit(CallbackType::String(value.to_owned()));
+                    callback.emit(CallbackType::String(value.clone()));
                 }
 
                 *self.props.value_mut() = value;
@@ -62,7 +62,7 @@ impl Component for InputText {
                 <Helper text={helper} />
             }
         });
-        let value = self.props.value().to_owned();
+        let value = self.props.value().clone();
         let oninput = self.link.callback(|data: InputData| Msg::Input(data.value));
         html! {
             <label class="flex-auto flex items-center gap-1">

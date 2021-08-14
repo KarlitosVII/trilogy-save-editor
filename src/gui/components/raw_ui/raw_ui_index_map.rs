@@ -199,7 +199,7 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputText label="Key" value={RcUi::new(key.to_owned())}
+                                <InputText label="Key" value={RcUi::new(key.clone())}
                                     oninput={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };

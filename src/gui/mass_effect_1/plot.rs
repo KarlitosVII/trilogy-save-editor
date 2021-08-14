@@ -82,7 +82,7 @@ impl Component for Me1Plot {
                     .map(|(title, category)| {
                         html! {
                             <PlotCategory
-                                title={title.to_owned()}
+                                title={title.clone()}
                                 booleans={RcUi::clone(booleans)}
                                 integers={IntPlotType::clone(integers)}
                                 category={category.clone()}
