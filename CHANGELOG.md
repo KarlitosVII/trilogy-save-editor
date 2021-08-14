@@ -5,6 +5,9 @@
 - No compare
 - Better font for high DPI
 - // TODO: unobtainable ME1 item db
+- // TODO: file drop
+- // TODO: command line
+- // TODO: Inventory select width fix
 
 ## 1.13.1
 - ME2: Added all armors plots

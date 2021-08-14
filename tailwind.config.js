@@ -19,6 +19,10 @@ module.exports = {
         border: "#333333",
       },
       'menu-bar': "#242424",
+      'scroll-bar': {
+        bg: "#090909",
+        fg: "#4f4f4f",
+      },
       table: {
         odd: "#121212",
         even: "#1A1A1A",

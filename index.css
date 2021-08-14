@@ -53,6 +53,25 @@
   --hover: theme("colors.me3.hover");
 }
 
+/* Scrollbar */
+:root {
+  scrollbar-color: theme("colors.scroll-bar.fg") theme("colors.scroll-bar.bg");
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+ 
+::-webkit-scrollbar-track {
+  background-color: theme("colors.scroll-bar.bg");
+}
+ 
+::-webkit-scrollbar-thumb {
+  @apply rounded-full;
+  background-color: theme("colors.scroll-bar.fg");
+}
+
 /* NavBar */
 .navbar-chevron {
   @apply chevron-right;
