@@ -54,6 +54,7 @@ impl Component for App {
         let save_handle = SaveHandler::bridge(link.callback(|response| match response {
             Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
             Response::Error(err) => Msg::Error(err),
+            Response::SaveSaved => Msg::SaveSaved,
         }));
 
         let _dbs_service = DatabaseService::bridge(link.callback(|_| {
@@ -75,26 +76,28 @@ impl Component for App {
                 false
             }
             Msg::SaveSave => {
-                // TODO: Save
-                true
+                if let Some(ref save_game) = self.props.save_game {
+                    self.save_handle.send(Request::SaveSave(save_game.clone()));
+                }
+                false
             }
             Msg::SaveSaved => {
                 self.link.send_message(Msg::Notification("Saved"));
                 false
             }
             Msg::ReloadSave => {
-                let file_path = match self.props.save_game {
+                match self.props.save_game {
                     Some(
                         SaveGame::MassEffect1Le { ref file_path, .. }
                         | SaveGame::MassEffect1LePs4 { ref file_path, .. }
                         | SaveGame::MassEffect2 { ref file_path, .. }
                         | SaveGame::MassEffect2Le { ref file_path, .. }
                         | SaveGame::MassEffect3 { ref file_path, .. },
-                    ) => file_path.to_owned(),
-                    None => unreachable!(),
-                };
-
-                self.save_handle.send(Request::ReloadSave(file_path));
+                    ) => {
+                        self.save_handle.send(Request::ReloadSave(file_path.to_owned()));
+                    }
+                    None => (),
+                }
                 false
             }
             Msg::Notification(notification) => {
@@ -215,7 +218,7 @@ impl App {
         html! {
             <div class="absolute w-screen h-screen grid place-content-center bg-white/30 z-50">
                 <div class="border border-default-border bg-default-bg">
-                    <div class="px-1 bg-theme-active select-none">{"Error"}</div>
+                    <div class="px-1 bg-theme-tab select-none">{"Error"}</div>
                     <div class="p-1 pt-0.5">
                         { error }
                         { for chain }

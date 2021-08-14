@@ -17,6 +17,7 @@ dirs = "3.0"
 rfd = "0.4"
 base64 = "0.13"
 # (De)Serialize
+serde = { version = "1.0", features = ["derive"], default-features = false }
 serde_json = "1.0"
 # WebView
 wry = { version = "0.12", features = ["protocol"], default-features = false }

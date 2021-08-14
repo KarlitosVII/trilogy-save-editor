@@ -27,7 +27,7 @@ pub enum Msg {
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    pub power_list: &'static [(&'static str, &'static str)], // TODO: add name
+    pub power_list: &'static [(&'static str, &'static str)], // TODO: Add power name
     pub powers: BonusPowerType,
     pub helper: Option<&'static str>,
 }

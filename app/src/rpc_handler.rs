@@ -1,7 +1,8 @@
-use std::fs;
 use std::path::{Path, PathBuf};
+use std::{fs, mem};
 
 use anyhow::{Context, Error, Result};
+use serde::Deserialize;
 use serde_json::{json, Value};
 use wry::application::window::Window;
 use wry::webview::{RpcRequest, RpcResponse};
@@ -17,14 +18,29 @@ pub fn rpc_handler(window: &Window, mut req: RpcRequest) -> Option<RpcResponse> 
                 Some(path) => open_file(&path).map(Some)?,
                 None => None,
             },
+            "save_dialog" => {
+                let params = req.params.take().context("Save path required")?;
+                let path: [PathBuf; 1] = serde_json::from_value(params)?;
+
+                match dialog::save(window, &path[0]) {
+                    Some(path) => Some(serde_json::to_value(path)?),
+                    None => None,
+                }
+            }
+            "save" => {
+                let params = req.params.take().context("RpcFile required")?;
+                let mut path: [RpcFile; 1] = serde_json::from_value(params)?;
+                let rpc_file = mem::take(&mut path[0]);
+                save_file(rpc_file).map(Some)?
+            }
             "reload" => {
-                let path: [PathBuf; 1] =
-                    serde_json::from_value(req.params.take().context("Save path required")?)?;
+                let params = req.params.take().context("Save path required")?;
+                let path: [PathBuf; 1] = serde_json::from_value(params)?;
                 open_file(&path[0]).map(Some)?
             }
             "load_database" => {
-                let path: [PathBuf; 1] =
-                    serde_json::from_value(req.params.take().context("Database path required")?)?;
+                let params = req.params.take().context("Database path required")?;
+                let path: [PathBuf; 1] = serde_json::from_value(params)?;
                 open_file(&path[0]).map(Some)?
             }
             _ => None,
@@ -40,8 +56,7 @@ pub fn rpc_handler(window: &Window, mut req: RpcRequest) -> Option<RpcResponse> 
 }
 
 fn open_file(path: &Path) -> Result<Value> {
-    let path = path.canonicalize()?;
-    let file = fs::read(&path)?;
+    let file = fs::read(path.canonicalize()?)?;
     let unencoded_size = file.len();
     let base64 = base64::encode(file);
     Ok(json!({
@@ -53,8 +68,51 @@ fn open_file(path: &Path) -> Result<Value> {
     }))
 }
 
+fn save_file(rpc_file: RpcFile) -> Result<Value> {
+    let RpcFile { path, file } = rpc_file;
+
+    // Backup if file exists
+    if path.exists() {
+        if let Some(ext) = path.extension() {
+            let mut ext = ext.to_owned();
+            ext.push(".bak");
+            let to = Path::with_extension(&path, ext);
+            fs::copy(&path, to)?;
+        }
+    }
+    fs::write(path, file.into_bytes()?)?;
+
+    Ok(Value::from(()))
+}
+
+#[derive(Deserialize, Default)]
+pub struct RpcFile {
+    pub path: PathBuf,
+    pub file: Base64File,
+}
+
+#[derive(Deserialize, Default)]
+pub struct Base64File {
+    unencoded_size: usize,
+    base64: String,
+}
+
+impl Base64File {
+    pub fn into_string(self) -> Result<String> {
+        let mut vec = Vec::with_capacity(self.unencoded_size);
+        base64::decode_config_buf(self.base64, base64::STANDARD, &mut vec)?;
+        String::from_utf8(vec).map_err(Into::into)
+    }
+
+    pub fn into_bytes(self) -> Result<Vec<u8>> {
+        let mut vec = Vec::with_capacity(self.unencoded_size);
+        base64::decode_config_buf(self.base64, base64::STANDARD, &mut vec)?;
+        Ok(vec)
+    }
+}
+
 mod dialog {
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
     use wry::application::window::Window;
 
     pub fn open(window: &Window) -> Option<PathBuf> {
@@ -64,6 +122,25 @@ mod dialog {
             .add_filter("Mass Effect Trilogy Save", &["pcsav", "ps4sav", "MassEffectSave"])
             .add_filter("All Files", &["*"])
             .pick_file()
+    }
+
+    pub fn save(window: &Window, path: &Path) -> Option<PathBuf> {
+        let directory = path.parent().map(ToOwned::to_owned).unwrap_or_default();
+        let file_name = path
+            .file_name()
+            .map(ToOwned::to_owned)
+            .unwrap_or_default()
+            .to_string_lossy()
+            .into_owned();
+
+        // FIXME: Filter by game
+        rfd::FileDialog::new()
+            .set_parent(window)
+            .set_directory(directory)
+            .set_file_name(&file_name)
+            .add_filter("Mass Effect Trilogy Save", &["pcsav", "ps4sav", "MassEffectSave"])
+            .add_filter("All Files", &["*"])
+            .save_file()
     }
 
     #[cfg(target_os = "windows")]
