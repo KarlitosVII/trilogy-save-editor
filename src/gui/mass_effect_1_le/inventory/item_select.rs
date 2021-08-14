@@ -144,7 +144,7 @@ impl Component for ItemSelect {
                 false
             }
             Msg::Select(key) => {
-                self.props.current_item = key.clone();
+                self.props.current_item = key;
                 self.props.onselect.emit(key);
                 self.link.send_message(Msg::BlurAll);
                 false

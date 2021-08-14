@@ -1,8 +1,9 @@
 mod bonus_powers;
+mod head_morph;
 mod plot_category;
 mod raw_plot;
 
-pub use self::{bonus_powers::*, plot_category::*, raw_plot::*};
+pub use self::{bonus_powers::*, head_morph::*, plot_category::*, raw_plot::*};
 
 use indexmap::IndexMap;
 use yew::prelude::*;

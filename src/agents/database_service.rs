@@ -169,8 +169,8 @@ impl DatabaseService {
     {
         self.link.send_future(async move {
             let handle_db = async {
-                let response = rpc::load_database(path).await?;
-                let file = response.file.into_string()?;
+                let rpc_file = rpc::load_database(path).await?;
+                let file = String::from_utf8(rpc_file.file.decode()?)?;
                 deserialize(file)
             };
             match handle_db.await.context(format!("Failed to parse `/{}`", path)) {

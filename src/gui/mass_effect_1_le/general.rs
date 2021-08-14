@@ -236,7 +236,11 @@ impl Me1LeGeneral {
 
         html! {
             <Table title={String::from("Gameplay")}>
-                { level.view("Level") }
+                <InputNumber
+                    label="Level"
+                    value={NumberType::Integer(RcUi::clone(level))}
+                    helper="Classic mode (1 - 60)"
+                />
                 { current_xp.view("Current XP") }
                 <InputNumber
                     label="Talent Points"
@@ -273,7 +277,7 @@ impl Me1LeGeneral {
         });
 
         html! {
-            <Table title={String::from("Gameplay")}>
+            <Table title={String::from("Squad")}>
                 { for characters }
             </Table>
         }

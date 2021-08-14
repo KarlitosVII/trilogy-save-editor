@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::{fs, mem};
 
-use anyhow::{Context, Error, Result};
+use anyhow::{bail, Context, Error, Result};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use wry::application::window::Window;
@@ -14,36 +14,44 @@ pub fn rpc_handler(window: &Window, mut req: RpcRequest) -> Option<RpcResponse> 
                 window.set_visible(true);
                 None
             }
-            "open" => match dialog::open(window) {
-                Some(path) => open_file(&path).map(Some)?,
-                None => None,
-            },
-            "save_dialog" => {
-                let params = req.params.take().context("Save path required")?;
-                let path: [PathBuf; 1] = serde_json::from_value(params)?;
-
-                match dialog::save(window, &path[0]) {
-                    Some(path) => Some(serde_json::to_value(path)?),
-                    None => None,
-                }
-            }
-            "save" => {
+            "save_file" => {
                 let params = req.params.take().context("RpcFile required")?;
                 let mut path: [RpcFile; 1] = serde_json::from_value(params)?;
                 let rpc_file = mem::take(&mut path[0]);
                 save_file(rpc_file).map(Some)?
             }
-            "reload" => {
+            "open_save" => match dialog::open_save(window) {
+                Some(path) => open_file(&path).map(Some)?,
+                None => Some(Value::Null),
+            },
+            "save_save_dialog" => {
+                let params = req.params.take().context("Save path required")?;
+                let path: [PathBuf; 1] = serde_json::from_value(params)?;
+
+                match dialog::save_save(window, &path[0]) {
+                    Some(path) => Some(serde_json::to_value(path)?),
+                    None => Some(Value::Null),
+                }
+            }
+            "reload_save" => {
                 let params = req.params.take().context("Save path required")?;
                 let path: [PathBuf; 1] = serde_json::from_value(params)?;
                 open_file(&path[0]).map(Some)?
             }
+            "import_head_morph" => match dialog::import_head_morph(window) {
+                Some(path) => open_file(&path).map(Some)?,
+                None => Some(Value::Null),
+            },
+            "export_head_morph_dialog" => match dialog::export_head_morph(window) {
+                Some(path) => Some(serde_json::to_value(path)?),
+                None => Some(Value::Null),
+            },
             "load_database" => {
                 let params = req.params.take().context("Database path required")?;
                 let path: [PathBuf; 1] = serde_json::from_value(params)?;
                 open_file(&path[0]).map(Some)?
             }
-            _ => None,
+            _ => bail!("Wrong RPC method, got: {}", req.method),
         };
         Ok::<_, Error>(response)
     };
@@ -80,7 +88,7 @@ fn save_file(rpc_file: RpcFile) -> Result<Value> {
             fs::copy(&path, to)?;
         }
     }
-    fs::write(path, file.into_bytes()?)?;
+    fs::write(path, file.decode()?)?;
 
     Ok(Value::from(()))
 }
@@ -98,13 +106,7 @@ pub struct Base64File {
 }
 
 impl Base64File {
-    pub fn into_string(self) -> Result<String> {
-        let mut vec = Vec::with_capacity(self.unencoded_size);
-        base64::decode_config_buf(self.base64, base64::STANDARD, &mut vec)?;
-        String::from_utf8(vec).map_err(Into::into)
-    }
-
-    pub fn into_bytes(self) -> Result<Vec<u8>> {
+    pub fn decode(self) -> Result<Vec<u8>> {
         let mut vec = Vec::with_capacity(self.unencoded_size);
         base64::decode_config_buf(self.base64, base64::STANDARD, &mut vec)?;
         Ok(vec)
@@ -115,7 +117,7 @@ mod dialog {
     use std::path::{Path, PathBuf};
     use wry::application::window::Window;
 
-    pub fn open(window: &Window) -> Option<PathBuf> {
+    pub fn open_save(window: &Window) -> Option<PathBuf> {
         rfd::FileDialog::new()
             .set_parent(window)
             .set_directory(document_dir())
@@ -124,7 +126,7 @@ mod dialog {
             .pick_file()
     }
 
-    pub fn save(window: &Window, path: &Path) -> Option<PathBuf> {
+    pub fn save_save(window: &Window, path: &Path) -> Option<PathBuf> {
         let directory = path.parent().map(ToOwned::to_owned).unwrap_or_default();
         let file_name = path
             .file_name()
@@ -133,12 +135,28 @@ mod dialog {
             .to_string_lossy()
             .into_owned();
 
-        // FIXME: Filter by game
+        // TODO: Filter by game
         rfd::FileDialog::new()
             .set_parent(window)
             .set_directory(directory)
             .set_file_name(&file_name)
             .add_filter("Mass Effect Trilogy Save", &["pcsav", "ps4sav", "MassEffectSave"])
+            .add_filter("All Files", &["*"])
+            .save_file()
+    }
+
+    pub fn import_head_morph(window: &Window) -> Option<PathBuf> {
+        rfd::FileDialog::new()
+            .set_parent(window)
+            .add_filter("Head Morph", &["ron"])
+            .add_filter("All Files", &["*"])
+            .pick_file()
+    }
+
+    pub fn export_head_morph(window: &Window) -> Option<PathBuf> {
+        rfd::FileDialog::new()
+            .set_parent(window)
+            .add_filter("Head Morph", &["ron"])
             .add_filter("All Files", &["*"])
             .save_file()
     }

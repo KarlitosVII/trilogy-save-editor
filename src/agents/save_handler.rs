@@ -2,16 +2,18 @@ use std::path::PathBuf;
 
 use anyhow::{bail, Context, Error, Result};
 use crc::{Crc, CRC_32_BZIP2};
+use ron::ser::PrettyConfig;
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
 use crate::gui::RcUi;
-use crate::rpc::{Base64File, RpcFile};
+use crate::rpc::{self, Base64File, RpcFile};
 use crate::save_data::{
     mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
     mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
     mass_effect_3::{Me3SaveGame, Me3Version},
+    shared::appearance::HeadMorph,
 };
-use crate::{rpc, unreal};
+use crate::unreal;
 
 #[derive(Clone)]
 pub enum SaveGame {
@@ -26,6 +28,8 @@ pub enum SaveGame {
 pub enum Msg {
     SaveOpened(HandlerId, SaveGame),
     SaveSaved(HandlerId),
+    HeadMorphImported(HandlerId, HeadMorph),
+    HeadMorphExported(HandlerId),
     DialogCancelled,
     Error(HandlerId, Error),
 }
@@ -34,12 +38,15 @@ pub enum Request {
     OpenSave,
     SaveSave(SaveGame),
     ReloadSave(PathBuf),
-    // TODO: Head Morph
+    ImportHeadMorph,
+    ExportHeadMorph(RcUi<HeadMorph>),
 }
 
 pub enum Response {
     SaveOpened(SaveGame),
     SaveSaved,
+    HeadMorphImported(HeadMorph),
+    HeadMorphExported,
     Error(Error),
 }
 
@@ -63,6 +70,10 @@ impl Agent for SaveHandler {
                 self.link.respond(who, Response::SaveOpened(save_game))
             }
             Msg::SaveSaved(who) => self.link.respond(who, Response::SaveSaved),
+            Msg::HeadMorphImported(who, head_morph) => {
+                self.link.respond(who, Response::HeadMorphImported(head_morph))
+            }
+            Msg::HeadMorphExported(who) => self.link.respond(who, Response::HeadMorphExported),
             Msg::DialogCancelled => (),
             Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
         }
@@ -73,6 +84,8 @@ impl Agent for SaveHandler {
             Request::OpenSave => self.open_save(who),
             Request::SaveSave(save_game) => self.save_save(who, save_game),
             Request::ReloadSave(path) => self.reload_save(who, path),
+            Request::ImportHeadMorph => self.import_head_morph(who),
+            Request::ExportHeadMorph(head_morph) => self.export_head_morph(who, head_morph),
         }
     }
 }
@@ -81,12 +94,17 @@ impl SaveHandler {
     fn open_save(&self, who: HandlerId) {
         self.link.send_future(async move {
             let handle_save = async {
-                let rpc_file = rpc::open().await?;
-                Self::deserialize(rpc_file)
+                let has_rpc_file = rpc::open_save().await?;
+                let result = match has_rpc_file {
+                    Some(rpc_file) => Self::deserialize(rpc_file).map(Some)?,
+                    None => None,
+                };
+                Ok::<_, Error>(result)
             };
 
             match handle_save.await.context("Failed to open the save") {
-                Ok(save_game) => Msg::SaveOpened(who, save_game),
+                Ok(Some(save_game)) => Msg::SaveOpened(who, save_game),
+                Ok(None) => Msg::DialogCancelled,
                 Err(err) => Msg::Error(who, err),
             }
         });
@@ -102,11 +120,11 @@ impl SaveHandler {
         };
         self.link.send_future(async move {
             let handle_save = async {
-                let has_path = rpc::save_dialog(path).await?;
+                let has_path = rpc::save_save_dialog(path).await?;
                 let cancelled = match has_path {
                     Some(path) => {
                         let rpc_file = Self::serialize(path, save_game)?;
-                        rpc::save(rpc_file).await?;
+                        rpc::save_file(rpc_file).await?;
                         false
                     }
                     None => true,
@@ -115,13 +133,8 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to save the save") {
-                Ok(cancelled) => {
-                    if cancelled {
-                        Msg::DialogCancelled
-                    } else {
-                        Msg::SaveSaved(who)
-                    }
-                }
+                Ok(false) => Msg::SaveSaved(who),
+                Ok(true) => Msg::DialogCancelled,
                 Err(err) => Msg::Error(who, err),
             }
         });
@@ -130,7 +143,7 @@ impl SaveHandler {
     fn reload_save(&self, who: HandlerId, path: PathBuf) {
         self.link.send_future(async move {
             let handle_save = async move {
-                let rpc_file = rpc::reload(path).await?;
+                let rpc_file = rpc::reload_save(path).await?;
                 Self::deserialize(rpc_file)
             };
 
@@ -143,7 +156,7 @@ impl SaveHandler {
 
     fn deserialize(rpc_file: RpcFile) -> Result<SaveGame> {
         let file_path = rpc_file.path;
-        let input = rpc_file.file.into_bytes()?;
+        let input = rpc_file.file.decode()?;
 
         let save_game = if input.len() >= 4 && input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
             // ME1 Legendary
@@ -238,5 +251,59 @@ impl SaveHandler {
         let rpc_file = RpcFile { path, file };
 
         Ok(rpc_file)
+    }
+
+    fn import_head_morph(&self, who: HandlerId) {
+        self.link.send_future(async move {
+            let handle_save = async {
+                let has_rpc_file = rpc::import_head_morph().await?;
+                let result = match has_rpc_file {
+                    Some(rpc_file) => {
+                        let file = String::from_utf8(rpc_file.file.decode()?)?;
+                        ron::from_str(&file).map(Some)?
+                    }
+                    None => None,
+                };
+                Ok::<_, Error>(result)
+            };
+
+            match handle_save.await.context("Failed to import the head morph") {
+                Ok(Some(head_morph)) => Msg::HeadMorphImported(who, head_morph),
+                Ok(None) => Msg::DialogCancelled,
+                Err(err) => Msg::Error(who, err),
+            }
+        });
+    }
+
+    fn export_head_morph(&self, who: HandlerId, head_morph: RcUi<HeadMorph>) {
+        self.link.send_future(async move {
+            let handle_save = async {
+                let has_path = rpc::export_head_morph_dialog().await?;
+                let cancelled = match has_path {
+                    Some(path) => {
+                        let pretty_config = PrettyConfig::new()
+                            .with_enumerate_arrays(true)
+                            .with_new_line(String::from('\n'));
+
+                        let output = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
+                        let file = Base64File {
+                            unencoded_size: output.len(),
+                            base64: base64::encode(output),
+                        };
+                        let rpc_file = { RpcFile { path, file } };
+                        rpc::save_file(rpc_file).await?;
+                        false
+                    }
+                    None => true,
+                };
+                Ok::<_, Error>(cancelled)
+            };
+
+            match handle_save.await.context("Failed to export the head morph") {
+                Ok(false) => Msg::HeadMorphExported(who),
+                Ok(true) => Msg::DialogCancelled,
+                Err(err) => Msg::Error(who, err),
+            }
+        });
     }
 }

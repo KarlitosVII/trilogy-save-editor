@@ -12,18 +12,18 @@ args = ["-Command", "npm", "update"]
 
 [tasks.update]
 command = "cargo"
-args = ["update"]
+args = ["update", "--workspace"]
 dependencies = ["npm-update"]
 
 [tasks.fmt]
 install_crate = "rustfmt"
 command = "cargo"
-args = ["fmt"]
+args = ["fmt", "--all"]
 
 [tasks.clippy]
 install_crate = "clippy"
 command = "cargo"
-args = ["clippy"]
+args = ["clippy", "--workspace"]
 dependencies = ["fmt"]
 
 [tasks.outdated]
@@ -34,7 +34,7 @@ dependencies = ["update"]
 
 [tasks.test]
 command = "cargo"
-args = ["test"]
+args = ["test", "--workspace"]
 dependencies = ["update"]
 
 # Serve

@@ -39,6 +39,8 @@ fn main() -> Result<()> {
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
+
+        #[allow(clippy::single_match)]
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,

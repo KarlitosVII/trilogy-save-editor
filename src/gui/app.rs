@@ -13,6 +13,7 @@ use crate::gui::{
     mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
     mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
     raw_ui::RawUi,
+    shared::HeadMorph,
     shared::{FloatPlotType, IntPlotType},
     RcUi, Theme,
 };
@@ -53,8 +54,9 @@ impl Component for App {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let save_handle = SaveHandler::bridge(link.callback(|response| match response {
             Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
-            Response::Error(err) => Msg::Error(err),
             Response::SaveSaved => Msg::SaveSaved,
+            Response::Error(err) => Msg::Error(err),
+            _ => unreachable!(),
         }));
 
         let _dbs_service = DatabaseService::bridge(link.callback(|_| {
@@ -86,6 +88,7 @@ impl Component for App {
                 false
             }
             Msg::ReloadSave => {
+                #[allow(clippy::single_match)]
                 match self.props.save_game {
                     Some(
                         SaveGame::MassEffect1Le { ref file_path, .. }
@@ -279,6 +282,7 @@ impl App {
     fn mass_effect_1_le(&self, save_game: RcUi<Me1LeSaveData>) -> Html {
         let me1 = save_game.borrow();
         let plot = me1.plot();
+        let head_morph = RcUi::clone(&me1.player().head_morph);
 
         html! {
             <section class="flex-auto flex p-1">
@@ -300,6 +304,12 @@ impl App {
                             onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
+                    <Tab title="Head Morph">
+                        <HeadMorph {head_morph}
+                            onnotification={self.link.callback(Msg::Notification)}
+                            onerror={self.link.callback(Msg::Error)}
+                        />
+                    </Tab>
                     <Tab title="Raw Data">
                         { save_game.view_opened("Mass Effect 1", true) }
                     </Tab>
@@ -317,16 +327,18 @@ impl App {
     }
 
     fn mass_effect_2(&self, save_game: Me2Type) -> Html {
-        let (raw_data, plot, me1_plot) = match save_game {
+        let (raw_data, plot, me1_plot, head_morph) = match save_game {
             Me2Type::Vanilla(ref me2) => (
                 me2.view_opened("Mass Effect 2", true),
                 RcUi::clone(&me2.borrow().plot),
                 RcUi::clone(&me2.borrow().me1_plot),
+                RcUi::clone(&me2.borrow().player().appearance().head_morph),
             ),
             Me2Type::Legendary(ref me2) => (
                 me2.view_opened("Mass Effect 2", true),
                 RcUi::clone(&me2.borrow().plot),
                 RcUi::clone(&me2.borrow().me1_plot),
+                RcUi::clone(&me2.borrow().player().appearance().head_morph),
             ),
         };
         let (plot, me1_plot) = (plot.borrow(), me1_plot.borrow());
@@ -343,6 +355,12 @@ impl App {
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
                             me1_booleans={RcUi::clone(&me1_plot.booleans)}
                             me1_integers={IntPlotType::Vec(RcUi::clone(&me1_plot.integers))}
+                            onerror={self.link.callback(Msg::Error)}
+                        />
+                    </Tab>
+                    <Tab title="Head Morph">
+                        <HeadMorph {head_morph}
+                            onnotification={self.link.callback(Msg::Notification)}
                             onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>
@@ -365,6 +383,7 @@ impl App {
     fn mass_effect_3(&self, save_game: RcUi<Me3SaveGame>) -> Html {
         let me3 = save_game.borrow();
         let plot = me3.plot();
+        let head_morph = RcUi::clone(&me3.player().appearance().head_morph);
 
         html! {
             <section class="flex-auto flex p-1">
@@ -377,6 +396,12 @@ impl App {
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
                             variables={RcUi::clone(&me3.player_variables)}
+                            onerror={self.link.callback(Msg::Error)}
+                        />
+                    </Tab>
+                    <Tab title="Head Morph">
+                        <HeadMorph {head_morph}
+                            onnotification={self.link.callback(Msg::Notification)}
                             onerror={self.link.callback(Msg::Error)}
                         />
                     </Tab>

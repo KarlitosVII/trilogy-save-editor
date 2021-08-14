@@ -31,7 +31,7 @@ enum PlayerAppearanceType {
 }
 
 #[rcize_fields]
-#[derive(Deserialize, Serialize, Clone, RawUi)]
+#[derive(Deserialize, Serialize, Clone, RawUi, RawUiChildren)]
 pub struct HeadMorph {
     pub hair_mesh: String,
     pub accessory_mesh: Vec<String>,
