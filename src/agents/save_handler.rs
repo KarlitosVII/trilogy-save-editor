@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::{bail, Context, Error, Result};
 use crc::{Crc, CRC_32_BZIP2};
+use gloo::console;
 use ron::ser::PrettyConfig;
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
@@ -74,7 +75,10 @@ impl Agent for SaveHandler {
                 self.link.respond(who, Response::HeadMorphImported(head_morph))
             }
             Msg::HeadMorphExported(who) => self.link.respond(who, Response::HeadMorphExported),
-            Msg::DialogCancelled => (),
+            Msg::DialogCancelled => {
+                #[cfg(debug_assertions)]
+                console::log!("Dialog cancelled");
+            }
             Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
         }
     }
@@ -247,8 +251,10 @@ impl SaveHandler {
             }
         };
 
-        let file = Base64File { unencoded_size: output.len(), base64: base64::encode(output) };
-        let rpc_file = RpcFile { path, file };
+        let rpc_file = RpcFile {
+            path,
+            file: Base64File { unencoded_size: output.len(), base64: base64::encode(output) },
+        };
 
         Ok(rpc_file)
     }
@@ -286,11 +292,13 @@ impl SaveHandler {
                             .with_new_line(String::from('\n'));
 
                         let output = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
-                        let file = Base64File {
-                            unencoded_size: output.len(),
-                            base64: base64::encode(output),
+                        let rpc_file = RpcFile {
+                            path,
+                            file: Base64File {
+                                unencoded_size: output.len(),
+                                base64: base64::encode(output),
+                            },
                         };
-                        let rpc_file = { RpcFile { path, file } };
                         rpc::save_file(rpc_file).await?;
                         false
                     }
