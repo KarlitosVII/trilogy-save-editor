@@ -1,4 +1,3 @@
-use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 use super::player::{Power, Weapon, WeaponMod};

@@ -166,7 +166,7 @@ impl Component for App {
                 "flex",
                 "flex-col",
                 "font-default",
-                "text-[80%]",
+                "text-[0.825rem]",
                 "leading-[20px]",
                 "text-white",
                 theme,

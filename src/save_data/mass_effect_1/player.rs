@@ -1,7 +1,6 @@
 use std::{cell::RefCell, fmt};
 
 use anyhow::Result;
-use derive_more::{Deref, DerefMut};
 use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
 
 use super::{data::Data, List};

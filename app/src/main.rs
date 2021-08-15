@@ -34,7 +34,7 @@ fn main() -> Result<()> {
         .with_initialization_script(include_str!("initialization.js"))
         .with_rpc_handler(rpc_handler)
         .with_custom_protocol(String::from("tse"), protocol)
-        .with_url("tse://_/")?
+        .with_url("tse://localhost/")?
         .build()?;
 
     event_loop.run(move |event, _, control_flow| {
@@ -55,7 +55,7 @@ fn main() -> Result<()> {
 }
 
 fn protocol(path: &str) -> wry::Result<(Vec<u8>, String)> {
-    let path = path.trim_start_matches("tse://_/");
+    let path = path.trim_start_matches("tse://localhost/");
     let path = if !path.is_empty() { path } else { "index.html" };
 
     let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();

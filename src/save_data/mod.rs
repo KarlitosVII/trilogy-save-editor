@@ -7,7 +7,6 @@ pub mod shared;
 use std::fmt;
 
 use anyhow::Result;
-use derive_more::{Deref, DerefMut, Display, From};
 use serde::{de, ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 use uuid::Uuid;
 

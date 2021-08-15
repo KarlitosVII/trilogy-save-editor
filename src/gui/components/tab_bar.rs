@@ -41,7 +41,14 @@ impl Component for TabBar {
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
+        if self.props.neq_assign(props) {
+            let len = self.props.children.len();
+            let last_tab = if len > 0 { len - 1 } else { 0 };
+            self.current_tab = self.current_tab.min(last_tab);
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {

@@ -85,6 +85,7 @@ impl Component for ItemSelect {
             Msg::Open => {
                 self.opened = true;
                 self.check_direction = true;
+
                 self.link.send_message(Msg::Scrolled);
                 false
             }
@@ -165,6 +166,11 @@ impl Component for ItemSelect {
     fn rendered(&mut self, _first_render: bool) {
         if self.check_direction {
             self.check_direction = false;
+
+            // Focus the filter when opened
+            if let Some(filter) = self.filter_ref.cast::<HtmlElement>() {
+                let _ = filter.focus();
+            }
 
             // Drop down open upward if bottom > viewport_height
             if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {

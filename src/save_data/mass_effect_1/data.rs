@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 
 use anyhow::Result;
-use derive_more::{Deref, DerefMut};
 use serde::{de, Serialize};
 
 use super::{player::Name, List};

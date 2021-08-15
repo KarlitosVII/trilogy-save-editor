@@ -6,7 +6,6 @@ mod squad;
 use self::{galaxy_map::*, player::*, squad::*};
 
 use anyhow::Result;
-use derive_more::Display;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
 use super::shared::{

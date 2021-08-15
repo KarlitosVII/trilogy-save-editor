@@ -3,11 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  @font-face {
-    font-family: "Proggy Clean";
-    src: url(/ProggyClean.ttf) format("TrueType");
-  }
-  
   .chevron {
     background-size: 16px;
     background-repeat: no-repeat;

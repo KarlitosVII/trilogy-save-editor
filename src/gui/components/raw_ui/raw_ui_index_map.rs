@@ -1,6 +1,5 @@
 use std::any::Any;
 
-use derive_more::From;
 use indexmap::IndexMap;
 use yew::{prelude::*, utils::NeqAssign};
 

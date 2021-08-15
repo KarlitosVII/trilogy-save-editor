@@ -9,11 +9,11 @@ edition = "2018"
 lto = true
 
 [workspace]
-members = ["raw_ui_derive", "app"]
+members = ["macros", "app"]
 
 [dependencies]
 # Karlitos
-raw_ui_derive = { path = "raw_ui_derive" }
+macros = { path = "macros" }
 # Std-like
 anyhow = "1.0"
 derive_more = { version = "0.99", features = ["deref", "deref_mut", "from", "display"], default-features = false }

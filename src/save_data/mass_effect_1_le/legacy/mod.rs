@@ -6,7 +6,6 @@ use self::{art_placeable::*, inventory::*, pawn::*};
 
 use std::fmt;
 
-use derive_more::Display;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Deserializer, Serialize};
 

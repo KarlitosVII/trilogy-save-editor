@@ -7,7 +7,6 @@ mod squad;
 use self::{galaxy_map::*, player::*, plot::*, squad::*};
 
 use anyhow::Result;
-use derive_more::Display;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Deserializer, Serialize};
 

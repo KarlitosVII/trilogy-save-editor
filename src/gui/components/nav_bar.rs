@@ -103,6 +103,8 @@ impl NavBar {
             self.link.callback(|_| Msg::MenuBlur)
         };
 
+        let licenses = self.licenses_opened.then(|| self.view_licenses());
+
         html! {
             <div class="relative" tabindex="0"
                 onblur={self.about_opened.then(||self.link.callback(|_| Msg::MenuClose))}
@@ -138,7 +140,7 @@ impl NavBar {
                         </span>
                         <hr class="border-default-border mb-px" />
                         <div class="relative flex">
-                            { self.view_licenses() }
+                            { for licenses }
                             <a class={classes![
                                     "flex-auto",
                                     "px-1",
@@ -167,10 +169,9 @@ impl NavBar {
                 "border",
                 "border-default-border",
                 "p-1",
-                "w-[570px]",
+                "w-[582px]",
                 "h-[570px]",
                 "z-40",
-                (!self.licenses_opened).then(|| "hidden" )
             ]}>
                 <TabBar>
                     <Tab title="English">
