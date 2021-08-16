@@ -1,9 +1,10 @@
 mod bonus_powers;
 mod head_morph;
+mod link;
 mod plot_category;
 mod raw_plot;
 
-pub use self::{bonus_powers::*, head_morph::*, plot_category::*, raw_plot::*};
+pub use self::{bonus_powers::*, head_morph::*, link::*, plot_category::*, raw_plot::*};
 
 use indexmap::IndexMap;
 use yew::prelude::*;
@@ -65,7 +66,9 @@ impl PartialEq for PlotType {
 }
 
 impl RawUi for RcUi<PlotTable> {
-    fn view(&self, _: &str) -> yew::Html {
-        html! { "// TODO: Link to Raw Plot" }
+    fn view(&self, label: &str) -> yew::Html {
+        html! {
+            <Link label={label.to_owned()} tab="Raw Plot">{ "Go to Raw Plot tab" }</Link>
+        }
     }
 }

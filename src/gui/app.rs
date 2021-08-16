@@ -1,6 +1,6 @@
 use std::mem;
 
-use anyhow::{anyhow, Error};
+use anyhow::Error;
 use gloo::timers::future::TimeoutFuture;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
@@ -27,9 +27,9 @@ pub enum Msg {
     SaveSaved,
     ReloadSave,
     Notification(&'static str),
-    CloseNotification,
+    DismissNotification,
     Error(Error),
-    CloseError,
+    DismissError,
 }
 
 #[derive(Properties, Clone, Default)]
@@ -59,11 +59,16 @@ impl Component for App {
             _ => unreachable!(),
         }));
 
-        let _dbs_service = DatabaseService::bridge(link.callback(|_| {
-            Msg::Error(anyhow!("Database service should not send a message to App component"))
-        }));
+        let _dbs_service = DatabaseService::bridge(Callback::noop());
 
-        App { props, link, save_handle, _dbs_service, notification: None, error: None }
+        App {
+            props,
+            link,
+            save_handle,
+            _dbs_service,
+            notification: None,
+            error: None,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -107,11 +112,11 @@ impl Component for App {
                 self.notification = Some(notification);
                 self.link.send_future(async {
                     TimeoutFuture::new(1500).await;
-                    Msg::CloseNotification
+                    Msg::DismissNotification
                 });
                 true
             }
-            Msg::CloseNotification => {
+            Msg::DismissNotification => {
                 self.notification = None;
                 true
             }
@@ -119,7 +124,7 @@ impl Component for App {
                 self.error = Some(error);
                 true
             }
-            Msg::CloseError => {
+            Msg::DismissError => {
                 self.error = None;
                 true
             }
@@ -227,7 +232,7 @@ impl App {
                         { for chain }
                         <hr class="my-0.5 border-t border-default-border" />
                         <button class="button w-12"
-                            onclick={self.link.callback(|_| Msg::CloseError)}
+                            onclick={self.link.callback(|_| Msg::DismissError)}
                         >
                             {"OK"}
                         </button>
@@ -286,7 +291,7 @@ impl App {
 
         html! {
             <section class="flex-auto flex p-1">
-                <TabBar>
+                <TabBar is_main_tab_bar=true>
                     <Tab title="General">
                         <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
                     </Tab>
@@ -345,7 +350,7 @@ impl App {
 
         html! {
             <section class="flex-auto flex p-1">
-                <TabBar>
+                <TabBar is_main_tab_bar=true>
                     <Tab title="General">
                         <Me2General save_game={Me2Type::clone(&save_game)} />
                     </Tab>
@@ -387,7 +392,7 @@ impl App {
 
         html! {
             <section class="flex-auto flex p-1">
-                <TabBar>
+                <TabBar is_main_tab_bar=true>
                     <Tab title="General">
                         <Me3General save_game={RcUi::clone(&save_game)} />
                     </Tab>

@@ -8,6 +8,7 @@
 - // TODO: file drop
 - // TODO: command line
 - // TODO: Inventory select width fix
+- // TODO: ME1
 
 ## 1.13.1
 - ME2: Added all armors plots
