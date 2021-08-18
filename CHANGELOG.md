@@ -4,11 +4,12 @@
 - No ME1
 - No compare
 - Better font for high DPI
-- // TODO: unobtainable ME1 item db
 - // TODO: file drop
-- // TODO: command line
-- // TODO: Inventory select width fix
 - // TODO: ME1
+- // TODO: Title bar
+- // TODO: auto update
+- // TODO: command line
+- // TODO: unobtainable ME1 item db
 
 ## 1.13.1
 - ME2: Added all armors plots

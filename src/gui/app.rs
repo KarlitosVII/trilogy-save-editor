@@ -61,14 +61,7 @@ impl Component for App {
 
         let _dbs_service = DatabaseService::bridge(Callback::noop());
 
-        App {
-            props,
-            link,
-            save_handle,
-            _dbs_service,
-            notification: None,
-            error: None,
-        }
+        App { props, link, save_handle, _dbs_service, notification: None, error: None }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {

@@ -237,7 +237,7 @@ impl Component for Me3General {
         let save_game = &*self.props.save_game();
 
         html! {
-            <div class="flex flex-row divide-solid divide-x divide-default-border">
+            <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
                     { self.role_play(save_game.player()) }
                     { self.morality(save_game.plot()) }

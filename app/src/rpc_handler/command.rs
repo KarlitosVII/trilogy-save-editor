@@ -53,7 +53,7 @@ fn open_file(path: PathBuf) -> Result<RpcFile> {
     let file = fs::read(path.canonicalize()?)?;
     let unencoded_size = file.len();
     let base64 = base64::encode(file);
-    Ok(RpcFile { path: path.to_owned(), file: Base64File { unencoded_size, base64 } })
+    Ok(RpcFile { path, file: Base64File { unencoded_size, base64 } })
 }
 
 fn write_file(rpc_file: RpcFile) -> Result<()> {

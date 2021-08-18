@@ -1,11 +1,12 @@
 use std::cell::{Ref, RefMut};
+use web_sys::HtmlInputElement;
 use yew::{prelude::*, utils::NeqAssign};
 
 use super::CallbackType;
 use crate::gui::{components::Helper, RcUi};
 
 pub enum Msg {
-    Input(String),
+    Input(InputEvent),
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -41,12 +42,14 @@ impl Component for InputText {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Input(value) => {
+            Msg::Input(event) => {
+                let input: HtmlInputElement = event.target_unchecked_into();
+
                 if let Some(ref callback) = self.props.oninput {
-                    callback.emit(CallbackType::String(value.clone()));
+                    callback.emit(CallbackType::String(input.value()));
                 }
 
-                *self.props.value_mut() = value;
+                *self.props.value_mut() = input.value();
                 false
             }
         }
@@ -63,7 +66,7 @@ impl Component for InputText {
             }
         });
         let value = self.props.value().clone();
-        let oninput = self.link.callback(|data: InputData| Msg::Input(data.value));
+        let oninput = self.link.callback(Msg::Input);
         html! {
             <label class="flex-auto flex items-center gap-1">
                 <input type="text" class="input w-2/3" placeholder="<empty>" {value} {oninput} />

@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use gloo::{events::EventListener, timers::future::TimeoutFuture};
 use indexmap::{map::Entry, IndexMap};
-use web_sys::HtmlElement;
+use web_sys::{HtmlElement, HtmlInputElement};
 use yew::{prelude::*, utils::NeqAssign};
 
 use super::{FloatPlotType, IntPlotType, PlotType};
@@ -17,7 +17,7 @@ use crate::save_data::shared::plot::RawPlotDb;
 pub enum Msg {
     Scrolled,
     ChangeBool(usize, bool),
-    Filter(String),
+    Filter(InputEvent),
     Filtered,
     Add,
 }
@@ -56,7 +56,7 @@ pub struct RawPlot {
     take: usize,
     label_list: Option<IndexMap<usize, Option<String>>>,
     is_filtering: bool,
-    next_filter: Option<String>,
+    pending_filter: Option<InputEvent>,
 }
 
 impl Component for RawPlot {
@@ -82,7 +82,7 @@ impl Component for RawPlot {
             take: 0,
             label_list: None,
             is_filtering: false,
-            next_filter: None,
+            pending_filter: None,
         };
         this.add_missing_plots();
         this.update_label_list();
@@ -95,14 +95,12 @@ impl Component for RawPlot {
                 if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
                     let scroll_top = scroll.scroll_top();
                     let offset_height = scroll.offset_height();
-                    let num_rows = offset_height / self.row_height + 1;
-                    let overflow_begin = num_rows / 4;
-                    let overflow_end = num_rows / 2;
+                    let num_rows = offset_height / self.row_height + 2;
 
-                    let len = self.label_list.as_ref().map(|list| list.len()).unwrap_or_else(|| 0);
+                    let len = self.label_list.as_ref().map(|list| list.len()).unwrap_or_default();
                     let start = scroll_top / self.row_height;
-                    self.skip = (start - overflow_begin).max(0) as usize;
-                    self.take = (num_rows + overflow_end).min(len as i32) as usize;
+                    self.skip = start.max(0) as usize;
+                    self.take = num_rows.min(len as i32) as usize;
                 }
                 true
             }
@@ -114,10 +112,12 @@ impl Component for RawPlot {
                 }
                 false
             }
-            Msg::Filter(filter) => {
+            Msg::Filter(event) => {
                 if !self.is_filtering {
                     self.is_filtering = true;
-                    *self.props.filter_mut() = filter;
+
+                    let input: HtmlInputElement = event.target_unchecked_into();
+                    *self.props.filter_mut() = input.value();
 
                     self.link.send_future(async {
                         TimeoutFuture::new(100).await;
@@ -128,14 +128,14 @@ impl Component for RawPlot {
 
                     self.link.send_message(Msg::Scrolled);
                 } else {
-                    self.next_filter = Some(filter);
+                    self.pending_filter = Some(event);
                 }
                 false
             }
             Msg::Filtered => {
                 self.is_filtering = false;
-                if let Some(filter) = self.next_filter.take() {
-                    self.link.send_message(Msg::Filter(filter))
+                if let Some(event) = self.pending_filter.take() {
+                    self.link.send_message(Msg::Filter(event))
                 }
                 false
             }
@@ -145,7 +145,7 @@ impl Component for RawPlot {
                     PlotType::Boolean(ref mut booleans) => {
                         let mut booleans = booleans.borrow_mut();
                         if new_plot >= booleans.len() {
-                            booleans.resize(new_plot + 1, Default::default());
+                            booleans.resize_with(new_plot + 1, Default::default);
                             true
                         } else {
                             false
@@ -155,7 +155,7 @@ impl Component for RawPlot {
                         IntPlotType::Vec(ref mut vec) => {
                             let mut vec = vec.borrow_mut();
                             if new_plot >= vec.len() {
-                                vec.resize(new_plot + 1, Default::default());
+                                vec.resize_with(new_plot + 1, Default::default);
                                 true
                             } else {
                                 false
@@ -175,7 +175,7 @@ impl Component for RawPlot {
                         FloatPlotType::Vec(ref mut vec) => {
                             let mut vec = vec.borrow_mut();
                             if new_plot >= vec.len() {
-                                vec.resize(new_plot + 1, Default::default());
+                                vec.resize_with(new_plot + 1, Default::default);
                                 true
                             } else {
                                 false
@@ -276,13 +276,13 @@ impl Component for RawPlot {
             },
             _ => Html::default(),
         };
-        let len = label_list.map(|list| list.len()).unwrap_or_else(|| 0);
+        let len = label_list.map(|list| list.len()).unwrap_or_default();
         html! {
             <div class="flex-auto flex flex-col gap-1">
                 <div class="flex gap-3 w-2/3">
                     <label class="flex-auto flex items-center gap-1">
                         <input type="text" class="flex-auto input" placeholder="<empty>" value={self.props.filter().clone()}
-                            oninput={self.link.callback(|data: InputData| Msg::Filter(data.value))}
+                            oninput={self.link.callback(Msg::Filter)}
                         />
                         { "Filter" }
                     </label>
@@ -306,7 +306,7 @@ impl Component for RawPlot {
                         style={format!("height: {}px;", len * self.row_height as usize + 2)}
                     >
                         <div class="absolute min-w-[33.333333%]"
-                            style={format!("will-change: transform; transform: translateY({}px)", self.skip * self.row_height as usize)}
+                            style={format!("will-change: transform; transform: translate3d(0, {}px, 0)", self.skip * self.row_height as usize)}
                         >
                             { for rows }
                         </div>
@@ -326,7 +326,7 @@ impl RawPlot {
                 if let Some(&max) = plot_db.booleans.keys().max() {
                     let mut booleans = booleans.borrow_mut();
                     if max >= booleans.len() {
-                        booleans.resize(max + 1, Default::default());
+                        booleans.resize_with(max + 1, Default::default);
                     };
                 }
             }
@@ -335,7 +335,7 @@ impl RawPlot {
                     if let Some(&max) = plot_db.integers.keys().max() {
                         let mut vec = vec.borrow_mut();
                         if max >= vec.len() {
-                            vec.resize(max + 1, Default::default());
+                            vec.resize_with(max + 1, Default::default);
                         };
                     }
                 }
@@ -350,7 +350,7 @@ impl RawPlot {
                     if let Some(&max) = plot_db.floats.keys().max() {
                         let mut vec = vec.borrow_mut();
                         if max >= vec.len() {
-                            vec.resize(max + 1, Default::default());
+                            vec.resize_with(max + 1, Default::default);
                         };
                     }
                 }

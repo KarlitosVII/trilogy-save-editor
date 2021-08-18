@@ -1,13 +1,14 @@
 use std::cell::{Ref, RefMut};
 
 use uuid::Uuid;
+use web_sys::HtmlInputElement;
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::RcUi;
 use crate::save_data::Guid;
 
 pub enum Msg {
-    Change(ChangeData),
+    Change(Event),
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -41,13 +42,13 @@ impl Component for RawUiGuid {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Change(ChangeData::Value(value)) => {
-                if let Ok(guid) = Uuid::parse_str(&value) {
+            Msg::Change(event) => {
+                let input: HtmlInputElement = event.target_unchecked_into();
+                if let Ok(guid) = Uuid::parse_str(&input.value()) {
                     *self.props.guid_mut() = Guid::from(guid);
                 }
                 true
             }
-            _ => unreachable!(),
         }
     }
 

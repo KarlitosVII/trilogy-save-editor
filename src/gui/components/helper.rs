@@ -52,7 +52,7 @@ impl Component for Helper {
             let left = client_rect.left() as i32;
             let right = left + width;
 
-            if right + 30 > viewport_width {
+            if right > viewport_width - 30 {
                 let _ =
                     popup.style().set_property("left", &format!("{}px", viewport_width - right));
                 let _ = popup.style().set_property("top", "30px");

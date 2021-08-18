@@ -5,8 +5,6 @@
 mod rpc_handler;
 use self::rpc_handler::rpc_handler;
 
-use std::io;
-
 use anyhow::Result;
 use rust_embed::RustEmbed;
 use wry::application::{
@@ -54,13 +52,13 @@ fn main() -> Result<()> {
     });
 }
 
-fn protocol(path: &str) -> wry::Result<(Vec<u8>, String)> {
-    let path = path.trim_start_matches("tse://localhost/");
-    let path = if !path.is_empty() { path } else { "index.html" };
+fn protocol(mut path: &str) -> wry::Result<(Vec<u8>, String)> {
+    path = path.trim_start_matches("tse://localhost/");
+    if path.is_empty() {
+        path = "index.html"
+    }
 
     let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();
-    let content = Asset::get(path).map(|file| file.data.into_owned()).ok_or_else(|| {
-        wry::Error::Io(io::Error::new(io::ErrorKind::Other, "Error loading requested file"))
-    })?;
+    let content = Asset::get(path).map(|file| file.data.into_owned()).unwrap_or_default();
     Ok((content, mime))
 }

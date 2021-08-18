@@ -1,3 +1,4 @@
+use web_sys::HtmlInputElement;
 use yew::{prelude::*, utils::NeqAssign};
 
 use super::CallbackType;
@@ -22,7 +23,7 @@ impl PartialEq for NumberType {
 }
 
 pub enum Msg {
-    Change(ChangeData),
+    Change(Event),
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -48,42 +49,42 @@ impl Component for InputNumber {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Change(ChangeData::Value(value)) => {
-                if value.is_empty() {
+            Msg::Change(event) => {
+                let input: HtmlInputElement = event.target_unchecked_into();
+                let value = input.value_as_number();
+
+                if value.is_nan() {
                     return true;
                 }
 
-                if let Ok(value) = value.parse::<f64>() {
-                    match self.props.value {
-                        NumberType::Byte(ref mut byte) => {
-                            let value: u8 = value as u8;
-                            *byte.borrow_mut() = value;
+                match self.props.value {
+                    NumberType::Byte(ref mut byte) => {
+                        let value: u8 = value as u8;
+                        *byte.borrow_mut() = value;
 
-                            if let Some(ref callback) = self.props.onchange {
-                                callback.emit(CallbackType::Byte(value));
-                            }
+                        if let Some(ref callback) = self.props.onchange {
+                            callback.emit(CallbackType::Byte(value));
                         }
-                        NumberType::Integer(ref mut integer) => {
-                            let value = value as i32;
-                            *integer.borrow_mut() = value;
+                    }
+                    NumberType::Integer(ref mut integer) => {
+                        let value = value as i32;
+                        *integer.borrow_mut() = value;
 
-                            if let Some(ref callback) = self.props.onchange {
-                                callback.emit(CallbackType::Integer(value));
-                            }
+                        if let Some(ref callback) = self.props.onchange {
+                            callback.emit(CallbackType::Integer(value));
                         }
-                        NumberType::Float(ref mut float) => {
-                            let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
-                            *float.borrow_mut() = value;
+                    }
+                    NumberType::Float(ref mut float) => {
+                        let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
+                        *float.borrow_mut() = value;
 
-                            if let Some(ref callback) = self.props.onchange {
-                                callback.emit(CallbackType::Float(value));
-                            }
+                        if let Some(ref callback) = self.props.onchange {
+                            callback.emit(CallbackType::Float(value));
                         }
-                    };
+                    }
                 }
                 true
             }
-            _ => unreachable!(),
         }
     }
 

@@ -37,6 +37,8 @@ impl Component for TabBar {
             Self::event_listener(link)
         });
 
+        // TODO: Tab history
+
         TabBar { props, link, current_tab, main_tab_listener }
     }
 
@@ -77,7 +79,7 @@ impl Component for TabBar {
             // Go to first tab if current tab doesn't exist
             let children = &self.props.children;
             if !children.iter().any(|child| child.props.title == self.current_tab) {
-                self.current_tab = Self::first_tab(&children);
+                self.current_tab = Self::first_tab(children);
             }
             true
         } else {
@@ -130,7 +132,7 @@ impl Component for TabBar {
         });
 
         html! {
-            <div class="flex flex-col flex-nowrap flex-auto">
+            <div class="flex-auto flex flex-col min-w-0">
                 <div class="flex flex-wrap gap-1 border-b border-theme-active mb-1">
                     { for tabs }
                 </div>
@@ -154,7 +156,7 @@ impl TabBar {
     }
 
     fn first_tab(children: &ChildrenWithProps<Tab>) -> String {
-        children.iter().next().map(|child| child.props.title.clone()).unwrap_or_default()
+        children.iter().next().map(|child| child.props.title).unwrap_or_default()
     }
 }
 

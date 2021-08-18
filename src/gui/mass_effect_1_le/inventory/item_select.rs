@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use gloo::timers::future::TimeoutFuture;
 use indexmap::IndexMap;
-use web_sys::HtmlElement;
+use web_sys::{HtmlElement, HtmlInputElement};
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::save_data::mass_effect_1_le::item_db::{DbItem, Me1ItemDb};
@@ -14,7 +14,7 @@ pub enum Msg {
     Focused,
     Blurred,
     BlurAll,
-    Filter(String),
+    Filter(InputEvent),
     Select(DbItem),
 }
 
@@ -34,7 +34,7 @@ pub struct ItemSelect {
     filter_ref: NodeRef,
     focused: bool,
     opened: bool,
-    check_direction: bool,
+    is_opening: bool,
     row_height: i32,
     skip: usize,
     take: usize,
@@ -56,7 +56,7 @@ impl Component for ItemSelect {
             filter_ref: Default::default(),
             focused: false,
             opened: false,
-            check_direction: false,
+            is_opening: false,
             row_height: 20,
             skip: 0,
             take: 0,
@@ -71,29 +71,26 @@ impl Component for ItemSelect {
                 if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
                     let scroll_top = scroll.scroll_top();
                     let offset_height = 300;
-                    let num_rows = offset_height / self.row_height + 1;
-                    let overflow_begin = num_rows / 4;
-                    let overflow_end = num_rows / 2;
+                    let num_rows = offset_height / self.row_height + 2;
 
                     let len = self.filtered_list.as_ref().unwrap_or(&self.props.item_db).len();
                     let start = scroll_top / self.row_height;
-                    self.skip = (start - overflow_begin).max(0) as usize;
-                    self.take = (num_rows + overflow_end).min(len as i32) as usize;
+                    self.skip = start.max(0) as usize;
+                    self.take = num_rows.min(len as i32) as usize;
                 }
                 true
             }
             Msg::Open => {
                 self.opened = true;
-                self.check_direction = true;
-
-                self.link.send_message(Msg::Scrolled);
-                false
+                self.is_opening = true;
+                true
             }
             Msg::ShouldClose => {
                 if !self.focused {
                     self.opened = false;
                     if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
                         let _ = drop_down.style().set_property("bottom", "auto");
+                        let _ = drop_down.style().set_property("right", "auto");
                     }
                     true
                 } else {
@@ -125,7 +122,10 @@ impl Component for ItemSelect {
                 }
                 false
             }
-            Msg::Filter(filter) => {
+            Msg::Filter(event) => {
+                let input: HtmlInputElement = event.target_unchecked_into();
+                let filter = input.value();
+
                 if !filter.is_empty() {
                     let filter = filter.to_lowercase();
                     let filtered_list = self
@@ -164,21 +164,22 @@ impl Component for ItemSelect {
     }
 
     fn rendered(&mut self, _first_render: bool) {
-        if self.check_direction {
-            self.check_direction = false;
+        if self.is_opening {
+            self.is_opening = false;
 
             // Focus the filter when opened
             if let Some(filter) = self.filter_ref.cast::<HtmlElement>() {
                 let _ = filter.focus();
             }
 
-            // Drop down open upward if bottom > viewport_height
             if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
-                let viewport_height =
-                    yew::utils::document().document_element().unwrap().client_height();
-                let rect = drop_down.get_bounding_client_rect();
-                let top = rect.top() as i32;
-                let bottom = rect.bottom() as i32;
+                let document = yew::utils::document().document_element().unwrap();
+                let viewport_height = document.client_height();
+                let client_rect = drop_down.get_bounding_client_rect();
+
+                // Drop down open upward if bottom > viewport_height
+                let top = client_rect.top() as i32;
+                let bottom = client_rect.bottom() as i32;
                 let height = bottom - top;
 
                 if height < top - 70 && bottom > viewport_height - 10 {
@@ -187,7 +188,19 @@ impl Component for ItemSelect {
                         let _ = drop_down.style().set_property("bottom", &format!("{}px", height));
                     }
                 }
+
+                // Keep the drop down in the viewport
+                let viewport_width = document.client_width();
+                let width = client_rect.width() as i32;
+                let left = client_rect.left() as i32;
+                let right = left + width;
+
+                if right > viewport_width - 20 {
+                    let _ = drop_down.style().set_property("right", "0");
+                }
             }
+
+            self.link.send_message(Msg::Scrolled);
         }
     }
 
@@ -196,11 +209,11 @@ impl Component for ItemSelect {
             .props
             .item_db
             .get(&self.props.current_item)
-            .map(|i| i.as_str())
+            .map(|item| item.as_str())
             .unwrap_or_else(|| "Unknown item");
 
-        let options = self.opened.then(|| {
-            let item_db = self.filtered_list.as_ref().unwrap_or(&self.props.item_db);
+        let item_db = self.filtered_list.as_ref().unwrap_or(&self.props.item_db);
+        let options = (self.opened && !self.is_opening).then(|| {
             let options = item_db.iter().skip(self.skip).take(self.take).map(|(&key, option)| {
                 let selected = key == self.props.current_item;
                 html_nested! {
@@ -222,12 +235,10 @@ impl Component for ItemSelect {
             });
 
             html! {
-                <div style={format!("height: {}px;", item_db.len() * self.row_height as usize)}>
-                    <div class="flex flex-col"
-                        style={format!("will-change: transform; transform: translateY({}px)", self.skip * self.row_height as usize)}
-                    >
-                        { for options }
-                    </div>
+                <div class="flex flex-col"
+                    style={format!("will-change: transform; transform: translate3d(0, {}px, 0)", self.skip * self.row_height as usize)}
+                >
+                    { for options }
                 </div>
             }
         });
@@ -239,56 +250,61 @@ impl Component for ItemSelect {
         };
 
         html! {
-            <div class="relative flex-auto select-none" tabindex="0"
+            <div class="relative flex-auto select-none min-w-0" tabindex="0"
                 onfocus={self.link.callback(|_| Msg::Focused)}
                 onblur={self.opened.then(||self.link.callback(|_| Msg::Blurred))}
                 ref={self.select_ref.clone()}
             >
-                <a class={classes![
-                        "block",
-                        "bg-theme-bg",
-                        "hover:bg-theme-hover",
-                        "active:bg-theme-active",
-                        "px-1",
-                        "pr-5",
-                        "cursor-pointer",
-                        "min-w-full",
-                        "select-chevron",
-                    ]}
-                    {onclick}
-                >
-                    { current_item_name }
-                </a>
-                <div class={classes![
-                        "absolute",
-                        "flex",
-                        "flex-col",
-                        "bg-popup/95",
-                        "border",
-                        "border-default-border",
-                        "min-w-full",
-                        "max-h-[300px]",
-                        "z-20",
-                        (!self.opened).then(|| "hidden")
-                    ]}
-                    ref={self.drop_down_ref.clone()}
-                >
-                    <label class="flex items-center gap-1 p-px pr-1">
-                        <input type="text" class="flex-auto input" placeholder="<empty>"
-                            value={self.filter.clone()}
-                            oninput={self.link.callback(|data: InputData| Msg::Filter(data.value))}
-                            onfocus={self.link.callback(|_| Msg::Focused)}
-                            onblur={self.link.callback(|_| Msg::Blurred)}
-                            ref={self.filter_ref.clone()}
-                        />
-                        { "Filter" }
-                    </label>
-                    <hr class="border-t border-default-border" />
-                    <div class="p-px overflow-y-auto z-20"
-                        onscroll={self.link.callback(|_| Msg::Scrolled)}
-                        ref={self.scroll_ref.clone()}
+                <div class="overflow-hidden">
+                    <a class={classes![
+                            "block",
+                            "bg-theme-bg",
+                            "hover:bg-theme-hover",
+                            "active:bg-theme-active",
+                            "px-1",
+                            "pr-5",
+                            "cursor-pointer",
+                            "select-chevron",
+                            "truncate",
+                        ]}
+                        {onclick}
                     >
-                        { for options }
+                        { current_item_name }
+                    </a>
+                    <div class={classes![
+                            "absolute",
+                            "flex",
+                            "flex-col",
+                            "bg-popup/95",
+                            "border",
+                            "border-default-border",
+                            "min-w-full",
+                            "w-[408px]",
+                            "max-h-[300px]",
+                            "z-20",
+                            (!self.opened).then(|| "hidden")
+                        ]}
+                        ref={self.drop_down_ref.clone()}
+                    >
+                        <label class="flex items-center gap-1 p-px pr-1">
+                            <input type="text" class="flex-auto input" placeholder="<empty>"
+                                value={self.filter.clone()}
+                                oninput={self.link.callback(Msg::Filter)}
+                                onfocus={self.link.callback(|_| Msg::Focused)}
+                                onblur={self.link.callback(|_| Msg::Blurred)}
+                                ref={self.filter_ref.clone()}
+                            />
+                            { "Filter" }
+                        </label>
+                        <hr class="border-t border-default-border" />
+                        <div class="p-px overflow-y-auto z-20"
+                            onscroll={self.link.callback(|_| Msg::Scrolled)}
+                            ref={self.scroll_ref.clone()}
+                        >
+                            <div style={format!("height: {}px;", item_db.len() * self.row_height as usize)}>
+                                { for options }
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

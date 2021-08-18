@@ -131,7 +131,7 @@ impl Component for Me1LeGeneral {
         let save_game = &*self.props.save_game();
 
         html! {
-            <div class="flex flex-row divide-solid divide-x divide-default-border">
+            <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
                     { self.role_play(save_game.player()) }
                     { self.morality(save_game.plot()) }
@@ -216,7 +216,7 @@ impl Me1LeGeneral {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
         let current_difficulty =
-            game_options.get(0).map(|d| *d.borrow()).unwrap_or_default() as usize;
+            game_options.get(0).map(|d| *d.borrow() as usize).unwrap_or_default();
         html! {
             <Table title={String::from("General")}>
                 <div class="flex items-center gap-1 cursor-default">

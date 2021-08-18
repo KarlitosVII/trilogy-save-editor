@@ -1,6 +1,7 @@
 use std::cell::{Ref, RefMut};
 
-use anyhow::bail;
+use anyhow::ensure;
+use web_sys::HtmlInputElement;
 use yew::{prelude::*, utils::NeqAssign};
 
 use crate::gui::{
@@ -14,7 +15,7 @@ pub enum Msg {
     G(CallbackType),
     B(CallbackType),
     A(CallbackType),
-    Change(ChangeData),
+    Change(Event),
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -64,11 +65,12 @@ impl Component for ColorPicker {
                 self.props.color_mut().a = value as f32 / 255.0;
                 true
             }
-            Msg::Change(ChangeData::Value(color)) => {
+            Msg::Change(event) => {
+                let input: HtmlInputElement = event.target_unchecked_into();
+                let color = input.value();
+
                 let hex_to_rgb = |hex: String| {
-                    if hex.len() != 7 {
-                        bail!("invalid color");
-                    }
+                    ensure!(hex.len() == 7, "invalid color");
 
                     let r = u8::from_str_radix(&hex[1..3], 16)?;
                     let g = u8::from_str_radix(&hex[3..5], 16)?;

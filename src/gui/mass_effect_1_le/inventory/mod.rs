@@ -108,12 +108,12 @@ impl Component for Me1LeInventory {
         if self.item_db.is_some() {
             let player = self.props.player();
             html! {
-                <div class="flex flex-row divide-solid divide-x divide-default-border">
-                    <div class="flex-1 pr-1 flex flex-col gap-1">
+                <div class="flex divide-solid divide-x divide-default-border">
+                    <div class="flex-1 flex flex-col gap-1 pr-1 min-w-0">
                         { self.player(player.inventory()) }
                         { self.squad(self.props.squad()) }
                     </div>
-                    <div class="flex-1 pl-1 flex flex-col gap-1">
+                    <div class="flex-1 flex flex-col gap-1 pl-1 min-w-0">
                         { self.inventory(player.inventory()) }
                     </div>
                 </div>
@@ -143,7 +143,7 @@ impl Me1LeInventory {
         let onselect_level =
             self.link.callback(move |idx| Msg::ChangeItemLevel(RcUi::clone(&item), idx));
         html! {
-            <div class="flex-auto flex items-center gap-1">
+            <div class="flex-auto flex items-center gap-1 min-w-0">
                 <ItemSelect
                     item_db={Rc::clone(self.item_db.as_ref().unwrap())}
                     {current_item}
