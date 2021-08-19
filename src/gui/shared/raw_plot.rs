@@ -66,7 +66,7 @@ impl Component for RawPlot {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let _resize_listener = {
             let link = link.clone();
-            EventListener::new(&web_sys::window().unwrap(), "resize", move |_| {
+            EventListener::new(&yew::utils::window(), "resize", move |_| {
                 link.send_message(Msg::Scrolled)
             })
         };

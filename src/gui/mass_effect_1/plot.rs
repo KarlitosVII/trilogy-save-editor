@@ -5,7 +5,6 @@ use indexmap::IndexMap;
 use yew::{prelude::*, utils::NeqAssign};
 use yew_agent::{Bridge, Bridged};
 
-use crate::database_service::{Database, DatabaseService, Request, Response, Type};
 use crate::gui::{
     components::{Tab, TabBar},
     shared::{IntPlotType, PlotCategory},
@@ -15,6 +14,7 @@ use crate::save_data::{
     mass_effect_1::plot_db::Me1PlotDb,
     shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
 };
+use crate::services::database::{Database, DatabaseService, Request, Response, Type};
 
 pub enum Msg {
     PlotDb(Rc<Me1PlotDb>),

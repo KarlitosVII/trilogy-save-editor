@@ -5,7 +5,7 @@ use js_sys::JsString;
 use serde::{de, Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen(module = "/src/agents/rpc.js")]
+#[wasm_bindgen(module = "/src/services/rpc.js")]
 extern "C" {
     #[wasm_bindgen(catch)]
     async fn js_save_file(rpc_file: JsValue) -> Result<(), JsString>;

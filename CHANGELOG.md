@@ -4,7 +4,6 @@
 - No ME1
 - No compare
 - Better font for high DPI
-- // TODO: file drop
 - // TODO: ME1
 - // TODO: Title bar
 - // TODO: auto update

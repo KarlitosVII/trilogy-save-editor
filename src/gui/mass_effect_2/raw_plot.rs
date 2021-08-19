@@ -4,13 +4,13 @@ use anyhow::Error;
 use yew::{prelude::*, utils::NeqAssign};
 use yew_agent::{Bridge, Bridged};
 
-use crate::database_service::{Database, DatabaseService, Request, Response, Type};
 use crate::gui::{
     components::{Tab, TabBar},
     shared::{FloatPlotType, IntPlotType, PlotType, RawPlot},
     RcUi,
 };
 use crate::save_data::shared::plot::{BitVec, RawPlotDb};
+use crate::services::database::{Database, DatabaseService, Request, Response, Type};
 
 pub enum Msg {
     PlotDb(Rc<RawPlotDb>),

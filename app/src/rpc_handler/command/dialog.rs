@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::path::PathBuf;
 
 use wry::application::window::Window;
@@ -5,16 +6,18 @@ use wry::application::window::Window;
 pub fn open_save(window: &Window) -> Option<PathBuf> {
     rfd::FileDialog::new()
         .set_parent(window)
-        .set_directory(document_dir())
+        .set_directory(bioware_dir())
         .add_filter("Mass Effect Trilogy Save", &["pcsav", "ps4sav", "MassEffectSave"])
         .add_filter("All Files", &["*"])
         .pick_file()
 }
 
 pub fn save_save(window: &Window, path: PathBuf) -> Option<PathBuf> {
-    let directory = path.parent().map(ToOwned::to_owned).unwrap_or_default();
-    let file_name =
-        path.file_name().map(ToOwned::to_owned).unwrap_or_default().to_string_lossy().into_owned();
+    let directory = path
+        .parent()
+        .and_then(|parent| parent.is_dir().then(|| parent.to_owned()))
+        .unwrap_or_else(bioware_dir);
+    let file_name = path.file_name().map(OsStr::to_string_lossy).unwrap_or_default();
 
     // TODO: Filter by game
     rfd::FileDialog::new()
@@ -43,7 +46,7 @@ pub fn export_head_morph(window: &Window) -> Option<PathBuf> {
 }
 
 #[cfg(target_os = "windows")]
-fn document_dir() -> PathBuf {
+fn bioware_dir() -> PathBuf {
     match dirs::document_dir() {
         Some(mut path) => {
             path.push("BioWare\\");
@@ -58,7 +61,7 @@ fn document_dir() -> PathBuf {
 // Mass Effect games installed in the default steam library, in
 // the user's home directory.
 #[cfg(target_os = "linux")]
-fn document_dir() -> PathBuf {
+fn bioware_dir() -> PathBuf {
     match dirs::home_dir() {
         Some(mut path) => {
             path.push(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare/");
@@ -69,6 +72,6 @@ fn document_dir() -> PathBuf {
 }
 
 #[cfg(all(not(target_os = "linux"), not(target_os = "windows")))]
-fn document_dir() -> PathBuf {
-    PathBuf::default()
+fn bioware_dir() -> PathBuf {
+    dirs::home_dir().unwrap_or_default()
 }

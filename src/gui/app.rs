@@ -1,11 +1,10 @@
 use std::mem;
 
-use anyhow::Error;
+use anyhow::{Error, Result};
 use gloo::timers::future::TimeoutFuture;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
-use crate::database_service::DatabaseService;
 use crate::gui::{
     components::{NavBar, Tab, TabBar, Table},
     mass_effect_1::{Me1Plot, Me1RawPlot},
@@ -18,10 +17,15 @@ use crate::gui::{
     RcUi, Theme,
 };
 use crate::save_data::{mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame};
-use crate::save_handler::{Request, Response, SaveGame, SaveHandler};
+use crate::services::{
+    database::DatabaseService,
+    drop_handler::DropHandler,
+    save_handler::{Request, Response, SaveGame, SaveHandler},
+};
 
 pub enum Msg {
     OpenSave,
+    SaveDropped(Result<(String, Vec<u8>)>),
     SaveOpened(SaveGame),
     SaveSave,
     SaveSaved,
@@ -41,8 +45,9 @@ pub struct Props {
 pub struct App {
     props: Props,
     link: ComponentLink<Self>,
-    save_handle: Box<dyn Bridge<SaveHandler>>,
+    save_handler: Box<dyn Bridge<SaveHandler>>,
     _dbs_service: Box<dyn Bridge<DatabaseService>>,
+    _drop_handler: DropHandler,
     notification: Option<&'static str>,
     error: Option<Error>,
 }
@@ -52,22 +57,40 @@ impl Component for App {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let save_handle = SaveHandler::bridge(link.callback(|response| match response {
+        let save_handler = SaveHandler::bridge(link.callback(|response| match response {
             Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
             Response::SaveSaved => Msg::SaveSaved,
             Response::Error(err) => Msg::Error(err),
             _ => unreachable!(),
         }));
 
-        let _dbs_service = DatabaseService::bridge(Callback::noop());
+        let dbs_service = DatabaseService::bridge(Callback::noop());
+        let drop_handler = DropHandler::new(link.callback(Msg::SaveDropped));
 
-        App { props, link, save_handle, _dbs_service, notification: None, error: None }
+        App {
+            props,
+            link,
+            save_handler,
+            _dbs_service: dbs_service,
+            _drop_handler: drop_handler,
+            notification: None,
+            error: None,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::OpenSave => {
-                self.save_handle.send(Request::OpenSave);
+                self.save_handler.send(Request::OpenSave);
+                false
+            }
+            Msg::SaveDropped(result) => {
+                match result {
+                    Ok((file_name, bytes)) => {
+                        self.save_handler.send(Request::SaveDropped(file_name, bytes))
+                    }
+                    Err(err) => self.link.send_message(Msg::Error(err)),
+                }
                 false
             }
             Msg::SaveOpened(save_game) => {
@@ -77,7 +100,7 @@ impl Component for App {
             }
             Msg::SaveSave => {
                 if let Some(ref save_game) = self.props.save_game {
-                    self.save_handle.send(Request::SaveSave(save_game.clone()));
+                    self.save_handler.send(Request::SaveSave(save_game.clone()));
                 }
                 false
             }
@@ -95,7 +118,7 @@ impl Component for App {
                         | SaveGame::MassEffect2Le { ref file_path, .. }
                         | SaveGame::MassEffect3 { ref file_path, .. },
                     ) => {
-                        self.save_handle.send(Request::ReloadSave(file_path.clone()));
+                        self.save_handler.send(Request::ReloadSave(file_path.clone()));
                     }
                     _ => (),
                 }

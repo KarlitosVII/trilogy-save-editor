@@ -7,13 +7,13 @@ use ron::ser::PrettyConfig;
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
 use crate::gui::RcUi;
-use crate::rpc::{self, Base64File, RpcFile};
 use crate::save_data::{
     mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
     mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
     mass_effect_3::{Me3SaveGame, Me3Version},
     shared::appearance::HeadMorph,
 };
+use crate::services::rpc::{self, Base64File, RpcFile};
 use crate::unreal;
 
 #[derive(Clone)]
@@ -37,6 +37,7 @@ pub enum Msg {
 
 pub enum Request {
     OpenSave,
+    SaveDropped(String, Vec<u8>),
     SaveSave(SaveGame),
     ReloadSave(PathBuf),
     ImportHeadMorph,
@@ -86,6 +87,7 @@ impl Agent for SaveHandler {
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
         match msg {
             Request::OpenSave => self.open_save(who),
+            Request::SaveDropped(file_name, bytes) => self.open_dropped_file(who, file_name, bytes),
             Request::SaveSave(save_game) => self.save_save(who, save_game),
             Request::ReloadSave(path) => self.reload_save(who, path),
             Request::ImportHeadMorph => self.import_head_morph(who),
@@ -100,7 +102,10 @@ impl SaveHandler {
             let handle_save = async {
                 let has_rpc_file = rpc::open_save().await?;
                 let result = match has_rpc_file {
-                    Some(rpc_file) => Self::deserialize(rpc_file).map(Some)?,
+                    Some(rpc_file) => {
+                        let RpcFile { path, file } = rpc_file;
+                        Self::deserialize(path, file.decode()?).map(Some)?
+                    }
                     None => None,
                 };
                 Ok::<_, Error>(result)
@@ -109,6 +114,17 @@ impl SaveHandler {
             match handle_save.await.context("Failed to open the save") {
                 Ok(Some(save_game)) => Msg::SaveOpened(who, save_game),
                 Ok(None) => Msg::DialogCancelled,
+                Err(err) => Msg::Error(who, err),
+            }
+        });
+    }
+
+    fn open_dropped_file(&self, who: HandlerId, file_name: String, bytes: Vec<u8>) {
+        self.link.send_message({
+            let deserialize = || Self::deserialize(file_name.into(), bytes);
+
+            match deserialize().context("Failed to open the save") {
+                Ok(save_game) => Msg::SaveOpened(who, save_game),
                 Err(err) => Msg::Error(who, err),
             }
         });
@@ -148,7 +164,8 @@ impl SaveHandler {
         self.link.send_future(async move {
             let handle_save = async move {
                 let rpc_file = rpc::reload_save(path).await?;
-                Self::deserialize(rpc_file)
+                let RpcFile { path, file } = rpc_file;
+                Self::deserialize(path, file.decode()?)
             };
 
             match handle_save.await.context("Failed to reload the save") {
@@ -158,10 +175,7 @@ impl SaveHandler {
         });
     }
 
-    fn deserialize(rpc_file: RpcFile) -> Result<SaveGame> {
-        let file_path = rpc_file.path;
-        let input = rpc_file.file.decode()?;
-
+    fn deserialize(file_path: PathBuf, input: Vec<u8>) -> Result<SaveGame> {
         let save_game = if input.len() >= 4 && input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
             // ME1 Legendary
             SaveGame::MassEffect1Le {

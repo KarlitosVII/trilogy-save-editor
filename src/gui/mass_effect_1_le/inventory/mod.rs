@@ -4,7 +4,6 @@ use anyhow::Error;
 use yew::{prelude::*, utils::NeqAssign};
 use yew_agent::{Bridge, Bridged};
 
-use crate::database_service::{Database, DatabaseService, Request, Response, Type};
 use crate::gui::{
     components::{Select, Table},
     RcUi,
@@ -14,6 +13,7 @@ use crate::save_data::mass_effect_1_le::{
     player::{Inventory, Item, ItemLevel, Player},
     squad::Henchman,
 };
+use crate::services::database::{Database, DatabaseService, Request, Response, Type};
 
 mod item_select;
 pub use self::item_select::*;

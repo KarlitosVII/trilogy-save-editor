@@ -8,14 +8,10 @@ extern crate derive_more;
 #[macro_use]
 extern crate macros;
 
-// mod compare;
-// mod event_handler;
-mod agents;
 mod gui;
 mod save_data;
+pub mod services;
 mod unreal;
-
-pub use self::agents::*;
 
 use gui::App;
 

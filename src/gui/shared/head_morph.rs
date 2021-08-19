@@ -5,7 +5,7 @@ use yew_agent::{Bridge, Bridged};
 
 use crate::gui::{components::Table, raw_ui::RawUiChildren, RcUi};
 use crate::save_data::shared::appearance::HeadMorph as DataHeadMorph;
-use crate::save_handler::{Request, Response, SaveHandler};
+use crate::services::save_handler::{Request, Response, SaveHandler};
 
 pub enum Msg {
     Import,
@@ -36,7 +36,7 @@ impl Props {
 pub struct HeadMorph {
     props: Props,
     link: ComponentLink<Self>,
-    save_handle: Box<dyn Bridge<SaveHandler>>,
+    save_handler: Box<dyn Bridge<SaveHandler>>,
 }
 
 impl Component for HeadMorph {
@@ -44,19 +44,19 @@ impl Component for HeadMorph {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let save_handle = SaveHandler::bridge(link.callback(|response| match response {
+        let save_handler = SaveHandler::bridge(link.callback(|response| match response {
             Response::HeadMorphImported(head_morph) => Msg::HeadMorphImported(head_morph),
             Response::HeadMorphExported => Msg::HeadMorphExported,
             Response::Error(err) => Msg::Error(err),
             _ => unreachable!(),
         }));
-        HeadMorph { props, link, save_handle }
+        HeadMorph { props, link, save_handler }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::Import => {
-                self.save_handle.send(Request::ImportHeadMorph);
+                self.save_handler.send(Request::ImportHeadMorph);
                 false
             }
             Msg::HeadMorphImported(head_morph) => {
@@ -66,7 +66,7 @@ impl Component for HeadMorph {
             }
             Msg::Export => {
                 if let Some(ref head_morph) = *self.props.head_morph() {
-                    self.save_handle.send(Request::ExportHeadMorph(RcUi::clone(head_morph)));
+                    self.save_handler.send(Request::ExportHeadMorph(RcUi::clone(head_morph)));
                 }
                 false
             }
