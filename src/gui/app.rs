@@ -8,7 +8,7 @@ use yew_agent::{Bridge, Bridged};
 
 use crate::gui::{
     components::{NavBar, Tab, TabBar, Table},
-    mass_effect_1::{Me1Plot, Me1RawData, Me1RawPlot},
+    mass_effect_1::{Me1General, Me1Plot, Me1RawData, Me1RawPlot},
     mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
     mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
     mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
@@ -222,9 +222,12 @@ impl App {
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar is_main_tab_bar=true>
-                    // <Tab title="General">
-                    //     <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
-                    // </Tab>
+                    <Tab title="General">
+                        <Me1General
+                            player={RcUi::clone(&save_game.player)}
+                            plot={RcUi::clone(&state.plot)}
+                        />
+                    </Tab>
                     <Tab title="Plot">
                         <Me1Plot
                             booleans={RcUi::clone(&plot.booleans)}

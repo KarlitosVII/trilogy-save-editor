@@ -4,7 +4,6 @@
 - No compare
 - Better font for high DPI
 - Better raw ME1 readability
-- // TODO: ME1 General
 - // TODO: Title bar
 - // TODO: auto update
 - // TODO: xbox 360/one support

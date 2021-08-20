@@ -2,19 +2,16 @@ use std::cell::{Ref, RefMut};
 
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::gui::{
-    components::{Helper, InputText, Select, Table},
-    raw_ui::RawUi,
-    shared::{BonusPowerType, BonusPowers},
-    RcUi,
-};
-use crate::save_data::{
-    mass_effect_3::{
-        player::Player, plot::PlotTable, AutoReplyModeOptions, Difficulty, Me3SaveGame,
+use crate::{
+    gui::{
+        components::{Helper, InputText, Select, Table},
+        raw_ui::RawUi,
+        shared::{BonusPowerType, BonusPowers},
+        RcUi,
     },
-    shared::{
-        player::{Notoriety, Origin},
-        EndGameState,
+    save_data::{
+        mass_effect_3::{player::Player, plot::PlotTable, Me3SaveGame},
+        shared::player::{Notoriety, Origin},
     },
 };
 
@@ -234,7 +231,7 @@ impl Component for Me3General {
     }
 
     fn view(&self) -> Html {
-        let save_game = &*self.props.save_game();
+        let save_game = self.props.save_game();
 
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
@@ -244,7 +241,7 @@ impl Component for Me3General {
                     { self.gameplay(save_game.player()) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
-                    { self.general(&save_game.difficulty, &save_game.conversation_mode, &save_game.end_game_state) }
+                    { self.general(&save_game) }
                     { self.bonus_powers(save_game.player()) }
                 </div>
             </div>
@@ -256,7 +253,7 @@ impl Me3General {
     fn role_play(&self, player: Ref<'_, Player>) -> Html {
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
-            <Table title={String::from("Role-Play")}>
+            <Table title="Role-Play">
                 { player.first_name.view("Name") }
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
@@ -298,7 +295,7 @@ impl Me3General {
 
     fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
         html! {
-            <Table title={String::from("Morality")}>
+            <Table title="Morality">
                 { for plot.integers().get(&10159).map(|paragon| paragon.view("Paragon")) }
                 { for plot.integers().get(&10160).map(|renegade| renegade.view("Renegade")) }
                 { for plot.integers().get(&10297).map(|renegade| renegade.view("Reputation")) }
@@ -326,7 +323,7 @@ impl Me3General {
             .unwrap_or_default();
 
         html! {
-            <Table title={String::from("Gameplay")}>
+            <Table title="Gameplay">
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={Me3Class::variants()}
@@ -346,12 +343,10 @@ impl Me3General {
         }
     }
 
-    fn general(
-        &self, difficulty: &RcUi<Difficulty>, conversation_mode: &RcUi<AutoReplyModeOptions>,
-        end_game_state: &RcUi<EndGameState>,
-    ) -> Html {
+    fn general(&self, save_game: &Ref<Me3SaveGame>) -> Html {
+        let Me3SaveGame { difficulty, end_game_state, conversation_mode, .. } = &**save_game;
         html! {
-            <Table title={String::from("General")}>
+            <Table title="General">
                 { difficulty.view("Difficulty") }
                 { conversation_mode.view("Conversation Mode") }
                 { end_game_state.view("End Game Stage") }

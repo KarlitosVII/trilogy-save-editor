@@ -2,16 +2,18 @@ use std::cell::{Ref, RefMut};
 
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::gui::{
-    components::{CallbackType, Helper, InputNumber, InputText, NumberType, Select, Table},
-    raw_ui::RawUi,
-    RcUi,
-};
-use crate::save_data::{
-    mass_effect_1_le::{player::Player, squad::Henchman, Me1LeSaveData},
-    shared::{
-        player::{Notoriety, Origin},
-        plot::PlotTable,
+use crate::{
+    gui::{
+        components::{CallbackType, Helper, InputNumber, InputText, NumberType, Select, Table},
+        raw_ui::RawUi,
+        RcUi,
+    },
+    save_data::{
+        mass_effect_1_le::{player::Player, squad::Henchman, Me1LeSaveData},
+        shared::{
+            player::{Notoriety, Origin},
+            plot::PlotTable,
+        },
     },
 };
 
@@ -128,7 +130,7 @@ impl Component for Me1LeGeneral {
     }
 
     fn view(&self) -> Html {
-        let save_game = &*self.props.save_game();
+        let save_game = self.props.save_game();
 
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
@@ -151,7 +153,7 @@ impl Me1LeGeneral {
     fn role_play(&self, player: Ref<'_, Player>) -> Html {
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
-            <Table title={String::from("Role-Play")}>
+            <Table title="Role-Play">
                 { player.first_name.view("Name") }
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
@@ -193,7 +195,7 @@ impl Me1LeGeneral {
 
     fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
         html! {
-            <Table title={String::from("Morality")}>
+            <Table title="Morality">
                 { for plot.integers().get(47).map(|paragon| paragon.view("Paragon")) }
                 { for plot.integers().get(46).map(|renegade| renegade.view("Renegade")) }
             </Table>
@@ -203,7 +205,7 @@ impl Me1LeGeneral {
     fn resources(&self, player: Ref<'_, Player>) -> Html {
         let Player { credits, medigel, grenades, omnigel, .. } = &*player;
         html! {
-            <Table title={String::from("Gameplay")}>
+            <Table title="Resources">
                 { credits.view("Credits") }
                 { medigel.view("Medigel") }
                 { grenades.view("Grenades") }
@@ -218,7 +220,7 @@ impl Me1LeGeneral {
         let current_difficulty =
             game_options.get(0).map(|d| *d.borrow() as usize).unwrap_or_default();
         html! {
-            <Table title={String::from("General")}>
+            <Table title="General">
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={difficulty}
@@ -235,7 +237,7 @@ impl Me1LeGeneral {
         let Player { level, current_xp, .. } = &*player;
 
         html! {
-            <Table title={String::from("Gameplay")}>
+            <Table title="Gameplay">
                 <InputNumber
                     label="Level"
                     value={NumberType::Int(RcUi::clone(level))}
@@ -277,7 +279,7 @@ impl Me1LeGeneral {
         });
 
         html! {
-            <Table title={String::from("Squad")}>
+            <Table title="Squad">
                 { for characters }
             </Table>
         }

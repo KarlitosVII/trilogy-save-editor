@@ -1,4 +1,4 @@
-mod property;
+pub mod property;
 
 use std::cell::Ref;
 

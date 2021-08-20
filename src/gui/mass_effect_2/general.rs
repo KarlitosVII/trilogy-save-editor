@@ -251,7 +251,7 @@ impl Me2General {
     fn role_play(&self, player: Ref<'_, Player>) -> Html {
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
-            <Table title={String::from("Role-Play")}>
+            <Table title="Role-Play">
                 { player.first_name.view("Name") }
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
@@ -293,7 +293,7 @@ impl Me2General {
 
     fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
         html! {
-            <Table title={String::from("Morality")}>
+            <Table title="Morality">
                 { for plot.integers().get(2).map(|paragon| paragon.view("Paragon")) }
                 { for plot.integers().get(3).map(|renegade| renegade.view("Renegade")) }
             </Table>
@@ -310,7 +310,7 @@ impl Me2General {
             .unwrap_or_default();
 
         html! {
-            <Table title={String::from("Gameplay")}>
+            <Table title="Gameplay">
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={Me2Class::variants()}
@@ -332,7 +332,7 @@ impl Me2General {
         let Player { eezo, iridium, palladium, platinum, probes, current_fuel, .. } = &*player;
 
         html! {
-            <Table title={String::from("Resources")}>
+            <Table title="Resources">
                 { eezo.view("Eezo") }
                 { iridium.view("Iridium") }
                 { palladium.view("Palladium") }
@@ -345,7 +345,7 @@ impl Me2General {
 
     fn general(&self, difficulty: RcUi<Difficulty>, end_game_state: RcUi<EndGameState>) -> Html {
         html! {
-            <Table title={String::from("General")}>
+            <Table title="General">
                 { difficulty.view("Difficulty") }
                 { end_game_state.view("End Game Stage") }
             </Table>

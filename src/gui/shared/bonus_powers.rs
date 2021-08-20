@@ -126,7 +126,7 @@ impl Component for BonusPowers {
         });
 
         html! {
-            <Table title={String::from("Bonus Powers")} helper={*helper}>
+            <Table title="Bonus Powers" helper={*helper}>
                 { for selectables }
             </Table>
         }
