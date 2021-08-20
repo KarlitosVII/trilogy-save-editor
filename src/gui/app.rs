@@ -60,12 +60,13 @@ impl Component for App {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let save_handler = SaveHandler::bridge(link.callback(|response| match response {
+        let mut save_handler = SaveHandler::bridge(link.callback(|response| match response {
             Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
             Response::SaveSaved => Msg::SaveSaved,
             Response::Error(err) => Msg::Error(err),
             _ => unreachable!(),
         }));
+        save_handler.send(Request::OpenCommandLineSave);
 
         let dbs_service = DatabaseService::bridge(Callback::noop());
         let drop_handler = DropHandler::new(link.callback(Msg::SaveDropped));

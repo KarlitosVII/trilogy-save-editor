@@ -6,6 +6,7 @@ mod rpc_handler;
 use self::rpc_handler::rpc_handler;
 
 use anyhow::Result;
+use clap::{Arg, ArgMatches};
 use rust_embed::RustEmbed;
 use wry::application::{
     dpi::LogicalSize,
@@ -19,7 +20,19 @@ use wry::webview::WebViewBuilder;
 #[folder = "../target/dist/"]
 struct Asset;
 
+fn parse_args() -> ArgMatches<'static> {
+    let app = clap::App::new("Trilogy Save Editor")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author("by Karlitos")
+        .about("A save editor for Mass Effect Trilogy (and Legendary)")
+        .arg(Arg::with_name("SAVE").help("Mass Effect save file"));
+
+    app.get_matches()
+}
+
 fn main() -> Result<()> {
+    let args = parse_args();
+
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_title("Trilogy Save Editor - by Karlitos")
@@ -30,7 +43,7 @@ fn main() -> Result<()> {
 
     let webview = WebViewBuilder::new(window)?
         .with_initialization_script(include_str!("initialization.js"))
-        .with_rpc_handler(rpc_handler)
+        .with_rpc_handler(move |window, req| rpc_handler(window, req, &args))
         .with_custom_protocol(String::from("tse"), protocol)
         .with_url("tse://localhost/")?
         .build()?;

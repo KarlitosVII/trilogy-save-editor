@@ -48,10 +48,7 @@ pub fn export_head_morph(window: &Window) -> Option<PathBuf> {
 #[cfg(target_os = "windows")]
 fn bioware_dir() -> PathBuf {
     match dirs::document_dir() {
-        Some(mut path) => {
-            path.push("BioWare\\");
-            path
-        }
+        Some(path) => path.join("BioWare\\"),
         None => PathBuf::default(),
     }
 }
@@ -63,9 +60,8 @@ fn bioware_dir() -> PathBuf {
 #[cfg(target_os = "linux")]
 fn bioware_dir() -> PathBuf {
     match dirs::home_dir() {
-        Some(mut path) => {
-            path.push(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare/");
-            path
+        Some(path) => {
+            path.join(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare/")
         }
         None => PathBuf::default(),
     }

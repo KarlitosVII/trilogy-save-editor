@@ -3,10 +3,11 @@
 - Inventory filters
 - No compare
 - Better font for high DPI
-- // TODO: ME1
+- Better raw ME1 readability
+- // TODO: ME1 General
 - // TODO: Title bar
 - // TODO: auto update
-- // TODO: command line
+- // TODO: xbox 360/one support
 - // TODO: unobtainable ME1 item db
 - // TODO: ME1 LE class swap
 

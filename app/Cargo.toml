@@ -11,6 +11,7 @@ path = "src/main.rs"
 # Std-like
 anyhow = "1.0"
 # Utils
+clap = "2.0"
 mime_guess = "2.0"
 rust-embed = { version = "6.0", default-features = false }
 dirs = "3.0"

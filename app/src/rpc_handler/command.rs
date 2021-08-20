@@ -1,11 +1,11 @@
-mod dialog;
-
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use wry::application::window::Window;
+
+use super::dialog;
 
 // Commands
 pub fn init(window: &Window) {

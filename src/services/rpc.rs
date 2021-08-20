@@ -30,6 +30,13 @@ pub async fn open_save() -> Result<Option<RpcFile>> {
     js_open_file("open_save").await.map(from_js_value).map_err(|e| anyhow!(String::from(e)))?
 }
 
+pub async fn open_command_line_save() -> Result<Option<RpcFile>> {
+    js_open_file("open_command_line_save")
+        .await
+        .map(from_js_value)
+        .map_err(|e| anyhow!(String::from(e)))?
+}
+
 pub async fn save_save_dialog(path: PathBuf) -> Result<Option<PathBuf>> {
     js_save_file_dialog("save_save_dialog", &path.to_string_lossy())
         .await

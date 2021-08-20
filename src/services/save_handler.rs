@@ -32,12 +32,13 @@ pub enum Msg {
     SaveSaved(HandlerId),
     HeadMorphImported(HandlerId, HeadMorph),
     HeadMorphExported(HandlerId),
-    DialogCancelled,
+    Noop,
     Error(HandlerId, Error),
 }
 
 pub enum Request {
     OpenSave,
+    OpenCommandLineSave,
     SaveDropped(String, Vec<u8>),
     SaveSave(SaveGame),
     ReloadSave(PathBuf),
@@ -77,9 +78,9 @@ impl Agent for SaveHandler {
                 self.link.respond(who, Response::HeadMorphImported(head_morph))
             }
             Msg::HeadMorphExported(who) => self.link.respond(who, Response::HeadMorphExported),
-            Msg::DialogCancelled => {
+            Msg::Noop => {
                 #[cfg(debug_assertions)]
-                console::log!("Dialog cancelled");
+                console::log!("No op");
             }
             Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
         }
@@ -88,6 +89,7 @@ impl Agent for SaveHandler {
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
         match msg {
             Request::OpenSave => self.open_save(who),
+            Request::OpenCommandLineSave => self.open_command_line_save(who),
             Request::SaveDropped(file_name, bytes) => self.open_dropped_file(who, file_name, bytes),
             Request::SaveSave(save_game) => self.save_save(who, save_game),
             Request::ReloadSave(path) => self.reload_save(who, path),
@@ -114,7 +116,29 @@ impl SaveHandler {
 
             match handle_save.await.context("Failed to open the save") {
                 Ok(Some(save_game)) => Msg::SaveOpened(who, save_game),
-                Ok(None) => Msg::DialogCancelled,
+                Ok(None) => Msg::Noop,
+                Err(err) => Msg::Error(who, err),
+            }
+        });
+    }
+
+    fn open_command_line_save(&self, who: HandlerId) {
+        self.link.send_future(async move {
+            let handle_save = async {
+                let has_rpc_file = rpc::open_command_line_save().await?;
+                let result = match has_rpc_file {
+                    Some(rpc_file) => {
+                        let RpcFile { path, file } = rpc_file;
+                        Self::deserialize(path, file.decode()?).map(Some)?
+                    }
+                    None => None,
+                };
+                Ok::<_, Error>(result)
+            };
+
+            match handle_save.await.context("Failed to open the save") {
+                Ok(Some(save_game)) => Msg::SaveOpened(who, save_game),
+                Ok(None) => Msg::Noop,
                 Err(err) => Msg::Error(who, err),
             }
         });
@@ -156,7 +180,7 @@ impl SaveHandler {
 
             match handle_save.await.context("Failed to save the save") {
                 Ok(false) => Msg::SaveSaved(who),
-                Ok(true) => Msg::DialogCancelled,
+                Ok(true) => Msg::Noop,
                 Err(err) => Msg::Error(who, err),
             }
         });
@@ -291,7 +315,7 @@ impl SaveHandler {
 
             match handle_save.await.context("Failed to import the head morph") {
                 Ok(Some(head_morph)) => Msg::HeadMorphImported(who, head_morph),
-                Ok(None) => Msg::DialogCancelled,
+                Ok(None) => Msg::Noop,
                 Err(err) => Msg::Error(who, err),
             }
         });
@@ -325,7 +349,7 @@ impl SaveHandler {
 
             match handle_save.await.context("Failed to export the head morph") {
                 Ok(false) => Msg::HeadMorphExported(who),
-                Ok(true) => Msg::DialogCancelled,
+                Ok(true) => Msg::Noop,
                 Err(err) => Msg::Error(who, err),
             }
         });
