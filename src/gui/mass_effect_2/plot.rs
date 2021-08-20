@@ -134,20 +134,20 @@ impl Component for Me2Plot {
                     // Workaround for unused_braces warning
                     #[allow(unused_braces)]
                     (html_nested! {
-                            <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
-                                <div class="flex-auto flex flex-col gap-1">
-                                    <div>
-                                        { "If you change these plots this will ONLY take effect after a new game +." }
-                                        <hr class="border-t border-default-border" />
-                                    </div>
-                                    <Me1Plot
-                                        booleans={RcUi::clone(me1_booleans)}
-                                        integers={IntPlotType::clone(me1_integers)}
-                                        onerror={self.link.callback(Msg::Error)}
-                                    />
+                        <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
+                            <div class="flex-auto flex flex-col gap-1">
+                                <div>
+                                    { "If you change these plots this will ONLY take effect after a new game +." }
+                                    <hr class="border-t border-default-border" />
                                 </div>
-                            </Tab>
-                        })
+                                <Me1Plot
+                                    booleans={RcUi::clone(me1_booleans)}
+                                    integers={IntPlotType::clone(me1_integers)}
+                                    onerror={self.link.callback(Msg::Error)}
+                                />
+                            </div>
+                        </Tab>
+                    })
                 } else {
                     // Workaround for unused_braces warning
                     #[allow(unused_braces)]

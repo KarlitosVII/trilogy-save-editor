@@ -98,7 +98,7 @@ impl Component for Select {
     fn view(&self) -> Html {
         let options = self.props.options.iter().enumerate().map(|(idx, option)| {
             let selected = idx == self.props.current_idx;
-            html_nested! {
+            html! {
                 <a
                     class={classes![
                         "flex-1",

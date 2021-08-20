@@ -16,7 +16,7 @@ pub use self::{
 
 pub enum CallbackType {
     Byte(u8),
-    Integer(i32),
+    Int(i32),
     Float(f32),
     String(String),
 }

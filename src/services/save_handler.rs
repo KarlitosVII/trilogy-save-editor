@@ -8,6 +8,7 @@ use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
 use crate::gui::RcUi;
 use crate::save_data::{
+    mass_effect_1::Me1SaveGame,
     mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
     mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
     mass_effect_3::{Me3SaveGame, Me3Version},
@@ -18,7 +19,7 @@ use crate::unreal;
 
 #[derive(Clone)]
 pub enum SaveGame {
-    // MassEffect1 { file_path: PathBuf, save_game: RcUi<Me1SaveGame> },
+    MassEffect1 { file_path: PathBuf, save_game: RcUi<Me1SaveGame> },
     MassEffect1Le { file_path: PathBuf, save_game: RcUi<Me1LeSaveGame> },
     MassEffect1LePs4 { file_path: PathBuf, save_game: RcUi<Me1LeSaveData> },
     MassEffect2 { file_path: PathBuf, save_game: RcUi<Me2SaveGame> },
@@ -132,7 +133,8 @@ impl SaveHandler {
 
     fn save_save(&self, who: HandlerId, save_game: SaveGame) {
         let path = match save_game {
-            SaveGame::MassEffect1Le { ref file_path, .. }
+            SaveGame::MassEffect1 { ref file_path, .. }
+            | SaveGame::MassEffect1Le { ref file_path, .. }
             | SaveGame::MassEffect1LePs4 { ref file_path, .. }
             | SaveGame::MassEffect2 { ref file_path, .. }
             | SaveGame::MassEffect2Le { ref file_path, .. }
@@ -207,12 +209,12 @@ impl SaveHandler {
                     file_path,
                     save_game: unreal::Deserializer::from_bytes(&input)?,
                 }
-            // } else if ext.eq_ignore_ascii_case("MassEffectSave") {
-            //     // ME1
-            //     SaveGame::MassEffect1 {
-            //         file_path,
-            //         save_game: unreal::Deserializer::from_bytes(&input)?,
-            //     }
+            } else if ext.eq_ignore_ascii_case("MassEffectSave") {
+                // ME1
+                SaveGame::MassEffect1 {
+                    file_path,
+                    save_game: unreal::Deserializer::from_bytes(&input)?,
+                }
             } else {
                 bail!("Unsupported file");
             }
@@ -224,7 +226,7 @@ impl SaveHandler {
 
     fn serialize(path: PathBuf, save_game: SaveGame) -> Result<RpcFile> {
         let output = match save_game {
-            // SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_vec(&save_game)?,
+            SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_vec(&save_game)?,
             SaveGame::MassEffect1Le { save_game, .. } => {
                 let mut output = unreal::Serializer::to_vec(&save_game)?;
 

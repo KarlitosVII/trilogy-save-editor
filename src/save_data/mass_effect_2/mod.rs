@@ -160,7 +160,7 @@ mod test {
         let now = Instant::now();
 
         // Deserialize
-        let me2_save_game: Me2SaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
+        let me2_save_game: Me2SaveGame = unreal::Deserializer::from_bytes(&input)?;
 
         println!("Deserialize : {:?}", Instant::now() - now);
         let now = Instant::now();
@@ -184,7 +184,7 @@ mod test {
         // }
 
         // Check serialized = input
-        assert_eq!(input, output);
+        assert!(input == output);
 
         Ok(())
     }
@@ -196,7 +196,7 @@ mod test {
         let now = Instant::now();
 
         // Deserialize
-        let me2_save_game: Me2LeSaveGame = unreal::Deserializer::from_bytes(&input.clone())?;
+        let me2_save_game: Me2LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
         println!("Deserialize : {:?}", Instant::now() - now);
         let now = Instant::now();
@@ -220,7 +220,7 @@ mod test {
         // }
 
         // Check serialized = input
-        assert_eq!(input, output);
+        assert!(input == output);
 
         Ok(())
     }

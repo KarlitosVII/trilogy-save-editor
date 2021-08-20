@@ -1,29 +1,31 @@
-use std::{cell::RefCell, fmt};
+use std::fmt;
 
 use anyhow::Result;
-use serde::{de, ser::SerializeStruct, Deserialize, Serialize};
+use serde::de;
+use serde::ser::SerializeTupleStruct;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::{data::Data, List};
-use crate::save_data::{Dummy, String};
+use crate::gui::RcUi;
+use crate::save_data::Dummy;
 use crate::unreal;
 
 #[derive(Clone)]
 pub struct Player {
     _begin: Dummy<8>,
-    header_offset: u32,
+    _header_offset: u32,
     _no_mans_land1: List<u8>,
     header: Header,
-    pub names: List<RefCell<Name>>,
+    pub names: RcUi<List<Name>>,
     classes: List<Class>,
     pub objects: List<Object>,
     _no_mans_land2: List<u8>,
-    datas: List<RefCell<Data>>,
-    pub duplicate: RefCell<Option<Name>>, // Spécial n'est pas (dé)sérialisé
+    datas: List<Data>,
 }
 
 impl Player {
-    pub fn get_name(&self, id: u32) -> &RefCell<Name> {
-        &self.names[id as usize]
+    pub fn get_name(&self, id: u32) -> String {
+        self.names.borrow()[id as usize].string.borrow().clone()
     }
 
     pub fn get_class(&self, id: i32) -> &Class {
@@ -34,7 +36,7 @@ impl Player {
         &self.objects[id as usize - 1]
     }
 
-    pub fn get_data(&self, i: i32) -> &RefCell<Data> {
+    pub fn get_data(&self, i: i32) -> &Data {
         &self.datas[i as usize - 1]
     }
 }
@@ -56,13 +58,13 @@ impl<'de> Deserialize<'de> for Player {
             where
                 A: de::SeqAccess<'de>,
             {
-                let _begin = seq.next_element()?.unwrap();
+                let begin = seq.next_element()?.unwrap();
                 let header_offset = seq.next_element()?.unwrap();
 
                 // No man's land 1
-                let mut _no_mans_land1 = Vec::new();
+                let mut no_mans_land1 = Vec::new();
                 for _ in 0..(header_offset - 12) {
-                    _no_mans_land1.push(seq.next_element()?.unwrap());
+                    no_mans_land1.push(seq.next_element()?.unwrap());
                 }
 
                 let header: Header = seq.next_element()?.unwrap();
@@ -70,7 +72,7 @@ impl<'de> Deserialize<'de> for Player {
                 // Names
                 let mut names = Vec::new();
                 for _ in 0..header.name_len {
-                    names.push(RefCell::new(seq.next_element()?.unwrap()));
+                    names.push(seq.next_element()?.unwrap());
                 }
 
                 // Imports
@@ -80,35 +82,34 @@ impl<'de> Deserialize<'de> for Player {
                 }
 
                 // Objects
-                let mut objects: Vec<Object> = Vec::new();
+                let mut objects = Vec::new();
                 for _ in 0..header.objects_len {
                     objects.push(seq.next_element()?.unwrap());
                 }
 
                 // No man's land 2
-                let mut _no_mans_land2 = Vec::new();
+                let mut no_mans_land2 = Vec::new();
                 for _ in 0..(header.data_offset - header.no_mans_land_offset) {
-                    _no_mans_land2.push(seq.next_element()?.unwrap());
+                    no_mans_land2.push(seq.next_element()?.unwrap());
                 }
 
                 // Data
                 let mut datas = Vec::new();
                 for _ in objects.iter() {
                     let data = Data::visit_seq(&names, &mut seq)?;
-                    datas.push(RefCell::new(data));
+                    datas.push(data);
                 }
 
                 Ok(Player {
-                    _begin,
-                    header_offset,
-                    _no_mans_land1: _no_mans_land1.into(),
+                    _begin: begin,
+                    _header_offset: header_offset,
+                    _no_mans_land1: no_mans_land1.into(),
                     header,
-                    names: names.into(),
+                    names: RcUi::new(names.into()),
                     classes: classes.into(),
                     objects: objects.into(),
-                    _no_mans_land2: _no_mans_land2.into(),
+                    _no_mans_land2: no_mans_land2.into(),
                     datas: datas.into(),
-                    duplicate: RefCell::new(None),
                 })
             }
         }
@@ -124,7 +125,7 @@ impl serde::Serialize for Player {
         use serde::ser::Error;
         let Player {
             _begin,
-            header_offset,
+            _header_offset,
             _no_mans_land1,
             header,
             names,
@@ -132,8 +133,8 @@ impl serde::Serialize for Player {
             objects,
             _no_mans_land2,
             datas,
-            duplicate: _,
         } = self;
+        let names = names.borrow();
 
         // Calculs d'offsets
         let mut header = header.clone();
@@ -141,7 +142,7 @@ impl serde::Serialize for Player {
         header.name_len = names.len() as u32;
         header.classes_offset = header.name_offset;
         for name in names.iter() {
-            header.classes_offset += name.borrow().size().map_err(Error::custom)? as u32;
+            header.classes_offset += name.size().map_err(Error::custom)? as u32;
         }
 
         header.objects_offset = header.classes_offset + (classes.len() * 28) as u32;
@@ -153,23 +154,23 @@ impl serde::Serialize for Player {
             let mut current_offset = header.data_offset;
             for (i, object) in objects.iter_mut().enumerate() {
                 object.data_offset = current_offset;
-                let data_size = datas[i].borrow().size().map_err(Error::custom)? as u32;
+                let data_size = datas[i].size().map_err(Error::custom)? as u32;
                 object.data_size = data_size;
                 current_offset += data_size;
             }
         }
 
         // Serialize
-        let mut s = serializer.serialize_struct("Player", 9)?;
-        s.serialize_field("_begin", _begin)?;
-        s.serialize_field("header_offset", header_offset)?;
-        s.serialize_field("_no_mans_land1", _no_mans_land1)?;
-        s.serialize_field("header", &header)?;
-        s.serialize_field("name", names)?;
-        s.serialize_field("classes", classes)?;
-        s.serialize_field("objects", &objects)?;
-        s.serialize_field("_no_mans_land2", _no_mans_land2)?;
-        s.serialize_field("objects", datas)?;
+        let mut s = serializer.serialize_tuple_struct("Player", 9)?;
+        s.serialize_field(_begin)?;
+        s.serialize_field(_header_offset)?;
+        s.serialize_field(_no_mans_land1)?;
+        s.serialize_field(&header)?;
+        s.serialize_field(&*names)?;
+        s.serialize_field(classes)?;
+        s.serialize_field(&objects)?;
+        s.serialize_field(_no_mans_land2)?;
+        s.serialize_field(datas)?;
         s.end()
     }
 }
@@ -193,19 +194,17 @@ struct Header {
     _osef2: Dummy<12>,
 }
 
-#[derive(Deserialize, Serialize, RawUi, Deref, DerefMut, Clone)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Name {
-    #[deref]
-    #[deref_mut]
-    string: String,
+    pub string: RcUi<String>,
     _osef: Dummy<8>,
     #[serde(skip)]
-    pub is_duplicate: bool, // Spécial
+    pub is_duplicate: bool, // Special
 }
 
 impl Name {
     fn size(&self) -> Result<usize> {
-        let bytes = unreal::Serializer::to_byte_buf(&self.string)?;
+        let bytes = unreal::Serializer::to_vec(&self.string)?;
         Ok(bytes.len() + 8)
     }
 }
@@ -251,7 +250,9 @@ mod test {
         let input = fs::read("test/ME1Save.MassEffectSave")?;
 
         let player_data = {
-            let zip_offset = <u32>::from_le_bytes([0; 4].copy_from_slice(&input[8..12]));
+            let mut offset_bytes = [0; 4];
+            offset_bytes.copy_from_slice(&input[8..12]);
+            let zip_offset = <u32>::from_le_bytes(offset_bytes);
             let mut zip = ZipArchive::new(Cursor::new(&input[zip_offset as usize..]))?;
 
             let mut bytes = Vec::new();
@@ -260,10 +261,10 @@ mod test {
         };
 
         // Deserialize
-        let player: Player = unreal::Deserializer::from_bytes(&player_data.clone())?;
+        let player: Player = unreal::Deserializer::from_bytes(&player_data)?;
 
         // Serialize
-        let output = unreal::Serializer::to_byte_buf(&player)?;
+        let output = unreal::Serializer::to_vec(&player)?;
 
         // // Check serialized = player_data
         // let cmp = player_data.chunks(4).zip(output.chunks(4));
@@ -274,7 +275,7 @@ mod test {
         // }
 
         // Check serialized = player_data
-        assert_eq!(player_data, output);
+        assert!(player_data == output);
 
         Ok(())
     }

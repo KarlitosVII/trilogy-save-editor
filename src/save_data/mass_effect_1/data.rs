@@ -1,48 +1,45 @@
-use std::cell::RefCell;
-
 use anyhow::Result;
 use serde::{de, Serialize};
 
 use super::{player::Name, List};
+use crate::gui::RcUi;
 use crate::save_data::{
     shared::{appearance::LinearColor, Rotator, Vector},
-    Dummy, String,
+    Dummy,
 };
 use crate::unreal;
 
-#[derive(Serialize, Deref, DerefMut, Clone)]
+#[derive(Serialize, Clone)]
 pub struct Data {
     _osef: Dummy<4>,
-    #[deref]
-    #[deref_mut]
-    pub properties: List<Property>,
+    pub properties: List<RcUi<Property>>,
 }
 
 impl Data {
-    pub fn visit_seq<'de, A>(names: &[RefCell<Name>], seq: &mut A) -> Result<Self, A::Error>
+    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
     {
         let _osef = seq.next_element()?.unwrap();
-        let properties = List::<Property>::visit_seq(names, seq)?;
+        let properties = List::<RcUi<Property>>::visit_seq(names, seq)?;
         Ok(Self { _osef, properties })
     }
 
     pub fn size(&self) -> Result<usize> {
         let mut size = 4;
         for property in self.properties.iter() {
-            size += property.size()?
+            size += property.borrow().size()?
         }
         Ok(size)
     }
 }
 
-fn get_name(names: &[RefCell<Name>], id: u32) -> String {
-    names[id as usize].borrow().to_string()
+fn get_name(names: &[Name], id: u32) -> String {
+    names[id as usize].string.borrow().clone()
 }
 
-impl List<Property> {
-    pub fn visit_seq<'de, A>(names: &[RefCell<Name>], seq: &mut A) -> Result<Self, A::Error>
+impl List<RcUi<Property>> {
+    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
     {
@@ -56,7 +53,7 @@ impl List<Property> {
             if let Property::None { .. } = property {
                 finished = true;
             }
-            properties.push(property);
+            properties.push(property.into());
         }
 
         Ok(properties.into())
@@ -81,7 +78,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: bool,
+        value: RcUi<bool>,
     },
     Byte {
         name_id: u32,
@@ -90,7 +87,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: u8,
+        value: RcUi<u8>,
     },
     Float {
         name_id: u32,
@@ -99,7 +96,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: f32,
+        value: RcUi<f32>,
     },
     Int {
         name_id: u32,
@@ -108,7 +105,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: i32,
+        value: RcUi<i32>,
     },
     Name {
         name_id: u32,
@@ -117,7 +114,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value_name_id: u32,
+        value_name_id: RcUi<u32>,
         _osef4: Dummy<4>,
     },
     Object {
@@ -136,7 +133,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        string: String,
+        string: RcUi<String>,
     },
     StringRef {
         name_id: u32,
@@ -145,7 +142,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: i32,
+        value: RcUi<i32>,
     },
     Struct {
         name_id: u32,
@@ -156,7 +153,7 @@ pub enum Property {
         _osef3: Dummy<4>,
         struct_name_id: u32,
         _osef4: Dummy<4>,
-        properties: StructType,
+        struct_type: StructType,
     },
     None {
         name_id: u32,
@@ -165,7 +162,7 @@ pub enum Property {
 }
 
 impl Property {
-    pub fn visit_seq<'de, A>(names: &[RefCell<Name>], seq: &mut A) -> Result<Self, A::Error>
+    pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
     {
@@ -222,8 +219,9 @@ impl Property {
                     }
                     _ => {
                         for _ in 0..len {
-                            let array_properties =
-                                ArrayType::Properties(List::<Property>::visit_seq(names, seq)?);
+                            let array_properties = ArrayType::Properties(
+                                List::<RcUi<Property>>::visit_seq(names, seq)?,
+                            );
                             array.push(array_properties);
                         }
                     }
@@ -292,11 +290,11 @@ impl Property {
                 let _osef4 = seq.next_element()?.unwrap();
 
                 let struct_name = get_name(names, struct_name_id);
-                let properties = match struct_name.as_str() {
+                let struct_type = match struct_name.as_str() {
                     "LinearColor" => StructType::LinearColor(seq.next_element()?.unwrap()),
                     "Vector" => StructType::Vector(seq.next_element()?.unwrap()),
                     "Rotator" => StructType::Rotator(seq.next_element()?.unwrap()),
-                    _ => StructType::Properties(List::<Property>::visit_seq(names, seq)?),
+                    _ => StructType::Properties(List::<RcUi<Property>>::visit_seq(names, seq)?),
                 };
                 Property::Struct {
                     name_id,
@@ -307,7 +305,7 @@ impl Property {
                     _osef3,
                     struct_name_id,
                     _osef4,
-                    properties,
+                    struct_type,
                 }
             }
             _ => unimplemented!(),
@@ -332,11 +330,11 @@ impl Property {
             Property::Name { .. } => size + 8,
             Property::Object { .. } => size + 4,
             Property::Str { string, .. } => {
-                let bytes = unreal::Serializer::to_byte_buf(string)?;
+                let bytes = unreal::Serializer::to_vec(string)?;
                 size + bytes.len()
             }
             Property::StringRef { .. } => size + 4,
-            Property::Struct { properties, .. } => size + properties.size()? + 8,
+            Property::Struct { struct_type, .. } => size + struct_type.size()? + 8,
             Property::None { .. } => 8,
         })
     }
@@ -344,11 +342,11 @@ impl Property {
 
 #[derive(Serialize, Clone)]
 pub enum ArrayType {
-    Int(i32),
+    Int(RcUi<i32>),
     Object(i32),
-    Vector(Vector),
-    String(String),
-    Properties(List<Property>),
+    Vector(RcUi<Vector>),
+    String(RcUi<String>),
+    Properties(List<RcUi<Property>>),
 }
 
 impl ArrayType {
@@ -358,13 +356,13 @@ impl ArrayType {
             ArrayType::Object(_) => 4,
             ArrayType::Vector(_) => 12,
             ArrayType::String(string) => {
-                let bytes = unreal::Serializer::to_byte_buf(string)?;
+                let bytes = unreal::Serializer::to_vec(string)?;
                 bytes.len()
             }
             ArrayType::Properties(properties) => {
                 let mut size = 0;
                 for property in properties.iter() {
-                    size += property.size()?
+                    size += property.borrow().size()?
                 }
                 size
             }
@@ -374,10 +372,10 @@ impl ArrayType {
 
 #[derive(Serialize, Clone)]
 pub enum StructType {
-    LinearColor(LinearColor),
-    Vector(Vector),
-    Rotator(Rotator),
-    Properties(List<Property>),
+    LinearColor(RcUi<LinearColor>),
+    Vector(RcUi<Vector>),
+    Rotator(RcUi<Rotator>),
+    Properties(List<RcUi<Property>>),
 }
 
 impl StructType {
@@ -389,7 +387,7 @@ impl StructType {
             StructType::Properties(properties) => {
                 let mut size = 0;
                 for property in properties.iter() {
-                    size += property.size()?
+                    size += property.borrow().size()?
                 }
                 size
             }

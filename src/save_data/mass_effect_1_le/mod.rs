@@ -332,7 +332,7 @@ mod test {
             let now = Instant::now();
 
             // Deserialize (again)
-            let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&output.clone())?;
+            let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&output)?;
 
             println!("Deserialize 2 : {:?}", Instant::now() - now);
             let now = Instant::now();
@@ -362,7 +362,7 @@ mod test {
             // }
 
             // Check 2nd serialize = first serialize
-            assert_eq!(output, output_2);
+            assert!(output == output_2);
         }
         Ok(())
     }
@@ -372,7 +372,7 @@ mod test {
     //     let input = fs::read("test/ME1Le_Export.pcsav")?;
     //     let me1_save_game: Me1LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
 
-    //     let output = unreal::Serializer::to_byte_buf(&me1_save_game.save_data)?;
+    //     let output = unreal::Serializer::to_vec(&me1_save_game.save_data)?;
     //     fs::write("test/ME1Le_Export.uncompressed", &output)?;
 
     //     Ok(())

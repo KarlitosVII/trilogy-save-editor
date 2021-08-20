@@ -1,7 +1,6 @@
 ## Unreleased
 - You can now add and edit all your plots in `Raw plot` tab (no longer only labelled ones)
 - Inventory filters
-- No ME1
 - No compare
 - Better font for high DPI
 - // TODO: ME1
@@ -9,6 +8,7 @@
 - // TODO: auto update
 - // TODO: command line
 - // TODO: unobtainable ME1 item db
+- // TODO: ME1 LE class swap
 
 ## 1.13.1
 - ME2: Added all armors plots

@@ -151,7 +151,7 @@ impl Component for RawPlot {
                             false
                         }
                     }
-                    PlotType::Integer(ref mut integers) => match integers {
+                    PlotType::Int(ref mut integers) => match integers {
                         IntPlotType::Vec(ref mut vec) => {
                             let mut vec = vec.borrow_mut();
                             if new_plot >= vec.len() {
@@ -239,7 +239,7 @@ impl Component for RawPlot {
                             />
                         }
                     }),
-                    PlotType::Integer(ref integers) => match integers {
+                    PlotType::Int(ref integers) => match integers {
                         IntPlotType::Vec(ref vec) => {
                             vec.borrow().get(idx).map(|plot| plot.view(&label))
                         }
@@ -256,7 +256,7 @@ impl Component for RawPlot {
                         }
                     },
                 };
-                html_nested! {
+                html! {
                     <div class="raw-plot-row">
                         { for row }
                     </div>
@@ -265,7 +265,7 @@ impl Component for RawPlot {
 
         let add_helper = match self.props.plots {
             PlotType::Boolean(_)
-            | PlotType::Integer(IntPlotType::Vec(_))
+            | PlotType::Int(IntPlotType::Vec(_))
             | PlotType::Float(FloatPlotType::Vec(_)) => html! {
                 <Helper text=
                     "Be careful when adding a new plot.\n\
@@ -292,7 +292,7 @@ impl Component for RawPlot {
                             Msg::Add
                         })}
                     >
-                        <InputNumber label={String::default()} value={NumberType::Integer(RcUi::clone(&self.props.add_id))} />
+                        <InputNumber label={String::default()} value={NumberType::Int(RcUi::clone(&self.props.add_id))} />
                         <input type="submit" class="button" value="Add" />
                         { add_helper }
                     </form>
@@ -330,7 +330,7 @@ impl RawPlot {
                     };
                 }
             }
-            PlotType::Integer(ref mut integers) => match integers {
+            PlotType::Int(ref mut integers) => match integers {
                 IntPlotType::Vec(ref mut vec) => {
                     if let Some(&max) = plot_db.integers.keys().max() {
                         let mut vec = vec.borrow_mut();
@@ -371,7 +371,7 @@ impl RawPlot {
                 let label_list = plot_db.booleans.iter().map(|(&k, v)| (k, Some(v.clone())));
                 (0..bitvec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
             }
-            PlotType::Integer(ref integers) => {
+            PlotType::Int(ref integers) => {
                 let label_list = plot_db.integers.iter().map(|(&k, v)| (k, Some(v.clone())));
                 match integers {
                     IntPlotType::Vec(ref vec) => {

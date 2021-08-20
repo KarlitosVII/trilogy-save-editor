@@ -77,7 +77,7 @@ impl Component for Me3RawPlot {
                         <RawPlot plots={PlotType::Boolean(RcUi::clone(booleans))} plot_db={Rc::clone(plot_db)} />
                     </Tab>
                     <Tab title="Integers">
-                        <RawPlot plots={PlotType::Integer(integers.clone())} plot_db={Rc::clone(plot_db)} />
+                        <RawPlot plots={PlotType::Int(integers.clone())} plot_db={Rc::clone(plot_db)} />
                     </Tab>
                     <Tab title="Floats">
                         <RawPlot plots={PlotType::Float(floats.clone())} plot_db={Rc::clone(plot_db)} />

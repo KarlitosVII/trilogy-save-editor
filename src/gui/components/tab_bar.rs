@@ -94,7 +94,7 @@ impl Component for TabBar {
                 let title = title.clone();
                 self.link.callback(move |event| Msg::TabClicked(event, title.clone()))
             });
-            html_nested! {
+            html! {
                 <a class={classes![
                         "rounded-b-none",
                         "rounded-t",

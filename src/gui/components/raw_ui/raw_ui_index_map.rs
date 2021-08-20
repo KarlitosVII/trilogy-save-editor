@@ -110,7 +110,7 @@ where
             }
             Msg::EditKey(idx, new_key) => match self.props.index_map {
                 IndexMapKeyType::I32(ref mut index_map) => match new_key {
-                    CallbackType::Integer(new_key) => {
+                    CallbackType::Int(new_key) => {
                         if let Some((key, _)) = index_map.borrow_mut().get_index_mut(idx) {
                             *key = new_key;
                         }
@@ -152,7 +152,7 @@ where
                         vec![RawUi::view(value, "Value")]
                     };
 
-                    html_nested! {
+                    html! {
                         <div class="flex gap-1">
                             <div class="py-px">
                                 <a class={classes![
@@ -185,7 +185,7 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputNumber label="Id" value={NumberType::Integer((*key).into())}
+                                <InputNumber label="Id" value={NumberType::Int((*key).into())}
                                     onchange={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };

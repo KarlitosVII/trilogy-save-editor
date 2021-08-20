@@ -1,3 +1,4 @@
+use std::cell::Ref;
 use std::mem;
 
 use anyhow::{Error, Result};
@@ -7,7 +8,7 @@ use yew_agent::{Bridge, Bridged};
 
 use crate::gui::{
     components::{NavBar, Tab, TabBar, Table},
-    mass_effect_1::{Me1Plot, Me1RawPlot},
+    mass_effect_1::{Me1Plot, Me1RawData, Me1RawPlot},
     mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
     mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
     mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
@@ -16,7 +17,9 @@ use crate::gui::{
     shared::{FloatPlotType, IntPlotType},
     RcUi, Theme,
 };
-use crate::save_data::{mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame};
+use crate::save_data::{
+    mass_effect_1::Me1SaveGame, mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame,
+};
 use crate::services::{
     database::DatabaseService,
     drop_handler::DropHandler,
@@ -112,7 +115,8 @@ impl Component for App {
                 #[allow(clippy::single_match)]
                 match self.props.save_game {
                     Some(
-                        SaveGame::MassEffect1Le { ref file_path, .. }
+                        SaveGame::MassEffect1 { ref file_path, .. }
+                        | SaveGame::MassEffect1Le { ref file_path, .. }
                         | SaveGame::MassEffect1LePs4 { ref file_path, .. }
                         | SaveGame::MassEffect2 { ref file_path, .. }
                         | SaveGame::MassEffect2Le { ref file_path, .. }
@@ -120,7 +124,7 @@ impl Component for App {
                     ) => {
                         self.save_handler.send(Request::ReloadSave(file_path.clone()));
                     }
-                    _ => (),
+                    None => (),
                 }
                 false
             }
@@ -154,6 +158,9 @@ impl Component for App {
     fn view(&self) -> Html {
         let (content, theme) = if let Some(ref save_game) = self.props.save_game {
             match save_game {
+                SaveGame::MassEffect1 { save_game, .. } => {
+                    (App::mass_effect_1(self, save_game.borrow()), Theme::MassEffect1)
+                }
                 SaveGame::MassEffect1Le { save_game, .. } => (
                     App::mass_effect_1_le(self, RcUi::clone(&save_game.borrow().save_data)),
                     Theme::MassEffect1,
@@ -207,95 +214,35 @@ impl Component for App {
 }
 
 impl App {
-    fn notification(&self, notification: &str) -> Html {
-        html! {
-            <div class={classes![
-                "absolute",
-                "top-1.5",
-                "left-1/2",
-                "-translate-x-1/2",
-                "border",
-                "border-default-border",
-                "bg-default-bg/50",
-                "px-2",
-                "pt-0.5",
-                "pb-1.5",
-                "z-50"
-            ]}>
-                { notification }
-                <div class="relative h-0.5 bg-theme-bg">
-                    <div class="absolute notification-animation w-full h-0.5 bg-white"></div>
-                </div>
-            </div>
-        }
-    }
-
-    fn error(&self, error: &Error) -> Html {
-        let chain = error.chain().skip(1).map(|error| {
-            html! {
-                <>
-                    <hr class="mt-0.5 border-t border-default-border" />
-                    { error }
-                </>
-            }
-        });
-        html! {
-            <div class="absolute w-screen h-screen grid place-content-center bg-white/30 z-50">
-                <div class="border border-default-border bg-default-bg">
-                    <div class="px-1 bg-theme-tab select-none">{"Error"}</div>
-                    <div class="p-1 pt-0.5">
-                        { error }
-                        { for chain }
-                        <hr class="my-0.5 border-t border-default-border" />
-                        <button class="button w-12"
-                            onclick={self.link.callback(|_| Msg::DismissError)}
-                        >
-                            {"OK"}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        }
-    }
-
-    fn changelog() -> Html {
-        let changelog = {
-            let file = include_str!("../../CHANGELOG.md");
-            let mut changelog = Vec::new();
-            let mut changes = Vec::new();
-            let mut version = "";
-
-            for line in file.split('\n') {
-                if let Some((prefix, text)) = line.split_once(' ') {
-                    match prefix {
-                        "##" => version = text,
-                        "-" | "*" => changes.push(text),
-                        _ => {}
-                    }
-                } else {
-                    changelog.push((version, mem::take(&mut changes)));
-                }
-            }
-            changelog
-        };
-
-        let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
-            html! {
-                <Table title={version.to_owned()} opened={i==0}>
-                    { for changes }
-                </Table>
-            }
-        });
+    fn mass_effect_1(&self, save_game: Ref<'_, Me1SaveGame>) -> Html {
+        let state = save_game.state();
+        let plot = state.plot();
 
         html! {
-            <section class="flex-auto flex flex-col gap-1 p-1">
-                <div>
-                    { "Changelog" }
-                    <hr class="border-t border-default-border" />
-                </div>
-                <div class="flex-auto flex flex-col gap-1 h-0 overflow-y-auto">
-                    { for logs }
-                </div>
+            <section class="flex-auto flex p-1">
+                <TabBar is_main_tab_bar=true>
+                    // <Tab title="General">
+                    //     <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
+                    // </Tab>
+                    <Tab title="Plot">
+                        <Me1Plot
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            onerror={self.link.callback(Msg::Error)}
+                        />
+                    </Tab>
+                    <Tab title="Raw Data">
+                        <Me1RawData player={RcUi::clone(&save_game.player)} />
+                    </Tab>
+                    <Tab title="Raw Plot">
+                        <Me1RawPlot
+                            booleans={RcUi::clone(&plot.booleans)}
+                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                            floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                            onerror={self.link.callback(Msg::Error)}
+                        />
+                    </Tab>
+                </TabBar>
             </section>
         }
     }
@@ -439,6 +386,99 @@ impl App {
                     </Tab>
                 </TabBar>
             </section>
+        }
+    }
+
+    fn changelog() -> Html {
+        let changelog = {
+            let file = include_str!("../../CHANGELOG.md");
+            let mut changelog = Vec::new();
+            let mut changes = Vec::new();
+            let mut version = "";
+
+            for line in file.split('\n') {
+                if let Some((prefix, text)) = line.split_once(' ') {
+                    match prefix {
+                        "##" => version = text,
+                        "-" | "*" => changes.push(text),
+                        _ => {}
+                    }
+                } else {
+                    changelog.push((version, mem::take(&mut changes)));
+                }
+            }
+            changelog
+        };
+
+        let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
+            html! {
+                <Table title={version.to_owned()} opened={i==0}>
+                    { for changes }
+                </Table>
+            }
+        });
+
+        html! {
+            <section class="flex-auto flex flex-col gap-1 p-1">
+                <div>
+                    { "Changelog" }
+                    <hr class="border-t border-default-border" />
+                </div>
+                <div class="flex-auto flex flex-col gap-1 h-0 overflow-y-auto">
+                    { for logs }
+                </div>
+            </section>
+        }
+    }
+
+    fn notification(&self, notification: &str) -> Html {
+        html! {
+            <div class={classes![
+                "absolute",
+                "top-1.5",
+                "left-1/2",
+                "-translate-x-1/2",
+                "border",
+                "border-default-border",
+                "bg-default-bg/50",
+                "px-2",
+                "pt-0.5",
+                "pb-1.5",
+                "z-50"
+            ]}>
+                { notification }
+                <div class="relative h-0.5 bg-theme-bg">
+                    <div class="absolute notification-animation w-full h-0.5 bg-white"></div>
+                </div>
+            </div>
+        }
+    }
+
+    fn error(&self, error: &Error) -> Html {
+        let chain = error.chain().skip(1).map(|error| {
+            html! {
+                <>
+                    <hr class="mt-0.5 border-t border-default-border" />
+                    { error }
+                </>
+            }
+        });
+        html! {
+            <div class="absolute w-screen h-screen grid place-content-center bg-white/30 z-50">
+                <div class="border border-default-border bg-default-bg">
+                    <div class="px-1 bg-theme-tab select-none">{"Error"}</div>
+                    <div class="p-1 pt-0.5">
+                        { error }
+                        { for chain }
+                        <hr class="my-0.5 border-t border-default-border" />
+                        <button class="button w-12"
+                            onclick={self.link.callback(|_| Msg::DismissError)}
+                        >
+                            {"OK"}
+                        </button>
+                    </div>
+                </div>
+            </div>
         }
     }
 }

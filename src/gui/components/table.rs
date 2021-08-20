@@ -81,7 +81,7 @@ impl Component for Table {
 
         let chunks = opened.then(|| {
             let mut rows = children.iter().map(|child| {
-                html_nested! {
+                html! {
                     <div class={classes![
                         "table-row",
                         title.is_some().then(|| "!pl-6"),

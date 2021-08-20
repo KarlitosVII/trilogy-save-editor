@@ -7,7 +7,7 @@ use crate::gui::{components::Helper, RcUi};
 #[derive(Clone)]
 pub enum NumberType {
     Byte(RcUi<u8>),
-    Integer(RcUi<i32>),
+    Int(RcUi<i32>),
     Float(RcUi<f32>),
 }
 
@@ -15,7 +15,7 @@ impl PartialEq for NumberType {
     fn eq(&self, other: &NumberType) -> bool {
         match (self, other) {
             (NumberType::Byte(byte), NumberType::Byte(other)) => byte == other,
-            (NumberType::Integer(integer), NumberType::Integer(other)) => integer == other,
+            (NumberType::Int(integer), NumberType::Int(other)) => integer == other,
             (NumberType::Float(float), NumberType::Float(other)) => float == other,
             _ => false,
         }
@@ -66,12 +66,12 @@ impl Component for InputNumber {
                             callback.emit(CallbackType::Byte(value));
                         }
                     }
-                    NumberType::Integer(ref mut integer) => {
+                    NumberType::Int(ref mut integer) => {
                         let value = value as i32;
                         *integer.borrow_mut() = value;
 
                         if let Some(ref callback) = self.props.onchange {
-                            callback.emit(CallbackType::Integer(value));
+                            callback.emit(CallbackType::Int(value));
                         }
                     }
                     NumberType::Float(ref mut float) => {
@@ -95,7 +95,7 @@ impl Component for InputNumber {
     fn view(&self) -> Html {
         let (value, placeholder) = match self.props.value {
             NumberType::Byte(ref byte) => (byte.borrow().to_string(), "<byte>"),
-            NumberType::Integer(ref integer) => (integer.borrow().to_string(), "<integer>"),
+            NumberType::Int(ref integer) => (integer.borrow().to_string(), "<integer>"),
             NumberType::Float(ref float) => {
                 let mut ryu = ryu::Buffer::new();
                 (ryu.format(*float.borrow()).trim_end_matches(".0").to_owned(), "<float>")
@@ -110,7 +110,7 @@ impl Component for InputNumber {
 
         html! {
             <label class="flex items-center gap-1">
-                <input type="number" class="input w-[120px]" step="any"
+                <input type="number" class="input w-[110px]" step="any"
                     {placeholder}
                     {value}
                     onchange={self.link.callback(Msg::Change)}

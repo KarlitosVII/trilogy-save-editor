@@ -115,7 +115,7 @@ impl Component for Me1LeGeneral {
                 }
                 true
             }
-            Msg::TalentPoints(CallbackType::Integer(talent_points)) => {
+            Msg::TalentPoints(CallbackType::Int(talent_points)) => {
                 *player.talent_points_mut() = talent_points;
                 true
             }
@@ -238,13 +238,13 @@ impl Me1LeGeneral {
             <Table title={String::from("Gameplay")}>
                 <InputNumber
                     label="Level"
-                    value={NumberType::Integer(RcUi::clone(level))}
+                    value={NumberType::Int(RcUi::clone(level))}
                     helper="Classic mode (1 - 60)"
                 />
                 { current_xp.view("Current XP") }
                 <InputNumber
                     label="Talent Points"
-                    value={NumberType::Integer((*player.talent_points()).into())}
+                    value={NumberType::Int((*player.talent_points()).into())}
                     onchange={self.link.callback(Msg::TalentPoints)}
                 />
                 <button class="button" onclick={self.link.callback(|_| Msg::ResetTalents(None))}>

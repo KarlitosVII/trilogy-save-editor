@@ -107,7 +107,7 @@ impl Component for BonusPowers {
                 .any(|power| power.borrow().power_class_name().eq_ignore_ascii_case(power_class_name)),
             };
 
-            html_nested! {
+            html! {
                 <button
                     class={classes![
                         "rounded-none",

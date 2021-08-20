@@ -35,7 +35,7 @@ base64 = "0.13"
 # Wasm
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
-# wasm-timer = "0.2"
+wasm-timer = "0.2"
 js-sys = "0.3"
 web-sys = { version="0.3", features=["DataTransfer", "CssStyleDeclaration", "DomRect", "History", "PopStateEvent", "PopStateEventInit"] }
 gloo = { version = "0.3", features = ["futures"], default-features = false }

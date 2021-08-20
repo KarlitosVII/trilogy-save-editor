@@ -129,7 +129,7 @@ impl PlotCategory {
             };
         }
 
-        // Integers
+        // Ints
         match integers {
             IntPlotType::Vec(ref mut vec) => {
                 if let Some(&(mut max)) = int_db.keys().max() {

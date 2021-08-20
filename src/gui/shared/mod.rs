@@ -50,7 +50,7 @@ impl PartialEq for FloatPlotType {
 #[derive(Clone)]
 pub enum PlotType {
     Boolean(RcUi<BitVec>),
-    Integer(IntPlotType),
+    Int(IntPlotType),
     Float(FloatPlotType),
 }
 
@@ -58,7 +58,7 @@ impl PartialEq for PlotType {
     fn eq(&self, other: &PlotType) -> bool {
         match (self, other) {
             (PlotType::Boolean(booleans), PlotType::Boolean(other)) => booleans == other,
-            (PlotType::Integer(integers), PlotType::Integer(other)) => integers == other,
+            (PlotType::Int(integers), PlotType::Int(other)) => integers == other,
             (PlotType::Float(floats), PlotType::Float(other)) => floats == other,
             _ => false,
         }

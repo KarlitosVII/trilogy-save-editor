@@ -38,7 +38,7 @@ impl RawUi for RcUi<u8> {
 impl RawUi for RcUi<i32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label={label.to_owned()} value={NumberType::Integer(RcUi::clone(self))} />
+            <InputNumber label={label.to_owned()} value={NumberType::Int(RcUi::clone(self))} />
         }
     }
 }
