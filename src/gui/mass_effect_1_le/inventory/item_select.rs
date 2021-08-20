@@ -279,7 +279,7 @@ impl Component for ItemSelect {
                             "border",
                             "border-default-border",
                             "min-w-full",
-                            "w-[408px]",
+                            "w-[410px]",
                             "max-h-[300px]",
                             "z-20",
                             (!self.opened).then(|| "hidden")

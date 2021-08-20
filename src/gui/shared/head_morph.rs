@@ -44,7 +44,6 @@ impl Component for HeadMorph {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        // TODO: fix LOD0 performance
         let save_handler = SaveHandler::bridge(link.callback(|response| match response {
             Response::HeadMorphImported(head_morph) => Msg::HeadMorphImported(head_morph),
             Response::HeadMorphExported => Msg::HeadMorphExported,
@@ -121,9 +120,7 @@ impl Component for HeadMorph {
                     { for export_remove }
                 </div>
                 <hr class="border-t border-default-border" />
-                <div class="flex-auto h-0 overflow-y-auto">
-                    { for raw }
-                </div>
+                { for raw }
             </div>
         }
     }

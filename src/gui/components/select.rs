@@ -96,24 +96,27 @@ impl Component for Select {
     }
 
     fn view(&self) -> Html {
-        let options = self.props.options.iter().enumerate().map(|(idx, option)| {
-            let selected = idx == self.props.current_idx;
-            html! {
-                <a
-                    class={classes![
-                        "flex-1",
-                        "px-1",
-                        "hover:bg-theme-hover",
-                        "active:bg-theme-active",
-                        "cursor-pointer",
-                        "whitespace-nowrap",
-                        selected.then(|| "bg-theme-bg"),
-                    ]}
-                    onclick={self.link.callback(move |_| Msg::Select(idx))}
-                >
-                    { option }
-                </a>
-            }
+        let drop_down = self.opened.then(|| {
+            let options = self.props.options.iter().enumerate().map(|(idx, option)| {
+                let selected = idx == self.props.current_idx;
+                html! {
+                    <a
+                        class={classes![
+                            "flex-1",
+                            "px-1",
+                            "hover:bg-theme-hover",
+                            "active:bg-theme-active",
+                            "cursor-pointer",
+                            "whitespace-nowrap",
+                            selected.then(|| "bg-theme-bg"),
+                        ]}
+                        onclick={self.link.callback(move |_| Msg::Select(idx))}
+                    >
+                        { option }
+                    </a>
+                }
+            });
+            html! { for options }
         });
 
         let size = if self.props.sized { "w-[200px]" } else { "min-w-[60px]" };
@@ -164,7 +167,7 @@ impl Component for Select {
                     ]}
                     ref={self.drop_down_ref.clone()}
                 >
-                    { for options }
+                    { for drop_down }
                 </div>
             </div>
         }

@@ -2,7 +2,6 @@ use std::path::PathBuf;
 
 use anyhow::{bail, Context, Error, Result};
 use crc::{Crc, CRC_32_BZIP2};
-use gloo::console;
 use ron::ser::PrettyConfig;
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
@@ -80,7 +79,7 @@ impl Agent for SaveHandler {
             Msg::HeadMorphExported(who) => self.link.respond(who, Response::HeadMorphExported),
             Msg::Noop => {
                 #[cfg(debug_assertions)]
-                console::log!("No op");
+                gloo::console::log!("No op");
             }
             Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
         }

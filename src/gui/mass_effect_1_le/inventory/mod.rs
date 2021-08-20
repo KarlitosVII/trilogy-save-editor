@@ -109,7 +109,7 @@ impl Component for Me1LeInventory {
             let player = self.props.player();
             html! {
                 <div class="flex divide-solid divide-x divide-default-border">
-                    <div class="flex-1 flex flex-col gap-1 pr-1 min-w-0">
+                    <div class="flex-1 pr-1 min-w-0">
                         { self.player(player.inventory()) }
                         { self.squad(self.props.squad()) }
                     </div>
@@ -130,20 +130,30 @@ impl Component for Me1LeInventory {
 }
 
 impl Me1LeInventory {
-    fn item_view(&self, item: RcUi<Item>) -> Html {
+    fn item_view(&self, item: &RcUi<Item>) -> Html {
+        html! {
+            <div class="flex items-center gap-1 min-w-0">
+                {self.item_view_no_flex(item)}
+            </div>
+        }
+    }
+
+    fn item_view_no_flex(&self, item: &RcUi<Item>) -> Html {
         let current_item = DbItem {
             item_id: *item.borrow().item_id(),
             manufacturer_id: *item.borrow().manufacturer_id(),
         };
         let current_level = *item.borrow().item_level() as usize;
         let onselect_item = {
-            let item = RcUi::clone(&item);
+            let item = RcUi::clone(item);
             self.link.callback(move |new_item| Msg::ChangeItem(RcUi::clone(&item), new_item))
         };
-        let onselect_level =
-            self.link.callback(move |idx| Msg::ChangeItemLevel(RcUi::clone(&item), idx));
+        let onselect_level = {
+            let item = RcUi::clone(item);
+            self.link.callback(move |idx| Msg::ChangeItemLevel(RcUi::clone(&item), idx))
+        };
         html! {
-            <div class="flex-auto flex items-center gap-1 min-w-0">
+            <>
                 <ItemSelect
                     item_db={Rc::clone(self.item_db.as_ref().unwrap())}
                     {current_item}
@@ -155,16 +165,16 @@ impl Me1LeInventory {
                     onselect={onselect_level}
                     sized=false
                 />
-            </div>
+            </>
         }
     }
 
     fn player(&self, inventory: Ref<'_, Inventory>) -> Html {
         let equipment = inventory.equipment();
-        let equipment = equipment.iter().map(|item| self.item_view(RcUi::clone(item)));
+        let equipment = equipment.iter().map(|item| self.item_view(item));
 
         let quick_slots = inventory.quick_slots();
-        let quick_slots = quick_slots.iter().map(|item| self.item_view(RcUi::clone(item)));
+        let quick_slots = quick_slots.iter().map(|item| self.item_view(item));
         html! {
             <div class="flex flex-col gap-1">
                 <div>
@@ -196,12 +206,12 @@ impl Me1LeInventory {
             };
 
             let equipment = henchman.equipment();
-            let equipment = equipment.iter().map(|item| self.item_view(RcUi::clone(item)));
+            let equipment = equipment.iter().map(|item| self.item_view(item));
 
             let quick_slots = henchman.quick_slots();
-            let quick_slots = quick_slots.iter().map(|item| self.item_view(RcUi::clone(item)));
+            let quick_slots = quick_slots.iter().map(|item| self.item_view(item));
             html! {
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1 mt-1">
                     <div>
                         { name }
                         <hr class="border-t border-default-border" />
@@ -230,10 +240,10 @@ impl Me1LeInventory {
         };
 
         let item_remove_view = |item_list, idx, item| {
-            let item = self.item_view(RcUi::clone(item));
+            let item = self.item_view_no_flex(item);
 
             html! {
-                <div class="flex gap-1">
+                <div class="flex items-center gap-1 min-w-0">
                     <div class="py-px">
                         <a class={classes![
                                 "rounded-none",
