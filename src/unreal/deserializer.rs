@@ -1,6 +1,6 @@
 use std::mem;
 
-use encoding_rs::{UTF_16LE, WINDOWS_1252};
+use encoding_rs::{UTF_16BE, UTF_16LE, WINDOWS_1252};
 use serde::de::{
     self, DeserializeSeed, EnumAccess, Error, IntoDeserializer, MapAccess, SeqAccess,
     VariantAccess, Visitor,
@@ -11,11 +11,17 @@ use super::Result;
 
 pub struct Deserializer<'de> {
     input: &'de [u8],
+    is_le: bool,
 }
 
 impl<'de> Deserializer<'de> {
     pub fn from_bytes<T: Deserialize<'de>>(input: &'de [u8]) -> Result<T> {
-        let mut deserializer = Deserializer { input };
+        let mut deserializer = Deserializer { input, is_le: true };
+        T::deserialize(&mut deserializer)
+    }
+
+    pub fn from_be_bytes<T: Deserialize<'de>>(input: &'de [u8]) -> Result<T> {
+        let mut deserializer = Deserializer { input, is_le: false };
         T::deserialize(&mut deserializer)
     }
 
@@ -58,7 +64,11 @@ macro_rules! impl_deserialize {
             let mut bytes = [0; SIZE];
             bytes.copy_from_slice(slice);
 
-            let value = <$type>::from_le_bytes(bytes);
+            let value = if self.is_le {
+                <$type>::from_le_bytes(bytes)
+            } else {
+                <$type>::from_be_bytes(bytes)
+            };
             visitor.$visit_type(value)
         }
     };
@@ -99,9 +109,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
 
     // Unsigned ints
     impl_deserialize!(deserialize_u8(u8) = visit_u8()); // Impl
-
-    unimpl_deserialize!(deserialize_u16());
-
+    impl_deserialize!(deserialize_u16(u16) = visit_u16()); // Impl
     impl_deserialize!(deserialize_u32(u32) = visit_u32()); // Impl
     impl_deserialize!(deserialize_u64(u64) = visit_u64()); // Impl
 
@@ -134,9 +142,10 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
             let string_len = (len.abs() * 2) as usize;
             let bytes = self.read(string_len)?.to_owned();
 
-            let (decoded, _, had_errors) = UTF_16LE.decode(&bytes);
+            let (decoded, _, had_errors) =
+                if self.is_le { UTF_16LE.decode(&bytes) } else { UTF_16BE.decode(&bytes) };
             if had_errors {
-                return Err(Error::custom("UTF_16LE decoding error"));
+                return Err(Error::custom("UTF_16 decoding error"));
             }
 
             decoded.into_owned()

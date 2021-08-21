@@ -321,7 +321,7 @@ struct Player {
     } powers;
     struct {
         int len;
-        GawAsset gaw[len];
+        WarAsset gaw[len];
     } gaw_assets;
     struct {
         int len;

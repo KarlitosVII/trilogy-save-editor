@@ -115,7 +115,7 @@ where
     }
 }
 
-#[derive(Clone, From, Display)]
+#[derive(Clone, From, Display, Default)]
 #[display(fmt = "")]
 pub struct Guid(Uuid);
 
@@ -125,19 +125,13 @@ impl Guid {
     }
 }
 
-impl Default for Guid {
-    fn default() -> Self {
-        Guid(Uuid::default())
-    }
-}
-
 impl<'de> Deserialize<'de> for Guid {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        let bytes: [u8; 16] = Deserialize::deserialize(deserializer)?;
-        let guid = Uuid::from_bytes(bytes);
+        let (d1, d2, d3, d4): (u32, u16, u16, [u8; 8]) = Deserialize::deserialize(deserializer)?;
+        let guid = Uuid::from_fields(d1, d2, d3, &d4).map_err(de::Error::custom)?;
         Ok(Guid(guid))
     }
 }
@@ -147,6 +141,6 @@ impl serde::Serialize for Guid {
     where
         S: Serializer,
     {
-        serde::Serialize::serialize(self.0.as_bytes(), serializer)
+        serde::Serialize::serialize(&self.0.as_fields(), serializer)
     }
 }

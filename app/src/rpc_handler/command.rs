@@ -23,8 +23,8 @@ pub fn open_save(window: &Window) -> Result<Option<RpcFile>> {
     }
 }
 
-pub fn save_save_dialog(window: &Window, path: PathBuf) -> Result<Option<PathBuf>> {
-    let result = dialog::save_save(window, path);
+pub fn save_save_dialog(window: &Window, params: DialogParams) -> Result<Option<PathBuf>> {
+    let result = dialog::save_save(window, params);
     Ok(result)
 }
 
@@ -71,6 +71,12 @@ fn write_file(rpc_file: RpcFile) -> Result<()> {
     fs::write(path, file.decode()?)?;
 
     Ok(())
+}
+
+#[derive(Deserialize, Default)]
+pub struct DialogParams {
+    pub path: PathBuf,
+    pub filters: Vec<(String, Vec<String>)>,
 }
 
 #[derive(Deserialize, Serialize, Default)]

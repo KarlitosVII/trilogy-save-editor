@@ -1,3 +1,5 @@
+use std::iter::once;
+
 use encoding_rs::WINDOWS_1252;
 use serde::ser::{self, Error};
 use serde::Serialize;
@@ -6,6 +8,7 @@ use super::Result;
 
 pub struct Serializer {
     output: Vec<u8>,
+    is_le: bool,
 }
 
 impl Serializer {
@@ -14,7 +17,17 @@ impl Serializer {
     where
         T: Serialize,
     {
-        let mut serializer = Serializer { output: Vec::new() };
+        let mut serializer = Serializer { output: Vec::new(), is_le: true };
+        value.serialize(&mut serializer)?;
+        Ok(serializer.output)
+    }
+
+    #[allow(clippy::wrong_self_convention)]
+    pub fn to_be_vec<T>(value: &T) -> Result<Vec<u8>>
+    where
+        T: Serialize,
+    {
+        let mut serializer = Serializer { output: Vec::new(), is_le: false };
         value.serialize(&mut serializer)?;
         Ok(serializer.output)
     }
@@ -31,7 +44,8 @@ macro_rules! unimpl_serialize {
 macro_rules! impl_serialize {
     ($ser_method:ident($type:ty)) => {
         fn $ser_method(self, value: $type) -> Result<()> {
-            let bytes = <$type>::to_le_bytes(value);
+            let bytes =
+                if self.is_le { <$type>::to_le_bytes(value) } else { <$type>::to_be_bytes(value) };
             self.output.extend(&bytes);
             Ok(())
         }
@@ -64,9 +78,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
 
     // Unsigned ints
     impl_serialize!(serialize_u8(u8)); // Impl
-
-    unimpl_serialize!(serialize_u16(u16));
-
+    impl_serialize!(serialize_u16(u16)); // Impl
     impl_serialize!(serialize_u32(u32)); // Impl
     impl_serialize!(serialize_u64(u64)); // Impl
 
@@ -85,16 +97,14 @@ impl<'a> ser::Serializer for &'a mut Serializer {
 
         let (bytes, len) = if string.chars().any(|c| c as u32 > 0xff) {
             // Unicode
-            let mut encoded: Vec<u16> = string.encode_utf16().collect();
-            encoded.push(0);
+            let encoded: Vec<u8> = string
+                .encode_utf16()
+                .chain(once(0))
+                .flat_map(|c| if self.is_le { u16::to_le_bytes(c) } else { u16::to_be_bytes(c) })
+                .collect();
 
-            let mut bytes = Vec::new();
-            for doublebyte in encoded {
-                bytes.extend(&u16::to_le_bytes(doublebyte));
-            }
-
-            let len = bytes.len() as i32;
-            (bytes, -(len / 2))
+            let len = encoded.len() as i32;
+            (encoded, -(len / 2))
         } else {
             // Ascii
             let (encoded, _, had_errors) = WINDOWS_1252.encode(string);

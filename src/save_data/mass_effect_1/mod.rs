@@ -20,7 +20,8 @@ use crate::unreal;
 #[rcize_fields]
 #[derive(Clone)]
 pub struct Me1SaveGame {
-    _begin: Dummy<8>,
+    magic_number: Me1MagicNumber,
+    _begin: Dummy<4>,
     _zip_offset: u32,
     _no_mans_land: List<u8>,
     pub player: Player,
@@ -104,6 +105,7 @@ impl<'de> Deserialize<'de> for Me1SaveGame {
             where
                 A: de::SeqAccess<'de>,
             {
+                let magic_number = seq.next_element()?.unwrap();
                 let begin = seq.next_element()?.unwrap();
                 let zip_offset = seq.next_element()?.unwrap();
 
@@ -118,6 +120,7 @@ impl<'de> Deserialize<'de> for Me1SaveGame {
                     Me1SaveGame::unzip(&zip_data).map_err(de::Error::custom)?;
 
                 Ok(Me1SaveGame {
+                    magic_number,
                     _begin: begin,
                     _zip_offset: zip_offset,
                     _no_mans_land: no_mans_land.into(),
@@ -138,6 +141,7 @@ impl serde::Serialize for Me1SaveGame {
     {
         use serde::ser::Error;
         let Me1SaveGame {
+            magic_number,
             _begin,
             _zip_offset,
             _no_mans_land,
@@ -147,11 +151,30 @@ impl serde::Serialize for Me1SaveGame {
         } = self;
 
         let mut s = serializer.serialize_tuple_struct("Me1SaveGame", 4)?;
+        s.serialize_field(magic_number)?;
         s.serialize_field(_begin)?;
         s.serialize_field(_zip_offset)?;
         s.serialize_field(_no_mans_land)?;
         s.serialize_field(&self.zip().map_err(Error::custom)?)?;
         s.end()
+    }
+}
+
+#[derive(Serialize, Clone)]
+pub struct Me1MagicNumber(u32);
+
+impl<'de> Deserialize<'de> for Me1MagicNumber {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let version: [u8; 4] = Deserialize::deserialize(deserializer)?;
+
+        if &version != b"RGMH" {
+            return Err(de::Error::custom("Wrong magic number"));
+        }
+
+        Ok(Self(u32::from_le_bytes(version)))
     }
 }
 

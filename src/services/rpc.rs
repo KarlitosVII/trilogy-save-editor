@@ -1,82 +1,88 @@
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
-use js_sys::JsString;
 use serde::{de, Deserialize, Serialize};
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 
-#[wasm_bindgen(module = "/src/services/rpc.js")]
-extern "C" {
-    #[wasm_bindgen(catch)]
-    async fn js_save_file(rpc_file: JsValue) -> Result<(), JsString>;
+mod js {
+    use js_sys::JsString;
+    use wasm_bindgen::prelude::*;
 
-    #[wasm_bindgen(catch)]
-    async fn js_open_file(method: &str) -> Result<JsValue, JsString>;
+    #[wasm_bindgen(module = "/src/services/rpc.js")]
+    extern "C" {
+        #[wasm_bindgen(catch)]
+        pub async fn call(method: &str) -> Result<JsValue, JsString>;
 
-    #[wasm_bindgen(catch)]
-    async fn js_open_file_with_path(method: &str, path: &str) -> Result<JsValue, JsString>;
-
-    #[wasm_bindgen(catch)]
-    async fn js_save_file_dialog(method: &str, path: &str) -> Result<JsValue, JsString>;
+        #[wasm_bindgen(catch)]
+        pub async fn call_with_params(method: &str, params: JsValue) -> Result<JsValue, JsString>;
+    }
 }
 
-pub async fn save_file(rpc_file: RpcFile) -> Result<()> {
-    let js_rpc_file =
-        serde_wasm_bindgen::to_value(&rpc_file).map_err(|e| anyhow!(e.to_string()))?;
-    js_save_file(js_rpc_file).await.map_err(|e| anyhow!(String::from(e)))
-}
-
-pub async fn open_save() -> Result<Option<RpcFile>> {
-    js_open_file("open_save").await.map(from_js_value).map_err(|e| anyhow!(String::from(e)))?
-}
-
-pub async fn open_command_line_save() -> Result<Option<RpcFile>> {
-    js_open_file("open_command_line_save")
-        .await
-        .map(from_js_value)
-        .map_err(|e| anyhow!(String::from(e)))?
-}
-
-pub async fn save_save_dialog(path: PathBuf) -> Result<Option<PathBuf>> {
-    js_save_file_dialog("save_save_dialog", &path.to_string_lossy())
-        .await
-        .map(from_js_value)
-        .map_err(|e| anyhow!(String::from(e)))?
-}
-
-pub async fn reload_save(path: PathBuf) -> Result<RpcFile> {
-    js_open_file_with_path("reload_save", &path.to_string_lossy())
-        .await
-        .map(from_js_value)
-        .map_err(|e| anyhow!(String::from(e)))?
-}
-
-pub async fn import_head_morph() -> Result<Option<RpcFile>> {
-    js_open_file("import_head_morph")
-        .await
-        .map(from_js_value)
-        .map_err(|e| anyhow!(String::from(e)))?
-}
-
-pub async fn export_head_morph_dialog() -> Result<Option<PathBuf>> {
-    js_save_file_dialog("export_head_morph_dialog", "")
-        .await
-        .map(from_js_value)
-        .map_err(|e| anyhow!(String::from(e)))?
-}
-
-pub async fn load_database(path: &str) -> Result<RpcFile> {
-    js_open_file_with_path("load_database", path)
-        .await
-        .map(from_js_value)
-        .map_err(|e| anyhow!(String::from(e)))?
-}
-
+// Call
 fn from_js_value<T>(js: JsValue) -> Result<T>
 where
     T: for<'a> de::Deserialize<'a>,
 {
     serde_wasm_bindgen::from_value(js).map_err(|e| anyhow!(e.to_string()))
+}
+
+async fn call<T>(method: &str) -> Result<T>
+where
+    T: for<'a> de::Deserialize<'a>,
+{
+    js::call(method).await.map(from_js_value).map_err(|e| anyhow!(String::from(e)))?
+}
+
+async fn call_with_params<P, T>(method: &str, params: P) -> Result<T>
+where
+    P: Serialize,
+    T: for<'a> de::Deserialize<'a>,
+{
+    let js_params = serde_wasm_bindgen::to_value(&params).map_err(|e| anyhow!(e.to_string()))?;
+    js::call_with_params(method, js_params)
+        .await
+        .map(from_js_value)
+        .map_err(|e| anyhow!(String::from(e)))?
+}
+
+// Commands
+pub async fn save_file(rpc_file: RpcFile) -> Result<()> {
+    call_with_params("save_file", rpc_file).await
+}
+
+pub async fn open_save() -> Result<Option<RpcFile>> {
+    call("open_save").await
+}
+
+pub async fn open_command_line_save() -> Result<Option<RpcFile>> {
+    call("open_command_line_save").await
+}
+
+pub async fn save_save_dialog(params: DialogParams) -> Result<Option<PathBuf>> {
+    call_with_params("save_save_dialog", params).await
+}
+
+pub async fn reload_save(path: PathBuf) -> Result<RpcFile> {
+    call_with_params("reload_save", path).await
+}
+
+pub async fn import_head_morph() -> Result<Option<RpcFile>> {
+    call("import_head_morph").await
+}
+
+pub async fn export_head_morph_dialog() -> Result<Option<PathBuf>> {
+    call("export_head_morph_dialog").await
+}
+
+pub async fn load_database(path: &str) -> Result<RpcFile> {
+    call_with_params("load_database", path).await
+}
+
+// Utils
+#[derive(Serialize)]
+pub struct DialogParams {
+    pub path: PathBuf,
+    pub filters: Vec<(&'static str, Vec<&'static str>)>,
 }
 
 #[derive(Deserialize, Serialize)]

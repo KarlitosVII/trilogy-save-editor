@@ -31,7 +31,7 @@ struct ChunkHeader {
 
 #[derive(Clone)]
 pub struct Me1LeSaveGame {
-    magic_number: u32,
+    magic_number: Me1LeMagicNumber,
     block_size: u32,
     headers: List<ChunkHeader>,
     pub save_data: RcUi<Me1LeSaveData>,
@@ -170,6 +170,24 @@ impl serde::Serialize for Me1LeSaveGame {
         s.serialize_field("compression_flag", compression_flag)?;
         s.serialize_field("uncompressed_size", &headers[0].uncompressed_size)?;
         s.end()
+    }
+}
+
+#[derive(Serialize, Clone)]
+pub struct Me1LeMagicNumber(u32);
+
+impl<'de> Deserialize<'de> for Me1LeMagicNumber {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let version: [u8; 4] = Deserialize::deserialize(deserializer)?;
+
+        if version != [0xC1, 0x83, 0x2A, 0x9E] {
+            return Err(de::Error::custom("Wrong magic number"));
+        }
+
+        Ok(Self(u32::from_le_bytes(version)))
     }
 }
 

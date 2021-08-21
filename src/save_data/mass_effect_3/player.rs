@@ -6,7 +6,7 @@ use crate::save_data::{
         appearance::Appearance,
         player::{Notoriety, Origin, WeaponLoadout},
     },
-    Dummy,
+    Guid,
 };
 
 #[rcize_fields]
@@ -50,7 +50,7 @@ pub struct Player {
     pub grenades: i32,
     pub face_code: String,
     localized_class_name: i32,
-    _character_guid: Dummy<16>,
+    character_guid: Guid,
 }
 
 #[rcize_fields]

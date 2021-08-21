@@ -3,18 +3,22 @@ use std::path::PathBuf;
 use anyhow::{bail, Context, Error, Result};
 use crc::{Crc, CRC_32_BZIP2};
 use ron::ser::PrettyConfig;
+use serde::Deserialize;
 use yew_agent::{Agent, AgentLink, HandlerId, Job};
 
-use crate::gui::RcUi;
-use crate::save_data::{
-    mass_effect_1::Me1SaveGame,
-    mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame},
-    mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
-    mass_effect_3::{Me3SaveGame, Me3Version},
-    shared::appearance::HeadMorph,
+use crate::{
+    gui::RcUi,
+    save_data::mass_effect_1_le::Me1LeMagicNumber,
+    save_data::{
+        mass_effect_1::{Me1MagicNumber, Me1SaveGame},
+        mass_effect_1_le::{Me1LeSaveData, Me1LeSaveGame, Me1LeVersion},
+        mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
+        mass_effect_3::{Me3SaveGame, Me3Version},
+        shared::appearance::HeadMorph,
+    },
+    services::rpc::{self, Base64File, DialogParams, RpcFile},
+    unreal,
 };
-use crate::services::rpc::{self, Base64File, RpcFile};
-use crate::unreal;
 
 #[derive(Clone)]
 pub enum SaveGame {
@@ -155,17 +159,37 @@ impl SaveHandler {
     }
 
     fn save_save(&self, who: HandlerId, save_game: SaveGame) {
-        let path = match save_game {
-            SaveGame::MassEffect1 { ref file_path, .. }
-            | SaveGame::MassEffect1Le { ref file_path, .. }
-            | SaveGame::MassEffect1LePs4 { ref file_path, .. }
-            | SaveGame::MassEffect2 { ref file_path, .. }
-            | SaveGame::MassEffect2Le { ref file_path, .. }
-            | SaveGame::MassEffect3 { ref file_path, .. } => file_path.clone(),
+        let (path, filters) = match save_game {
+            SaveGame::MassEffect1 { ref file_path, .. } => {
+                (file_path.clone(), vec![("Mass Effect 1 save", vec!["MassEffectSave"])])
+            }
+            SaveGame::MassEffect1Le { ref file_path, .. } => {
+                (file_path.clone(), vec![("Mass Effect 1 Legendary PC save", vec!["pcsav"])])
+            }
+            SaveGame::MassEffect1LePs4 { ref file_path, .. } => {
+                (file_path.clone(), vec![("Mass Effect 1 Legendary PS4 save", vec!["ps4sav"])])
+            }
+            SaveGame::MassEffect2 { ref file_path, .. } => (
+                file_path.clone(),
+                vec![
+                    ("Mass Effect 2 PC save", vec!["pcsav"]),
+                    ("Mass Effect 2 XBOX 360 save", vec!["xbsav"]),
+                ],
+            ),
+            SaveGame::MassEffect2Le { ref file_path, .. } => {
+                (file_path.clone(), vec![("Mass Effect 2 Legendary save", vec!["pcsav"])])
+            }
+            SaveGame::MassEffect3 { ref file_path, .. } => (
+                file_path.clone(),
+                vec![
+                    ("Mass Effect 3 PC save", vec!["pcsav"]),
+                    ("Mass Effect 3 XBOX 360 save", vec!["xbsav"]),
+                ],
+            ),
         };
         self.link.send_future(async move {
             let handle_save = async {
-                let has_path = rpc::save_save_dialog(path).await?;
+                let has_path = rpc::save_save_dialog(DialogParams { path, filters }).await?;
                 let cancelled = match has_path {
                     Some(path) => {
                         let rpc_file = Self::serialize(path, save_game)?;
@@ -201,46 +225,53 @@ impl SaveHandler {
     }
 
     fn deserialize(file_path: PathBuf, input: Vec<u8>) -> Result<SaveGame> {
-        let save_game = if input.len() >= 4 && input[0..4] == [0xC1, 0x83, 0x2A, 0x9E] {
+        fn header<'de, T>(header: &'de [u8]) -> Result<T, unreal::Error>
+        where
+            T: Deserialize<'de>,
+        {
+            unreal::Deserializer::from_bytes::<T>(header)
+        }
+
+        let save_game = if header::<Me1MagicNumber>(&input).is_ok() {
+            // ME1
+            SaveGame::MassEffect1 {
+                file_path,
+                save_game: unreal::Deserializer::from_bytes(&input)?,
+            }
+        } else if header::<Me1LeMagicNumber>(&input).is_ok() {
             // ME1 Legendary
             SaveGame::MassEffect1Le {
                 file_path,
                 save_game: unreal::Deserializer::from_bytes(&input)?,
             }
-        } else if unreal::Deserializer::from_bytes::<Me2Version>(&input).is_ok() {
-            // ME2
-            SaveGame::MassEffect2 {
+        } else if header::<Me1LeVersion>(&input).is_ok() {
+            // ME1LE PS4
+            SaveGame::MassEffect1LePs4 {
                 file_path,
                 save_game: unreal::Deserializer::from_bytes(&input)?,
             }
-        } else if unreal::Deserializer::from_bytes::<Me2LeVersion>(&input).is_ok() {
+        } else if let Ok(save) = header::<Me2Version>(&input) {
+            // ME2
+            let save_game = if save.is_xbox360 {
+                unreal::Deserializer::from_be_bytes(&input)?
+            } else {
+                unreal::Deserializer::from_bytes(&input)?
+            };
+            SaveGame::MassEffect2 { file_path, save_game }
+        } else if header::<Me2LeVersion>(&input).is_ok() {
             // ME2 Legendary
             SaveGame::MassEffect2Le {
                 file_path,
                 save_game: unreal::Deserializer::from_bytes(&input)?,
             }
-        } else if unreal::Deserializer::from_bytes::<Me3Version>(&input).is_ok() {
+        } else if let Ok(save) = header::<Me3Version>(&input) {
             // ME3
-            SaveGame::MassEffect3 {
-                file_path,
-                save_game: unreal::Deserializer::from_bytes(&input)?,
-            }
-        } else if let Some(ext) = file_path.extension() {
-            if ext.eq_ignore_ascii_case("ps4sav") {
-                // ME1LE PS4
-                SaveGame::MassEffect1LePs4 {
-                    file_path,
-                    save_game: unreal::Deserializer::from_bytes(&input)?,
-                }
-            } else if ext.eq_ignore_ascii_case("MassEffectSave") {
-                // ME1
-                SaveGame::MassEffect1 {
-                    file_path,
-                    save_game: unreal::Deserializer::from_bytes(&input)?,
-                }
+            let save_game = if save.is_xbox360 {
+                unreal::Deserializer::from_be_bytes(&input)?
             } else {
-                bail!("Unsupported file");
-            }
+                unreal::Deserializer::from_bytes(&input)?
+            };
+            SaveGame::MassEffect3 { file_path, save_game }
         } else {
             bail!("Unsupported file");
         };
@@ -265,11 +296,22 @@ impl SaveHandler {
             }
             SaveGame::MassEffect1LePs4 { save_game, .. } => unreal::Serializer::to_vec(&save_game)?,
             SaveGame::MassEffect2 { save_game, .. } => {
-                let mut output = unreal::Serializer::to_vec(&save_game)?;
+                let is_xbox360 = path.extension().map(|ext| ext == "xbsav").unwrap_or_default();
+                let mut output = if is_xbox360 {
+                    unreal::Serializer::to_be_vec(&save_game)?
+                } else {
+                    unreal::Serializer::to_vec(&save_game)?
+                };
 
                 let crc = Crc::<u32>::new(&CRC_32_BZIP2);
                 let checksum = crc.checksum(&output);
-                output.extend(&u32::to_le_bytes(checksum));
+
+                let extend = if is_xbox360 {
+                    u32::to_be_bytes(checksum)
+                } else {
+                    u32::to_le_bytes(checksum)
+                };
+                output.extend(extend);
                 output
             }
             SaveGame::MassEffect2Le { save_game, .. } => {
@@ -281,11 +323,22 @@ impl SaveHandler {
                 output
             }
             SaveGame::MassEffect3 { save_game, .. } => {
-                let mut output = unreal::Serializer::to_vec(&save_game)?;
+                let is_xbox360 = path.extension().map(|ext| ext == "xbsav").unwrap_or_default();
+                let mut output = if is_xbox360 {
+                    unreal::Serializer::to_be_vec(&save_game)?
+                } else {
+                    unreal::Serializer::to_vec(&save_game)?
+                };
 
                 let crc = Crc::<u32>::new(&CRC_32_BZIP2);
                 let checksum = crc.checksum(&output);
-                output.extend(&u32::to_le_bytes(checksum));
+
+                let extend = if is_xbox360 {
+                    u32::to_be_bytes(checksum)
+                } else {
+                    u32::to_le_bytes(checksum)
+                };
+                output.extend(extend);
                 output
             }
         };

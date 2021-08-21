@@ -44,22 +44,32 @@ pub struct Me2SaveGame {
 }
 
 #[derive(Serialize, Clone)]
-pub struct Me2Version(i32);
+pub struct Me2Version {
+    version: i32,
+    #[serde(skip)]
+    pub is_xbox360: bool,
+}
 
 impl<'de> Deserialize<'de> for Me2Version {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        let version: i32 = Deserialize::deserialize(deserializer)?;
+        const GAME_VERSION: i32 = 29;
 
-        if version != 29 {
-            return Err(de::Error::custom(
+        let bytes: [u8; 4] = Deserialize::deserialize(deserializer)?;
+        let version_le = i32::from_le_bytes(bytes);
+        let version_be = i32::from_be_bytes(bytes);
+
+        if version_le == GAME_VERSION {
+            Ok(Self { version: version_le, is_xbox360: false })
+        } else if version_be == GAME_VERSION {
+            Ok(Self { version: version_be, is_xbox360: true })
+        } else {
+            Err(de::Error::custom(
                 "Wrong save version, please use a save from the latest version of the game",
-            ));
+            ))
         }
-
-        Ok(Self(version))
     }
 }
 
@@ -145,7 +155,6 @@ struct DependentDlc {
 #[cfg(test)]
 mod test {
     use std::fs;
-    use std::time::Instant;
 
     use anyhow::Result;
     use crc::{Crc, CRC_32_BZIP2};
@@ -157,13 +166,8 @@ mod test {
     fn deserialize_serialize_vanilla() -> Result<()> {
         let input = fs::read("test/ME2Save.pcsav")?;
 
-        let now = Instant::now();
-
         // Deserialize
         let me2_save_game: Me2SaveGame = unreal::Deserializer::from_bytes(&input)?;
-
-        println!("Deserialize : {:?}", Instant::now() - now);
-        let now = Instant::now();
 
         // Serialize
         let mut output = unreal::Serializer::to_vec(&me2_save_game)?;
@@ -172,8 +176,6 @@ mod test {
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);
         let checksum = crc.checksum(&output);
         output.extend(&u32::to_le_bytes(checksum));
-
-        println!("Serialize : {:?}", Instant::now() - now);
 
         // // Check serialized = input
         // let cmp = input.chunks(4).zip(output.chunks(4));
@@ -190,16 +192,48 @@ mod test {
     }
 
     #[test]
+    fn deserialize_serialize_vanilla_xbox360() -> Result<()> {
+        let input_pc = fs::read("test/ME2Save.pcsav")?;
+        let input_xb360 = fs::read("test/ME2Save360.xbsav")?;
+
+        // Deserialize
+        let me2_pc: Me2SaveGame = unreal::Deserializer::from_bytes(&input_pc)?;
+        let me2_xb360: Me2SaveGame = unreal::Deserializer::from_be_bytes(&input_xb360)?;
+
+        // Serialize
+        let mut output_xb360_to_pc = unreal::Serializer::to_vec(&me2_xb360)?;
+
+        let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+        let checksum = crc.checksum(&output_xb360_to_pc);
+        output_xb360_to_pc.extend(&u32::to_le_bytes(checksum));
+
+        let mut output_pc_to_xb360 = unreal::Serializer::to_be_vec(&me2_pc)?;
+
+        let crc = Crc::<u32>::new(&CRC_32_BZIP2);
+        let checksum = crc.checksum(&output_pc_to_xb360);
+        output_pc_to_xb360.extend(&u32::to_be_bytes(checksum));
+
+        // // Check serialized = input
+        // let cmp = input.chunks(4).zip(output.chunks(4));
+        // for (i, (a, b)) in cmp.enumerate() {
+        //     if a != b {
+        //         panic!("0x{:02x?} : {:02x?} != {:02x?}", i * 4, a, b);
+        //     }
+        // }
+
+        // Check serialized = input
+        assert!(input_pc == output_xb360_to_pc);
+        assert!(input_xb360 == output_pc_to_xb360);
+
+        Ok(())
+    }
+
+    #[test]
     fn deserialize_serialize_legendary() -> Result<()> {
         let input = fs::read("test/ME2LeSave.pcsav")?;
 
-        let now = Instant::now();
-
         // Deserialize
         let me2_save_game: Me2LeSaveGame = unreal::Deserializer::from_bytes(&input)?;
-
-        println!("Deserialize : {:?}", Instant::now() - now);
-        let now = Instant::now();
 
         // Serialize
         let mut output = unreal::Serializer::to_vec(&me2_save_game)?;
@@ -208,8 +242,6 @@ mod test {
         let crc = Crc::<u32>::new(&CRC_32_BZIP2);
         let checksum = crc.checksum(&output);
         output.extend(&u32::to_le_bytes(checksum));
-
-        println!("Serialize : {:?}", Instant::now() - now);
 
         // // Check serialized = input
         // let cmp = input.chunks(4).zip(output.chunks(4));
