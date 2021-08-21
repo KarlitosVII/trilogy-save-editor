@@ -11,6 +11,7 @@ pub use self::app::*;
 
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{self, Display};
+use std::ops::Deref;
 use std::rc::Rc;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -77,13 +78,20 @@ pub enum Theme {
     MassEffect3,
 }
 
-impl From<Theme> for yew::Classes {
-    fn from(theme: Theme) -> Self {
-        match theme {
+impl Deref for Theme {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
             Theme::MassEffect1 => "mass-effect-1",
             Theme::MassEffect2 => "mass-effect-2",
             Theme::MassEffect3 => "mass-effect-3",
         }
-        .into()
+    }
+}
+
+impl From<Theme> for yew::Classes {
+    fn from(theme: Theme) -> Self {
+        theme.to_string().into()
     }
 }

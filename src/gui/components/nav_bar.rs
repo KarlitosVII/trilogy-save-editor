@@ -1,13 +1,19 @@
 use web_sys::HtmlElement;
 use yew::{prelude::*, utils::NeqAssign};
 
-use crate::gui::components::{Tab, TabBar};
+use crate::{
+    gui::components::{Tab, TabBar},
+    services::rpc,
+};
+
+const GITHUB_LINK: &str = "https://github.com/KarlitosVII/trilogy-save-editor";
 
 pub enum Msg {
     MenuOpen,
     MenuClose,
     MenuBlur,
     LicensesHover,
+    OpenGithub,
 }
 
 #[derive(Properties, Clone, PartialEq)]
@@ -60,6 +66,12 @@ impl Component for NavBar {
             Msg::LicensesHover => {
                 self.licenses_opened = true;
                 true
+            }
+            Msg::OpenGithub => {
+                wasm_bindgen_futures::spawn_local(async {
+                    let _ = rpc::open_external_link(GITHUB_LINK).await;
+                });
+                false
             }
         }
     }
@@ -127,6 +139,7 @@ impl NavBar {
                     "left-0",
                     "flex",
                     "flex-col",
+                    "gap-px",
                     "bg-popup/90",
                     "border",
                     "border-default-border",
@@ -138,7 +151,21 @@ impl NavBar {
                         <span class="px-1 whitespace-nowrap">
                             {"© 2021 Karlitos"}
                         </span>
-                        <hr class="border-default-border mb-px" />
+                        <hr class="border-default-border" />
+                        <a class={classes![
+                                "px-1",
+                                "hover:bg-theme-hover",
+                                "active:bg-theme-active",
+                                "whitespace-nowrap",
+                                "cursor-pointer",
+                                "link",
+                            ]}
+                            title={GITHUB_LINK}
+                            onclick={self.link.callback(|_| Msg::OpenGithub)}
+                        >
+                            {"Github"}
+                        </a>
+                        <hr class="border-default-border" />
                         <div class="relative flex">
                             { for licenses }
                             <a class={classes![
@@ -175,12 +202,12 @@ impl NavBar {
             ]}>
                 <TabBar>
                     <Tab title="English">
-                        <pre class="px-2">
+                        <pre class="px-2 select-text">
                             { include_str!("../../../LICENSE.txt") }
                         </pre>
                     </Tab>
                     <Tab title="French">
-                        <pre class="px-2">
+                        <pre class="px-2 select-text">
                             { include_str!("../../../LICENSE_FRENCH.txt") }
                         </pre>
                     </Tab>

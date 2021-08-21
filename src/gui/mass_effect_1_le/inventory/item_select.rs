@@ -262,7 +262,6 @@ impl Component for ItemSelect {
                             "hover:bg-theme-hover",
                             "active:bg-theme-active",
                             "px-1",
-                            "pr-5",
                             "cursor-pointer",
                             "select-chevron",
                             "truncate",

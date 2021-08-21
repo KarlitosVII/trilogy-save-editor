@@ -12,16 +12,19 @@ module.exports = {
       default: [defaultTheme.fontFamily.mono],
     },
     colors: {
-      black: "#000000",
       white: "#FFFFFF",
       default: {
         bg: "#0D0D0D",
         border: "#333333",
       },
-      'menu-bar': "#242424",
-      'scroll-bar': {
+      "title-bar": {
+        bg: "#191919",
+        close: "#AA0000",
+      },
+      "menu-bar": "#242424",
+      "scroll-bar": {
         bg: "#090909",
-        fg: "#4f4f4f",
+        fg: "#4F4F4F",
       },
       table: {
         odd: "#121212",

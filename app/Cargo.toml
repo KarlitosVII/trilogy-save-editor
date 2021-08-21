@@ -17,6 +17,7 @@ rust-embed = { version = "6.0", default-features = false }
 dirs = "3.0"
 rfd = "0.4"
 base64 = "0.13"
+opener = "0.5"
 # (De)Serialize
 serde = { version = "1.0", features = ["derive"], default-features = false }
 serde_json = "1.0"

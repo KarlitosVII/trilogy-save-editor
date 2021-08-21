@@ -1,50 +1,70 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
+use anyhow::{Error, Result};
 use serde::{Deserialize, Serialize};
-use wry::application::window::Window;
 
-use super::dialog;
+use super::{dialog, Event, RpcUtils};
 
 // Commands
-pub fn init(window: &Window) {
-    window.set_visible(true);
+pub fn init(utils: &RpcUtils) {
+    utils.window.set_visible(true);
 }
 
-pub fn save_file(_: &Window, rpc_file: RpcFile) -> Result<()> {
+pub fn minimize(utils: &RpcUtils) {
+    utils.window.set_minimized(true);
+}
+
+pub fn toggle_maximize(utils: &RpcUtils) {
+    let is_maximized = utils.window.is_maximized();
+    utils.window.set_maximized(!is_maximized);
+}
+
+pub fn drag_window(utils: &RpcUtils) {
+    let _ = utils.window.drag_window();
+}
+
+pub fn close(utils: &RpcUtils) {
+    let _ = utils.event_proxy.send_event(Event::CloseWindow);
+}
+
+pub fn open_external_link(_: &RpcUtils, link: PathBuf) -> Result<()> {
+    opener::open(link).map_err(Error::from)
+}
+
+pub fn save_file(_: &RpcUtils, rpc_file: RpcFile) -> Result<()> {
     write_file(rpc_file)
 }
 
-pub fn open_save(window: &Window) -> Result<Option<RpcFile>> {
-    match dialog::open_save(window) {
+pub fn open_save(utils: &RpcUtils) -> Result<Option<RpcFile>> {
+    match dialog::open_save(utils.window) {
         Some(path) => open_file(path).map(Some),
         None => Ok(None),
     }
 }
 
-pub fn save_save_dialog(window: &Window, params: DialogParams) -> Result<Option<PathBuf>> {
-    let result = dialog::save_save(window, params);
+pub fn save_save_dialog(utils: &RpcUtils, params: DialogParams) -> Result<Option<PathBuf>> {
+    let result = dialog::save_save(utils.window, params);
     Ok(result)
 }
 
-pub fn reload_save(_: &Window, path: PathBuf) -> Result<RpcFile> {
+pub fn reload_save(_: &RpcUtils, path: PathBuf) -> Result<RpcFile> {
     open_file(path)
 }
 
-pub fn import_head_morph(window: &Window) -> Result<Option<RpcFile>> {
-    match dialog::import_head_morph(window) {
+pub fn import_head_morph(utils: &RpcUtils) -> Result<Option<RpcFile>> {
+    match dialog::import_head_morph(utils.window) {
         Some(path) => open_file(path).map(Some),
         None => Ok(None),
     }
 }
 
-pub fn export_head_morph_dialog(window: &Window) -> Result<Option<PathBuf>> {
-    let result = dialog::export_head_morph(window);
+pub fn export_head_morph_dialog(utils: &RpcUtils) -> Result<Option<PathBuf>> {
+    let result = dialog::export_head_morph(utils.window);
     Ok(result)
 }
 
-pub fn load_database(_: &Window, path: PathBuf) -> Result<RpcFile> {
+pub fn load_database(_: &RpcUtils, path: PathBuf) -> Result<RpcFile> {
     open_file(path)
 }
 

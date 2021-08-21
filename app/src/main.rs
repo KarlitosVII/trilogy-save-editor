@@ -2,19 +2,20 @@
 #![cfg_attr(debug_assertions, windows_subsystem = "console")]
 #![warn(clippy::all)]
 
-mod rpc_handler;
-use self::rpc_handler::rpc_handler;
+mod rpc;
 
 use anyhow::Result;
 use clap::{Arg, ArgMatches};
 use rust_embed::RustEmbed;
-use wry::application::{
-    dpi::LogicalSize,
-    event::{Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder,
+use wry::{
+    application::{
+        dpi::LogicalSize,
+        event::{Event, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        window::WindowBuilder,
+    },
+    webview::WebViewBuilder,
 };
-use wry::webview::WebViewBuilder;
 
 #[derive(RustEmbed)]
 #[folder = "../target/dist/"]
@@ -33,17 +34,23 @@ fn parse_args() -> ArgMatches<'static> {
 fn main() -> Result<()> {
     let args = parse_args();
 
-    let event_loop = EventLoop::new();
+    let event_loop = EventLoop::<rpc::Event>::with_user_event();
+    let proxy = event_loop.create_proxy();
     let window = WindowBuilder::new()
-        .with_title("Trilogy Save Editor - by Karlitos")
-        .with_min_inner_size(LogicalSize::new(480, 270))
-        .with_inner_size(LogicalSize::new(1000, 670))
+        .with_title(format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")))
+        .with_min_inner_size(LogicalSize::new(600, 300))
+        .with_inner_size(LogicalSize::new(1000, 700))
         .with_visible(false)
+        .with_decorations(false)
         .build(&event_loop)?;
+
+    let mut last_maximized_state = window.is_maximized();
 
     let webview = WebViewBuilder::new(window)?
         .with_initialization_script(include_str!("initialization.js"))
-        .with_rpc_handler(move |window, req| rpc_handler(window, req, &args))
+        .with_rpc_handler(move |window, req| {
+            rpc::rpc_handler(req, rpc::RpcUtils { window, event_proxy: &proxy, args: &args })
+        })
         .with_custom_protocol(String::from("tse"), protocol)
         .with_url("tse://localhost/")?
         .build()?;
@@ -51,15 +58,32 @@ fn main() -> Result<()> {
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
-        #[allow(clippy::single_match)]
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 WindowEvent::Resized(_) => {
                     let _ = webview.resize();
+                    let is_maximized = webview.window().is_maximized();
+                    if is_maximized != last_maximized_state {
+                        last_maximized_state = is_maximized;
+                        let _ = webview.evaluate_script(&format!(
+                            r#"
+                            (() => {{
+                                const event = new CustomEvent("maximized_state_changed", {{
+                                    detail: {{
+                                        is_maximized: {},
+                                    }}
+                                }});
+                                document.dispatchEvent(event);
+                            }})();
+                            "#,
+                            is_maximized
+                        ));
+                    }
                 }
                 _ => (),
             },
+            Event::UserEvent(event) => rpc::event_handler(event, &webview, control_flow),
             _ => (),
         }
     });

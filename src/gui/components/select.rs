@@ -143,7 +143,6 @@ impl Component for Select {
                         "hover:bg-theme-hover",
                         "active:bg-theme-active",
                         "px-1",
-                        "pr-5",
                         "cursor-pointer",
                         "min-w-full",
                         "select-chevron",

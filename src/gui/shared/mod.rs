@@ -66,9 +66,9 @@ impl PartialEq for PlotType {
 }
 
 impl RawUi for RcUi<PlotTable> {
-    fn view(&self, label: &str) -> yew::Html {
+    fn view(&self, _: &str) -> yew::Html {
         html! {
-            <Link label={label.to_owned()} tab="Raw Plot">{ "Go to Raw Plot tab" }</Link>
+            <Link tab="Raw Plot">{ "Raw Plot" }</Link>
         }
     }
 }

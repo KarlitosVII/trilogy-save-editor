@@ -4,9 +4,9 @@
 - No compare
 - Better font for high DPI
 - Better raw ME1 readability
-- // TODO: Title bar
+- xbox 360 support
 - // TODO: auto update
-- // TODO: xbox 360/one support
+- // TODO: xbox one support
 - // TODO: unobtainable ME1 item db
 - // TODO: ME1 LE class swap
 

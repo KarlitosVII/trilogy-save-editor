@@ -11,7 +11,18 @@
     <link data-trunk rel="rust" data-wasm-opt="3" />
 </head>
 
-<body class="bg-default-bg">
+<body class="bg-default-bg font-default text-[0.825rem] leading-[20px] text-white overflow-hidden">
+    <title-bar class="flex bg-title-bar-bg h-[28px] select-none">
+        <div id="drag_zone" class="flex-auto relative h-full">
+            <span id="title" class="absolute left-[50vw] -translate-x-1/2 top-1/2 -translate-y-1/2 whitespace-nowrap">
+                Trilogy Save Editor - by Karlitos
+            </span>
+        </div>
+        <button id="minimize"></button>
+        <button id="maximize"></button>
+        <button id="close"></button>
+    </title-bar>
+    <app></app>
 </body>
 
 </html>

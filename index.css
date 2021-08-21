@@ -10,12 +10,14 @@
 
   .chevron-down {
     @apply chevron;
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" ><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>');
+    /* Refactoring UI Inc, https://github.com/tailwindlabs/heroicons/blob/master/LICENSE */
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>');
   }
 
   .chevron-right {
     @apply chevron;
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" ><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>');
+    /* Refactoring UI Inc, https://github.com/tailwindlabs/heroicons/blob/master/LICENSE */
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>');
   }
 }
 
@@ -67,6 +69,42 @@
   background-color: theme("colors.scroll-bar.fg");
 }
 
+/* Title bar */
+title-bar > button {
+  @apply rounded-none hover:bg-theme-hover cursor-auto select-none h-full w-[46px];
+}
+
+#minimize {
+  /* Microsoft, https://github.com/microsoft/vscode-codicons/blob/main/LICENSE */
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M14 8v1H3V8h11z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}
+
+#maximize {
+  /* Microsoft, https://github.com/microsoft/vscode-codicons/blob/main/LICENSE */
+  background-image: url('data:image/svg+xml,<svg  viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M3 3v10h10V3H3zm9 9H4V4h8v8z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}
+
+#maximize.maximized {
+  /* Microsoft, https://github.com/microsoft/vscode-codicons/blob/main/LICENSE */
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M3 5v9h9V5H3zm8 8H4V6h7v7z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5 5h1V4h7v7h-1v1h2V3H5v2z"/></svg>') !important;
+}
+
+#close {
+  @apply hover:bg-title-bar-close;
+  /* Microsoft, https://github.com/microsoft/vscode-codicons/blob/main/LICENSE */
+  background-image: url('data:image/svg+xml,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="white"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.116 8l-4.558 4.558.884.884L8 8.884l4.558 4.558.884-.884L8.884 8l4.558-4.558-.884-.884L8 7.116 3.442 2.558l-.884.884L7.116 8z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}
+
+
 /* NavBar */
 .navbar-chevron {
   @apply chevron-right;
@@ -75,7 +113,7 @@
 
 /* Select */
 .select-chevron {
-  @apply chevron-down;
+  @apply !pr-5 chevron-down;
   background-position: right 0.05rem center;
 }
 
@@ -105,6 +143,15 @@
   @apply p-[1.5px] px-1 w-full h-[23px];
 }
 
+.link {
+    @apply !pr-6;
+    /* Icons8, https://github.com/icons8/line-awesome/blob/master/LICENSE.md */
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="white"><path d="M18 5v2h5.563L11.28 19.281l1.438 1.438L25 8.437V14h2V5zM5 9v18h18V14l-2 2v9H7V11h9l2-2z"/></svg>');
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-position: right 0.05rem center;
+}
+
 /* Button */
 .button {
   @apply rounded-none bg-theme-bg hover:bg-theme-hover active:bg-theme-active cursor-pointer select-none px-1;
@@ -122,7 +169,9 @@
 }
 
 .checkbox:checked {
-  background-image: url('data:image/svg+xml,<svg viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z"/></svg>');
+  /* Refactoring UI Inc, https://github.com/tailwindlabs/heroicons/blob/master/LICENSE */
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="white"><path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z"/></svg>');
+  background-repeat: no-repeat;
   background-position: center;
 }
 

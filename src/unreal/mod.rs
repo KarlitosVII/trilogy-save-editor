@@ -32,7 +32,7 @@ impl Display for Error {
         match self {
             Error::Message(msg) => formatter.write_str(msg),
             Error::Eof => formatter.write_str(
-                "unexpected end of file, some data in your save are unexpected or your save is corrupted ?\n\
+                "Unexpected end of file, some data in your save are unexpected or your save is corrupted ?\n\
                 Save again and retry. If this error persists, please report a bug with your save attached"),
         }
     }

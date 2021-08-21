@@ -9,7 +9,6 @@ pub enum Msg {
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    pub label: String,
     pub tab: String,
     pub children: Children,
 }
@@ -52,12 +51,9 @@ impl Component for Link {
 
     fn view(&self) -> Html {
         html! {
-            <div class="flex-auto flex items-center gap-1">
-                <button class="button" onclick={self.link.callback(|_| Msg::Clicked)}>
-                    { self.props.children.clone() }
-                </button>
-                { &self.props.label }
-            </div>
+            <button class="button link" onclick={self.link.callback(|_| Msg::Clicked)}>
+                { self.props.children.clone() }
+            </button>
         }
     }
 }

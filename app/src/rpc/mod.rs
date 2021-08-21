@@ -8,25 +8,30 @@ use std::path::PathBuf;
 use anyhow::{bail, Context, Result};
 use clap::ArgMatches;
 use serde_json::{json, Value};
-use wry::application::window::Window;
-use wry::webview::{RpcRequest, RpcResponse};
+use wry::{
+    application::{
+        event_loop::{ControlFlow, EventLoopProxy},
+        window::Window,
+    },
+    webview::{RpcRequest, RpcResponse, WebView},
+};
 
-macro_rules! emit_commands {
-    ($req:ident, $window:ident => [$(command::$command:ident),* $(,)?]) => {
+macro_rules! notify_commands {
+    ($req:ident, $utils:ident => [$(command::$command:ident),* $(,)?]) => {
         $(
             if $req.method == stringify!($command) {
-                command::$command($window);
+                command::$command(&$utils);
                 return Ok(None);
             }
         )*
     };
 }
 
-macro_rules! send_commands {
-    ($req:ident, $window:ident => [$(command::$command:ident),* $(,)?]) => {
+macro_rules! call_commands {
+    ($req:ident, $utils:ident => [$(command::$command:ident),* $(,)?]) => {
         $(
             if $req.method == stringify!($command) {
-                let response = command::$command($window)?;
+                let response = command::$command(&$utils)?;
                 let js_value = serde_json::to_value(&response).map(Some)?;
                 return Ok(js_value);
             }
@@ -34,14 +39,14 @@ macro_rules! send_commands {
     };
 }
 
-macro_rules! send_commands_with_param {
-    ($req:ident, $window:ident => [$(command::$command:ident),* $(,)?]) => {
+macro_rules! call_commands_with_param {
+    ($req:ident, $utils:ident => [$(command::$command:ident),* $(,)?]) => {
         $(
             if $req.method == stringify!($command) {
                 let params = $req.params.take().context("argument required")?;
                 let value: [_; 1] = serde_json::from_value(params)?;
                 let value = IntoIter::new(value).next().unwrap_or_default();
-                let response = command::$command($window, value)?;
+                let response = command::$command(&$utils, value)?;
                 let js_value = serde_json::to_value(&response).map(Some)?;
                 return Ok(js_value);
             }
@@ -49,15 +54,21 @@ macro_rules! send_commands_with_param {
     };
 }
 
-pub fn rpc_handler(window: &Window, mut req: RpcRequest, args: &ArgMatches) -> Option<RpcResponse> {
+pub struct RpcUtils<'a> {
+    pub window: &'a Window,
+    pub event_proxy: &'a EventLoopProxy<Event>,
+    pub args: &'a ArgMatches<'a>,
+}
+
+pub fn rpc_handler(mut req: RpcRequest, utils: RpcUtils) -> Option<RpcResponse> {
     let mut handle_request = || -> Result<Option<Value>> {
         if req.method == "open_command_line_save" {
-            let response = if let Some(path) = args.value_of("SAVE") {
+            let response = if let Some(path) = utils.args.value_of("SAVE") {
                 let mut path = PathBuf::from(path);
                 if path.is_relative() {
                     path = env::current_dir()?.join(path);
                 }
-                command::reload_save(window, path).map(Some)?
+                command::reload_save(&utils, path).map(Some)?
             } else {
                 None
             };
@@ -65,15 +76,22 @@ pub fn rpc_handler(window: &Window, mut req: RpcRequest, args: &ArgMatches) -> O
             return Ok(js_value);
         }
 
-        emit_commands!(req, window => [command::init]);
+        notify_commands!(req, utils => [
+            command::init,
+            command::minimize,
+            command::toggle_maximize,
+            command::drag_window,
+            command::close,
+        ]);
 
-        send_commands!(req, window => [
+        call_commands!(req, utils => [
             command::open_save,
             command::import_head_morph,
             command::export_head_morph_dialog,
         ]);
 
-        send_commands_with_param!(req, window => [
+        call_commands_with_param!(req, utils => [
+            command::open_external_link,
             command::save_file,
             command::save_save_dialog,
             command::reload_save,
@@ -87,5 +105,15 @@ pub fn rpc_handler(window: &Window, mut req: RpcRequest, args: &ArgMatches) -> O
         Ok(None) => None,
         Ok(Some(response)) => Some(RpcResponse::new_result(req.id.take(), Some(response))),
         Err(error) => Some(RpcResponse::new_error(req.id.take(), Some(json!(error.to_string())))),
+    }
+}
+
+pub enum Event {
+    CloseWindow,
+}
+
+pub fn event_handler(event: Event, _webview: &WebView, control_flow: &mut ControlFlow) {
+    match event {
+        Event::CloseWindow => *control_flow = ControlFlow::Exit,
     }
 }

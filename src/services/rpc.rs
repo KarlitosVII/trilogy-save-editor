@@ -46,6 +46,10 @@ where
 }
 
 // Commands
+pub async fn open_external_link(link: &str) -> Result<()> {
+    call_with_params("open_external_link", link).await
+}
+
 pub async fn save_file(rpc_file: RpcFile) -> Result<()> {
     call_with_params("save_file", rpc_file).await
 }

@@ -99,6 +99,7 @@ impl Component for App {
             }
             Msg::SaveOpened(save_game) => {
                 self.props.save_game = Some(save_game);
+                self.change_theme();
                 self.link.send_message(Msg::Notification("Opened"));
                 false
             }
@@ -157,32 +158,30 @@ impl Component for App {
     }
 
     fn view(&self) -> Html {
-        let (content, theme) = if let Some(ref save_game) = self.props.save_game {
+        let content = if let Some(ref save_game) = self.props.save_game {
             match save_game {
                 SaveGame::MassEffect1 { save_game, .. } => {
-                    (App::mass_effect_1(self, save_game.borrow()), Theme::MassEffect1)
+                    App::mass_effect_1(self, save_game.borrow())
                 }
-                SaveGame::MassEffect1Le { save_game, .. } => (
-                    App::mass_effect_1_le(self, RcUi::clone(&save_game.borrow().save_data)),
-                    Theme::MassEffect1,
-                ),
+                SaveGame::MassEffect1Le { save_game, .. } => {
+                    App::mass_effect_1_le(self, RcUi::clone(&save_game.borrow().save_data))
+                }
                 SaveGame::MassEffect1LePs4 { save_game, .. } => {
-                    (App::mass_effect_1_le(self, RcUi::clone(save_game)), Theme::MassEffect1)
+                    App::mass_effect_1_le(self, RcUi::clone(save_game))
                 }
-                SaveGame::MassEffect2 { save_game, .. } => (
-                    App::mass_effect_2(self, Me2Type::Vanilla(RcUi::clone(save_game))),
-                    Theme::MassEffect2,
-                ),
-                SaveGame::MassEffect2Le { save_game, .. } => (
-                    App::mass_effect_2(self, Me2Type::Legendary(RcUi::clone(save_game))),
-                    Theme::MassEffect2,
-                ),
+                SaveGame::MassEffect2 { save_game, .. } => {
+                    App::mass_effect_2(self, Me2Type::Vanilla(RcUi::clone(save_game)))
+                }
+                SaveGame::MassEffect2Le { save_game, .. } => {
+                    App::mass_effect_2(self, Me2Type::Legendary(RcUi::clone(save_game)))
+                }
+
                 SaveGame::MassEffect3 { save_game, .. } => {
-                    (App::mass_effect_3(self, RcUi::clone(save_game)), Theme::MassEffect3)
+                    App::mass_effect_3(self, RcUi::clone(save_game))
                 }
             }
         } else {
-            (App::changelog(), Theme::MassEffect3)
+            App::changelog()
         };
 
         let notification =
@@ -190,16 +189,7 @@ impl Component for App {
         let error = self.error.as_ref().map(|error| App::error(self, error));
 
         html! {
-            <div class={classes![
-                "h-screen",
-                "flex",
-                "flex-col",
-                "font-default",
-                "text-[0.825rem]",
-                "leading-[20px]",
-                "text-white",
-                theme,
-            ]}>
+            <div class="h-[calc(100vh-28px)] flex flex-col">
                 <NavBar
                     save_loaded={self.props.save_game.is_some()}
                     onopen={self.link.callback(|_| Msg::OpenSave)}
@@ -439,12 +429,13 @@ impl App {
         html! {
             <div class={classes![
                 "absolute",
-                "top-1.5",
+                "top-8",
                 "left-1/2",
                 "-translate-x-1/2",
                 "border",
                 "border-default-border",
                 "bg-default-bg/50",
+                "select-none",
                 "px-2",
                 "pt-0.5",
                 "pb-1.5",
@@ -460,16 +451,20 @@ impl App {
 
     fn error(&self, error: &Error) -> Html {
         let chain = error.chain().skip(1).map(|error| {
+            let text = error.to_string();
+            let error = text.split_terminator('\n').map(|text| {
+                html! { <p>{ text }</p> }
+            });
             html! {
                 <>
-                    <hr class="mt-0.5 border-t border-default-border" />
-                    { error }
+                    <hr class="my-0.5 border-t border-default-border" />
+                    { for error }
                 </>
             }
         });
         html! {
-            <div class="absolute w-screen h-screen grid place-content-center bg-white/30 z-50">
-                <div class="border border-default-border bg-default-bg">
+            <div class="absolute w-screen h-[calc(100vh-28px)] grid place-content-center bg-white/30 z-50">
+                <div class="border border-default-border bg-default-bg max-w-xl">
                     <div class="px-1 bg-theme-tab select-none">{"Error"}</div>
                     <div class="p-1 pt-0.5">
                         { error }
@@ -483,6 +478,24 @@ impl App {
                     </div>
                 </div>
             </div>
+        }
+    }
+
+    fn change_theme(&self) {
+        if let Some(ref save_game) = self.props.save_game {
+            let theme = match save_game {
+                SaveGame::MassEffect1 { .. }
+                | SaveGame::MassEffect1Le { .. }
+                | SaveGame::MassEffect1LePs4 { .. } => Theme::MassEffect1,
+                SaveGame::MassEffect2 { .. } | SaveGame::MassEffect2Le { .. } => Theme::MassEffect2,
+                SaveGame::MassEffect3 { .. } => Theme::MassEffect3,
+            };
+
+            let body = yew::utils::document().body().unwrap();
+            let classes = body.class_list();
+
+            let _ = classes.remove_3(&Theme::MassEffect1, &Theme::MassEffect2, &Theme::MassEffect3);
+            let _ = classes.add_1(&theme);
         }
     }
 }
