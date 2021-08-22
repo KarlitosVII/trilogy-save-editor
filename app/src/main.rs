@@ -4,7 +4,9 @@
 
 mod rpc;
 
-use anyhow::Result;
+use std::panic;
+
+use anyhow::{bail, Result};
 use clap::{Arg, ArgMatches};
 use rust_embed::RustEmbed;
 use wry::{
@@ -14,7 +16,7 @@ use wry::{
         event_loop::{ControlFlow, EventLoop},
         window::WindowBuilder,
     },
-    webview::WebViewBuilder,
+    webview::{self, WebViewBuilder},
 };
 
 #[derive(RustEmbed)]
@@ -33,6 +35,23 @@ fn parse_args() -> ArgMatches<'static> {
 
 fn main() -> Result<()> {
     let args = parse_args();
+
+    #[cfg(target_os = "windows")]
+    if panic::catch_unwind(|| webview::webview_version()).is_err() {
+        use std::os::windows::process::CommandExt;
+
+        let mut process = std::process::Command::new("powershell")
+            .arg("-Command")
+            .arg(include_str!("webview2_install.ps1"))
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            .spawn()
+            .unwrap();
+
+        let result = process.wait().unwrap();
+        if !result.success() {
+            bail!("Failed to install WebView2");
+        }
+    }
 
     let event_loop = EventLoop::<rpc::Event>::with_user_event();
     let proxy = event_loop.create_proxy();
