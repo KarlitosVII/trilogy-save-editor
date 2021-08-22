@@ -47,7 +47,7 @@ fn main() -> Result<()> {
     let mut last_maximized_state = window.is_maximized();
 
     let webview = WebViewBuilder::new(window)?
-        .with_initialization_script(include_str!("initialization.js"))
+        .with_initialization_script(include_str!("init.js"))
         .with_rpc_handler(move |window, req| {
             rpc::rpc_handler(req, rpc::RpcUtils { window, event_proxy: &proxy, args: &args })
         })
