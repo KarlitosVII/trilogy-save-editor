@@ -149,16 +149,18 @@ impl Me1General {
     }
 
     fn role_play(&self, m_player: &Data) -> Html {
-        let name =
-            self.find_property(&m_player.properties, "m_FirstName").map(|p| self.view_property(p));
-        let gender =
-            self.find_property(&m_player.properties, "m_Gender").map(|p| self.view_property(p));
+        let name = self
+            .find_property(&m_player.properties, "m_FirstName")
+            .map(|p| self.view_property(p, "Name"));
+        let gender = self
+            .find_property(&m_player.properties, "m_Gender")
+            .map(|p| self.view_property(p, "Gender"));
         let origin = self
             .find_property(&m_player.properties, "m_BackgroundOrigin")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Origin"));
         let notoriety = self
             .find_property(&m_player.properties, "m_BackgroundNotoriety")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Notoriety"));
 
         html! {
             <Table title="Role-Play">
@@ -171,13 +173,15 @@ impl Me1General {
     }
 
     fn gameplay(&self, m_player: &Data, m_squad: &Data) -> Html {
-        let class =
-            self.find_property(&m_player.properties, "m_ClassBase").map(|p| self.view_property(p));
-        let level =
-            self.find_property(&m_player.properties, "m_XPLevel").map(|p| self.view_property(p));
+        let class = self
+            .find_property(&m_player.properties, "m_ClassBase")
+            .map(|p| self.view_property(p, "Class"));
+        let level = self
+            .find_property(&m_player.properties, "m_XPLevel")
+            .map(|p| self.view_property(p, "Level"));
         let curent_xp = self
             .find_property(&m_squad.properties, "m_nSquadExperience")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Current XP"));
 
         html! {
             <Table title="Gameplay">
@@ -238,16 +242,16 @@ impl Me1General {
     fn resources(&self, m_inventory: &Data) -> Html {
         let credits = self
             .find_property(&m_inventory.properties, "m_nResourceCredits")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Credits"));
         let medigel = self
             .find_property(&m_inventory.properties, "m_fResourceMedigel")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Medigel"));
         let grenades = self
             .find_property(&m_inventory.properties, "m_nResourceGrenades")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Grenades"));
         let omnigel = self
             .find_property(&m_inventory.properties, "m_fResourceSalvage")
-            .map(|p| self.view_property(p));
+            .map(|p| self.view_property(p, "Omnigel"));
 
         html! {
             <Table title="Resources">
@@ -259,12 +263,13 @@ impl Me1General {
         }
     }
 
-    fn view_property(&self, property: &RcUi<DataProperty>) -> Html {
+    fn view_property(&self, property: &RcUi<DataProperty>, label: &str) -> Html {
         let player = &self.props.player;
         html! {
             <Property
                 player={RcUi::clone(player)}
                 property={RcUi::clone(property)}
+                label={label.to_owned()}
             />
         }
     }

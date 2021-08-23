@@ -49,7 +49,7 @@ args = ["-Command", "npm", "run", "watch"]
 [tasks.trunk-serve]
 install_crate = "trunk"
 command = "trunk"
-args = ["serve"]
+args = ["serve", "--dist", "target/dist"]
 
 [tasks.serve]
 run_task = { name = ["tailwind-watch", "trunk-serve"], parallel = true }
@@ -73,7 +73,7 @@ args = ["-Command", "npm", "run", "build"]
 [tasks.trunk-build]
 install_crate = "trunk"
 command = "trunk"
-args = ["build"]
+args = ["build", "--dist", "target/dist"]
 
 [tasks.build]
 clear = true

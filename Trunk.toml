@@ -1,5 +1,0 @@
-[build]
-dist = "target\\dist"
-
-[clean]
-dist = "target\\dist"

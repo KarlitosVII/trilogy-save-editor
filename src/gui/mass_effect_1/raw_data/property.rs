@@ -24,6 +24,7 @@ pub enum Msg {
 pub struct Props {
     pub player: RcUi<Player>,
     pub property: RcUi<DataProperty>,
+    pub label: Option<String>,
 }
 
 impl Props {
@@ -79,6 +80,11 @@ impl Component for Property {
         let player = self.props.player();
 
         let get_name = |name_id: &u32| -> String {
+            // Label override
+            if let Some(ref label) = self.props.label {
+                return label.clone();
+            }
+
             let name = player.get_name(*name_id);
             name.trim_start_matches("m_a") // Array
                 .trim_start_matches("m_b") // Bool

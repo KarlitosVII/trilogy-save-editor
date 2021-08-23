@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "tailwindcss -i index.css -o target/index.css --jit",
+    "release": "tailwindcss -i index.css -o target/index.css --jit --minify",
     "watch": "tailwindcss -i index.css -o target/index.css --jit --watch"
   },
   "repository": {
