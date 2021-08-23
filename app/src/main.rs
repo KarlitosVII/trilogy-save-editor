@@ -37,7 +37,9 @@ fn main() -> Result<()> {
     let args = parse_args();
 
     #[cfg(target_os = "windows")]
-    if panic::catch_unwind(|| webview::webview_version()).is_err() {
+    if panic::catch_unwind(|| webview::webview_version().expect("Unable to get webview2 version"))
+        .is_err()
+    {
         use std::os::windows::process::CommandExt;
 
         let mut process = std::process::Command::new("powershell")

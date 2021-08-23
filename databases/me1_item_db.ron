@@ -1,3 +1,4 @@
+// TODO: unobtainable ME1 item db
 Me1ItemDb({
     DbItem(
         item_id: 0,

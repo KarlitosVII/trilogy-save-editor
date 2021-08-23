@@ -51,6 +51,7 @@ impl Component for Me1LeGeneral {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        // TODO: ME1 LE class swap
         Me1LeGeneral { props, link }
     }
 

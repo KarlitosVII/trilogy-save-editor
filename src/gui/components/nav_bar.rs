@@ -1,3 +1,4 @@
+use wasm_bindgen_futures as futures;
 use web_sys::HtmlElement;
 use yew::{prelude::*, utils::NeqAssign};
 
@@ -6,6 +7,7 @@ use crate::{
     services::rpc,
 };
 
+const NEXUSMODS_LINK: &str = "https://www.nexusmods.com/masseffectlegendaryedition/mods/20";
 const GITHUB_LINK: &str = "https://github.com/KarlitosVII/trilogy-save-editor";
 
 pub enum Msg {
@@ -13,6 +15,7 @@ pub enum Msg {
     MenuClose,
     MenuBlur,
     LicensesHover,
+    OpenNexusMods,
     OpenGithub,
 }
 
@@ -67,8 +70,14 @@ impl Component for NavBar {
                 self.licenses_opened = true;
                 true
             }
+            Msg::OpenNexusMods => {
+                futures::spawn_local(async {
+                    let _ = rpc::open_external_link(NEXUSMODS_LINK).await;
+                });
+                false
+            }
             Msg::OpenGithub => {
-                wasm_bindgen_futures::spawn_local(async {
+                futures::spawn_local(async {
                     let _ = rpc::open_external_link(GITHUB_LINK).await;
                 });
                 false
@@ -151,6 +160,20 @@ impl NavBar {
                         <span class="px-1 whitespace-nowrap">
                             {"© 2021 Karlitos"}
                         </span>
+                        <hr class="border-default-border" />
+                        <a class={classes![
+                                "px-1",
+                                "hover:bg-theme-hover",
+                                "active:bg-theme-active",
+                                "whitespace-nowrap",
+                                "cursor-pointer",
+                                "link",
+                            ]}
+                            title={NEXUSMODS_LINK}
+                            onclick={self.link.callback(|_| Msg::OpenNexusMods)}
+                        >
+                            {"NexusMods"}
+                        </a>
                         <hr class="border-default-border" />
                         <a class={classes![
                                 "px-1",

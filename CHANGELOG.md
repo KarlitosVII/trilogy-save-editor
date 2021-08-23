@@ -6,9 +6,6 @@
 - Better raw ME1 readability
 - xbox 360 support
 - // TODO: auto update
-- // TODO: xbox one support
-- // TODO: unobtainable ME1 item db
-- // TODO: ME1 LE class swap
 
 ## 1.13.1
 - ME2: Added all armors plots

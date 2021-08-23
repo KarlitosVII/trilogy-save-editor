@@ -11,6 +11,9 @@ lto = true
 [workspace]
 members = ["macros", "app"]
 
+[build-dependencies]
+regex = "1.0"
+
 [dependencies]
 # Karlitos
 macros = { path = "macros" }
