@@ -21,7 +21,7 @@ fn main() {
     let mut inno_setup = fs::read_to_string(INNO_SETUP_PATH).expect(INNO_SETUP_PATH);
 
     // #define AppVersion "*"
-    let regex = Regex::new(r#"(?m)^\s*#define\s+AppVersion\s+"([\d.]+)"$"#).unwrap();
+    let regex = Regex::new(r#"(?m)^\s*#define\s+AppVersion\s+"([\d.]+)"\s*$"#).unwrap();
     let captures = regex.captures(&inno_setup).expect("regex doesn't match");
     if &captures[1] != env!("CARGO_PKG_VERSION") {
         let range = captures.get(1).unwrap().range();
