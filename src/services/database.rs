@@ -29,6 +29,11 @@ pub enum Database {
     Me3RawPlot(Rc<RawPlotDb>),
 }
 
+pub enum Msg {
+    DatabaseLoaded(HandlerId, Database),
+    Error(HandlerId, Error),
+}
+
 pub enum Request {
     Database(Type),
 }
@@ -36,11 +41,6 @@ pub enum Request {
 pub enum Response {
     Database(Database),
     Error(Error),
-}
-
-pub enum Msg {
-    DatabaseLoaded(HandlerId, Database),
-    Error(HandlerId, Error),
 }
 
 #[derive(Default)]

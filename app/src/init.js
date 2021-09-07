@@ -39,7 +39,7 @@
             window.rpc.notify("toggle_maximize");
         });
 
-        document.addEventListener("maximized_state_changed", (e) => {
+        document.addEventListener("tse_maximized_state_changed", (e) => {
             if (e.detail.is_maximized === true) {
                 maximize.classList.add("maximized");
             } else {

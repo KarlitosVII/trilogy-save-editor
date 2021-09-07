@@ -9,18 +9,19 @@ use crate::{
 
 const NEXUSMODS_LINK: &str = "https://www.nexusmods.com/masseffectlegendaryedition/mods/20";
 const GITHUB_LINK: &str = "https://github.com/KarlitosVII/trilogy-save-editor";
+const DONATION_LINK: &str = "https://www.paypal.com/donate/?business=karlitos.vii@laposte.net";
 
 pub enum Msg {
     MenuOpen,
     MenuClose,
     MenuBlur,
     LicensesHover,
-    OpenNexusMods,
-    OpenGithub,
+    OpenLink(&'static str),
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
+    pub children: Children,
     pub save_loaded: bool,
     pub onopen: Callback<()>,
     pub onsave: Callback<()>,
@@ -70,15 +71,9 @@ impl Component for NavBar {
                 self.licenses_opened = true;
                 true
             }
-            Msg::OpenNexusMods => {
-                futures::spawn_local(async {
-                    let _ = rpc::open_external_link(NEXUSMODS_LINK).await;
-                });
-                false
-            }
-            Msg::OpenGithub => {
-                futures::spawn_local(async {
-                    let _ = rpc::open_external_link(GITHUB_LINK).await;
+            Msg::OpenLink(link) => {
+                futures::spawn_local(async move {
+                    let _ = rpc::open_external_link(link).await;
                 });
                 false
             }
@@ -103,7 +98,7 @@ impl Component for NavBar {
         });
 
         html! {
-            <nav class="bg-menu-bar select-none">
+            <nav class="bg-menu-bar select-none flex">
                 <div class="flex items-center gap-2 px-1">
                     <button class="button" onclick={self.props.onopen.reform(|_| ())}>
                         {"Open"}
@@ -111,6 +106,7 @@ impl Component for NavBar {
                     { for loaded_buttons }
                     { self.view_about_menu() }
                 </div>
+                { self.props.children.clone() }
             </nav>
         }
     }
@@ -128,7 +124,7 @@ impl NavBar {
 
         html! {
             <div class="relative" tabindex="0"
-                onblur={self.about_opened.then(||self.link.callback(|_| Msg::MenuClose))}
+                onblur={self.about_opened.then(|| self.link.callback(|_| Msg::MenuClose))}
                 ref={self.about_ref.clone()}
             >
                 <a
@@ -170,7 +166,7 @@ impl NavBar {
                                 "link",
                             ]}
                             title={NEXUSMODS_LINK}
-                            onclick={self.link.callback(|_| Msg::OpenNexusMods)}
+                            onclick={self.link.callback(|_| Msg::OpenLink(NEXUSMODS_LINK))}
                         >
                             {"NexusMods"}
                         </a>
@@ -184,9 +180,23 @@ impl NavBar {
                                 "link",
                             ]}
                             title={GITHUB_LINK}
-                            onclick={self.link.callback(|_| Msg::OpenGithub)}
+                            onclick={self.link.callback(|_| Msg::OpenLink(GITHUB_LINK))}
                         >
                             {"Github"}
+                        </a>
+                        <hr class="border-default-border" />
+                        <a class={classes![
+                                "px-1",
+                                "hover:bg-theme-hover",
+                                "active:bg-theme-active",
+                                "whitespace-nowrap",
+                                "cursor-pointer",
+                                "link",
+                            ]}
+                            title={DONATION_LINK}
+                            onclick={self.link.callback(|_| Msg::OpenLink(DONATION_LINK))}
+                        >
+                            {"Donate"}
                         </a>
                         <hr class="border-default-border" />
                         <div class="relative flex">

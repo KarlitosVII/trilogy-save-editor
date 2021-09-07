@@ -6,24 +6,26 @@ use gloo::timers::future::TimeoutFuture;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
-use crate::gui::{
-    components::{NavBar, Tab, TabBar, Table},
-    mass_effect_1::{Me1General, Me1Plot, Me1RawData, Me1RawPlot},
-    mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
-    mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
-    mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
-    raw_ui::RawUi,
-    shared::HeadMorph,
-    shared::{FloatPlotType, IntPlotType},
-    RcUi, Theme,
-};
-use crate::save_data::{
-    mass_effect_1::Me1SaveGame, mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame,
-};
-use crate::services::{
-    database::DatabaseService,
-    drop_handler::DropHandler,
-    save_handler::{Request, Response, SaveGame, SaveHandler},
+use crate::{
+    gui::{
+        components::{AutoUpdate, NavBar, Tab, TabBar, Table},
+        mass_effect_1::{Me1General, Me1Plot, Me1RawData, Me1RawPlot},
+        mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
+        mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
+        mass_effect_3::{Me3General, Me3Plot, Me3RawPlot},
+        raw_ui::RawUi,
+        shared::HeadMorph,
+        shared::{FloatPlotType, IntPlotType},
+        RcUi, Theme,
+    },
+    save_data::{
+        mass_effect_1::Me1SaveGame, mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame,
+    },
+    services::{
+        database::DatabaseService,
+        drop_handler::DropHandler,
+        save_handler::{Request, Response, SaveGame, SaveHandler},
+    },
 };
 
 pub enum Msg {
@@ -195,7 +197,9 @@ impl Component for App {
                     onopen={self.link.callback(|_| Msg::OpenSave)}
                     onsave={self.link.callback(|_| Msg::SaveSave)}
                     onreload={self.link.callback(|_| Msg::ReloadSave)}
-                />
+                >
+                    <AutoUpdate onerror={self.link.callback(Msg::Error)} />
+                </NavBar>
                 { content }
                 { for notification }
                 { for error }

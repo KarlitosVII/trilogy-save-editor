@@ -2,13 +2,15 @@
 #![cfg_attr(debug_assertions, windows_subsystem = "console")]
 #![warn(clippy::all)]
 
-mod rpc;
+#[cfg(target_os = "windows")]
+mod auto_update;
 
-use std::panic;
+mod rpc;
 
 use anyhow::{bail, Result};
 use clap::{Arg, ArgMatches};
 use rust_embed::RustEmbed;
+use serde_json::json;
 use wry::{
     application::{
         dpi::LogicalSize,
@@ -16,6 +18,7 @@ use wry::{
         event_loop::{ControlFlow, EventLoop},
         window::WindowBuilder,
     },
+    http::{self, status::StatusCode},
     webview::{self, WebViewBuilder},
 };
 
@@ -33,30 +36,31 @@ fn parse_args() -> ArgMatches<'static> {
     app.get_matches()
 }
 
-fn main() -> Result<()> {
-    let args = parse_args();
-
+#[tokio::main]
+async fn main() -> Result<()> {
     #[cfg(target_os = "windows")]
-    if panic::catch_unwind(|| webview::webview_version().expect("Unable to get webview2 version"))
-        .is_err()
+    if std::panic::catch_unwind(|| {
+        webview::webview_version().expect("Unable to get webview2 version")
+    })
+    .is_err()
     {
         use std::os::windows::process::CommandExt;
 
-        let mut process = std::process::Command::new("powershell")
+        let status = std::process::Command::new("powershell")
             .arg("-Command")
             .arg(include_str!("webview2_install.ps1"))
             .creation_flags(0x08000000) // CREATE_NO_WINDOW
-            .spawn()
-            .unwrap();
+            .status()
+            .expect("failed to execute webview2_install.ps1");
 
-        let result = process.wait().unwrap();
-        if !result.success() {
+        if !status.success() {
             bail!("Failed to install WebView2");
         }
     }
 
+    let args = parse_args();
+
     let event_loop = EventLoop::<rpc::Event>::with_user_event();
-    let proxy = event_loop.create_proxy();
     let window = WindowBuilder::new()
         .with_title(format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")))
         .with_min_inner_size(LogicalSize::new(600, 300))
@@ -67,6 +71,7 @@ fn main() -> Result<()> {
 
     let mut last_maximized_state = window.is_maximized();
 
+    let proxy = event_loop.create_proxy();
     let webview = WebViewBuilder::new(window)?
         .with_initialization_script(include_str!("init.js"))
         .with_rpc_handler(move |window, req| {
@@ -76,6 +81,7 @@ fn main() -> Result<()> {
         .with_url("tse://localhost/")?
         .build()?;
 
+    let proxy = event_loop.create_proxy();
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
@@ -87,18 +93,9 @@ fn main() -> Result<()> {
                     let is_maximized = webview.window().is_maximized();
                     if is_maximized != last_maximized_state {
                         last_maximized_state = is_maximized;
-                        let _ = webview.evaluate_script(&format!(
-                            r#"
-                            (() => {{
-                                const event = new CustomEvent("maximized_state_changed", {{
-                                    detail: {{
-                                        is_maximized: {},
-                                    }}
-                                }});
-                                document.dispatchEvent(event);
-                            }})();
-                            "#,
-                            is_maximized
+                        let _ = proxy.send_event(rpc::Event::DispatchCustomEvent(
+                            "tse_maximized_state_changed",
+                            json!({ "is_maximized": is_maximized }),
                         ));
                     }
                 }
@@ -110,13 +107,23 @@ fn main() -> Result<()> {
     });
 }
 
-fn protocol(mut path: &str) -> wry::Result<(Vec<u8>, String)> {
-    path = path.trim_start_matches("tse://localhost/");
+fn protocol(request: &http::Request) -> wry::Result<http::Response> {
+    let mut path = request.uri().trim_start_matches("tse://localhost/");
     if path.is_empty() {
         path = "index.html"
     }
 
-    let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();
-    let content = Asset::get(path).map(|file| file.data.into_owned()).unwrap_or_default();
-    Ok((content, mime))
+    let response = http::ResponseBuilder::new()
+        // Prevent caching
+        .header("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
+        .header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+        .header("Pragma", "no-cache");
+
+    match Asset::get(path) {
+        Some(asset) => {
+            let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();
+            response.mimetype(&mime).body(asset.data.into())
+        }
+        None => response.status(StatusCode::NOT_FOUND).body(vec![]),
+    }
 }

@@ -1,3 +1,4 @@
+mod auto_update;
 mod check_box;
 mod color_picker;
 mod helper;
@@ -10,8 +11,8 @@ mod tab_bar;
 mod table;
 
 pub use self::{
-    check_box::*, color_picker::*, helper::*, input_number::*, input_text::*, nav_bar::*,
-    select::*, tab_bar::*, table::*,
+    auto_update::*, check_box::*, color_picker::*, helper::*, input_number::*, input_text::*,
+    nav_bar::*, select::*, tab_bar::*, table::*,
 };
 
 pub enum CallbackType {

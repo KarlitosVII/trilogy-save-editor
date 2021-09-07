@@ -19,7 +19,12 @@ regex = "1.0"
 macros = { path = "macros" }
 # Std-like
 anyhow = "1.0"
-derive_more = { version = "0.99", features = ["deref", "deref_mut", "from", "display"], default-features = false }
+derive_more = { version = "0.99", features = [
+    "deref",
+    "deref_mut",
+    "display",
+    "from",
+], default-features = false }
 bitvec = { version = "0.22", features = ["std"], default-features = false }
 indexmap = { version = "1.6", features = ["std"], default-features = false }
 encoding_rs = { version = "0.8", default-features = false }
@@ -27,20 +32,27 @@ encoding_rs = { version = "0.8", default-features = false }
 # flume = { version = "0.10", features = ["async"], default-features = false }
 # Utils
 crc = "2.0"
-flate2 = { version = "1.0", features = ["rust_backend"], default-features = false }
+flate2 = { version = "1.0", features = [
+    "rust_backend",
+], default-features = false }
 zip = { version = "0.5", features = ["deflate"], default-features = false }
 uuid = "0.8"
 ryu = "1.0"
 base64 = "0.13"
-# Http
-# reqwest = {version = "0.11", default-features = false }
-# reqwasm = "0.2"
 # Wasm
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
-wasm-timer = "0.2"
+# wasm-timer = "0.2"
 js-sys = "0.3"
-web-sys = { version="0.3", features=["DataTransfer", "CssStyleDeclaration", "DomRect", "History", "PopStateEvent", "PopStateEventInit"] }
+web-sys = { version = "0.3", features = [
+    "CssStyleDeclaration",
+    "CustomEvent",
+    "DataTransfer",
+    "DomRect",
+    "History",
+    "PopStateEvent",
+    "PopStateEventInit",
+] }
 gloo = { version = "0.3", features = ["futures"], default-features = false }
 # (De)Serialization
 serde-wasm-bindgen = "0.3"

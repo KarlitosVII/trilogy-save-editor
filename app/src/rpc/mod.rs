@@ -85,6 +85,8 @@ pub fn rpc_handler(mut req: RpcRequest, utils: RpcUtils) -> Option<RpcResponse> 
         ]);
 
         call_commands!(req, utils => [
+            command::check_for_update,
+            command::download_and_install_update,
             command::open_save,
             command::import_head_morph,
             command::export_head_morph_dialog,
@@ -110,10 +112,25 @@ pub fn rpc_handler(mut req: RpcRequest, utils: RpcUtils) -> Option<RpcResponse> 
 
 pub enum Event {
     CloseWindow,
+    DispatchCustomEvent(&'static str, serde_json::Value),
 }
 
-pub fn event_handler(event: Event, _webview: &WebView, control_flow: &mut ControlFlow) {
+pub fn event_handler(event: Event, webview: &WebView, control_flow: &mut ControlFlow) {
     match event {
         Event::CloseWindow => *control_flow = ControlFlow::Exit,
+        Event::DispatchCustomEvent(event, detail) => {
+            let _ = webview.evaluate_script(&format!(
+                r#"
+                (() => {{
+                    const event = new CustomEvent("{event}", {{
+                        detail: {detail}
+                    }});
+                    document.dispatchEvent(event);
+                }})();
+                "#,
+                event = event,
+                detail = detail,
+            ));
+        }
     }
 }

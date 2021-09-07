@@ -46,6 +46,14 @@ where
 }
 
 // Commands
+pub async fn check_for_update() -> Result<()> {
+    call("check_for_update").await
+}
+
+pub async fn download_and_install_update() -> Result<()> {
+    call("download_and_install_update").await
+}
+
 pub async fn open_external_link(link: &str) -> Result<()> {
     call_with_params("open_external_link", link).await
 }

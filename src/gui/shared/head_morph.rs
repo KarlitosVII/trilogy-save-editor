@@ -44,6 +44,7 @@ impl Component for HeadMorph {
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        // TODO: Import gibbed head morph
         let save_handler = SaveHandler::bridge(link.callback(|response| match response {
             Response::HeadMorphImported(head_morph) => Msg::HeadMorphImported(head_morph),
             Response::HeadMorphExported => Msg::HeadMorphExported,

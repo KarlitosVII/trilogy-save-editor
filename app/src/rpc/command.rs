@@ -1,5 +1,7 @@
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{Error, Result};
 use serde::{Deserialize, Serialize};
@@ -26,6 +28,40 @@ pub fn drag_window(utils: &RpcUtils) {
 
 pub fn close(utils: &RpcUtils) {
     let _ = utils.event_proxy.send_event(Event::CloseWindow);
+}
+
+#[cfg(target_os = "windows")]
+pub fn check_for_update(utils: &RpcUtils) -> Result<()> {
+    use crate::auto_update::AUTO_UPDATE;
+
+    let proxy = utils.event_proxy.clone();
+    tokio::spawn(async move {
+        AUTO_UPDATE.check_for_update(proxy).await;
+    });
+
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+pub fn download_and_install_update(utils: &RpcUtils) -> Result<()> {
+    use crate::auto_update::AUTO_UPDATE;
+
+    let proxy = utils.event_proxy.clone();
+    tokio::spawn(async move {
+        AUTO_UPDATE.download_and_install(proxy).await;
+    });
+
+    Ok(())
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn check_for_update(_: &RpcUtils) -> Result<()> {
+    Ok(())
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn download_and_install_update(_: &RpcUtils) -> Result<()> {
+    Ok(())
 }
 
 pub fn open_external_link(_: &RpcUtils, link: PathBuf) -> Result<()> {

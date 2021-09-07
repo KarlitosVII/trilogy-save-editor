@@ -270,7 +270,7 @@ impl Component for RawPlot {
                 <Helper text=
                     "Be careful when adding a new plot.\n\
                     Because of the way the data is stored, adding a new plot will add as many plots as the plot id.\n\
-                    For example, if you have `40 000` plots, adding the plot `1 000 000` will add `960 000` plots !\n
+                    For example, if you have `10 000` plots, adding the plot `1 000 000` will add `990 000` plots !\n
                     This can bloat your save and significantly reduce the performance of the filter."
                 />
             },
