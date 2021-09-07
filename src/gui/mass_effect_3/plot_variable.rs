@@ -1,7 +1,7 @@
 use std::cell::RefMut;
 
 use indexmap::IndexMap;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{
     components::{CheckBox, Table},
@@ -25,30 +25,27 @@ pub struct Props {
 }
 
 impl Props {
-    fn booleans_mut(&mut self) -> RefMut<'_, BitVec> {
+    fn booleans_mut(&self) -> RefMut<'_, BitVec> {
         self.booleans.borrow_mut()
     }
 }
 
-pub struct PlotVariable {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct PlotVariable {}
 
 impl Component for PlotVariable {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let mut this = PlotVariable { props, link };
-        this.add_missing_plots();
+    fn create(ctx: &Context<Self>) -> Self {
+        let mut this = PlotVariable {};
+        this.add_missing_plots(ctx);
         this
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::ChangeBool(idx, value) => {
-                if let Some(mut plot) = self.props.booleans_mut().get_mut(idx) {
+                if let Some(mut plot) = ctx.props().booleans_mut().get_mut(idx) {
                     *plot = value;
                 }
                 false
@@ -56,17 +53,13 @@ impl Component for PlotVariable {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            self.add_missing_plots();
-            true
-        } else {
-            false
-        }
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.add_missing_plots(ctx);
+        true
     }
 
-    fn view(&self) -> Html {
-        let Props { title, booleans, variables, plot_variable, .. } = &self.props;
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let Props { title, booleans, variables, plot_variable, .. } = &ctx.props();
         let PlotVariableDb { booleans: bool_db, variables: var_db } = &plot_variable;
 
         let booleans = bool_db.iter().map(|(&idx, label)| match booleans.borrow().get(idx) {
@@ -74,7 +67,7 @@ impl Component for PlotVariable {
                 <CheckBox
                     label={label.clone()}
                     value={RcUi::new(*value)}
-                    onchange={self.link.callback(move |value| Msg::ChangeBool(idx, value))}
+                    onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                 />
             },
             None => Html::default(),
@@ -100,8 +93,8 @@ impl Component for PlotVariable {
 }
 
 impl PlotVariable {
-    fn add_missing_plots(&mut self) {
-        let Props { booleans, variables, plot_variable, .. } = &mut self.props;
+    fn add_missing_plots(&mut self, ctx: &Context<Self>) {
+        let Props { booleans, variables, plot_variable, .. } = &mut ctx.props();
         let PlotVariableDb { booleans: bool_db, variables: var_db } = &plot_variable;
 
         // Booleans

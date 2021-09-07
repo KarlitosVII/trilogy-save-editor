@@ -1,7 +1,7 @@
-use std::any::Any;
+use std::{any::Any, marker::PhantomData};
 
 use indexmap::IndexMap;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{
     components::{raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table},
@@ -52,8 +52,7 @@ pub struct RawUiIndexMap<T>
 where
     T: RawUi + Default,
 {
-    props: Props<T>,
-    link: ComponentLink<Self>,
+    _marker: PhantomData<T>,
     opened: bool,
     new_item_idx: usize,
 }
@@ -65,17 +64,17 @@ where
     type Message = Msg;
     type Properties = Props<T>;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        RawUiIndexMap { props, link, opened: false, new_item_idx: 0 }
+    fn create(_ctx: &Context<Self>) -> Self {
+        RawUiIndexMap { _marker: PhantomData, opened: false, new_item_idx: 0 }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Toggle => {
                 self.opened = !self.opened;
                 if self.opened {
                     // Prevent last item to reopen
-                    self.new_item_idx = match self.props.index_map {
+                    self.new_item_idx = match ctx.props().index_map {
                         IndexMapKeyType::I32(ref index_map) => index_map.borrow().len(),
                         IndexMapKeyType::String(ref index_map) => index_map.borrow().len(),
                     };
@@ -83,13 +82,13 @@ where
                 true
             }
             Msg::Add => {
-                match self.props.index_map {
-                    IndexMapKeyType::I32(ref mut index_map) => {
+                match ctx.props().index_map {
+                    IndexMapKeyType::I32(ref index_map) => {
                         // Open added item
                         self.new_item_idx = index_map.borrow().len();
                         index_map.borrow_mut().entry(-1).or_default();
                     }
-                    IndexMapKeyType::String(ref mut index_map) => {
+                    IndexMapKeyType::String(ref index_map) => {
                         // Open added item
                         self.new_item_idx = index_map.borrow().len();
                         index_map.borrow_mut().entry(Default::default()).or_default();
@@ -98,18 +97,18 @@ where
                 true
             }
             Msg::Remove(idx) => {
-                match self.props.index_map {
-                    IndexMapKeyType::I32(ref mut index_map) => {
+                match ctx.props().index_map {
+                    IndexMapKeyType::I32(ref index_map) => {
                         index_map.borrow_mut().shift_remove_index(idx);
                     }
-                    IndexMapKeyType::String(ref mut index_map) => {
+                    IndexMapKeyType::String(ref index_map) => {
                         index_map.borrow_mut().shift_remove_index(idx);
                     }
                 }
                 true
             }
-            Msg::EditKey(idx, new_key) => match self.props.index_map {
-                IndexMapKeyType::I32(ref mut index_map) => match new_key {
+            Msg::EditKey(idx, new_key) => match ctx.props().index_map {
+                IndexMapKeyType::I32(ref index_map) => match new_key {
                     CallbackType::Int(new_key) => {
                         if let Some((key, _)) = index_map.borrow_mut().get_index_mut(idx) {
                             *key = new_key;
@@ -118,7 +117,7 @@ where
                     }
                     _ => false,
                 },
-                IndexMapKeyType::String(ref mut index_map) => match new_key {
+                IndexMapKeyType::String(ref index_map) => match new_key {
                     CallbackType::String(new_key) => {
                         if let Some((key, _)) = index_map.borrow_mut().get_index_mut(idx) {
                             *key = new_key;
@@ -131,11 +130,7 @@ where
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let chevron = if self.opened { "table-chevron-down" } else { "table-chevron-right" };
 
         let content = self
@@ -165,7 +160,7 @@ where
                                         "py-0",
                                         "cursor-pointer",
                                     ]}
-                                    onclick={self.link.callback(move |_| Msg::Remove(idx))}
+                                    onclick={ctx.link().callback(move |_| Msg::Remove(idx))}
                                 >
                                     {"remove"}
                                 </a>
@@ -178,7 +173,7 @@ where
                     }
                 };
 
-                let items = match self.props.index_map {
+                let items = match ctx.props().index_map {
                     IndexMapKeyType::I32(ref index_map) => index_map
                         .borrow()
                         .iter()
@@ -186,7 +181,7 @@ where
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
                                 <InputNumber label="Id" value={NumberType::Int((*key).into())}
-                                    onchange={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
+                                    onchange={ctx.link().callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };
                             view(idx, key.to_string(), input_k, value)
@@ -199,7 +194,7 @@ where
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
                                 <InputText label="Key" value={RcUi::new(key.clone())}
-                                    oninput={self.link.callback(move |callback| Msg::EditKey(idx, callback))}
+                                    oninput={ctx.link().callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };
                             let label = if !key.is_empty() { key } else { "<empty>" };
@@ -219,7 +214,7 @@ where
                                     "bg-theme-bg",
                                     "px-1",
                                 ]}
-                                onclick={self.link.callback(|_| Msg::Add)}
+                                onclick={ctx.link().callback(|_| Msg::Add)}
                             >
                                 {"add"}
                             </button>
@@ -241,9 +236,9 @@ where
                             "text-left",
                             chevron,
                         ]}
-                        onclick={self.link.callback(|_| Msg::Toggle)}
+                        onclick={ctx.link().callback(|_| Msg::Toggle)}
                     >
-                        { &self.props.label }
+                        { &ctx.props().label }
                     </button>
                 </div>
                 { for content }

@@ -1,5 +1,5 @@
 use web_sys::HtmlInputElement;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use super::CallbackType;
 use crate::gui::{components::Helper, RcUi};
@@ -34,20 +34,17 @@ pub struct Props {
     pub onchange: Option<Callback<CallbackType>>,
 }
 
-pub struct InputNumber {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct InputNumber;
 
 impl Component for InputNumber {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        InputNumber { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        InputNumber
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Change(event) => {
                 let input: HtmlInputElement = event.target_unchecked_into();
@@ -57,28 +54,28 @@ impl Component for InputNumber {
                     return true;
                 }
 
-                match self.props.value {
-                    NumberType::Byte(ref mut byte) => {
+                match ctx.props().value {
+                    NumberType::Byte(ref byte) => {
                         let value: u8 = value as u8;
                         *byte.borrow_mut() = value;
 
-                        if let Some(ref callback) = self.props.onchange {
+                        if let Some(ref callback) = ctx.props().onchange {
                             callback.emit(CallbackType::Byte(value));
                         }
                     }
-                    NumberType::Int(ref mut integer) => {
+                    NumberType::Int(ref integer) => {
                         let value = value as i32;
                         *integer.borrow_mut() = value;
 
-                        if let Some(ref callback) = self.props.onchange {
+                        if let Some(ref callback) = ctx.props().onchange {
                             callback.emit(CallbackType::Int(value));
                         }
                     }
-                    NumberType::Float(ref mut float) => {
+                    NumberType::Float(ref float) => {
                         let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
                         *float.borrow_mut() = value;
 
-                        if let Some(ref callback) = self.props.onchange {
+                        if let Some(ref callback) = ctx.props().onchange {
                             callback.emit(CallbackType::Float(value));
                         }
                     }
@@ -88,12 +85,8 @@ impl Component for InputNumber {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let (value, placeholder) = match self.props.value {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let (value, placeholder) = match ctx.props().value {
             NumberType::Byte(ref byte) => (byte.borrow().to_string(), "<byte>"),
             NumberType::Int(ref integer) => (integer.borrow().to_string(), "<integer>"),
             NumberType::Float(ref float) => {
@@ -102,7 +95,7 @@ impl Component for InputNumber {
             }
         };
 
-        let helper = self.props.helper.as_ref().map(|&helper| {
+        let helper = ctx.props().helper.as_ref().map(|&helper| {
             html! {
                 <Helper text={helper} />
             }
@@ -113,9 +106,9 @@ impl Component for InputNumber {
                 <input type="number" class="input w-[110px]" step="any"
                     {placeholder}
                     {value}
-                    onchange={self.link.callback(Msg::Change)}
+                    onchange={ctx.link().callback(Msg::Change)}
                 />
-                { &self.props.label }
+                { &ctx.props().label }
                 { for helper }
             </label>
         }

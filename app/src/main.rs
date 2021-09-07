@@ -39,13 +39,15 @@ fn parse_args() -> ArgMatches<'static> {
 #[tokio::main]
 async fn main() -> Result<()> {
     #[cfg(target_os = "windows")]
-    if std::panic::catch_unwind(|| {
-        webview::webview_version().expect("Unable to get webview2 version")
-    })
-    .is_err()
     {
-        if let Err(err) = install_webview2().await {
-            anyhow::bail!(err)
+        let should_install_webview2 = std::panic::catch_unwind(|| {
+            webview::webview_version().expect("Unable to get webview2 version")
+        })
+        .is_err();
+        if should_install_webview2 {
+            if let Err(err) = install_webview2().await {
+                anyhow::bail!(err)
+            }
         }
     }
 
@@ -143,7 +145,7 @@ async fn install_webview2() -> Result<()> {
     let path = temp_dir.join("MicrosoftEdgeWebview2Setup.exe");
 
     // If not exists
-    if !fs::metadata(&temp_dir).await.is_ok() {
+    if fs::metadata(&temp_dir).await.is_err() {
         fs::create_dir(temp_dir).await?;
     }
     fs::write(&path, setup).await?;

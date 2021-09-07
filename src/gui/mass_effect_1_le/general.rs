@@ -1,6 +1,6 @@
 use std::cell::{Ref, RefMut};
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::{
     gui::{
@@ -36,27 +36,24 @@ impl Props {
         self.save_game.borrow()
     }
 
-    fn save_game_mut(&mut self) -> RefMut<'_, Me1LeSaveData> {
+    fn save_game_mut(&self) -> RefMut<'_, Me1LeSaveData> {
         self.save_game.borrow_mut()
     }
 }
 
-pub struct Me1LeGeneral {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct Me1LeGeneral;
 
 impl Component for Me1LeGeneral {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         // TODO: ME1 LE class swap
-        Me1LeGeneral { props, link }
+        Me1LeGeneral
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        let Me1LeSaveData { player, squad, plot, .. } = &mut *self.props.save_game_mut();
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        let Me1LeSaveData { player, squad, plot, .. } = &mut *ctx.props().save_game_mut();
         let (mut player, mut plot) = (player.borrow_mut(), plot.borrow_mut());
         match msg {
             Msg::Gender(gender) => {
@@ -98,7 +95,7 @@ impl Component for Me1LeGeneral {
                 false
             }
             Msg::ResetTalents(tag) => {
-                let (mut talent_points, mut complex_talents) = if let Some(tag) = tag {
+                let (talent_points, complex_talents) = if let Some(tag) = tag {
                     // Squad mate
                     let squad = squad.borrow();
                     let character = squad
@@ -126,24 +123,20 @@ impl Component for Me1LeGeneral {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let save_game = self.props.save_game();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let save_game = ctx.props().save_game();
 
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
-                    { self.role_play(save_game.player()) }
+                    { self.role_play(ctx, save_game.player()) }
                     { self.morality(save_game.plot()) }
                     { self.resources(save_game.player()) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
-                    { self.general(save_game.player().game_options()) }
-                    { self.gameplay(save_game.player()) }
-                    { self.squad(save_game.squad()) }
+                    { self.general(ctx, save_game.player().game_options()) }
+                    { self.gameplay(ctx, save_game.player()) }
+                    { self.squad(ctx, save_game.squad()) }
                 </div>
             </div>
         }
@@ -151,7 +144,8 @@ impl Component for Me1LeGeneral {
 }
 
 impl Me1LeGeneral {
-    fn role_play(&self, player: Ref<'_, Player>) -> Html {
+    fn role_play(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+        let link = ctx.link();
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
             <Table title="Role-Play">
@@ -160,7 +154,7 @@ impl Me1LeGeneral {
                     <Select
                         options={genders}
                         current_idx={*player.is_female() as usize}
-                        onselect={self.link.callback(Msg::Gender)}
+                        onselect={link.callback(Msg::Gender)}
                     />
                     {"Gender"}
                     <Helper text=
@@ -172,7 +166,7 @@ impl Me1LeGeneral {
                     <Select
                         options={Origin::variants()}
                         current_idx={*player.origin() as usize}
-                        onselect={self.link.callback(Msg::Origin)}
+                        onselect={link.callback(Msg::Origin)}
                     />
                     {"Origin"}
                 </div>
@@ -180,7 +174,7 @@ impl Me1LeGeneral {
                     <Select
                         options={Notoriety::variants()}
                         current_idx={*player.notoriety() as usize}
-                        onselect={self.link.callback(Msg::Notoriety)}
+                        onselect={link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}
                 </div>
@@ -215,7 +209,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn general(&self, game_options: Ref<'_, Vec<RcUi<i32>>>) -> Html {
+    fn general(&self, ctx: &Context<Self>, game_options: Ref<'_, Vec<RcUi<i32>>>) -> Html {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
         let current_difficulty =
@@ -226,7 +220,7 @@ impl Me1LeGeneral {
                     <Select
                         options={difficulty}
                         current_idx={current_difficulty}
-                        onselect={self.link.callback(Msg::Difficulty)}
+                        onselect={ctx.link().callback(Msg::Difficulty)}
                     />
                     { "Difficulty" }
                 </div>
@@ -234,7 +228,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn gameplay(&self, player: Ref<'_, Player>) -> Html {
+    fn gameplay(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let Player { level, current_xp, .. } = &*player;
 
         html! {
@@ -248,16 +242,16 @@ impl Me1LeGeneral {
                 <InputNumber
                     label="Talent Points"
                     value={NumberType::Int((*player.talent_points()).into())}
-                    onchange={self.link.callback(Msg::TalentPoints)}
+                    onchange={ctx.link().callback(Msg::TalentPoints)}
                 />
-                <button class="button" onclick={self.link.callback(|_| Msg::ResetTalents(None))}>
+                <button class="button" onclick={ctx.link().callback(|_| Msg::ResetTalents(None))}>
                     { "Reset player's talents" }
                 </button>
             </Table>
         }
     }
 
-    fn squad(&self, squad: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
+    fn squad(&self, ctx: &Context<Self>, squad: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
         let characters = [
             ("hench_humanfemale", "Ashley"),
             ("hench_turian", "Garrus"),
@@ -271,7 +265,7 @@ impl Me1LeGeneral {
             characters.iter().find_map(|&(tag, name)| {
                 (*character.borrow().tag() == tag).then(|| {
                     html! {
-                        <button class="button" onclick={self.link.callback(move |_| Msg::ResetTalents(Some(tag)))}>
+                        <button class="button" onclick={ctx.link().callback(move |_| Msg::ResetTalents(Some(tag)))}>
                             { format!("Reset {}'s talents", name) }
                         </button>
                     }

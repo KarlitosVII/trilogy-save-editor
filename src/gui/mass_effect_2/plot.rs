@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use anyhow::Error;
 use indexmap::IndexMap;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
 use crate::gui::{
@@ -32,8 +32,6 @@ pub struct Props {
 }
 
 pub struct Me2Plot {
-    props: Props,
-    link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
     plot_db: Option<Rc<Me2PlotDb>>,
 }
@@ -42,9 +40,9 @@ impl Component for Me2Plot {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let mut database_service =
-            DatabaseService::bridge(link.callback(|response| match response {
+            DatabaseService::bridge(ctx.link().callback(|response| match response {
                 Response::Database(Database::Me2Plot(db)) => Msg::PlotDb(db),
                 Response::Error(err) => Msg::Error(err),
                 _ => unreachable!(),
@@ -52,34 +50,25 @@ impl Component for Me2Plot {
 
         database_service.send(Request::Database(Type::Me2Plot));
 
-        Me2Plot { props, link, _database_service: database_service, plot_db: None }
+        Me2Plot { _database_service: database_service, plot_db: None }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::PlotDb(db) => {
                 self.plot_db = Some(db);
                 true
             }
             Msg::Error(err) => {
-                self.props.onerror.emit(err);
+                ctx.props().onerror.emit(err);
                 false
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         if let Some(ref plot_db) = self.plot_db {
-            let (booleans, integers, me1_booleans, me1_integers) = (
-                &self.props.booleans,
-                &self.props.integers,
-                &self.props.me1_booleans,
-                &self.props.me1_integers,
-            );
+            let Props { booleans, integers, me1_booleans, me1_integers, .. } = &ctx.props();
             let Me2PlotDb {
                 player,
                 crew,
@@ -143,7 +132,7 @@ impl Component for Me2Plot {
                                 <Me1Plot
                                     booleans={RcUi::clone(me1_booleans)}
                                     integers={IntPlotType::clone(me1_integers)}
-                                    onerror={self.link.callback(Msg::Error)}
+                                    onerror={ctx.link().callback(Msg::Error)}
                                 />
                             </div>
                         </Tab>

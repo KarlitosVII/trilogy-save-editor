@@ -1,6 +1,6 @@
 use std::cell::Ref;
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use super::Me2Type;
 use crate::gui::{
@@ -53,21 +53,18 @@ pub struct Props {
     pub save_game: Me2Type,
 }
 
-pub struct Me2General {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct Me2General;
 
 impl Component for Me2General {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Me2General { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Me2General
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        let (mut player, mut me1_plot, mut plot) = match self.props.save_game {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        let (player, me1_plot, plot) = match ctx.props().save_game {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
                 (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
@@ -204,12 +201,8 @@ impl Component for Me2General {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let (difficulty, end_game_state, player, plot) = match self.props.save_game {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let (difficulty, end_game_state, player, plot) = match ctx.props().save_game {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
                 (
@@ -233,9 +226,9 @@ impl Component for Me2General {
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
-                    { self.role_play(player.borrow()) }
+                    { self.role_play(ctx, player.borrow()) }
                     { self.morality(plot.borrow()) }
-                    { self.gameplay(player.borrow()) }
+                    { self.gameplay(ctx, player.borrow()) }
                     { self.resources(player.borrow()) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
@@ -248,7 +241,8 @@ impl Component for Me2General {
 }
 
 impl Me2General {
-    fn role_play(&self, player: Ref<'_, Player>) -> Html {
+    fn role_play(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+        let link = ctx.link();
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
             <Table title="Role-Play">
@@ -257,7 +251,7 @@ impl Me2General {
                     <Select
                         options={genders}
                         current_idx={*player.is_female() as usize}
-                        onselect={self.link.callback(Msg::Gender)}
+                        onselect={link.callback(Msg::Gender)}
                     />
                     {"Gender"}
                     <Helper text=
@@ -269,7 +263,7 @@ impl Me2General {
                     <Select
                         options={Origin::variants()}
                         current_idx={*player.origin() as usize}
-                        onselect={self.link.callback(Msg::Origin)}
+                        onselect={link.callback(Msg::Origin)}
                     />
                     {"Origin"}
                 </div>
@@ -277,7 +271,7 @@ impl Me2General {
                     <Select
                         options={Notoriety::variants()}
                         current_idx={*player.notoriety() as usize}
-                        onselect={self.link.callback(Msg::Notoriety)}
+                        onselect={link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}
                 </div>
@@ -300,7 +294,7 @@ impl Me2General {
         }
     }
 
-    fn gameplay(&self, player: Ref<'_, Player>) -> Html {
+    fn gameplay(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let Player { level, current_xp, talent_points, credits, medigel, .. } = &*player;
 
         let class_idx = Me2Class::names()
@@ -315,7 +309,7 @@ impl Me2General {
                     <Select
                         options={Me2Class::variants()}
                         current_idx={class_idx}
-                        onselect={self.link.callback(Msg::PlayerClass)}
+                        onselect={ctx.link().callback(Msg::PlayerClass)}
                     />
                     {"Class"}
                 </div>

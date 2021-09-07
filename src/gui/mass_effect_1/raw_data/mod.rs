@@ -2,7 +2,7 @@ pub mod property;
 
 use std::cell::Ref;
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{components::Table, mass_effect_1::raw_data::property::Property, RcUi};
 use crate::save_data::mass_effect_1::player::Player;
@@ -18,29 +18,18 @@ impl Props {
     }
 }
 
-pub struct Me1RawData {
-    props: Props,
-    // link: ComponentLink<Self>,
-}
+pub struct Me1RawData;
 
 impl Component for Me1RawData {
     type Message = ();
     type Properties = Props;
 
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        Me1RawData { props }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Me1RawData {}
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        unimplemented!()
-    }
-
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let player = self.props.player();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let player = ctx.props().player();
         let object_id = player
             .objects
             .iter()
@@ -56,7 +45,7 @@ impl Component for Me1RawData {
         let properties = properties.iter().take(take).map(|property| {
             html! {
                 <Property
-                    player={RcUi::clone(&self.props.player)}
+                    player={RcUi::clone(&ctx.props().player)}
                     property={RcUi::clone(property)}
                 />
             }

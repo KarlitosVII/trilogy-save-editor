@@ -1,7 +1,7 @@
 use gloo::events::EventListener;
 use wasm_bindgen::JsCast;
 use web_sys::PopStateEvent;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::{html::Scope, prelude::*};
 
 use crate::gui::Theme;
 
@@ -20,8 +20,6 @@ pub struct Props {
 }
 
 pub struct TabBar {
-    props: Props,
-    link: ComponentLink<Self>,
     main_tab_listener: Option<EventListener>,
     current_tab: String,
 }
@@ -30,19 +28,19 @@ impl Component for TabBar {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let current_tab = Self::first_tab(&props.children);
-        let main_tab_listener = props.is_main_tab_bar.then(|| {
-            let link = link.clone();
+    fn create(ctx: &Context<Self>) -> Self {
+        let current_tab = Self::first_tab(&ctx.props().children);
+        let main_tab_listener = ctx.props().is_main_tab_bar.then(|| {
+            let link = ctx.link().clone();
             Self::event_listener(link)
         });
 
         // TODO: Tab history
 
-        TabBar { props, link, current_tab, main_tab_listener }
+        TabBar { current_tab, main_tab_listener }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::TabClicked(event, title) => {
                 if event.button() == MAIN_BUTTON {
@@ -53,7 +51,7 @@ impl Component for TabBar {
                 }
             }
             Msg::MainTabChanged(main_tab) => {
-                let children = &self.props.children;
+                let children = &ctx.props().children;
                 if children.iter().any(|child| child.props.title == main_tab) {
                     self.current_tab = main_tab;
                 } else {
@@ -64,35 +62,31 @@ impl Component for TabBar {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            let is_main_tab_bar = self.props.is_main_tab_bar;
-            let is_event_listening = self.main_tab_listener.is_some();
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        let is_main_tab_bar = ctx.props().is_main_tab_bar;
+        let is_event_listening = self.main_tab_listener.is_some();
 
-            if !is_main_tab_bar && is_event_listening {
-                self.main_tab_listener = None;
-            } else if is_main_tab_bar && !is_event_listening {
-                let link = self.link.clone();
-                self.main_tab_listener = Some(Self::event_listener(link));
-            }
-
-            // Go to first tab if current tab doesn't exist
-            let children = &self.props.children;
-            if !children.iter().any(|child| child.props.title == self.current_tab) {
-                self.current_tab = Self::first_tab(children);
-            }
-            true
-        } else {
-            false
+        if !is_main_tab_bar && is_event_listening {
+            self.main_tab_listener = None;
+        } else if is_main_tab_bar && !is_event_listening {
+            let link = ctx.link().clone();
+            self.main_tab_listener = Some(Self::event_listener(link));
         }
+
+        // Go to first tab if current tab doesn't exist
+        let children = &ctx.props().children;
+        if !children.iter().any(|child| child.props.title == self.current_tab) {
+            self.current_tab = Self::first_tab(children);
+        }
+        true
     }
 
-    fn view(&self) -> Html {
-        let tabs = self.props.children.iter().map(|child| {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let tabs = ctx.props().children.iter().map(|child| {
             let title = child.props.title.clone();
             let onmousedown = (title != self.current_tab).then(|| {
                 let title = title.clone();
-                self.link.callback(move |event| Msg::TabClicked(event, title.clone()))
+                ctx.link().callback(move |event| Msg::TabClicked(event, title.clone()))
             });
             html! {
                 <a class={classes![
@@ -114,7 +108,7 @@ impl Component for TabBar {
             }
         });
 
-        let content = self.props.children.iter().find_map(|content| {
+        let content = ctx.props().children.iter().find_map(|content| {
             (content.props.title == self.current_tab).then(|| {
                 html! {
                     <div class={classes![
@@ -143,7 +137,7 @@ impl Component for TabBar {
 }
 
 impl TabBar {
-    fn event_listener(link: ComponentLink<Self>) -> EventListener {
+    fn event_listener(link: Scope<Self>) -> EventListener {
         EventListener::new(&yew::utils::window(), "popstate", {
             move |event| {
                 if let Some(event) = event.dyn_ref::<PopStateEvent>() {
@@ -156,7 +150,7 @@ impl TabBar {
     }
 
     fn first_tab(children: &ChildrenWithProps<Tab>) -> String {
-        children.iter().next().map(|child| child.props.title).unwrap_or_default()
+        children.iter().next().map(|child| child.props.title.clone()).unwrap_or_default()
     }
 }
 
@@ -168,28 +162,17 @@ pub struct TabProps {
     pub theme: Option<Theme>,
 }
 
-pub struct Tab {
-    props: TabProps,
-    // link: ComponentLink<Self>,
-}
+pub struct Tab;
 
 impl Component for Tab {
     type Message = ();
     type Properties = TabProps;
 
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        Tab { props }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Tab
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        unimplemented!()
-    }
-
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        self.props.children.iter().collect::<Html>()
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        ctx.props().children.iter().collect::<Html>()
     }
 }

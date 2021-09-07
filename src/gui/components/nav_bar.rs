@@ -1,6 +1,6 @@
 use wasm_bindgen_futures as futures;
 use web_sys::HtmlElement;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::{
     gui::components::{Tab, TabBar},
@@ -29,8 +29,6 @@ pub struct Props {
 }
 
 pub struct NavBar {
-    props: Props,
-    link: ComponentLink<Self>,
     about_ref: NodeRef,
     about_opened: bool,
     licenses_opened: bool,
@@ -40,17 +38,11 @@ impl Component for NavBar {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        NavBar {
-            props,
-            link,
-            about_ref: Default::default(),
-            about_opened: false,
-            licenses_opened: false,
-        }
+    fn create(_ctx: &Context<Self>) -> Self {
+        NavBar { about_ref: Default::default(), about_opened: false, licenses_opened: false }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::MenuOpen => {
                 self.about_opened = true;
@@ -80,18 +72,14 @@ impl Component for NavBar {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let loaded_buttons = self.props.save_loaded.then(|| {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let loaded_buttons = ctx.props().save_loaded.then(|| {
             html! { <>
-                <button class="button" onclick={self.props.onsave.reform(|_| ())}>
+                <button class="button" onclick={ctx.props().onsave.reform(|_| ())}>
                     {"Save"}
                 </button>
                 <span>{"-"}</span>
-                <button class="button" onclick={self.props.onreload.reform(|_| ())}>
+                <button class="button" onclick={ctx.props().onreload.reform(|_| ())}>
                     {"Reload"}
                 </button>
             </> }
@@ -100,31 +88,32 @@ impl Component for NavBar {
         html! {
             <nav class="bg-menu-bar select-none flex">
                 <div class="flex items-center gap-2 px-1">
-                    <button class="button" onclick={self.props.onopen.reform(|_| ())}>
+                    <button class="button" onclick={ctx.props().onopen.reform(|_| ())}>
                         {"Open"}
                     </button>
                     { for loaded_buttons }
-                    { self.view_about_menu() }
+                    { self.view_about_menu(ctx) }
                 </div>
-                { self.props.children.clone() }
+                { ctx.props().children.clone() }
             </nav>
         }
     }
 }
 
 impl NavBar {
-    fn view_about_menu(&self) -> Html {
+    fn view_about_menu(&self, ctx: &Context<Self>) -> Html {
+        let link = ctx.link();
         let onclick = if !self.about_opened {
-            self.link.callback(|_| Msg::MenuOpen)
+            link.callback(|_| Msg::MenuOpen)
         } else {
-            self.link.callback(|_| Msg::MenuBlur)
+            link.callback(|_| Msg::MenuBlur)
         };
 
         let licenses = self.licenses_opened.then(|| self.view_licenses());
 
         html! {
             <div class="relative" tabindex="0"
-                onblur={self.about_opened.then(|| self.link.callback(|_| Msg::MenuClose))}
+                onblur={self.about_opened.then(|| link.callback(|_| Msg::MenuClose))}
                 ref={self.about_ref.clone()}
             >
                 <a
@@ -166,7 +155,7 @@ impl NavBar {
                                 "link",
                             ]}
                             title={NEXUSMODS_LINK}
-                            onclick={self.link.callback(|_| Msg::OpenLink(NEXUSMODS_LINK))}
+                            onclick={link.callback(|_| Msg::OpenLink(NEXUSMODS_LINK))}
                         >
                             {"NexusMods"}
                         </a>
@@ -180,7 +169,7 @@ impl NavBar {
                                 "link",
                             ]}
                             title={GITHUB_LINK}
-                            onclick={self.link.callback(|_| Msg::OpenLink(GITHUB_LINK))}
+                            onclick={link.callback(|_| Msg::OpenLink(GITHUB_LINK))}
                         >
                             {"Github"}
                         </a>
@@ -194,7 +183,7 @@ impl NavBar {
                                 "link",
                             ]}
                             title={DONATION_LINK}
-                            onclick={self.link.callback(|_| Msg::OpenLink(DONATION_LINK))}
+                            onclick={link.callback(|_| Msg::OpenLink(DONATION_LINK))}
                         >
                             {"Donate"}
                         </a>
@@ -209,7 +198,7 @@ impl NavBar {
                                     "cursor-pointer",
                                     "navbar-chevron",
                                 ]}
-                                onmouseover={self.link.callback(|_| Msg::LicensesHover)}
+                                onmouseover={link.callback(|_| Msg::LicensesHover)}
                             >
                                 {"License"}
                             </a>

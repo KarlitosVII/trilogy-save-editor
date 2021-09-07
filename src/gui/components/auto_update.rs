@@ -8,7 +8,7 @@ use serde::Deserialize;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures as futures;
 use web_sys::CustomEvent;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::services::rpc;
 
@@ -31,8 +31,6 @@ pub struct Props {
 }
 
 pub struct AutoUpdate {
-    props: Props,
-    link: ComponentLink<Self>,
     _update_listener: EventListener,
     _progress_listener: EventListener,
     _error_listener: EventListener,
@@ -43,16 +41,16 @@ impl Component for AutoUpdate {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let update_listener = {
-            let link = link.clone();
+            let link = ctx.link().clone();
             EventListener::new(&yew::utils::document(), "tse_update_available", move |_| {
                 link.send_message(Msg::UpdateAvailable);
             })
         };
 
         let progress_listener = {
-            let link = link.clone();
+            let link = ctx.link().clone();
             EventListener::new(&yew::utils::document(), "tse_update_progress", move |event| {
                 if let Some(event) = event.dyn_ref::<CustomEvent>() {
                     #[derive(Deserialize)]
@@ -68,7 +66,7 @@ impl Component for AutoUpdate {
         };
 
         let error_listener = {
-            let link = link.clone();
+            let link = ctx.link().clone();
             EventListener::new(&yew::utils::document(), "tse_update_error", move |event| {
                 if let Some(event) = event.dyn_ref::<CustomEvent>() {
                     #[derive(Deserialize)]
@@ -87,8 +85,6 @@ impl Component for AutoUpdate {
         AutoUpdate::check_for_update();
 
         AutoUpdate {
-            props,
-            link,
             _update_listener: update_listener,
             _progress_listener: progress_listener,
             _error_listener: error_listener,
@@ -96,7 +92,7 @@ impl Component for AutoUpdate {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::UpdateAvailable => {
                 self.update_state = UpdateState::UpdateAvailable;
@@ -115,23 +111,19 @@ impl Component for AutoUpdate {
             }
             Msg::Error(err) => {
                 self.update_state = UpdateState::None;
-                self.props.onerror.emit(err);
+                ctx.props().onerror.emit(err);
                 true
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         match self.update_state {
             UpdateState::UpdateAvailable => html! {
                 <div class="flex-auto flex items-center gap-2 px-1">
                     <div class="flex-auto text-right">{"A new update is available"}</div>
                     <button class="button"
-                        onclick={self.link.callback(|_| Msg::InstallUpdate)}
+                        onclick={ctx.link().callback(|_| Msg::InstallUpdate)}
                     >
                         {"Download and install"}
                     </button>

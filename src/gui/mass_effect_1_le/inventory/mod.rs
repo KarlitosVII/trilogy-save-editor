@@ -1,7 +1,7 @@
 use std::{cell::Ref, rc::Rc};
 
 use anyhow::Error;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
 use crate::gui::{
@@ -45,8 +45,6 @@ impl Props {
 }
 
 pub struct Me1LeInventory {
-    props: Props,
-    link: ComponentLink<Self>,
     _database_service: Box<dyn Bridge<DatabaseService>>,
     item_db: Option<Rc<Me1ItemDb>>,
 }
@@ -55,9 +53,9 @@ impl Component for Me1LeInventory {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let mut database_service =
-            DatabaseService::bridge(link.callback(|response| match response {
+            DatabaseService::bridge(ctx.link().callback(|response| match response {
                 Response::Database(Database::Me1ItemDb(db)) => Msg::ItemDb(db),
                 Response::Error(err) => Msg::Error(err),
                 _ => unreachable!(),
@@ -65,56 +63,52 @@ impl Component for Me1LeInventory {
 
         database_service.send(Request::Database(Type::Me1ItemDb));
 
-        Me1LeInventory { props, link, _database_service: database_service, item_db: None }
+        Me1LeInventory { _database_service: database_service, item_db: None }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::ItemDb(db) => {
                 self.item_db = Some(db);
                 true
             }
             Msg::Error(err) => {
-                self.props.onerror.emit(err);
+                ctx.props().onerror.emit(err);
                 false
             }
-            Msg::ChangeItem(mut item, new_item) => {
+            Msg::ChangeItem(item, new_item) => {
                 let mut item = item.borrow_mut();
                 *item.item_id_mut() = new_item.item_id;
                 *item.manufacturer_id_mut() = new_item.manufacturer_id;
                 false
             }
-            Msg::ChangeItemLevel(mut item, item_level) => {
+            Msg::ChangeItemLevel(item, item_level) => {
                 let mut item = item.borrow_mut();
                 *item.item_level_mut() = ItemLevel::from(item_level);
                 false
             }
-            Msg::RemoveItem(mut item_list, idx) => {
+            Msg::RemoveItem(item_list, idx) => {
                 item_list.borrow_mut().remove(idx);
                 true
             }
-            Msg::AddItem(mut item_list) => {
+            Msg::AddItem(item_list) => {
                 item_list.borrow_mut().push(Default::default());
                 true
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         if self.item_db.is_some() {
-            let player = self.props.player();
+            let player = ctx.props().player();
             html! {
                 <div class="flex divide-solid divide-x divide-default-border">
                     <div class="flex-1 pr-1 min-w-0">
-                        { self.player(player.inventory()) }
-                        { self.squad(self.props.squad()) }
+                        { self.player(ctx, player.inventory()) }
+                        { self.squad(ctx, ctx.props().squad()) }
                     </div>
                     <div class="flex-1 flex flex-col gap-1 pl-1 min-w-0">
-                        { self.inventory(player.inventory()) }
+                        { self.inventory(ctx, player.inventory()) }
                     </div>
                 </div>
             }
@@ -130,15 +124,15 @@ impl Component for Me1LeInventory {
 }
 
 impl Me1LeInventory {
-    fn item_view(&self, item: &RcUi<Item>) -> Html {
+    fn item_view(&self, ctx: &Context<Self>, item: &RcUi<Item>) -> Html {
         html! {
             <div class="flex items-center gap-1 min-w-0">
-                {self.item_view_no_flex(item)}
+                {self.item_view_no_flex(ctx, item)}
             </div>
         }
     }
 
-    fn item_view_no_flex(&self, item: &RcUi<Item>) -> Html {
+    fn item_view_no_flex(&self, ctx: &Context<Self>, item: &RcUi<Item>) -> Html {
         let current_item = DbItem {
             item_id: *item.borrow().item_id(),
             manufacturer_id: *item.borrow().manufacturer_id(),
@@ -146,11 +140,11 @@ impl Me1LeInventory {
         let current_level = *item.borrow().item_level() as usize;
         let onselect_item = {
             let item = RcUi::clone(item);
-            self.link.callback(move |new_item| Msg::ChangeItem(RcUi::clone(&item), new_item))
+            ctx.link().callback(move |new_item| Msg::ChangeItem(RcUi::clone(&item), new_item))
         };
         let onselect_level = {
             let item = RcUi::clone(item);
-            self.link.callback(move |idx| Msg::ChangeItemLevel(RcUi::clone(&item), idx))
+            ctx.link().callback(move |idx| Msg::ChangeItemLevel(RcUi::clone(&item), idx))
         };
         html! {
             <>
@@ -169,12 +163,12 @@ impl Me1LeInventory {
         }
     }
 
-    fn player(&self, inventory: Ref<'_, Inventory>) -> Html {
+    fn player(&self, ctx: &Context<Self>, inventory: Ref<'_, Inventory>) -> Html {
         let equipment = inventory.equipment();
-        let equipment = equipment.iter().map(|item| self.item_view(item));
+        let equipment = equipment.iter().map(|item| self.item_view(ctx, item));
 
         let quick_slots = inventory.quick_slots();
-        let quick_slots = quick_slots.iter().map(|item| self.item_view(item));
+        let quick_slots = quick_slots.iter().map(|item| self.item_view(ctx, item));
         html! {
             <div class="flex flex-col gap-1">
                 <div>
@@ -191,7 +185,7 @@ impl Me1LeInventory {
         }
     }
 
-    fn squad(&self, inventory: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
+    fn squad(&self, ctx: &Context<Self>, inventory: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
         let squad = inventory.iter().map(|henchman| {
             let henchman = henchman.borrow();
 
@@ -206,10 +200,10 @@ impl Me1LeInventory {
             };
 
             let equipment = henchman.equipment();
-            let equipment = equipment.iter().map(|item| self.item_view(item));
+            let equipment = equipment.iter().map(|item| self.item_view(ctx, item));
 
             let quick_slots = henchman.quick_slots();
-            let quick_slots = quick_slots.iter().map(|item| self.item_view(item));
+            let quick_slots = quick_slots.iter().map(|item| self.item_view(ctx, item));
             html! {
                 <div class="flex flex-col gap-1 mt-1">
                     <div>
@@ -229,18 +223,19 @@ impl Me1LeInventory {
         html! { for squad }
     }
 
-    fn inventory(&self, player_inventory: Ref<'_, Inventory>) -> Html {
+    fn inventory(&self, ctx: &Context<Self>, player_inventory: Ref<'_, Inventory>) -> Html {
+        let link = ctx.link();
         let inventory_add = {
             let inventory = RcUi::clone(&player_inventory.inventory);
-            self.link.callback(move |_| Msg::AddItem(RcUi::clone(&inventory)))
+            link.callback(move |_| Msg::AddItem(RcUi::clone(&inventory)))
         };
         let buy_pack_add = {
             let buy_pack = RcUi::clone(&player_inventory.buy_pack);
-            self.link.callback(move |_| Msg::AddItem(RcUi::clone(&buy_pack)))
+            link.callback(move |_| Msg::AddItem(RcUi::clone(&buy_pack)))
         };
 
         let item_remove_view = |item_list, idx, item| {
-            let item = self.item_view_no_flex(item);
+            let item = self.item_view_no_flex(ctx, item);
 
             html! {
                 <div class="flex items-center gap-1 min-w-0">
@@ -255,7 +250,7 @@ impl Me1LeInventory {
                                 "py-0",
                                 "cursor-pointer",
                             ]}
-                            onclick={self.link.callback(move |_| Msg::RemoveItem(RcUi::clone(&item_list), idx))}
+                            onclick={link.callback(move |_| Msg::RemoveItem(RcUi::clone(&item_list), idx))}
                         >
                             {"remove"}
                         </a>

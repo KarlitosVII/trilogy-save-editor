@@ -1,6 +1,6 @@
 use std::cell::RefMut;
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use super::IntPlotType;
 use crate::gui::{
@@ -25,30 +25,27 @@ pub struct Props {
 }
 
 impl Props {
-    fn booleans_mut(&mut self) -> RefMut<'_, BitVec> {
+    fn booleans_mut(&self) -> RefMut<'_, BitVec> {
         self.booleans.borrow_mut()
     }
 }
 
-pub struct PlotCategory {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct PlotCategory;
 
 impl Component for PlotCategory {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let mut this = PlotCategory { props, link };
-        this.add_missing_plots();
+    fn create(ctx: &Context<Self>) -> Self {
+        let mut this = PlotCategory {};
+        this.add_missing_plots(ctx);
         this
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::ChangeBool(idx, value) => {
-                if let Some(mut plot) = self.props.booleans_mut().get_mut(idx) {
+                if let Some(mut plot) = ctx.props().booleans_mut().get_mut(idx) {
                     *plot = value;
                 }
                 false
@@ -56,17 +53,13 @@ impl Component for PlotCategory {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            self.add_missing_plots();
-            true
-        } else {
-            false
-        }
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.add_missing_plots(ctx);
+        true
     }
 
-    fn view(&self) -> Html {
-        let Props { title, booleans, integers, category, me3_imported_me1 } = &self.props;
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let Props { title, booleans, integers, category, me3_imported_me1 } = &ctx.props();
         let PlotCategoryDb { booleans: bool_db, integers: int_db } = category;
 
         let booleans = bool_db.iter().map(|(idx, label)| {
@@ -79,7 +72,7 @@ impl Component for PlotCategory {
                     <CheckBox
                         label={label.clone()}
                         value={RcUi::new(*value)}
-                        onchange={self.link.callback(move |value| Msg::ChangeBool(idx, value))}
+                        onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                     />
                 },
                 None => Html::default(),
@@ -113,8 +106,8 @@ impl Component for PlotCategory {
 }
 
 impl PlotCategory {
-    fn add_missing_plots(&mut self) {
-        let Props { booleans, integers, category, me3_imported_me1, .. } = &mut self.props;
+    fn add_missing_plots(&mut self, ctx: &Context<Self>) {
+        let Props { booleans, integers, category, me3_imported_me1, .. } = &mut ctx.props();
         let PlotCategoryDb { booleans: bool_db, integers: int_db } = &category;
 
         // Booleans
@@ -131,7 +124,7 @@ impl PlotCategory {
 
         // Ints
         match integers {
-            IntPlotType::Vec(ref mut vec) => {
+            IntPlotType::Vec(ref vec) => {
                 if let Some(&(mut max)) = int_db.keys().max() {
                     if *me3_imported_me1 {
                         max += 10_000;
@@ -143,7 +136,7 @@ impl PlotCategory {
                     };
                 }
             }
-            IntPlotType::IndexMap(ref mut index_map) => {
+            IntPlotType::IndexMap(ref index_map) => {
                 for mut key in int_db.keys().copied() {
                     if *me3_imported_me1 {
                         key += 10_000;

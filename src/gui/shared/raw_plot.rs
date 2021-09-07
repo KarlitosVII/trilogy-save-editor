@@ -4,7 +4,7 @@ use std::rc::Rc;
 use gloo::{events::EventListener, timers::future::TimeoutFuture};
 use indexmap::{map::Entry, IndexMap};
 use web_sys::{HtmlElement, HtmlInputElement};
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use super::{FloatPlotType, IntPlotType, PlotType};
 use crate::gui::{
@@ -37,7 +37,7 @@ impl Props {
         self.filter.borrow()
     }
 
-    fn filter_mut(&mut self) -> RefMut<'_, String> {
+    fn filter_mut(&self) -> RefMut<'_, String> {
         self.filter.borrow_mut()
     }
 
@@ -47,8 +47,6 @@ impl Props {
 }
 
 pub struct RawPlot {
-    props: Props,
-    link: ComponentLink<Self>,
     _resize_listener: EventListener,
     scroll_ref: NodeRef,
     row_height: i32,
@@ -63,18 +61,16 @@ impl Component for RawPlot {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let _resize_listener = {
-            let link = link.clone();
+            let link = ctx.link().clone();
             EventListener::new(&yew::utils::window(), "resize", move |_| {
                 link.send_message(Msg::Scrolled)
             })
         };
-        link.send_message(Msg::Scrolled);
+        ctx.link().send_message(Msg::Scrolled);
 
         let mut this = RawPlot {
-            props,
-            link,
             _resize_listener,
             scroll_ref: Default::default(),
             row_height: 23,
@@ -84,12 +80,12 @@ impl Component for RawPlot {
             is_filtering: false,
             pending_filter: None,
         };
-        this.add_missing_plots();
-        this.update_label_list();
+        this.add_missing_plots(ctx);
+        this.update_label_list(ctx);
         this
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Scrolled => {
                 if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
@@ -105,7 +101,7 @@ impl Component for RawPlot {
                 true
             }
             Msg::ChangeBool(idx, value) => {
-                if let PlotType::Boolean(ref mut booleans) = self.props.plots {
+                if let PlotType::Boolean(ref booleans) = ctx.props().plots {
                     if let Some(mut plot) = booleans.borrow_mut().get_mut(idx) {
                         *plot = value;
                     }
@@ -117,16 +113,16 @@ impl Component for RawPlot {
                     self.is_filtering = true;
 
                     let input: HtmlInputElement = event.target_unchecked_into();
-                    *self.props.filter_mut() = input.value();
+                    *ctx.props().filter_mut() = input.value();
 
-                    self.link.send_future(async {
+                    ctx.link().send_future(async {
                         TimeoutFuture::new(100).await;
                         Msg::Filtered
                     });
 
-                    self.update_label_list();
+                    self.update_label_list(ctx);
 
-                    self.link.send_message(Msg::Scrolled);
+                    ctx.link().send_message(Msg::Scrolled);
                 } else {
                     self.pending_filter = Some(event);
                 }
@@ -135,14 +131,14 @@ impl Component for RawPlot {
             Msg::Filtered => {
                 self.is_filtering = false;
                 if let Some(event) = self.pending_filter.take() {
-                    self.link.send_message(Msg::Filter(event))
+                    ctx.link().send_message(Msg::Filter(event))
                 }
                 false
             }
             Msg::Add => {
-                let new_plot = *self.props.add_id() as usize;
-                let added = match self.props.plots {
-                    PlotType::Boolean(ref mut booleans) => {
+                let new_plot = *ctx.props().add_id() as usize;
+                let added = match ctx.props().plots {
+                    PlotType::Boolean(ref booleans) => {
                         let mut booleans = booleans.borrow_mut();
                         if new_plot >= booleans.len() {
                             booleans.resize_with(new_plot + 1, Default::default);
@@ -151,8 +147,8 @@ impl Component for RawPlot {
                             false
                         }
                     }
-                    PlotType::Int(ref mut integers) => match integers {
-                        IntPlotType::Vec(ref mut vec) => {
+                    PlotType::Int(ref integers) => match integers {
+                        IntPlotType::Vec(ref vec) => {
                             let mut vec = vec.borrow_mut();
                             if new_plot >= vec.len() {
                                 vec.resize_with(new_plot + 1, Default::default);
@@ -161,7 +157,7 @@ impl Component for RawPlot {
                                 false
                             }
                         }
-                        IntPlotType::IndexMap(ref mut index_map) => {
+                        IntPlotType::IndexMap(ref index_map) => {
                             match index_map.borrow_mut().entry(new_plot as i32) {
                                 Entry::Vacant(plot) => {
                                     plot.insert(Default::default());
@@ -171,8 +167,8 @@ impl Component for RawPlot {
                             }
                         }
                     },
-                    PlotType::Float(ref mut floats) => match floats {
-                        FloatPlotType::Vec(ref mut vec) => {
+                    PlotType::Float(ref floats) => match floats {
+                        FloatPlotType::Vec(ref vec) => {
                             let mut vec = vec.borrow_mut();
                             if new_plot >= vec.len() {
                                 vec.resize_with(new_plot + 1, Default::default);
@@ -181,7 +177,7 @@ impl Component for RawPlot {
                                 false
                             }
                         }
-                        FloatPlotType::IndexMap(ref mut index_map) => {
+                        FloatPlotType::IndexMap(ref index_map) => {
                             match index_map.borrow_mut().entry(new_plot as i32) {
                                 Entry::Vacant(plot) => {
                                     plot.insert(Default::default());
@@ -193,34 +189,30 @@ impl Component for RawPlot {
                     },
                 };
                 if added {
-                    self.update_label_list();
-                    self.link.send_message(Msg::Scrolled);
+                    self.update_label_list(ctx);
+                    ctx.link().send_message(Msg::Scrolled);
                 }
                 false
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            self.add_missing_plots();
-            self.update_label_list();
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.add_missing_plots(ctx);
+        self.update_label_list(ctx);
 
-            if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
-                if scroll.scroll_top() != 0 {
-                    scroll.set_scroll_top(0);
-                } else {
-                    self.link.send_message(Msg::Scrolled);
-                }
-                return false;
+        if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
+            if scroll.scroll_top() != 0 {
+                scroll.set_scroll_top(0);
+            } else {
+                ctx.link().send_message(Msg::Scrolled);
             }
-            true
-        } else {
-            false
+            return false;
         }
+        true
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let label_list = self.label_list.as_ref();
         let rows =
             label_list.unwrap().iter().skip(self.skip).take(self.take).map(|(&idx, label)| {
@@ -229,13 +221,13 @@ impl Component for RawPlot {
                     .map(|label| format!("{} - {}", idx, label))
                     .unwrap_or_else(|| idx.to_string());
 
-                let row = match self.props.plots {
+                let row = match ctx.props().plots {
                     PlotType::Boolean(ref booleans) => booleans.borrow().get(idx).map(|plot| {
                         html! {
                             <CheckBox
                                 {label}
                                 value={RcUi::new(*plot)}
-                                onchange={self.link.callback(move |value| Msg::ChangeBool(idx, value))}
+                                onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                             />
                         }
                     }),
@@ -263,7 +255,7 @@ impl Component for RawPlot {
                 }
             });
 
-        let add_helper = match self.props.plots {
+        let add_helper = match ctx.props().plots {
             PlotType::Boolean(_)
             | PlotType::Int(IntPlotType::Vec(_))
             | PlotType::Float(FloatPlotType::Vec(_)) => html! {
@@ -281,25 +273,25 @@ impl Component for RawPlot {
             <div class="flex-auto flex flex-col gap-1">
                 <div class="flex gap-3 w-2/3">
                     <label class="flex-auto flex items-center gap-1">
-                        <input type="text" class="flex-auto input" placeholder="<empty>" value={self.props.filter().clone()}
-                            oninput={self.link.callback(Msg::Filter)}
+                        <input type="text" class="flex-auto input" placeholder="<empty>" value={ctx.props().filter().clone()}
+                            oninput={ctx.link().callback(Msg::Filter)}
                         />
                         { "Filter" }
                     </label>
                     <form class="flex gap-1"
-                        onsubmit={self.link.callback(|e: Event| {
+                        onsubmit={ctx.link().callback(|e: Event| {
                             e.prevent_default();
                             Msg::Add
                         })}
                     >
-                        <InputNumber label={String::default()} value={NumberType::Int(RcUi::clone(&self.props.add_id))} />
+                        <InputNumber label={String::default()} value={NumberType::Int(RcUi::clone(&ctx.props().add_id))} />
                         <input type="submit" class="button" value="Add" />
                         { add_helper }
                     </form>
                 </div>
                 <hr class="border-t border-default-border" />
                 <div class="flex-auto h-0 overflow-y-auto"
-                    onscroll={self.link.callback(|_| Msg::Scrolled)}
+                    onscroll={ctx.link().callback(|_| {gloo::console::log!("Scrolled"); Msg::Scrolled})}
                     ref={self.scroll_ref.clone()}
                 >
                     <div class="relative w-full border border-default-border raw-plot-bg"
@@ -318,11 +310,11 @@ impl Component for RawPlot {
 }
 
 impl RawPlot {
-    fn add_missing_plots(&mut self) {
-        let Props { plots, plot_db, .. } = &mut self.props;
+    fn add_missing_plots(&mut self, ctx: &Context<Self>) {
+        let Props { plots, plot_db, .. } = &mut ctx.props();
 
         match plots {
-            PlotType::Boolean(ref mut booleans) => {
+            PlotType::Boolean(ref booleans) => {
                 if let Some(&max) = plot_db.booleans.keys().max() {
                     let mut booleans = booleans.borrow_mut();
                     if max >= booleans.len() {
@@ -330,8 +322,8 @@ impl RawPlot {
                     };
                 }
             }
-            PlotType::Int(ref mut integers) => match integers {
-                IntPlotType::Vec(ref mut vec) => {
+            PlotType::Int(ref integers) => match integers {
+                IntPlotType::Vec(ref vec) => {
                     if let Some(&max) = plot_db.integers.keys().max() {
                         let mut vec = vec.borrow_mut();
                         if max >= vec.len() {
@@ -339,14 +331,14 @@ impl RawPlot {
                         };
                     }
                 }
-                IntPlotType::IndexMap(ref mut index_map) => {
+                IntPlotType::IndexMap(ref index_map) => {
                     for key in plot_db.integers.keys().copied() {
                         index_map.borrow_mut().entry(key as i32).or_default();
                     }
                 }
             },
-            PlotType::Float(ref mut floats) => match floats {
-                FloatPlotType::Vec(ref mut vec) => {
+            PlotType::Float(ref floats) => match floats {
+                FloatPlotType::Vec(ref vec) => {
                     if let Some(&max) = plot_db.floats.keys().max() {
                         let mut vec = vec.borrow_mut();
                         if max >= vec.len() {
@@ -354,7 +346,7 @@ impl RawPlot {
                         };
                     }
                 }
-                FloatPlotType::IndexMap(ref mut index_map) => {
+                FloatPlotType::IndexMap(ref index_map) => {
                     for key in plot_db.floats.keys().copied() {
                         index_map.borrow_mut().entry(key as i32).or_default();
                     }
@@ -363,8 +355,8 @@ impl RawPlot {
         }
     }
 
-    fn update_label_list(&mut self) {
-        let Props { plots, plot_db, .. } = &self.props;
+    fn update_label_list(&mut self, ctx: &Context<Self>) {
+        let Props { plots, plot_db, .. } = &ctx.props();
 
         let mut label_list: IndexMap<usize, Option<String>> = match plots {
             PlotType::Boolean(ref bitvec) => {
@@ -403,7 +395,7 @@ impl RawPlot {
 
         label_list.sort_keys();
 
-        let filter = self.props.filter();
+        let filter = ctx.props().filter();
         let is_number = filter.parse::<usize>().is_ok();
         if !filter.is_empty() {
             let filter_lowercase = filter.to_lowercase();

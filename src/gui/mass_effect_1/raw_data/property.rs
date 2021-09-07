@@ -1,7 +1,7 @@
 use std::cell::Ref;
 use std::cmp::Ordering;
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{
     components::{raw_ui::RawUiStruct, CallbackType, InputText},
@@ -37,23 +37,20 @@ impl Props {
     }
 }
 
-pub struct Property {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct Property;
 
 impl Component for Property {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Property { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Property
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::DuplicateName(mut value_name_id, CallbackType::String(new_value)) => {
-                let mut player = self.props.player.borrow_mut();
+            Msg::DuplicateName(value_name_id, CallbackType::String(new_value)) => {
+                let player = ctx.props().player.borrow_mut();
                 let mut names = player.names.borrow_mut();
 
                 // Duplicate
@@ -72,16 +69,12 @@ impl Component for Property {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let player = self.props.player();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let player = ctx.props().player();
 
         let get_name = |name_id: &u32| -> String {
             // Label override
-            if let Some(ref label) = self.props.label {
+            if let Some(ref label) = ctx.props().label {
                 return label.clone();
             }
 
@@ -106,7 +99,7 @@ impl Component for Property {
             }
         }
 
-        match &*self.props.property() {
+        match &*ctx.props().property() {
             DataProperty::Array { name_id, array, .. } => {
                 let label = get_name(name_id);
 
@@ -120,7 +113,7 @@ impl Component for Property {
 
                             let label = format!("{} : {}", object_name, idx);
                             let properties = &player.get_data(*object_id).properties;
-                            self.view_properties(label, properties)
+                            self.view_properties(ctx, label, properties)
                         } else {
                             // Null
                             html! { "Null" }
@@ -129,7 +122,7 @@ impl Component for Property {
                     ArrayType::Vector(vector) => vector.view(&idx.to_string()),
                     ArrayType::String(string) => string.view(&idx.to_string()),
                     ArrayType::Properties(properties) => {
-                        self.view_properties(idx.to_string(), properties)
+                        self.view_properties(ctx, idx.to_string(), properties)
                     }
                 });
 
@@ -165,7 +158,7 @@ impl Component for Property {
                     }
                 } else {
                     let value_name_id = RcUi::clone(value_name_id);
-                    let oninput = self.link.callback(move |callback| {
+                    let oninput = ctx.link().callback(move |callback| {
                         Msg::DuplicateName(RcUi::clone(&value_name_id), callback)
                     });
                     html! {
@@ -186,7 +179,7 @@ impl Component for Property {
 
                         let label = format!("{} : {}", object_name, label);
                         let properties = &player.get_data(*object_id).properties;
-                        self.view_properties(label, properties)
+                        self.view_properties(ctx, label, properties)
                     }
                     Ordering::Less => {
                         // Class
@@ -217,7 +210,9 @@ impl Component for Property {
                     StructType::LinearColor(color) => color.view(&label),
                     StructType::Vector(vector) => vector.view(&label),
                     StructType::Rotator(rotator) => rotator.view(&label),
-                    StructType::Properties(properties) => self.view_properties(label, properties),
+                    StructType::Properties(properties) => {
+                        self.view_properties(ctx, label, properties)
+                    }
                 }
             }
             DataProperty::None { .. } => unreachable!(),
@@ -226,13 +221,15 @@ impl Component for Property {
 }
 
 impl Property {
-    fn view_properties(&self, label: String, properties: &List<RcUi<DataProperty>>) -> Html {
+    fn view_properties(
+        &self, ctx: &Context<Self>, label: String, properties: &List<RcUi<DataProperty>>,
+    ) -> Html {
         let len = properties.len();
         let take = if len > 0 { len - 1 } else { 0 };
         let properties = properties.iter().take(take).map(|property| {
             html! {
                 <Property
-                    player={RcUi::clone(&self.props.player)}
+                    player={RcUi::clone(&ctx.props().player)}
                     property={RcUi::clone(property)}
                 />
             }

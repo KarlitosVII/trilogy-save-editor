@@ -1,5 +1,5 @@
 use web_sys::HtmlElement;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 pub enum Msg {
     Open,
@@ -18,10 +18,9 @@ pub struct Props {
 }
 
 pub struct Select {
-    props: Props,
-    link: ComponentLink<Self>,
     select_ref: NodeRef,
     drop_down_ref: NodeRef,
+    current_idx: usize,
     opened: bool,
 }
 
@@ -29,17 +28,16 @@ impl Component for Select {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Select {
-            props,
-            link,
             select_ref: Default::default(),
             drop_down_ref: Default::default(),
+            current_idx: ctx.props().current_idx,
             opened: false,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Open => {
                 self.opened = true;
@@ -56,25 +54,25 @@ impl Component for Select {
                 false
             }
             Msg::Select(idx) => {
-                self.props.current_idx = idx;
-                self.props.onselect.emit(idx);
-                self.link.send_message(Msg::Blur);
+                self.current_idx = idx;
+                ctx.props().onselect.emit(idx);
+                ctx.link().send_message(Msg::Blur);
                 false
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            if !self.opened {
-                return true;
-            }
-            self.link.send_message(Msg::Blur);
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.current_idx = ctx.props().current_idx;
+        if self.opened {
+            ctx.link().send_message(Msg::Blur);
+            false
+        } else {
+            true
         }
-        false
     }
 
-    fn rendered(&mut self, _first_render: bool) {
+    fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
         // Drop down open upward if bottom > viewport_height
         if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
             let viewport_height =
@@ -95,10 +93,10 @@ impl Component for Select {
         }
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let drop_down = self.opened.then(|| {
-            let options = self.props.options.iter().enumerate().map(|(idx, option)| {
-                let selected = idx == self.props.current_idx;
+            let options = ctx.props().options.iter().enumerate().map(|(idx, option)| {
+                let selected = idx == self.current_idx;
                 html! {
                     <a
                         class={classes![
@@ -110,7 +108,7 @@ impl Component for Select {
                             "whitespace-nowrap",
                             selected.then(|| "bg-theme-bg"),
                         ]}
-                        onclick={self.link.callback(move |_| Msg::Select(idx))}
+                        onclick={ctx.link().callback(move |_| Msg::Select(idx))}
                     >
                         { option }
                     </a>
@@ -119,12 +117,12 @@ impl Component for Select {
             html! { for options }
         });
 
-        let size = if self.props.sized { "w-[200px]" } else { "min-w-[60px]" };
+        let size = if ctx.props().sized { "w-[200px]" } else { "min-w-[60px]" };
 
         let onclick = if !self.opened {
-            self.link.callback(|_| Msg::Open)
+            ctx.link().callback(|_| Msg::Open)
         } else {
-            self.link.callback(|_| Msg::Blur)
+            ctx.link().callback(|_| Msg::Blur)
         };
 
         html! {
@@ -134,7 +132,7 @@ impl Component for Select {
                     "select-none",
                     size,
                 ]}
-                onblur={self.opened.then(||self.link.callback(|_| Msg::Close))}
+                onblur={self.opened.then(||ctx.link().callback(|_| Msg::Close))}
                 ref={self.select_ref.clone()}
             >
                 <a class={classes![
@@ -149,7 +147,7 @@ impl Component for Select {
                     ]}
                     {onclick}
                 >
-                    { self.props.options[self.props.current_idx] }
+                    { ctx.props().options[self.current_idx] }
                 </a>
                 <div
                     class={classes![

@@ -5,7 +5,7 @@
 - Better font for high DPI
 - Better raw ME1 readability
 - xbox 360 support
-- // TODO: auto update
+- auto update
 
 ## 1.13.1
 - ME2: Added all armors plots

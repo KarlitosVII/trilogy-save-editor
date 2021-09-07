@@ -1,5 +1,5 @@
 use gloo::timers::future::TimeoutFuture;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::components::Helper;
 
@@ -17,34 +17,34 @@ pub struct Props {
 }
 
 pub struct Table {
-    props: Props,
-    link: ComponentLink<Self>,
+    opened: bool,
 }
 
 impl Component for Table {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Table { props, link }
+    fn create(ctx: &Context<Self>) -> Self {
+        Table { opened: ctx.props().opened }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Toggle => {
-                self.props.opened = !self.props.opened;
+                self.opened = !self.opened;
                 true
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.opened = ctx.props().opened;
+        true
     }
 
-    fn view(&self) -> Html {
-        let Props { title, children, opened, helper } = &self.props;
-        let opened = title.is_none() || *opened;
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let Props { title, children, helper, .. } = &ctx.props();
+        let opened = title.is_none() || self.opened;
 
         let title = title.as_ref().map(|title| {
             let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
@@ -70,7 +70,7 @@ impl Component for Table {
                             "pl-6",
                             chevron,
                         ]}
-                        onclick={self.link.callback(|_| Msg::Toggle)}
+                        onclick={ctx.link().callback(|_| Msg::Toggle)}
                     >
                         { title }
                         { for helper }
@@ -123,8 +123,6 @@ struct ChunkProps {
 }
 
 struct RowChunk {
-    props: ChunkProps,
-    link: ComponentLink<Self>,
     should_render: bool,
 }
 
@@ -132,19 +130,19 @@ impl Component for RowChunk {
     type Message = ChunkMsg;
     type Properties = ChunkProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let should_render = props.position == 0;
+    fn create(ctx: &Context<Self>) -> Self {
+        let should_render = ctx.props().position == 0;
         if !should_render {
-            let position = props.position as u32;
-            link.send_future(async move {
+            let position = ctx.props().position as u32;
+            ctx.link().send_future(async move {
                 TimeoutFuture::new(17 * position).await;
                 ChunkMsg::Render
             });
         }
-        RowChunk { props, link, should_render }
+        RowChunk { should_render }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ChunkMsg::Render => {
                 self.should_render = true;
@@ -153,22 +151,20 @@ impl Component for RowChunk {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            if self.props.position != 0 {
-                self.link.send_future(async {
-                    TimeoutFuture::new(0).await;
-                    ChunkMsg::Render
-                });
-            } else {
-                return true;
-            }
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        if ctx.props().position == 0 {
+            true
+        } else {
+            ctx.link().send_future(async {
+                TimeoutFuture::new(0).await;
+                ChunkMsg::Render
+            });
+            false
         }
-        false
     }
 
-    fn view(&self) -> Html {
-        let content = self.should_render.then(|| self.props.children.iter().collect::<Html>());
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let content = self.should_render.then(|| ctx.props().children.iter().collect::<Html>());
         html! { for content }
     }
 }

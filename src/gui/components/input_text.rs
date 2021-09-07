@@ -1,6 +1,6 @@
 use std::cell::{Ref, RefMut};
 use web_sys::HtmlInputElement;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use super::CallbackType;
 use crate::gui::{components::Helper, RcUi};
@@ -22,55 +22,48 @@ impl Props {
         self.value.borrow()
     }
 
-    fn value_mut(&mut self) -> RefMut<'_, String> {
+    fn value_mut(&self) -> RefMut<'_, String> {
         self.value.borrow_mut()
     }
 }
 
-pub struct InputText {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct InputText;
 
 impl Component for InputText {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        InputText { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        InputText
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Input(event) => {
                 let input: HtmlInputElement = event.target_unchecked_into();
 
-                if let Some(ref callback) = self.props.oninput {
+                if let Some(ref callback) = ctx.props().oninput {
                     callback.emit(CallbackType::String(input.value()));
                 }
 
-                *self.props.value_mut() = input.value();
+                *ctx.props().value_mut() = input.value();
                 false
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let helper = self.props.helper.as_ref().map(|&helper| {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let helper = ctx.props().helper.as_ref().map(|&helper| {
             html! {
                 <Helper text={helper} />
             }
         });
-        let value = self.props.value().clone();
-        let oninput = self.link.callback(Msg::Input);
+        let value = ctx.props().value().clone();
+        let oninput = ctx.link().callback(Msg::Input);
         html! {
             <label class="flex-auto flex items-center gap-1">
                 <input type="text" class="input w-2/3" placeholder="<empty>" {value} {oninput} />
-                { &self.props.label }
+                { &ctx.props().label }
                 { for helper }
             </label>
         }

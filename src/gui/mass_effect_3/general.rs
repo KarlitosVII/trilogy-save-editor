@@ -1,6 +1,6 @@
 use std::cell::{Ref, RefMut};
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::{
     gui::{
@@ -67,26 +67,23 @@ impl Props {
         self.save_game.borrow()
     }
 
-    fn save_game_mut(&mut self) -> RefMut<'_, Me3SaveGame> {
+    fn save_game_mut(&self) -> RefMut<'_, Me3SaveGame> {
         self.save_game.borrow_mut()
     }
 }
 
-pub struct Me3General {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct Me3General;
 
 impl Component for Me3General {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Me3General { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Me3General
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        let Me3SaveGame { player, plot, .. } = &mut *self.props.save_game_mut();
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        let Me3SaveGame { player, plot, .. } = &mut *ctx.props().save_game_mut();
         let (mut player, mut plot) = (player.borrow_mut(), plot.borrow_mut());
         match msg {
             Msg::Gender(gender) => {
@@ -226,19 +223,15 @@ impl Component for Me3General {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let save_game = self.props.save_game();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let save_game = ctx.props().save_game();
 
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
-                    { self.role_play(save_game.player()) }
+                    { self.role_play(ctx, save_game.player()) }
                     { self.morality(save_game.plot()) }
-                    { self.gameplay(save_game.player()) }
+                    { self.gameplay(ctx, save_game.player()) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
                     { self.general(&save_game) }
@@ -250,7 +243,8 @@ impl Component for Me3General {
 }
 
 impl Me3General {
-    fn role_play(&self, player: Ref<'_, Player>) -> Html {
+    fn role_play(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+        let link = ctx.link();
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
             <Table title="Role-Play">
@@ -259,7 +253,7 @@ impl Me3General {
                     <Select
                         options={genders}
                         current_idx={*player.is_female() as usize}
-                        onselect={self.link.callback(Msg::Gender)}
+                        onselect={link.callback(Msg::Gender)}
                     />
                     {"Gender"}
                     <Helper text=
@@ -271,7 +265,7 @@ impl Me3General {
                     <Select
                         options={Origin::variants()}
                         current_idx={*player.origin() as usize}
-                        onselect={self.link.callback(Msg::Origin)}
+                        onselect={link.callback(Msg::Origin)}
                     />
                     {"Origin"}
                 </div>
@@ -279,7 +273,7 @@ impl Me3General {
                     <Select
                         options={Notoriety::variants()}
                         current_idx={*player.notoriety() as usize}
-                        onselect={self.link.callback(Msg::Notoriety)}
+                        onselect={link.callback(Msg::Notoriety)}
                     />
                     {"Notoriety"}
                 </div>
@@ -304,7 +298,7 @@ impl Me3General {
         }
     }
 
-    fn gameplay(&self, player: Ref<'_, Player>) -> Html {
+    fn gameplay(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let Player {
             level,
             current_xp,
@@ -328,7 +322,7 @@ impl Me3General {
                     <Select
                         options={Me3Class::variants()}
                         current_idx={class_idx}
-                        onselect={self.link.callback(Msg::PlayerClass)}
+                        onselect={ctx.link().callback(Msg::PlayerClass)}
                     />
                     {"Class"}
                 </div>

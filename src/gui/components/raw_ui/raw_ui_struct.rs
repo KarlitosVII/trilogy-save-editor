@@ -6,7 +6,7 @@ pub enum Msg {
     Toggle,
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct Props {
     pub label: String,
     pub children: Children,
@@ -15,44 +15,31 @@ pub struct Props {
 }
 
 pub struct RawUiStruct {
-    props: Props,
-    link: ComponentLink<Self>,
+    opened: bool,
 }
 
 impl Component for RawUiStruct {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        RawUiStruct { props, link }
+    fn create(ctx: &Context<Self>) -> Self {
+        RawUiStruct { opened: ctx.props().opened }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Toggle => {
-                self.props.opened = !self.props.opened;
+                self.opened = !self.opened;
                 true
             }
         }
     }
 
-    fn change(&mut self, mut props: Self::Properties) -> ShouldRender {
-        let Props { label, opened, children } = &mut props;
-        // Prevent struct to close
-        if self.props.label != *label || self.props.children != *children {
-            *opened = self.props.opened;
-            self.props = props;
-            true
-        } else {
-            false
-        }
-    }
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let Props { ref label, ref children, .. } = ctx.props();
+        let chevron = if self.opened { "table-chevron-down" } else { "table-chevron-right" };
 
-    fn view(&self) -> Html {
-        let Props { ref label, ref children, opened } = self.props;
-        let chevron = if opened { "table-chevron-down" } else { "table-chevron-right" };
-
-        let content = opened.then(|| {
+        let content = self.opened.then(|| {
             html! {
                 <div class="p-1">
                     <Table>
@@ -76,7 +63,7 @@ impl Component for RawUiStruct {
                             "pl-6",
                             chevron,
                         ]}
-                        onclick={self.link.callback(|_| Msg::Toggle)}
+                        onclick={ctx.link().callback(|_| Msg::Toggle)}
                     >
                         { label }
                     </button>

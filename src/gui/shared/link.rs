@@ -1,7 +1,6 @@
 use wasm_bindgen::JsValue;
 use web_sys::{PopStateEvent, PopStateEventInit};
 use yew::prelude::*;
-use yew::utils::NeqAssign;
 
 pub enum Msg {
     Clicked,
@@ -13,25 +12,22 @@ pub struct Props {
     pub children: Children,
 }
 
-pub struct Link {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct Link;
 
 impl Component for Link {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Link { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Link {}
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Clicked => {
                 let window = yew::utils::window();
 
-                let main_tab = JsValue::from_str(&self.props.tab);
+                let main_tab = JsValue::from_str(&ctx.props().tab);
                 // let history = window.history().expect("no history");
                 // history.push_state(&main_tab, "").expect("push history");
 
@@ -45,14 +41,10 @@ impl Component for Link {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <button class="button link" onclick={self.link.callback(|_| Msg::Clicked)}>
-                { self.props.children.clone() }
+            <button class="button link" onclick={ctx.link().callback(|_| Msg::Clicked)}>
+                { ctx.props().children.clone() }
             </button>
         }
     }

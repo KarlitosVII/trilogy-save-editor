@@ -3,7 +3,7 @@ use std::rc::Rc;
 use gloo::timers::future::TimeoutFuture;
 use indexmap::IndexMap;
 use web_sys::{HtmlElement, HtmlInputElement};
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::save_data::mass_effect_1_le::item_db::{DbItem, Me1ItemDb};
 
@@ -26,12 +26,11 @@ pub struct Props {
 }
 
 pub struct ItemSelect {
-    props: Props,
-    link: ComponentLink<Self>,
     select_ref: NodeRef,
     drop_down_ref: NodeRef,
     scroll_ref: NodeRef,
     filter_ref: NodeRef,
+    current_item: DbItem,
     focused: bool,
     opened: bool,
     is_opening: bool,
@@ -46,14 +45,13 @@ impl Component for ItemSelect {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         ItemSelect {
-            props,
-            link,
             select_ref: Default::default(),
             drop_down_ref: Default::default(),
             scroll_ref: Default::default(),
             filter_ref: Default::default(),
+            current_item: ctx.props().current_item,
             focused: false,
             opened: false,
             is_opening: false,
@@ -65,7 +63,7 @@ impl Component for ItemSelect {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Scrolled => {
                 if let Some(scroll) = self.scroll_ref.cast::<HtmlElement>() {
@@ -73,7 +71,7 @@ impl Component for ItemSelect {
                     let offset_height = 300;
                     let num_rows = offset_height / self.row_height + 2;
 
-                    let len = self.filtered_list.as_ref().unwrap_or(&self.props.item_db).len();
+                    let len = self.filtered_list.as_ref().unwrap_or(&ctx.props().item_db).len();
                     let start = scroll_top / self.row_height;
                     self.skip = start.max(0) as usize;
                     self.take = num_rows.min(len as i32) as usize;
@@ -107,7 +105,7 @@ impl Component for ItemSelect {
                 // The drop down blur just before the filter focus
                 // so we delay the check until next event loop
                 // to avoid closing when clicking into filter's input
-                self.link.send_future(async {
+                ctx.link().send_future(async {
                     TimeoutFuture::new(0).await;
                     Msg::ShouldClose
                 });
@@ -128,8 +126,8 @@ impl Component for ItemSelect {
 
                 if !filter.is_empty() {
                     let filter = filter.to_lowercase();
-                    let filtered_list = self
-                        .props
+                    let filtered_list = ctx
+                        .props()
                         .item_db
                         .iter()
                         .filter_map(|(k, v)| {
@@ -141,29 +139,29 @@ impl Component for ItemSelect {
                     self.filtered_list = None;
                 }
                 self.filter = filter;
-                self.link.send_message(Msg::Scrolled);
+                ctx.link().send_message(Msg::Scrolled);
                 false
             }
             Msg::Select(key) => {
-                self.props.current_item = key;
-                self.props.onselect.emit(key);
-                self.link.send_message(Msg::BlurAll);
+                self.current_item = key;
+                ctx.props().onselect.emit(key);
+                ctx.link().send_message(Msg::BlurAll);
                 false
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props.neq_assign(props) {
-            if !self.opened {
-                return true;
-            }
-            self.link.send_message(Msg::BlurAll);
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.current_item = ctx.props().current_item;
+        if self.opened {
+            ctx.link().send_message(Msg::BlurAll);
+            false
+        } else {
+            true
         }
-        false
     }
 
-    fn rendered(&mut self, _first_render: bool) {
+    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
         if self.is_opening {
             self.is_opening = false;
 
@@ -200,22 +198,22 @@ impl Component for ItemSelect {
                 }
             }
 
-            self.link.send_message(Msg::Scrolled);
+            ctx.link().send_message(Msg::Scrolled);
         }
     }
 
-    fn view(&self) -> Html {
-        let current_item_name = self
-            .props
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let current_item_name = ctx
+            .props()
             .item_db
-            .get(&self.props.current_item)
+            .get(&self.current_item)
             .map(|item| item.as_str())
             .unwrap_or_else(|| "Unknown item");
 
-        let item_db = self.filtered_list.as_ref().unwrap_or(&self.props.item_db);
+        let item_db = self.filtered_list.as_ref().unwrap_or(&ctx.props().item_db);
         let options = (self.opened && !self.is_opening).then(|| {
             let options = item_db.iter().skip(self.skip).take(self.take).map(|(&key, option)| {
-                let selected = key == self.props.current_item;
+                let selected = key == self.current_item;
                 html_nested! {
                     <a
                         class={classes![
@@ -227,7 +225,7 @@ impl Component for ItemSelect {
                             "whitespace-nowrap",
                             selected.then(|| "bg-theme-bg"),
                         ]}
-                        onclick={self.link.callback(move |_| Msg::Select(key))}
+                        onclick={ctx.link().callback(move |_| Msg::Select(key))}
                     >
                         { option }
                     </a>
@@ -244,15 +242,15 @@ impl Component for ItemSelect {
         });
 
         let onclick = if !self.opened {
-            self.link.callback(|_| Msg::Open)
+            ctx.link().callback(|_| Msg::Open)
         } else {
-            self.link.callback(|_| Msg::BlurAll)
+            ctx.link().callback(|_| Msg::BlurAll)
         };
 
         html! {
             <div class="relative flex-auto select-none min-w-0" tabindex="0"
-                onfocus={self.link.callback(|_| Msg::Focused)}
-                onblur={self.opened.then(||self.link.callback(|_| Msg::Blurred))}
+                onfocus={ctx.link().callback(|_| Msg::Focused)}
+                onblur={self.opened.then(||ctx.link().callback(|_| Msg::Blurred))}
                 ref={self.select_ref.clone()}
             >
                 <div class="overflow-hidden">
@@ -288,16 +286,16 @@ impl Component for ItemSelect {
                         <label class="flex items-center gap-1 p-px pr-1">
                             <input type="text" class="flex-auto input" placeholder="<empty>"
                                 value={self.filter.clone()}
-                                oninput={self.link.callback(Msg::Filter)}
-                                onfocus={self.link.callback(|_| Msg::Focused)}
-                                onblur={self.link.callback(|_| Msg::Blurred)}
+                                oninput={ctx.link().callback(Msg::Filter)}
+                                onfocus={ctx.link().callback(|_| Msg::Focused)}
+                                onblur={ctx.link().callback(|_| Msg::Blurred)}
                                 ref={self.filter_ref.clone()}
                             />
                             { "Filter" }
                         </label>
                         <hr class="border-t border-default-border" />
                         <div class="p-px overflow-y-auto z-20"
-                            onscroll={self.link.callback(|_| Msg::Scrolled)}
+                            onscroll={ctx.link().callback(|_| Msg::Scrolled)}
                             ref={self.scroll_ref.clone()}
                         >
                             <div style={format!("height: {}px;", item_db.len() * self.row_height as usize)}>

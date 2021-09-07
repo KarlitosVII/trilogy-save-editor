@@ -1,6 +1,6 @@
 use anyhow::Error;
 use std::cell::{Ref, RefMut};
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
 use crate::gui::{components::Table, raw_ui::RawUiChildren, RcUi};
@@ -28,14 +28,12 @@ impl Props {
         self.head_morph.borrow()
     }
 
-    fn head_morph_mut(&mut self) -> RefMut<'_, Option<RcUi<DataHeadMorph>>> {
+    fn head_morph_mut(&self) -> RefMut<'_, Option<RcUi<DataHeadMorph>>> {
         self.head_morph.borrow_mut()
     }
 }
 
 pub struct HeadMorph {
-    props: Props,
-    link: ComponentLink<Self>,
     save_handler: Box<dyn Bridge<SaveHandler>>,
 }
 
@@ -43,63 +41,59 @@ impl Component for HeadMorph {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         // TODO: Import gibbed head morph
-        let save_handler = SaveHandler::bridge(link.callback(|response| match response {
+        let save_handler = SaveHandler::bridge(ctx.link().callback(|response| match response {
             Response::HeadMorphImported(head_morph) => Msg::HeadMorphImported(head_morph),
             Response::HeadMorphExported => Msg::HeadMorphExported,
             Response::Error(err) => Msg::Error(err),
             _ => unreachable!(),
         }));
-        HeadMorph { props, link, save_handler }
+        HeadMorph { save_handler }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Import => {
                 self.save_handler.send(Request::ImportHeadMorph);
                 false
             }
             Msg::HeadMorphImported(head_morph) => {
-                *self.props.head_morph_mut() = Some(head_morph.into());
-                self.props.onnotification.emit("Imported");
+                *ctx.props().head_morph_mut() = Some(head_morph.into());
+                ctx.props().onnotification.emit("Imported");
                 true
             }
             Msg::Export => {
-                if let Some(ref head_morph) = *self.props.head_morph() {
+                if let Some(ref head_morph) = *ctx.props().head_morph() {
                     self.save_handler.send(Request::ExportHeadMorph(RcUi::clone(head_morph)));
                 }
                 false
             }
             Msg::HeadMorphExported => {
-                self.props.onnotification.emit("Exported");
+                ctx.props().onnotification.emit("Exported");
                 false
             }
             Msg::RemoveHeadMorph => {
-                self.props.head_morph_mut().take();
+                ctx.props().head_morph_mut().take();
                 true
             }
             Msg::Error(err) => {
-                self.props.onerror.emit(err);
+                ctx.props().onerror.emit(err);
                 false
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let head_morph = self.props.head_morph();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let head_morph = ctx.props().head_morph();
         let export_remove = head_morph.is_some().then(|| {
             html! {
                 <>
-                    <button class="button" onclick={self.link.callback(|_| Msg::Export)}>
+                    <button class="button" onclick={ctx.link().callback(|_| Msg::Export)}>
                         {"Export"}
                     </button>
                     <span>{"-"}</span>
-                    <button class="button" onclick={self.link.callback(|_| Msg::RemoveHeadMorph)}>
+                    <button class="button" onclick={ctx.link().callback(|_| Msg::RemoveHeadMorph)}>
                         {"Remove head morph"}
                     </button>
                 </>
@@ -115,7 +109,7 @@ impl Component for HeadMorph {
         html! {
             <div class="flex-auto flex flex-col gap-1">
                 <div class="flex items-center gap-2">
-                    <button class="button" onclick={self.link.callback(|_| Msg::Import)}>
+                    <button class="button" onclick={ctx.link().callback(|_| Msg::Import)}>
                         {"Import"}
                     </button>
                     { for export_remove }

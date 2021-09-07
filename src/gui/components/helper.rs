@@ -1,5 +1,5 @@
 use web_sys::HtmlElement;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 pub enum Msg {
     Hover,
@@ -12,8 +12,6 @@ pub struct Props {
 }
 
 pub struct Helper {
-    props: Props,
-    link: ComponentLink<Self>,
     popup_ref: NodeRef,
     hovered: bool,
 }
@@ -22,11 +20,11 @@ impl Component for Helper {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Helper { props, link, popup_ref: Default::default(), hovered: false }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Helper { popup_ref: Default::default(), hovered: false }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Hover => {
                 self.hovered = true;
@@ -39,11 +37,7 @@ impl Component for Helper {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn rendered(&mut self, _first_render: bool) {
+    fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
         // Keep the popup in the viewport
         if let Some(popup) = self.popup_ref.cast::<HtmlElement>() {
             let viewport_width = yew::utils::document().document_element().unwrap().client_width();
@@ -63,15 +57,15 @@ impl Component for Helper {
         }
     }
 
-    fn view(&self) -> Html {
-        let text = self.props.text.split_terminator('\n').map(|text| {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let text = ctx.props().text.split_terminator('\n').map(|text| {
             html! { <p>{ text }</p> }
         });
         html! {
             <div class="relative">
                 <div class="text-white/50 select-none"
-                    onmouseover={self.link.callback(|_| Msg::Hover)}
-                    onmouseout={self.link.callback(|_| Msg::Out)}
+                    onmouseover={ctx.link().callback(|_| Msg::Hover)}
+                    onmouseout={ctx.link().callback(|_| Msg::Out)}
                 >
                     { "(?)" }
                 </div>

@@ -1,6 +1,9 @@
-use std::cell::{Ref, RefMut};
+use std::{
+    cell::{Ref, RefMut},
+    marker::PhantomData,
+};
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{raw_ui::RawUi, RcUi};
 
@@ -25,7 +28,7 @@ where
         self.option.borrow()
     }
 
-    fn option_mut(&mut self) -> RefMut<'_, Option<T>> {
+    fn option_mut(&self) -> RefMut<'_, Option<T>> {
         self.option.borrow_mut()
     }
 }
@@ -34,8 +37,7 @@ pub struct RawUiOption<T>
 where
     T: RawUi,
 {
-    props: Props<T>,
-    link: ComponentLink<Self>,
+    _marker: PhantomData<T>,
 }
 
 impl<T> Component for RawUiOption<T>
@@ -45,25 +47,21 @@ where
     type Message = Msg;
     type Properties = Props<T>;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        RawUiOption { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        RawUiOption { _marker: PhantomData }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Remove => {
-                *self.props.option_mut() = None;
+                *ctx.props().option_mut() = None;
                 true
             }
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        match *self.props.option() {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        match *ctx.props().option() {
             Some(ref content) => html! {
                 <div class="flex gap-1">
                     <div class="py-px">
@@ -78,18 +76,18 @@ where
                                 "py-0",
                                 "cursor-pointer",
                             ]}
-                            onclick={self.link.callback(|_| Msg::Remove)}
+                            onclick={ctx.link().callback(|_| Msg::Remove)}
                         >
                             {"remove"}
                         </a>
                     </div>
-                    { content.view(&self.props.label) }
+                    { content.view(&ctx.props().label) }
                 </div>
             },
             None => html! {
                 <div class="flex-auto flex items-center gap-1">
                     <span class="w-2/3">{ "None" }</span>
-                    { &self.props.label }
+                    { &ctx.props().label }
                 </div>
             },
         }

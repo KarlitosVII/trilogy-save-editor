@@ -1,4 +1,4 @@
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{components::Table, RcUi};
 use crate::save_data::{
@@ -32,24 +32,21 @@ pub struct Props {
     pub helper: Option<&'static str>,
 }
 
-pub struct BonusPowers {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct BonusPowers;
 
 impl Component for BonusPowers {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        BonusPowers { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        BonusPowers
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::ToggleBonusPower(power_class_name) => {
-                match self.props.powers {
-                    BonusPowerType::Me2(ref mut powers) => {
+                match ctx.props().powers {
+                    BonusPowerType::Me2(ref powers) => {
                         let idx = powers.borrow().iter().enumerate().find_map(|(i, power)| {
                             power
                                 .borrow()
@@ -61,12 +58,12 @@ impl Component for BonusPowers {
                         if let Some(idx) = idx {
                             powers.borrow_mut().remove(idx);
                         } else {
-                            let mut power = Me2Power::default();
+                            let power = Me2Power::default();
                             *power.power_class_name.borrow_mut() = power_class_name;
                             powers.borrow_mut().push(power.into());
                         }
                     }
-                    BonusPowerType::Me3(ref mut powers) => {
+                    BonusPowerType::Me3(ref powers) => {
                         let idx = powers.borrow().iter().enumerate().find_map(|(i, power)| {
                             power
                                 .borrow()
@@ -78,7 +75,7 @@ impl Component for BonusPowers {
                         if let Some(idx) = idx {
                             powers.borrow_mut().remove(idx);
                         } else {
-                            let mut power = Me3Power::default();
+                            let power = Me3Power::default();
                             *power.power_class_name.borrow_mut() = power_class_name;
                             powers.borrow_mut().push(power.into());
                         }
@@ -90,12 +87,8 @@ impl Component for BonusPowers {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        let Props { power_list, powers, helper } = &self.props;
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let Props { power_list, powers, helper } = &ctx.props();
 
         let selectables = power_list.iter().map(|&(power_class_name, power_name)| {
             let selected = match powers {
@@ -118,7 +111,7 @@ impl Component for BonusPowers {
                         "text-left",
                         selected.then(|| "bg-theme-bg"),
                     ]}
-                    onclick={self.link.callback(move |_| Msg::ToggleBonusPower(power_class_name.to_owned()))}
+                    onclick={ctx.link().callback(move |_| Msg::ToggleBonusPower(power_class_name.to_owned()))}
                 >
                     {power_name}
                 </button>

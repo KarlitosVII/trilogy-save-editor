@@ -2,7 +2,7 @@ use std::cell::{Ref, RefMut};
 
 use anyhow::ensure;
 use web_sys::HtmlInputElement;
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::gui::{
     components::{CallbackType, InputNumber, NumberType},
@@ -29,40 +29,37 @@ impl Props {
         self.color.borrow()
     }
 
-    fn color_mut(&mut self) -> RefMut<'_, LinearColor> {
+    fn color_mut(&self) -> RefMut<'_, LinearColor> {
         self.color.borrow_mut()
     }
 }
 
-pub struct ColorPicker {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct ColorPicker;
 
 impl Component for ColorPicker {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        ColorPicker { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        ColorPicker
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::R(CallbackType::Byte(value)) => {
-                self.props.color_mut().r = value as f32 / 255.0;
+                ctx.props().color_mut().r = value as f32 / 255.0;
                 true
             }
             Msg::G(CallbackType::Byte(value)) => {
-                self.props.color_mut().g = value as f32 / 255.0;
+                ctx.props().color_mut().g = value as f32 / 255.0;
                 true
             }
             Msg::B(CallbackType::Byte(value)) => {
-                self.props.color_mut().b = value as f32 / 255.0;
+                ctx.props().color_mut().b = value as f32 / 255.0;
                 true
             }
             Msg::A(CallbackType::Byte(value)) => {
-                self.props.color_mut().a = value as f32 / 255.0;
+                ctx.props().color_mut().a = value as f32 / 255.0;
                 true
             }
             Msg::Change(event) => {
@@ -79,7 +76,7 @@ impl Component for ColorPicker {
                 };
 
                 if let Ok((r, g, b)) = hex_to_rgb(color) {
-                    let mut color = self.props.color_mut();
+                    let mut color = ctx.props().color_mut();
                     color.r = r as f32 / 255.0;
                     color.g = g as f32 / 255.0;
                     color.b = b as f32 / 255.0;
@@ -92,13 +89,9 @@ impl Component for ColorPicker {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let (r, g, b, a) = {
-            let colors = self.props.color();
+            let colors = ctx.props().color();
             (
                 (colors.r * 255.0) as u8,
                 (colors.g * 255.0) as u8,
@@ -110,19 +103,19 @@ impl Component for ColorPicker {
 
         html! {
             <div class="flex gap-2">
-                <InputNumber label="R" value={NumberType::Byte(r.into())} onchange={self.link.callback(Msg::R)} />
-                <InputNumber label="G" value={NumberType::Byte(g.into())} onchange={self.link.callback(Msg::G)} />
-                <InputNumber label="B" value={NumberType::Byte(b.into())} onchange={self.link.callback(Msg::B)} />
-                <InputNumber label="A" value={NumberType::Byte(a.into())} onchange={self.link.callback(Msg::A)} />
+                <InputNumber label="R" value={NumberType::Byte(r.into())} onchange={ctx.link().callback(Msg::R)} />
+                <InputNumber label="G" value={NumberType::Byte(g.into())} onchange={ctx.link().callback(Msg::G)} />
+                <InputNumber label="B" value={NumberType::Byte(b.into())} onchange={ctx.link().callback(Msg::B)} />
+                <InputNumber label="A" value={NumberType::Byte(a.into())} onchange={ctx.link().callback(Msg::A)} />
                 <label class="flex-auto flex items-center gap-1">
                     <span class="border border-default-border w-5 h-5" style={format!("background-color: {}", hex_color)}>
                         <input type="color"
                             class="opacity-0"
                             value={hex_color}
-                            onchange={self.link.callback(Msg::Change)}
+                            onchange={ctx.link().callback(Msg::Change)}
                         />
                     </span>
-                    { &self.props.label }
+                    { &ctx.props().label }
                 </label>
             </div>
         }

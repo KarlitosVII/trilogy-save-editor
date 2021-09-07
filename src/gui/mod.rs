@@ -29,7 +29,7 @@ impl<T> RcUi<T> {
         RefCell::borrow(&self.0)
     }
 
-    pub fn borrow_mut(&mut self) -> RefMut<'_, T> {
+    pub fn borrow_mut(&self) -> RefMut<'_, T> {
         RefCell::borrow_mut(&self.0)
     }
 }

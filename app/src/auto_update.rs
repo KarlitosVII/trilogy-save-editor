@@ -103,7 +103,7 @@ impl AutoUpdate {
                 let path = temp_dir.join(name);
 
                 // If not exists
-                if !fs::metadata(&temp_dir).await.is_ok() {
+                if fs::metadata(&temp_dir).await.is_err() {
                     fs::create_dir(temp_dir).await?;
                 }
                 fs::write(&path, setup).await?;

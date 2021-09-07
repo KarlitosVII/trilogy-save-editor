@@ -1,6 +1,6 @@
 use std::cell::Ref;
 
-use yew::{prelude::*, utils::NeqAssign};
+use yew::prelude::*;
 
 use crate::save_data::{
     mass_effect_1::{
@@ -40,23 +40,20 @@ impl Props {
     }
 }
 
-pub struct Me1General {
-    props: Props,
-    link: ComponentLink<Self>,
-}
+pub struct Me1General;
 
 impl Component for Me1General {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Me1General { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Me1General
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Difficulty(new_difficulty_idx) => {
-                let player = self.props.player();
+                let player = ctx.props().player();
 
                 // Worst thing ever >>
                 // Find current game
@@ -71,8 +68,9 @@ impl Component for Me1General {
                         (object_name == "CurrentGame").then(|| player.get_data(i as i32 + 1))
                     })
                     .and_then(|current_game| {
-                        let m_game_options =
-                            self.find_property(&current_game.properties, "m_GameOptions")?.borrow();
+                        let m_game_options = self
+                            .find_property(ctx, &current_game.properties, "m_GameOptions")?
+                            .borrow();
                         match *m_game_options {
                             DataProperty::Struct {
                                 struct_type: StructType::Properties(ref properties),
@@ -81,17 +79,17 @@ impl Component for Me1General {
                             _ => None,
                         }
                         .and_then(|properties| {
-                            self.find_property(properties, "m_nCombatDifficulty").and_then(|p| {
-                                match *p.borrow() {
+                            self.find_property(ctx, properties, "m_nCombatDifficulty").and_then(
+                                |p| match *p.borrow() {
                                     DataProperty::Int { ref value, .. } => Some(RcUi::clone(value)),
                                     _ => None,
-                                }
-                            })
+                                },
+                            )
                         })
                     });
 
                 // Then set new difficulty
-                if let Some(mut value) = value {
+                if let Some(value) = value {
                     *value.borrow_mut() = new_difficulty_idx as i32;
                 }
 
@@ -100,18 +98,14 @@ impl Component for Me1General {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-
-    fn view(&self) -> Html {
-        html! { for self.try_view() }
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        html! { for self.try_view(ctx) }
     }
 }
 
 impl Me1General {
-    fn try_view(&self) -> Option<Html> {
-        let player = self.props.player();
+    fn try_view(&self, ctx: &Context<Self>) -> Option<Html> {
+        let player = ctx.props().player();
 
         let current_game = player.objects.iter().enumerate().find_map(|(i, object)| {
             let object_name = player.get_name(object.object_name_id);
@@ -119,48 +113,48 @@ impl Me1General {
         })?;
 
         let m_player = {
-            let object_id = self.find_object_id(&current_game.properties, "m_Player")?;
+            let object_id = self.find_object_id(ctx, &current_game.properties, "m_Player")?;
             player.get_data(object_id)
         };
 
         let m_squad = {
-            let object_id = self.find_object_id(&m_player.properties, "m_Squad")?;
+            let object_id = self.find_object_id(ctx, &m_player.properties, "m_Squad")?;
             player.get_data(object_id)
         };
 
         let m_inventory = {
-            let object_id = self.find_object_id(&m_squad.properties, "m_Inventory")?;
+            let object_id = self.find_object_id(ctx, &m_squad.properties, "m_Inventory")?;
             player.get_data(object_id)
         };
 
         Some(html! {
             <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
-                    { self.role_play(m_player) }
-                    { self.gameplay(m_player, m_squad) }
-                    { self.morality() }
+                    { self.role_play(ctx, m_player) }
+                    { self.gameplay(ctx, m_player, m_squad) }
+                    { self.morality(ctx) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
-                    { for self.general(&current_game.properties) }
-                    { self.resources(m_inventory) }
+                    { for self.general(ctx, &current_game.properties) }
+                    { self.resources(ctx, m_inventory) }
                 </div>
             </div>
         })
     }
 
-    fn role_play(&self, m_player: &Data) -> Html {
+    fn role_play(&self, ctx: &Context<Self>, m_player: &Data) -> Html {
         let name = self
-            .find_property(&m_player.properties, "m_FirstName")
-            .map(|p| self.view_property(p, "Name"));
+            .find_property(ctx, &m_player.properties, "m_FirstName")
+            .map(|p| self.view_property(ctx, p, "Name"));
         let gender = self
-            .find_property(&m_player.properties, "m_Gender")
-            .map(|p| self.view_property(p, "Gender"));
+            .find_property(ctx, &m_player.properties, "m_Gender")
+            .map(|p| self.view_property(ctx, p, "Gender"));
         let origin = self
-            .find_property(&m_player.properties, "m_BackgroundOrigin")
-            .map(|p| self.view_property(p, "Origin"));
+            .find_property(ctx, &m_player.properties, "m_BackgroundOrigin")
+            .map(|p| self.view_property(ctx, p, "Origin"));
         let notoriety = self
-            .find_property(&m_player.properties, "m_BackgroundNotoriety")
-            .map(|p| self.view_property(p, "Notoriety"));
+            .find_property(ctx, &m_player.properties, "m_BackgroundNotoriety")
+            .map(|p| self.view_property(ctx, p, "Notoriety"));
 
         html! {
             <Table title="Role-Play">
@@ -172,16 +166,16 @@ impl Me1General {
         }
     }
 
-    fn gameplay(&self, m_player: &Data, m_squad: &Data) -> Html {
+    fn gameplay(&self, ctx: &Context<Self>, m_player: &Data, m_squad: &Data) -> Html {
         let class = self
-            .find_property(&m_player.properties, "m_ClassBase")
-            .map(|p| self.view_property(p, "Class"));
+            .find_property(ctx, &m_player.properties, "m_ClassBase")
+            .map(|p| self.view_property(ctx, p, "Class"));
         let level = self
-            .find_property(&m_player.properties, "m_XPLevel")
-            .map(|p| self.view_property(p, "Level"));
+            .find_property(ctx, &m_player.properties, "m_XPLevel")
+            .map(|p| self.view_property(ctx, p, "Level"));
         let curent_xp = self
-            .find_property(&m_squad.properties, "m_nSquadExperience")
-            .map(|p| self.view_property(p, "Current XP"));
+            .find_property(ctx, &m_squad.properties, "m_nSquadExperience")
+            .map(|p| self.view_property(ctx, p, "Current XP"));
 
         html! {
             <Table title="Gameplay">
@@ -192,8 +186,8 @@ impl Me1General {
         }
     }
 
-    fn morality(&self) -> Html {
-        let plot = self.props.plot();
+    fn morality(&self, ctx: &Context<Self>) -> Html {
+        let plot = ctx.props().plot();
         html! {
             <Table title="Morality">
                 { for plot.integers().get(47).map(|paragon| paragon.view("Paragon")) }
@@ -202,11 +196,13 @@ impl Me1General {
         }
     }
 
-    fn general(&self, current_game: &List<RcUi<DataProperty>>) -> Option<Html> {
+    fn general(
+        &self, ctx: &Context<Self>, current_game: &List<RcUi<DataProperty>>,
+    ) -> Option<Html> {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
 
-        let m_game_options = self.find_property(current_game, "m_GameOptions")?.borrow();
+        let m_game_options = self.find_property(ctx, current_game, "m_GameOptions")?.borrow();
         let difficulty = match *m_game_options {
             DataProperty::Struct {
                 struct_type: StructType::Properties(ref properties), ..
@@ -214,9 +210,11 @@ impl Me1General {
             _ => None,
         }
         .and_then(|properties| {
-            self.find_property(properties, "m_nCombatDifficulty").and_then(|p| match *p.borrow() {
-                DataProperty::Int { ref value, .. } => Some(*value.borrow() as usize),
-                _ => None,
+            self.find_property(ctx, properties, "m_nCombatDifficulty").and_then(|p| {
+                match *p.borrow() {
+                    DataProperty::Int { ref value, .. } => Some(*value.borrow() as usize),
+                    _ => None,
+                }
             })
         })
         .map(|current_idx| {
@@ -225,7 +223,7 @@ impl Me1General {
                     <Select
                         options={difficulty}
                         {current_idx}
-                        onselect={self.link.callback(Msg::Difficulty)}
+                        onselect={ctx.link().callback(Msg::Difficulty)}
                     />
                     { "Difficulty" }
                 </div>
@@ -239,19 +237,19 @@ impl Me1General {
         })
     }
 
-    fn resources(&self, m_inventory: &Data) -> Html {
+    fn resources(&self, ctx: &Context<Self>, m_inventory: &Data) -> Html {
         let credits = self
-            .find_property(&m_inventory.properties, "m_nResourceCredits")
-            .map(|p| self.view_property(p, "Credits"));
+            .find_property(ctx, &m_inventory.properties, "m_nResourceCredits")
+            .map(|p| self.view_property(ctx, p, "Credits"));
         let medigel = self
-            .find_property(&m_inventory.properties, "m_fResourceMedigel")
-            .map(|p| self.view_property(p, "Medigel"));
+            .find_property(ctx, &m_inventory.properties, "m_fResourceMedigel")
+            .map(|p| self.view_property(ctx, p, "Medigel"));
         let grenades = self
-            .find_property(&m_inventory.properties, "m_nResourceGrenades")
-            .map(|p| self.view_property(p, "Grenades"));
+            .find_property(ctx, &m_inventory.properties, "m_nResourceGrenades")
+            .map(|p| self.view_property(ctx, p, "Grenades"));
         let omnigel = self
-            .find_property(&m_inventory.properties, "m_fResourceSalvage")
-            .map(|p| self.view_property(p, "Omnigel"));
+            .find_property(ctx, &m_inventory.properties, "m_fResourceSalvage")
+            .map(|p| self.view_property(ctx, p, "Omnigel"));
 
         html! {
             <Table title="Resources">
@@ -263,8 +261,10 @@ impl Me1General {
         }
     }
 
-    fn view_property(&self, property: &RcUi<DataProperty>, label: &str) -> Html {
-        let player = &self.props.player;
+    fn view_property(
+        &self, ctx: &Context<Self>, property: &RcUi<DataProperty>, label: &str,
+    ) -> Html {
+        let player = &ctx.props().player;
         html! {
             <Property
                 player={RcUi::clone(player)}
@@ -275,9 +275,9 @@ impl Me1General {
     }
 
     fn find_property<'a>(
-        &self, properties: &'a List<RcUi<DataProperty>>, property_name: &str,
+        &self, ctx: &Context<Self>, properties: &'a List<RcUi<DataProperty>>, property_name: &str,
     ) -> Option<&'a RcUi<DataProperty>> {
-        let player = self.props.player();
+        let player = ctx.props().player();
         properties.iter().find_map(|property| match *property.borrow() {
             DataProperty::Array { name_id, .. }
             | DataProperty::Bool { name_id, .. }
@@ -296,9 +296,9 @@ impl Me1General {
     }
 
     fn find_object_id(
-        &self, properties: &List<RcUi<DataProperty>>, property_name: &str,
+        &self, ctx: &Context<Self>, properties: &List<RcUi<DataProperty>>, property_name: &str,
     ) -> Option<i32> {
-        self.find_property(properties, property_name).and_then(|property| {
+        self.find_property(ctx, properties, property_name).and_then(|property| {
             match *property.borrow() {
                 DataProperty::Object { object_id, .. } => Some(object_id),
                 _ => None,

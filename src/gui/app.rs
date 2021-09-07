@@ -41,50 +41,43 @@ pub enum Msg {
     DismissError,
 }
 
-#[derive(Properties, Clone, Default)]
-pub struct Props {
-    #[prop_or_default]
-    save_game: Option<SaveGame>,
-}
-
 pub struct App {
-    props: Props,
-    link: ComponentLink<Self>,
     save_handler: Box<dyn Bridge<SaveHandler>>,
     _dbs_service: Box<dyn Bridge<DatabaseService>>,
     _drop_handler: DropHandler,
     notification: Option<&'static str>,
     error: Option<Error>,
+    save_game: Option<SaveGame>,
 }
 
 impl Component for App {
     type Message = Msg;
-    type Properties = Props;
+    type Properties = ();
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let mut save_handler = SaveHandler::bridge(link.callback(|response| match response {
-            Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
-            Response::SaveSaved => Msg::SaveSaved,
-            Response::Error(err) => Msg::Error(err),
-            _ => unreachable!(),
-        }));
+    fn create(ctx: &Context<Self>) -> Self {
+        let mut save_handler =
+            SaveHandler::bridge(ctx.link().callback(|response| match response {
+                Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
+                Response::SaveSaved => Msg::SaveSaved,
+                Response::Error(err) => Msg::Error(err),
+                _ => unreachable!(),
+            }));
         save_handler.send(Request::OpenCommandLineSave);
 
         let dbs_service = DatabaseService::bridge(Callback::noop());
-        let drop_handler = DropHandler::new(link.callback(Msg::SaveDropped));
+        let drop_handler = DropHandler::new(ctx.link().callback(Msg::SaveDropped));
 
         App {
-            props,
-            link,
             save_handler,
             _dbs_service: dbs_service,
             _drop_handler: drop_handler,
             notification: None,
             error: None,
+            save_game: None,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::OpenSave => {
                 self.save_handler.send(Request::OpenSave);
@@ -95,29 +88,29 @@ impl Component for App {
                     Ok((file_name, bytes)) => {
                         self.save_handler.send(Request::SaveDropped(file_name, bytes))
                     }
-                    Err(err) => self.link.send_message(Msg::Error(err)),
+                    Err(err) => ctx.link().send_message(Msg::Error(err)),
                 }
                 false
             }
             Msg::SaveOpened(save_game) => {
-                self.props.save_game = Some(save_game);
+                self.save_game = Some(save_game);
                 self.change_theme();
-                self.link.send_message(Msg::Notification("Opened"));
+                ctx.link().send_message(Msg::Notification("Opened"));
                 false
             }
             Msg::SaveSave => {
-                if let Some(ref save_game) = self.props.save_game {
+                if let Some(ref save_game) = self.save_game {
                     self.save_handler.send(Request::SaveSave(save_game.clone()));
                 }
                 false
             }
             Msg::SaveSaved => {
-                self.link.send_message(Msg::Notification("Saved"));
+                ctx.link().send_message(Msg::Notification("Saved"));
                 false
             }
             Msg::ReloadSave => {
                 #[allow(clippy::single_match)]
-                match self.props.save_game {
+                match self.save_game {
                     Some(
                         SaveGame::MassEffect1 { ref file_path, .. }
                         | SaveGame::MassEffect1Le { ref file_path, .. }
@@ -134,7 +127,7 @@ impl Component for App {
             }
             Msg::Notification(notification) => {
                 self.notification = Some(notification);
-                self.link.send_future(async {
+                ctx.link().send_future(async {
                     TimeoutFuture::new(1500).await;
                     Msg::DismissNotification
                 });
@@ -155,31 +148,27 @@ impl Component for App {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
-        let content = if let Some(ref save_game) = self.props.save_game {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let content = if let Some(ref save_game) = self.save_game {
             match save_game {
                 SaveGame::MassEffect1 { save_game, .. } => {
-                    App::mass_effect_1(self, save_game.borrow())
+                    App::mass_effect_1(self, ctx, save_game.borrow())
                 }
                 SaveGame::MassEffect1Le { save_game, .. } => {
-                    App::mass_effect_1_le(self, RcUi::clone(&save_game.borrow().save_data))
+                    App::mass_effect_1_le(self, ctx, RcUi::clone(&save_game.borrow().save_data))
                 }
                 SaveGame::MassEffect1LePs4 { save_game, .. } => {
-                    App::mass_effect_1_le(self, RcUi::clone(save_game))
+                    App::mass_effect_1_le(self, ctx, RcUi::clone(save_game))
                 }
                 SaveGame::MassEffect2 { save_game, .. } => {
-                    App::mass_effect_2(self, Me2Type::Vanilla(RcUi::clone(save_game)))
+                    App::mass_effect_2(self, ctx, Me2Type::Vanilla(RcUi::clone(save_game)))
                 }
                 SaveGame::MassEffect2Le { save_game, .. } => {
-                    App::mass_effect_2(self, Me2Type::Legendary(RcUi::clone(save_game)))
+                    App::mass_effect_2(self, ctx, Me2Type::Legendary(RcUi::clone(save_game)))
                 }
 
                 SaveGame::MassEffect3 { save_game, .. } => {
-                    App::mass_effect_3(self, RcUi::clone(save_game))
+                    App::mass_effect_3(self, ctx, RcUi::clone(save_game))
                 }
             }
         } else {
@@ -188,17 +177,18 @@ impl Component for App {
 
         let notification =
             self.notification.as_ref().map(|notification| App::notification(self, notification));
-        let error = self.error.as_ref().map(|error| App::error(self, error));
+        let error = self.error.as_ref().map(|error| App::error(self, ctx, error));
 
+        let link = ctx.link();
         html! {
             <div class="h-[calc(100vh-28px)] flex flex-col">
                 <NavBar
-                    save_loaded={self.props.save_game.is_some()}
-                    onopen={self.link.callback(|_| Msg::OpenSave)}
-                    onsave={self.link.callback(|_| Msg::SaveSave)}
-                    onreload={self.link.callback(|_| Msg::ReloadSave)}
+                    save_loaded={self.save_game.is_some()}
+                    onopen={link.callback(|_| Msg::OpenSave)}
+                    onsave={link.callback(|_| Msg::SaveSave)}
+                    onreload={link.callback(|_| Msg::ReloadSave)}
                 >
-                    <AutoUpdate onerror={self.link.callback(Msg::Error)} />
+                    <AutoUpdate onerror={link.callback(Msg::Error)} />
                 </NavBar>
                 { content }
                 { for notification }
@@ -209,10 +199,11 @@ impl Component for App {
 }
 
 impl App {
-    fn mass_effect_1(&self, save_game: Ref<'_, Me1SaveGame>) -> Html {
+    fn mass_effect_1(&self, ctx: &Context<Self>, save_game: Ref<'_, Me1SaveGame>) -> Html {
         let state = save_game.state();
         let plot = state.plot();
 
+        let link = ctx.link();
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar is_main_tab_bar=true>
@@ -226,7 +217,7 @@ impl App {
                         <Me1Plot
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -237,7 +228,7 @@ impl App {
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
                             floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>
@@ -245,11 +236,12 @@ impl App {
         }
     }
 
-    fn mass_effect_1_le(&self, save_game: RcUi<Me1LeSaveData>) -> Html {
+    fn mass_effect_1_le(&self, ctx: &Context<Self>, save_game: RcUi<Me1LeSaveData>) -> Html {
         let me1 = save_game.borrow();
         let plot = me1.plot();
         let head_morph = RcUi::clone(&me1.player().head_morph);
 
+        let link = ctx.link();
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar is_main_tab_bar=true>
@@ -260,20 +252,20 @@ impl App {
                         <Me1Plot
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Inventory">
                         <Me1LeInventory
                             player={RcUi::clone(&me1.player)}
                             squad={RcUi::clone(&me1.squad)}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Head Morph">
                         <HeadMorph {head_morph}
-                            onnotification={self.link.callback(Msg::Notification)}
-                            onerror={self.link.callback(Msg::Error)}
+                            onnotification={link.callback(Msg::Notification)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -284,7 +276,7 @@ impl App {
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
                             floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>
@@ -292,7 +284,7 @@ impl App {
         }
     }
 
-    fn mass_effect_2(&self, save_game: Me2Type) -> Html {
+    fn mass_effect_2(&self, ctx: &Context<Self>, save_game: Me2Type) -> Html {
         let (raw_data, plot, me1_plot, head_morph) = match save_game {
             Me2Type::Vanilla(ref me2) => (
                 me2.view_opened("Mass Effect 2", true),
@@ -309,6 +301,7 @@ impl App {
         };
         let (plot, me1_plot) = (plot.borrow(), me1_plot.borrow());
 
+        let link = ctx.link();
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar is_main_tab_bar=true>
@@ -321,13 +314,13 @@ impl App {
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
                             me1_booleans={RcUi::clone(&me1_plot.booleans)}
                             me1_integers={IntPlotType::Vec(RcUi::clone(&me1_plot.integers))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Head Morph">
                         <HeadMorph {head_morph}
-                            onnotification={self.link.callback(Msg::Notification)}
-                            onerror={self.link.callback(Msg::Error)}
+                            onnotification={link.callback(Msg::Notification)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -338,7 +331,7 @@ impl App {
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
                             floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>
@@ -346,11 +339,12 @@ impl App {
         }
     }
 
-    fn mass_effect_3(&self, save_game: RcUi<Me3SaveGame>) -> Html {
+    fn mass_effect_3(&self, ctx: &Context<Self>, save_game: RcUi<Me3SaveGame>) -> Html {
         let me3 = save_game.borrow();
         let plot = me3.plot();
         let head_morph = RcUi::clone(&me3.player().appearance().head_morph);
 
+        let link = ctx.link();
         html! {
             <section class="flex-auto flex p-1">
                 <TabBar is_main_tab_bar=true>
@@ -362,13 +356,13 @@ impl App {
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
                             variables={RcUi::clone(&me3.player_variables)}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Head Morph">
                         <HeadMorph {head_morph}
-                            onnotification={self.link.callback(Msg::Notification)}
-                            onerror={self.link.callback(Msg::Error)}
+                            onnotification={link.callback(Msg::Notification)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                     <Tab title="Raw Data">
@@ -379,7 +373,7 @@ impl App {
                             booleans={RcUi::clone(&plot.booleans)}
                             integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
                             floats={FloatPlotType::IndexMap(RcUi::clone(&plot.floats))}
-                            onerror={self.link.callback(Msg::Error)}
+                            onerror={link.callback(Msg::Error)}
                         />
                     </Tab>
                 </TabBar>
@@ -453,7 +447,7 @@ impl App {
         }
     }
 
-    fn error(&self, error: &Error) -> Html {
+    fn error(&self, ctx: &Context<Self>, error: &Error) -> Html {
         let chain = error.chain().skip(1).map(|error| {
             let text = error.to_string();
             let error = text.split_terminator('\n').map(|text| {
@@ -475,7 +469,7 @@ impl App {
                         { for chain }
                         <hr class="my-0.5 border-t border-default-border" />
                         <button class="button w-12"
-                            onclick={self.link.callback(|_| Msg::DismissError)}
+                            onclick={ctx.link().callback(|_| Msg::DismissError)}
                         >
                             {"OK"}
                         </button>
@@ -486,7 +480,7 @@ impl App {
     }
 
     fn change_theme(&self) {
-        if let Some(ref save_game) = self.props.save_game {
+        if let Some(ref save_game) = self.save_game {
             let theme = match save_game {
                 SaveGame::MassEffect1 { .. }
                 | SaveGame::MassEffect1Le { .. }
