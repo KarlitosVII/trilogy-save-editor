@@ -1,11 +1,12 @@
-## Unreleased
-- You can now add and edit all your plots in `Raw plot` tab (no longer only labelled ones)
-- Inventory filters
-- No compare
+## 2.0.0
+- Rebuilt the entire UI from scratch (from Dear Imgui / Vulkan / DX to Wasm / Web View)
+- That means no more crashes related to wgpu / Vulkan / DX
+- You can now add and edit all your plots in the `Raw plot` tab (not just the labelled ones)
+- Xbox 360 support for ME2OT and ME3 (You can convert your save by saving it with the other file extension)
+- Added a filter in the ME1LE inventory to make it easier to find items
+- Better readability of ME1OT raw data (removal of all `m_` prefixes and removal of `duplicate` buttons, duplication is now auto)
+- Added an auto update, it check once a day on the TSE repository (github) and displays a button to install the new version
 - Better font for high DPI
-- Better raw ME1 readability
-- xbox 360 support
-- auto update
 
 ## 1.13.1
 - ME2: Added all armors plots

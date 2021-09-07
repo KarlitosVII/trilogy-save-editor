@@ -9,6 +9,7 @@ mod rpc;
 
 use anyhow::Result;
 use clap::{Arg, ArgMatches};
+use image::GenericImageView;
 use rust_embed::RustEmbed;
 use serde_json::json;
 use wry::{
@@ -16,7 +17,7 @@ use wry::{
         dpi::LogicalSize,
         event::{Event, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
-        window::WindowBuilder,
+        window::{Icon, WindowBuilder},
     },
     http::{self, status::StatusCode},
     webview::{self, WebViewBuilder},
@@ -56,6 +57,7 @@ async fn main() -> Result<()> {
     let event_loop = EventLoop::<rpc::Event>::with_user_event();
     let window = WindowBuilder::new()
         .with_title(format!("Trilogy Save Editor - v{} by Karlitos", env!("CARGO_PKG_VERSION")))
+        .with_window_icon(load_icon())
         .with_min_inner_size(LogicalSize::new(600, 300))
         .with_inner_size(LogicalSize::new(1000, 700))
         .with_visible(false)
@@ -119,6 +121,13 @@ fn protocol(request: &http::Request) -> wry::Result<http::Response> {
         }
         None => response.status(StatusCode::NOT_FOUND).body(vec![]),
     }
+}
+
+fn load_icon() -> Option<Icon> {
+    let image = image::load_from_memory(include_bytes!("../../misc/tse.png")).unwrap();
+    let (width, height) = image.dimensions();
+    let rgba = image.into_rgba8().into_raw();
+    Some(Icon::from_rgba(rgba, width, height).unwrap())
 }
 
 #[cfg(target_os = "windows")]

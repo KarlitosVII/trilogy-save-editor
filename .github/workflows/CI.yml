@@ -43,10 +43,17 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-    - name: Install dependencies
-      if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: sudo apt install libxcb-shape0-dev libxcb-xfixes0-dev
-    - name: Build
-      run: cargo build --verbose
+    # - name: Install dependencies
+    #   if: matrix.target == 'x86_64-unknown-linux-gnu'
+    #   run: sudo apt install libxcb-shape0-dev libxcb-xfixes0-dev
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --all --verbose
+    - name: Install Trunk
+      run: cargo install trunk
+    - name: Run tailwind
+      run: npm update
+      run: npm run build
+    - name: Trunk build
+      run: trunk build --dist "target/dist"
+    - name: Build
+      run: cargo build -p app

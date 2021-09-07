@@ -28,7 +28,7 @@ AllowNoIcons=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 OutputDir=target
-OutputBaseFilename=trilogy-save-editor_setup
+OutputBaseFilename=trilogy-save-editor_{#AppVersion}_setup
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern

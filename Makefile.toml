@@ -55,13 +55,6 @@ args = ["serve", "--dist", "target/dist"]
 run_task = { name = ["tailwind-watch", "trunk-serve"], parallel = true }
 
 # Build
-[tasks.copy-databases]
-script_runner = "@duckscript"
-script = '''
-rm -r ./target/release/databases
-cp ./databases ./target/release
-'''
-
 [tasks.tailwind-build]
 command = "npm"
 args = ["run", "build"]
@@ -87,34 +80,28 @@ command = "cargo"
 args = ["run", "-p", "app"]
 dependencies = ["tailwind-build", "trunk-build"]
 
+# Release
+[tasks.tailwind-release]
+command = "npm"
+args = ["run", "release"]
+
+[tasks.tailwind-release.windows]
+command = "powershell"
+args = ["-Command", "npm", "run", "release"]
+
+[tasks.trunk-release]
+install_crate = "trunk"
+command = "trunk"
+args = ["build", "--dist", "target/dist", "--release"]
+
 [tasks.release]
+clear = true
 command = "cargo"
-args = ["build", "--release"]
-dependencies = ["copy-databases", "update"]
+args = ["build", "-p", "app", "--release"]
+dependencies = ["tailwind-release", "trunk-release"]
 
 # Cook
-[tasks.zip]
-script_runner = "@duckscript"
-script = '''
-cd ./target/release/
-
-project_name = set "${CARGO_MAKE_PROJECT_NAME}"
-dir = set "${project_name}"
-mkdir "${dir}"
-cp ./databases "./${dir}/"
-
-ext = set ""
-if eq "${CARGO_MAKE_RUST_TARGET_OS}" "windows"
-	ext = set ".exe"
-end
-
-file_name = set "${project_name}${ext}"
-cp "./${file_name}" "./${dir}/${file_name}"
-
-exec 7z a "${CARGO_MAKE_WORKING_DIRECTORY}/${project_name}.zip" "${project_name}" -mx=7
-
-rm -r "./${dir}/"
-'''
-
 [tasks.cook]
-dependencies = ["fmt", "clippy", "test", "release", "zip"]
+command = "iscc"
+args = ["InnoSetup.iss"]
+dependencies = ["fmt", "clippy", "test", "release"]
