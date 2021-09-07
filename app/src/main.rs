@@ -20,7 +20,7 @@ use wry::{
         window::{Icon, WindowBuilder},
     },
     http::{self, status::StatusCode},
-    webview::{self, WebViewBuilder},
+    webview::WebViewBuilder,
 };
 
 #[derive(RustEmbed)]
@@ -41,14 +41,24 @@ fn parse_args() -> ArgMatches<'static> {
 async fn main() -> Result<()> {
     #[cfg(target_os = "windows")]
     {
+        use tokio::fs;
+
+        // Install WebView2
         let should_install_webview2 = std::panic::catch_unwind(|| {
-            webview::webview_version().expect("Unable to get webview2 version")
+            wry::webview::webview_version().expect("Unable to get webview2 version")
         })
         .is_err();
         if should_install_webview2 {
             if let Err(err) = install_webview2().await {
                 anyhow::bail!(err)
             }
+        }
+
+        // Clear WebView2 Code Cache
+        let code_cache_dir =
+            concat!(env!("CARGO_BIN_NAME"), ".exe.WebView2/EBWebView/Default/Code Cache");
+        if fs::metadata(code_cache_dir).await.is_ok() {
+            let _ = fs::remove_dir_all(code_cache_dir).await;
         }
     }
 
@@ -110,9 +120,10 @@ fn protocol(request: &http::Request) -> wry::Result<http::Response> {
 
     let response = http::ResponseBuilder::new()
         // Prevent caching
-        .header("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
-        .header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
-        .header("Pragma", "no-cache");
+        // .header("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
+        // .header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+        // .header("Pragma", "no-cache")
+        ;
 
     match Asset::get(path) {
         Some(asset) => {

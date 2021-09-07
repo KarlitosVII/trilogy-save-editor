@@ -44,6 +44,7 @@ Without them I could not have done anything.
 ## Compile from source
 
 ```sh
+rustup target add wasm32-unknown-unknown
 npm update
 cargo install make
 cargo make release
