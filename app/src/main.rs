@@ -7,7 +7,7 @@ mod auto_update;
 
 mod rpc;
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::{Arg, ArgMatches};
 use rust_embed::RustEmbed;
 use serde_json::json;
@@ -44,17 +44,8 @@ async fn main() -> Result<()> {
     })
     .is_err()
     {
-        use std::os::windows::process::CommandExt;
-
-        let status = std::process::Command::new("powershell")
-            .arg("-Command")
-            .arg(include_str!("webview2_install.ps1"))
-            .creation_flags(0x08000000) // CREATE_NO_WINDOW
-            .status()
-            .expect("failed to execute webview2_install.ps1");
-
-        if !status.success() {
-            bail!("Failed to install WebView2");
+        if let Err(err) = install_webview2().await {
+            anyhow::bail!(err)
         }
     }
 
@@ -126,4 +117,45 @@ fn protocol(request: &http::Request) -> wry::Result<http::Response> {
         }
         None => response.status(StatusCode::NOT_FOUND).body(vec![]),
     }
+}
+
+#[cfg(target_os = "windows")]
+async fn install_webview2() -> Result<()> {
+    use std::env;
+    use tokio::{fs, process};
+
+    let should_install = rfd::AsyncMessageDialog::new()
+        .set_title("Install WebView2 Runtime")
+        .set_description("The WebView2 Runtime must be installed to use this program. Install now?")
+        .set_level(rfd::MessageLevel::Warning)
+        .set_buttons(rfd::MessageButtons::YesNo)
+        .show()
+        .await;
+
+    if !should_install {
+        anyhow::bail!("WebView2 install cancelled by user");
+    }
+
+    let setup =
+        reqwest::get("https://go.microsoft.com/fwlink/p/?LinkId=2124703").await?.bytes().await?;
+
+    let temp_dir = env::temp_dir().join("trilogy-save-editor");
+    let path = temp_dir.join("MicrosoftEdgeWebview2Setup.exe");
+
+    // If not exists
+    if !fs::metadata(&temp_dir).await.is_ok() {
+        fs::create_dir(temp_dir).await?;
+    }
+    fs::write(&path, setup).await?;
+
+    let status = process::Command::new(path)
+        .arg("/install")
+        .status()
+        .await
+        .expect("Failed to launch WebView2 install");
+
+    if !status.success() {
+        anyhow::bail!("Failed to install WebView2");
+    }
+    Ok(())
 }
