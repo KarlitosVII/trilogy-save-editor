@@ -38,7 +38,7 @@ pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
 pub fn import_head_morph(window: &Window) -> Option<PathBuf> {
     rfd::FileDialog::new()
         .set_parent(window)
-        .add_filter("Head Morph", &["ron"])
+        .add_filter("Head Morph", &["ron", "me2headmorph", "me3headmorph"])
         .add_filter("All Files", &["*"])
         .pick_file()
 }

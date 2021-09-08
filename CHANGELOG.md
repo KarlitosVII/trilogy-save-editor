@@ -1,3 +1,6 @@
+## Unreleased
+- Support for Gibbed's head morphs (.me2headmorph, .me3headmorph)
+
 ## 2.0.0
 - Rebuilt the entire UI from scratch (from Dear Imgui / Vulkan / DX to Wasm / Web View)
 - That means no more crashes related to wgpu / Vulkan / DX

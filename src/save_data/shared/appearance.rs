@@ -80,3 +80,25 @@ impl serde::Serialize for LinearColor {
         linear_color.end()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::fs;
+
+    use anyhow::Result;
+
+    use super::*;
+    use crate::unreal;
+
+    #[test]
+    fn gibbed_head_morph() -> Result<()> {
+        let me2 = fs::read("test/GibbedME2.me2headmorph")?;
+        let me3 = fs::read("test/GibbedME3.me3headmorph")?;
+
+        // Deserialize
+        let _: HeadMorph = unreal::Deserializer::from_bytes(&me2[31..])?;
+        let _: HeadMorph = unreal::Deserializer::from_bytes(&me3[31..])?;
+
+        Ok(())
+    }
+}

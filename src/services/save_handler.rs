@@ -296,7 +296,11 @@ impl SaveHandler {
             }
             SaveGame::MassEffect1LePs4 { save_game, .. } => unreal::Serializer::to_vec(&save_game)?,
             SaveGame::MassEffect2 { save_game, .. } => {
-                let is_xbox360 = path.extension().map(|ext| ext == "xbsav").unwrap_or_default();
+                let is_xbox360 = path
+                    .extension()
+                    .map(|ext| ext.eq_ignore_ascii_case("xbsav"))
+                    .unwrap_or_default();
+
                 let mut output = if is_xbox360 {
                     unreal::Serializer::to_be_vec(&save_game)?
                 } else {
@@ -323,7 +327,11 @@ impl SaveHandler {
                 output
             }
             SaveGame::MassEffect3 { save_game, .. } => {
-                let is_xbox360 = path.extension().map(|ext| ext == "xbsav").unwrap_or_default();
+                let is_xbox360 = path
+                    .extension()
+                    .map(|ext| ext.eq_ignore_ascii_case("xbsav"))
+                    .unwrap_or_default();
+
                 let mut output = if is_xbox360 {
                     unreal::Serializer::to_be_vec(&save_game)?
                 } else {
@@ -357,8 +365,17 @@ impl SaveHandler {
                 let has_rpc_file = rpc::import_head_morph().await?;
                 let result = match has_rpc_file {
                     Some(rpc_file) => {
-                        let file = String::from_utf8(rpc_file.file.decode()?)?;
-                        ron::from_str(&file).map(Some)?
+                        let file = rpc_file.file.decode()?;
+                        if file.starts_with(b"GIBBEDMASSEFFECT2HEADMORPH")
+                            || file.starts_with(b"GIBBEDMASSEFFECT3HEADMORPH")
+                        {
+                            // Gibbed's head morph
+                            unreal::Deserializer::from_bytes(&file[31..]).map(Some)?
+                        } else {
+                            // TSE head morph
+                            let ron = String::from_utf8(file)?;
+                            ron::from_str(&ron).map(Some)?
+                        }
                     }
                     None => None,
                 };
