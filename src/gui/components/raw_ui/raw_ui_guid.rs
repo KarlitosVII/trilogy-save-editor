@@ -40,11 +40,14 @@ impl Component for RawUiGuid {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Change(event) => {
-                let input: HtmlInputElement = event.target_unchecked_into();
-                if let Ok(guid) = Uuid::parse_str(&input.value()) {
-                    *ctx.props().guid_mut() = Guid::from(guid);
+                if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                    if let Ok(guid) = Uuid::parse_str(&input.value()) {
+                        *ctx.props().guid_mut() = Guid::from(guid);
+                    }
+                    true
+                } else {
+                    false
                 }
-                true
             }
         }
     }

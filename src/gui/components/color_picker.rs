@@ -63,27 +63,27 @@ impl Component for ColorPicker {
                 true
             }
             Msg::Change(event) => {
-                let input: HtmlInputElement = event.target_unchecked_into();
-                let color = input.value();
+                if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                    let color = input.value();
 
-                let hex_to_rgb = |hex: String| {
-                    ensure!(hex.len() == 7, "invalid color");
+                    let hex_to_rgb = |hex: String| {
+                        ensure!(hex.len() == 7, "invalid color");
 
-                    let r = u8::from_str_radix(&hex[1..3], 16)?;
-                    let g = u8::from_str_radix(&hex[3..5], 16)?;
-                    let b = u8::from_str_radix(&hex[5..7], 16)?;
-                    Ok((r, g, b))
-                };
+                        let r = u8::from_str_radix(&hex[1..3], 16)?;
+                        let g = u8::from_str_radix(&hex[3..5], 16)?;
+                        let b = u8::from_str_radix(&hex[5..7], 16)?;
+                        Ok((r, g, b))
+                    };
 
-                if let Ok((r, g, b)) = hex_to_rgb(color) {
-                    let mut color = ctx.props().color_mut();
-                    color.r = r as f32 / 255.0;
-                    color.g = g as f32 / 255.0;
-                    color.b = b as f32 / 255.0;
-                    true
-                } else {
-                    false
+                    if let Ok((r, g, b)) = hex_to_rgb(color) {
+                        let mut color = ctx.props().color_mut();
+                        color.r = r as f32 / 255.0;
+                        color.g = g as f32 / 255.0;
+                        color.b = b as f32 / 255.0;
+                        return true;
+                    }
                 }
+                false
             }
             _ => unreachable!(),
         }

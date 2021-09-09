@@ -40,13 +40,13 @@ impl Component for InputText {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Input(event) => {
-                let input: HtmlInputElement = event.target_unchecked_into();
+                if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                    if let Some(ref callback) = ctx.props().oninput {
+                        callback.emit(CallbackType::String(input.value()));
+                    }
 
-                if let Some(ref callback) = ctx.props().oninput {
-                    callback.emit(CallbackType::String(input.value()));
+                    *ctx.props().value_mut() = input.value();
                 }
-
-                *ctx.props().value_mut() = input.value();
                 false
             }
         }

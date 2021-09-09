@@ -121,25 +121,26 @@ impl Component for ItemSelect {
                 false
             }
             Msg::Filter(event) => {
-                let input: HtmlInputElement = event.target_unchecked_into();
-                let filter = input.value();
+                if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                    let filter = input.value();
 
-                if !filter.is_empty() {
-                    let filter = filter.to_lowercase();
-                    let filtered_list = ctx
-                        .props()
-                        .item_db
-                        .iter()
-                        .filter_map(|(k, v)| {
-                            (v.to_lowercase().contains(&filter)).then(|| (*k, v.clone()))
-                        })
-                        .collect::<IndexMap<_, _>>();
-                    self.filtered_list = Some(filtered_list.into());
-                } else {
-                    self.filtered_list = None;
+                    if !filter.is_empty() {
+                        let filter = filter.to_lowercase();
+                        let filtered_list = ctx
+                            .props()
+                            .item_db
+                            .iter()
+                            .filter_map(|(k, v)| {
+                                (v.to_lowercase().contains(&filter)).then(|| (*k, v.clone()))
+                            })
+                            .collect::<IndexMap<_, _>>();
+                        self.filtered_list = Some(filtered_list.into());
+                    } else {
+                        self.filtered_list = None;
+                    }
+                    self.filter = filter;
+                    ctx.link().send_message(Msg::Scrolled);
                 }
-                self.filter = filter;
-                ctx.link().send_message(Msg::Scrolled);
                 false
             }
             Msg::Select(key) => {

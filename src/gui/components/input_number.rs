@@ -47,40 +47,43 @@ impl Component for InputNumber {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Change(event) => {
-                let input: HtmlInputElement = event.target_unchecked_into();
-                let value = input.value_as_number();
+                if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                    let value = input.value_as_number();
 
-                if value.is_nan() {
-                    return true;
+                    if value.is_nan() {
+                        return true;
+                    }
+
+                    match ctx.props().value {
+                        NumberType::Byte(ref byte) => {
+                            let value: u8 = value as u8;
+                            *byte.borrow_mut() = value;
+
+                            if let Some(ref callback) = ctx.props().onchange {
+                                callback.emit(CallbackType::Byte(value));
+                            }
+                        }
+                        NumberType::Int(ref integer) => {
+                            let value = value as i32;
+                            *integer.borrow_mut() = value;
+
+                            if let Some(ref callback) = ctx.props().onchange {
+                                callback.emit(CallbackType::Int(value));
+                            }
+                        }
+                        NumberType::Float(ref float) => {
+                            let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
+                            *float.borrow_mut() = value;
+
+                            if let Some(ref callback) = ctx.props().onchange {
+                                callback.emit(CallbackType::Float(value));
+                            }
+                        }
+                    }
+                    true
+                } else {
+                    false
                 }
-
-                match ctx.props().value {
-                    NumberType::Byte(ref byte) => {
-                        let value: u8 = value as u8;
-                        *byte.borrow_mut() = value;
-
-                        if let Some(ref callback) = ctx.props().onchange {
-                            callback.emit(CallbackType::Byte(value));
-                        }
-                    }
-                    NumberType::Int(ref integer) => {
-                        let value = value as i32;
-                        *integer.borrow_mut() = value;
-
-                        if let Some(ref callback) = ctx.props().onchange {
-                            callback.emit(CallbackType::Int(value));
-                        }
-                    }
-                    NumberType::Float(ref float) => {
-                        let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
-                        *float.borrow_mut() = value;
-
-                        if let Some(ref callback) = ctx.props().onchange {
-                            callback.emit(CallbackType::Float(value));
-                        }
-                    }
-                }
-                true
             }
         }
     }

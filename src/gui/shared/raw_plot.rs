@@ -110,19 +110,20 @@ impl Component for RawPlot {
             }
             Msg::Filter(event) => {
                 if !self.is_filtering {
-                    self.is_filtering = true;
+                    if let Some(input) = event.target_dyn_into::<HtmlInputElement>() {
+                        self.is_filtering = true;
 
-                    let input: HtmlInputElement = event.target_unchecked_into();
-                    *ctx.props().filter_mut() = input.value();
+                        *ctx.props().filter_mut() = input.value();
 
-                    ctx.link().send_future(async {
-                        TimeoutFuture::new(100).await;
-                        Msg::Filtered
-                    });
+                        ctx.link().send_future(async {
+                            TimeoutFuture::new(100).await;
+                            Msg::Filtered
+                        });
 
-                    self.update_label_list(ctx);
+                        self.update_label_list(ctx);
 
-                    ctx.link().send_message(Msg::Scrolled);
+                        ctx.link().send_message(Msg::Scrolled);
+                    }
                 } else {
                     self.pending_filter = Some(event);
                 }
