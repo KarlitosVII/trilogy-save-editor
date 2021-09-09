@@ -22,12 +22,12 @@ impl PartialEq for BonusPowerType {
 }
 
 pub enum Msg {
-    ToggleBonusPower(String),
+    ToggleBonusPower(String, String),
 }
 
 #[derive(Properties, Clone, PartialEq)]
 pub struct Props {
-    pub power_list: &'static [(&'static str, &'static str)], // TODO: Add power name
+    pub power_list: &'static [(&'static str, &'static str, &'static str)],
     pub powers: BonusPowerType,
     pub helper: Option<&'static str>,
 }
@@ -44,7 +44,7 @@ impl Component for BonusPowers {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::ToggleBonusPower(power_class_name) => {
+            Msg::ToggleBonusPower(power_name, power_class_name) => {
                 match ctx.props().powers {
                     BonusPowerType::Me2(ref powers) => {
                         let idx = powers.borrow().iter().enumerate().find_map(|(i, power)| {
@@ -59,6 +59,7 @@ impl Component for BonusPowers {
                             powers.borrow_mut().remove(idx);
                         } else {
                             let power = Me2Power::default();
+                            *power.name.borrow_mut() = power_name;
                             *power.power_class_name.borrow_mut() = power_class_name;
                             powers.borrow_mut().push(power.into());
                         }
@@ -76,6 +77,7 @@ impl Component for BonusPowers {
                             powers.borrow_mut().remove(idx);
                         } else {
                             let power = Me3Power::default();
+                            *power.name.borrow_mut() = power_name;
                             *power.power_class_name.borrow_mut() = power_class_name;
                             powers.borrow_mut().push(power.into());
                         }
@@ -90,7 +92,7 @@ impl Component for BonusPowers {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let Props { power_list, powers, helper } = &ctx.props();
 
-        let selectables = power_list.iter().map(|&(power_class_name, power_name)| {
+        let selectables = power_list.iter().map(|&(power_name, power_class_name, power_label)| {
             let selected = match powers {
                 BonusPowerType::Me2(powers) => powers.borrow()
                 .iter()
@@ -111,9 +113,9 @@ impl Component for BonusPowers {
                         "text-left",
                         selected.then(|| "bg-theme-bg"),
                     ]}
-                    onclick={ctx.link().callback(move |_| Msg::ToggleBonusPower(power_class_name.to_owned()))}
+                    onclick={ctx.link().callback(move |_| Msg::ToggleBonusPower(power_name.to_owned(), power_class_name.to_owned()))}
                 >
-                    {power_name}
+                    {power_label}
                 </button>
             }
         });

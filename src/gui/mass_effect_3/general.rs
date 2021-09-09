@@ -349,27 +349,46 @@ impl Me3General {
     }
 
     fn bonus_powers(&self, player: Ref<'_, Player>) -> Html {
-        let power_list: &'static [(&'static str, &'static str)] = &[
-            ("SFXGameContent.SFXPowerCustomAction_EnergyDrain", "Energy Drain"),
-            ("SFXGameContent.SFXPowerCustomAction_ProtectorDrone", "Defense Drone"),
-            ("SFXGameContent.SFXPowerCustomAction_GethShieldBoost", "Defense Matrix"),
-            ("SFXGameContent.SFXPowerCustomAction_Decoy", "Decoy"),
-            ("SFXGameContent.SFXPowerCustomAction_ArmorPiercingAmmo", "Armor Piercing Ammo"),
-            ("SFXGameContent.SFXPowerCustomAction_ProximityMine", "Proximity Mine"),
-            ("SFXGameContent.SFXPowerCustomAction_Barrier", "Barrier"),
-            ("SFXGameContent.SFXPowerCustomAction_Reave", "Reave"),
-            ("SFXGameContent.SFXPowerCustomAction_InfernoGrenade", "Inferno Grenade"),
-            ("SFXGameContent.SFXPowerCustomAction_Marksman", "Marksman"),
-            ("SFXGameContent.SFXPowerCustomAction_WarpAmmo", "Warp Ammo"),
-            ("SFXGameContent.SFXPowerCustomAction_Stasis", "Stasis"),
-            ("SFXGameContent.SFXPowerCustomAction_Fortification", "Fortification"),
-            ("SFXGameContent.SFXPowerCustomAction_Carnage", "Carnage"),
-            ("SFXGameContent.SFXPowerCustomAction_Slam", "Slam"),
-            ("SFXGameContent.SFXPowerCustomAction_DarkChannel", "Dark Channel"),
-            ("SFXGameContentDLC_Exp_Pack001.SFXPowerCustomAction_Dominate", "Dominate"),
-            ("SFXGameContentDLC_Exp_Pack002.SFXPowerCustomAction_AriaLash", "Lash"),
-            ("SFXGameContentDLC_Exp_Pack002.SFXPowerCustomAction_BioticFlare", "Flare"),
-            ("SFXGameContentDLC_EXP_Pack003.SFXPowerCustomAction_StimPack", "Stim Pack"),
+        let power_list: &'static [(&'static str, &'static str, &'static str)] = &[
+            ("EnergyDrain", "SFXGameContent.SFXPowerCustomAction_EnergyDrain", "Energy Drain"),
+            (
+                "ProtectorDrone",
+                "SFXGameContent.SFXPowerCustomAction_ProtectorDrone",
+                "Defense Drone",
+            ),
+            (
+                "GethShieldBoost",
+                "SFXGameContent.SFXPowerCustomAction_GethShieldBoost",
+                "Defense Matrix",
+            ),
+            ("Decoy", "SFXGameContent.SFXPowerCustomAction_Decoy", "Decoy"),
+            (
+                "ArmorPiercingAmmo",
+                "SFXGameContent.SFXPowerCustomAction_ArmorPiercingAmmo",
+                "Armor Piercing Ammo",
+            ),
+            (
+                "ProximityMine",
+                "SFXGameContent.SFXPowerCustomAction_ProximityMine",
+                "Proximity Mine",
+            ),
+            ("Barrier", "SFXGameContent.SFXPowerCustomAction_Barrier", "Barrier"),
+            ("Reave", "SFXGameContent.SFXPowerCustomAction_Reave", "Reave"),
+            (
+                "InfernoGrenade",
+                "SFXGameContent.SFXPowerCustomAction_InfernoGrenade",
+                "Inferno Grenade",
+            ),
+            ("Marksman", "SFXGameContent.SFXPowerCustomAction_Marksman", "Marksman"),
+            ("WarpAmmo", "SFXGameContent.SFXPowerCustomAction_WarpAmmo", "Warp Ammo"),
+            ("Stasis", "SFXGameContent.SFXPowerCustomAction_Stasis", "Stasis"),
+            ("Fortification", "SFXGameContent.SFXPowerCustomAction_Fortification", "Fortification"),
+            ("Carnage", "SFXGameContent.SFXPowerCustomAction_Carnage", "Carnage"),
+            ("Slam", "SFXGameContent.SFXPowerCustomAction_Slam", "Slam"),
+            ("DarkChannel", "SFXGameContent.SFXPowerCustomAction_DarkChannel", "Dark Channel"),
+            ("Dominate", "SFXGameContentDLC_Exp_Pack001.SFXPowerCustomAction_Dominate", "Dominate"),
+            ("AriaLash", "SFXGameContentDLC_Exp_Pack002.SFXPowerCustomAction_AriaLash", "Lash"),
+            ("Flare", "SFXGameContentDLC_Exp_Pack002.SFXPowerCustomAction_BioticFlare", "Flare"),
         ];
 
         html! {

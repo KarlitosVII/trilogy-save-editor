@@ -41,7 +41,7 @@ pub struct Player {
 #[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 pub struct Power {
-    name: String,
+    pub name: String,
     rank: f32,
     pub power_class_name: String,
     wheel_display_index: i32,

@@ -347,21 +347,45 @@ impl Me2General {
     }
 
     fn bonus_powers(&self, player: Ref<'_, Player>) -> Html {
-        let power_list: &'static [(&'static str, &'static str)] = &[
-            ("SFXGameContent_Powers.SFXPower_Crush_Player", "Slam"),
-            ("SFXGameContent_Powers.SFXPower_Barrier_Player", "Barrier"),
-            ("SFXGameContent_Powers.SFXPower_WarpAmmo_Player", "Warp Ammo"),
-            ("SFXGameContent_Powers.SFXPower_Fortification_Player", "Fortification"),
-            ("SFXGameContent_Powers.SFXPower_ArmorPiercingAmmo_Player", "Armor Piercing Ammo"),
-            ("SFXGameContent_Powers.SFXPower_NeuralShock_Player", "Neural Shock"),
-            ("SFXGameContent_Powers.SFXPower_ShieldJack_Player", "Energy Drain"),
-            ("SFXGameContent_Powers.SFXPower_Reave_Player", "Reave"),
-            ("SFXGameContent_Powers.SFXPower_Dominate_Player", "Dominate"),
-            ("SFXGameContent_Powers.SFXPower_AntiOrganicAmmo_Player", "Shredder Ammo"),
-            ("SFXGameContent_Powers.SFXPower_GethShieldBoost_Player", "Geth Shield Boost"),
-            ("SFXGameContentDLC_HEN_VT.SFXPower_ZaeedUnique_Player", "Inferno Grenade"),
-            ("SFXGameContentKasumi.SFXPower_KasumiUnique_Player", "Flashbang Grenade"),
-            ("SFXGameContentLiara.SFXPower_StasisNew", "Stasis"),
+        let power_list: &'static [(&'static str, &'static str, &'static str)] = &[
+            ("Slam", "SFXGameContent_Powers.SFXPower_Crush_Player", "Slam"),
+            ("Barrier", "SFXGameContent_Powers.SFXPower_Barrier_Player", "Barrier"),
+            ("WarpAmmo", "SFXGameContent_Powers.SFXPower_WarpAmmo_Player", "Warp Ammo"),
+            (
+                "Fortification",
+                "SFXGameContent_Powers.SFXPower_Fortification_Player",
+                "Fortification",
+            ),
+            (
+                "ArmorPiercingAmmo",
+                "SFXGameContent_Powers.SFXPower_ArmorPiercingAmmo_Player",
+                "Armor Piercing Ammo",
+            ),
+            ("NeuralShock", "SFXGameContent_Powers.SFXPower_NeuralShock_Player", "Neural Shock"),
+            ("ShieldJack", "SFXGameContent_Powers.SFXPower_ShieldJack_Player", "Energy Drain"),
+            ("Reave", "SFXGameContent_Powers.SFXPower_Reave_Player", "Reave"),
+            ("Dominate", "SFXGameContent_Powers.SFXPower_Dominate_Player", "Dominate"),
+            (
+                "AntiOrganicAmmo",
+                "SFXGameContent_Powers.SFXPower_AntiOrganicAmmo_Player",
+                "Shredder Ammo",
+            ),
+            (
+                "GethShieldBoost",
+                "SFXGameContent_Powers.SFXPower_GethShieldBoost_Player",
+                "Geth Shield Boost",
+            ),
+            (
+                "ZaeedUnique",
+                "SFXGameContentDLC_HEN_VT.SFXPower_ZaeedUnique_Player",
+                "Inferno Grenade",
+            ),
+            (
+                "KasumiUnique",
+                "SFXGameContentKasumi.SFXPower_KasumiUnique_Player",
+                "Flashbang Grenade",
+            ),
+            ("StasisNew", "SFXGameContentLiara.SFXPower_StasisNew", "Stasis"),
         ];
 
         html! {

@@ -57,7 +57,7 @@ pub struct Player {
 #[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", name)]
 pub struct Power {
-    name: String,
+    pub name: String,
     rank: f32,
     evolved_choice_0: i32,
     evolved_choice_1: i32,
