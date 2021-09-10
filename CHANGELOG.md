@@ -1,4 +1,4 @@
-## Unreleased
+## 2.1.0
 - Support for Gibbed's head morphs (.me2headmorph, .me3headmorph)
 
 ## 2.0.0
