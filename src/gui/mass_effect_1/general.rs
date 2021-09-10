@@ -24,7 +24,7 @@ pub enum Msg {
     Difficulty(usize),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub player: RcUi<Player>,
     pub plot: RcUi<PlotTable>,

@@ -22,7 +22,7 @@ pub enum Msg {
     Add,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub plots: PlotType,
     pub plot_db: Rc<RawPlotDb>,

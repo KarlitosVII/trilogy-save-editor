@@ -20,7 +20,7 @@ pub enum Msg {
     DuplicateName(RcUi<u32>, CallbackType),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub player: RcUi<Player>,
     pub property: RcUi<DataProperty>,

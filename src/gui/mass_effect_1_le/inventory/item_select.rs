@@ -18,7 +18,7 @@ pub enum Msg {
     Select(DbItem),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub item_db: Rc<Me1ItemDb>,
     pub current_item: DbItem,

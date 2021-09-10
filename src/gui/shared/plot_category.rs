@@ -14,7 +14,7 @@ pub enum Msg {
     ChangeBool(usize, bool),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: Option<String>,
     pub booleans: RcUi<BitVec>,

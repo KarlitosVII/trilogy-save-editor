@@ -39,7 +39,7 @@ pub enum Msg {
     EditKey(usize, CallbackType),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props<T>
 where
     T: RawUi + Default,

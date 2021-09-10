@@ -6,7 +6,7 @@ pub enum Msg {
     Clicked,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub tab: String,
     pub children: Children,
@@ -19,7 +19,7 @@ impl Component for Link {
     type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Link {}
+        Link
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {

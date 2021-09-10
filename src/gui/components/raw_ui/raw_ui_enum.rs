@@ -11,7 +11,7 @@ pub enum Msg {
     Changed(usize),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct Props<T>
 where
     T: From<usize> + Into<usize> + Clone + 'static,

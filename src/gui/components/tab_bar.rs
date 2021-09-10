@@ -12,7 +12,7 @@ pub enum Msg {
     MainTabChanged(String),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub children: ChildrenWithProps<Tab>,
     #[prop_or(false)]
@@ -154,7 +154,7 @@ impl TabBar {
     }
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct TabProps {
     pub title: String,
     #[prop_or_default]

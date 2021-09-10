@@ -16,7 +16,7 @@ pub enum Msg {
     Error(Error),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub head_morph: RcUi<Option<RcUi<DataHeadMorph>>>,
     pub onnotification: Callback<&'static str>,

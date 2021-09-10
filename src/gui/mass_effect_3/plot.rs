@@ -24,7 +24,7 @@ pub enum Msg {
     Error(Error),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub booleans: RcUi<BitVec>,
     pub integers: IntPlotType,

@@ -19,7 +19,7 @@ pub enum Msg {
     OpenLink(&'static str),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub children: Children,
     pub save_loaded: bool,

@@ -13,7 +13,7 @@ pub enum Msg {
     Remove(usize),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props<T>
 where
     T: RawUi + Default + Display,

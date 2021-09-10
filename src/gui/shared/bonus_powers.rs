@@ -25,7 +25,7 @@ pub enum Msg {
     ToggleBonusPower(String, String),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub power_list: &'static [(&'static str, &'static str, &'static str)],
     pub powers: BonusPowerType,

@@ -7,7 +7,7 @@ use yew::prelude::*;
 use crate::gui::{components::Table, mass_effect_1::raw_data::property::Property, RcUi};
 use crate::save_data::mass_effect_1::player::Player;
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub player: RcUi<Player>,
 }

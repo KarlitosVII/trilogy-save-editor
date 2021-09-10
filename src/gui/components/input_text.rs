@@ -9,7 +9,7 @@ pub enum Msg {
     Input(InputEvent),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
     pub value: RcUi<String>,

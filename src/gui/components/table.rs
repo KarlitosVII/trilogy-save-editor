@@ -7,7 +7,7 @@ pub enum Msg {
     Toggle,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: Option<String>,
     pub children: Children,
@@ -116,7 +116,7 @@ enum ChunkMsg {
     Render,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 struct ChunkProps {
     children: Children,
     position: usize,

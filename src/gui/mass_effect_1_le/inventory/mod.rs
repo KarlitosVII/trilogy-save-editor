@@ -27,7 +27,7 @@ pub enum Msg {
     AddItem(RcUi<Vec<RcUi<Item>>>),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub player: RcUi<Player>,
     pub squad: RcUi<Vec<RcUi<Henchman>>>,

@@ -25,7 +25,7 @@ pub enum Msg {
     Error(Error),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub onerror: Callback<Error>,
 }

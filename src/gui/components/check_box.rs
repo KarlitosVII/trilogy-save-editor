@@ -7,7 +7,7 @@ pub enum Msg {
     Toggle,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
     pub value: RcUi<bool>,

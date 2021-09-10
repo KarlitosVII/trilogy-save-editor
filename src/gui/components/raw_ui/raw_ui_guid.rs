@@ -11,7 +11,7 @@ pub enum Msg {
     Change(Event),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
     pub guid: RcUi<Guid>,

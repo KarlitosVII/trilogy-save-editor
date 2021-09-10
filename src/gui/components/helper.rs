@@ -6,7 +6,7 @@ pub enum Msg {
     Out,
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub text: &'static str,
 }

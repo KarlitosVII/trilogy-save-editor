@@ -8,7 +8,7 @@ pub enum Msg {
     Select(usize),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub options: &'static [&'static str],
     pub current_idx: usize,

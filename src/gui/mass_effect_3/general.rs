@@ -57,7 +57,7 @@ pub enum Msg {
     PlayerClass(usize),
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct Props {
     pub save_game: RcUi<Me3SaveGame>,
 }
