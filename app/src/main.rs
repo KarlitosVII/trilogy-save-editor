@@ -3,7 +3,7 @@
 #![warn(clippy::all)]
 
 #[cfg(target_os = "windows")]
-mod auto_update;
+mod windows;
 
 mod rpc;
 
@@ -41,25 +41,19 @@ fn parse_args() -> ArgMatches<'static> {
 async fn main() -> Result<()> {
     #[cfg(target_os = "windows")]
     {
-        use tokio::fs;
-
         // Install WebView2
         let should_install_webview2 = std::panic::catch_unwind(|| {
             wry::webview::webview_version().expect("Unable to get webview2 version")
         })
         .is_err();
         if should_install_webview2 {
-            if let Err(err) = install_webview2().await {
+            if let Err(err) = windows::install_webview2().await {
                 anyhow::bail!(err)
             }
         }
 
         // Clear WebView2 Code Cache
-        let code_cache_dir =
-            concat!(env!("CARGO_BIN_NAME"), ".exe.WebView2/EBWebView/Default/Code Cache");
-        if fs::metadata(code_cache_dir).await.is_ok() {
-            let _ = fs::remove_dir_all(code_cache_dir).await;
-        }
+        windows::clear_code_cache_if_more_than_20mo().await;
     }
 
     let args = parse_args();
@@ -139,45 +133,4 @@ fn load_icon() -> Option<Icon> {
     let (width, height) = image.dimensions();
     let rgba = image.into_rgba8().into_raw();
     Some(Icon::from_rgba(rgba, width, height).unwrap())
-}
-
-#[cfg(target_os = "windows")]
-async fn install_webview2() -> Result<()> {
-    use std::env;
-    use tokio::{fs, process};
-
-    let should_install = rfd::AsyncMessageDialog::new()
-        .set_title("Install WebView2 Runtime")
-        .set_description("The WebView2 Runtime must be installed to use this program. Install now?")
-        .set_level(rfd::MessageLevel::Warning)
-        .set_buttons(rfd::MessageButtons::YesNo)
-        .show()
-        .await;
-
-    if !should_install {
-        anyhow::bail!("WebView2 install cancelled by user");
-    }
-
-    let setup =
-        reqwest::get("https://go.microsoft.com/fwlink/p/?LinkId=2124703").await?.bytes().await?;
-
-    let temp_dir = env::temp_dir().join("trilogy-save-editor");
-    let path = temp_dir.join("MicrosoftEdgeWebview2Setup.exe");
-
-    // If not exists
-    if fs::metadata(&temp_dir).await.is_err() {
-        fs::create_dir(temp_dir).await?;
-    }
-    fs::write(&path, setup).await?;
-
-    let status = process::Command::new(path)
-        .arg("/install")
-        .status()
-        .await
-        .expect("Failed to launch WebView2 install");
-
-    if !status.success() {
-        anyhow::bail!("Failed to install WebView2");
-    }
-    Ok(())
 }

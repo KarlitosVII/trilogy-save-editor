@@ -32,7 +32,7 @@ pub fn close(utils: &RpcUtils) {
 
 #[cfg(target_os = "windows")]
 pub fn check_for_update(utils: &RpcUtils) -> Result<()> {
-    use crate::auto_update::AUTO_UPDATE;
+    use crate::windows::auto_update::AUTO_UPDATE;
 
     let proxy = utils.event_proxy.clone();
     tokio::spawn(async move {
@@ -44,7 +44,7 @@ pub fn check_for_update(utils: &RpcUtils) -> Result<()> {
 
 #[cfg(target_os = "windows")]
 pub fn download_and_install_update(utils: &RpcUtils) -> Result<()> {
-    use crate::auto_update::AUTO_UPDATE;
+    use crate::windows::auto_update::AUTO_UPDATE;
 
     let proxy = utils.event_proxy.clone();
     tokio::spawn(async move {
