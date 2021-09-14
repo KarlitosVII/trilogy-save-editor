@@ -94,7 +94,7 @@ impl AutoUpdate {
                 send_progress(0.0);
                 let size = size as f64;
                 while let Some(chunk) = response.chunk().await? {
-                    setup.extend_from_slice(&chunk);
+                    setup.extend(chunk);
                     send_progress(setup.len() as f64 / size);
                 }
 

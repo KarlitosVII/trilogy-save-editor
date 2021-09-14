@@ -152,8 +152,8 @@ pub struct Base64File {
 
 impl Base64File {
     pub fn decode(self) -> Result<Vec<u8>> {
-        let mut vec = Vec::with_capacity(self.unencoded_size);
-        base64::decode_config_buf(self.base64, base64::STANDARD, &mut vec)?;
+        let mut vec = vec![0; self.unencoded_size];
+        base64::decode_config_slice(self.base64, base64::STANDARD, &mut vec)?;
         Ok(vec)
     }
 }
