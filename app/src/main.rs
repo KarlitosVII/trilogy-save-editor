@@ -112,13 +112,7 @@ fn protocol(request: &http::Request) -> wry::Result<http::Response> {
         path = "index.html"
     }
 
-    let response = http::ResponseBuilder::new()
-        // Prevent caching
-        // .header("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
-        // .header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
-        // .header("Pragma", "no-cache")
-        ;
-
+    let response = http::ResponseBuilder::new();
     match Asset::get(path) {
         Some(asset) => {
             let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();

@@ -101,6 +101,9 @@ pub fn export_head_morph_dialog(utils: &RpcUtils) -> Result<Option<PathBuf>> {
 }
 
 pub fn load_database(_: &RpcUtils, path: PathBuf) -> Result<RpcFile> {
+    #[cfg(not(debug_assertions))]
+    let path = std::env::current_exe()?.parent().map(|parent| parent.join(&path)).unwrap_or(path);
+
     open_file(path)
 }
 

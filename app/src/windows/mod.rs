@@ -49,9 +49,9 @@ pub async fn clear_code_cache_if_more_than_20mo() {
         code_cache_dir.push("EBWebView\\Default\\Code Cache");
 
         const THRESHOLD: u64 = if cfg!(debug_assertions) {
-            52_428_800 // 50mo
+            1024 * 1024 * 50 // 50mo
         } else {
-            20_971_520 // 20mo
+            1024 * 1024 * 20 // 20mo
         };
 
         if dir_size(&code_cache_dir)? > THRESHOLD {
