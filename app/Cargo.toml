@@ -30,7 +30,11 @@ clap = "2.0"
 mime_guess = "2.0"
 rust-embed = { version = "6.0", default-features = false }
 dirs = "3.0"
-rfd = "0.5"
+# rfd = "0.5"
+native-dialog = { version = "0.5", features = [
+    "windows_dpi_awareness",
+    "windows_visual_styles",
+], default-features = false }
 base64 = "0.13"
 opener = "0.5"
 image = { version = "0.23", features = ["png"], default-features = false }

@@ -1,21 +1,20 @@
 use std::{env, path::Path};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
+use native_dialog::MessageType;
 use tokio::{fs, process, task};
 
 pub mod auto_update;
 
 pub async fn install_webview2() -> Result<()> {
-    let should_install = rfd::AsyncMessageDialog::new()
+    let should_install = native_dialog::MessageDialog::new()
         .set_title("Install WebView2 Runtime")
-        .set_description("The WebView2 Runtime must be installed to use this program. Install now?")
-        .set_level(rfd::MessageLevel::Warning)
-        .set_buttons(rfd::MessageButtons::YesNo)
-        .show()
-        .await;
+        .set_text("The WebView2 Runtime must be installed to use this program. Install now?")
+        .set_type(MessageType::Warning)
+        .show_confirm()?;
 
     if !should_install {
-        anyhow::bail!("WebView2 install cancelled by user");
+        bail!("WebView2 install cancelled by user");
     }
 
     let setup =
@@ -37,7 +36,7 @@ pub async fn install_webview2() -> Result<()> {
         .expect("Failed to launch WebView2 install");
 
     if !status.success() {
-        anyhow::bail!("Failed to install WebView2");
+        bail!("Failed to install WebView2");
     }
     Ok(())
 }

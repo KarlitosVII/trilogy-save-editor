@@ -1,50 +1,55 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
+use anyhow::{Error, Result};
 use wry::application::window::Window;
 
 use super::command::DialogParams;
 
-pub fn open_save(window: &Window) -> Option<PathBuf> {
-    rfd::FileDialog::new()
-        .set_parent(window)
-        .set_directory(bioware_dir())
+pub fn open_save(window: &Window) -> Result<Option<PathBuf>> {
+    native_dialog::FileDialog::new()
+        .set_owner(window)
+        .set_location(&bioware_dir())
         .add_filter("Mass Effect Trilogy Save", &["pcsav", "xbsav", "ps4sav", "MassEffectSave"])
         .add_filter("All Files", &["*"])
-        .pick_file()
+        .show_open_single_file()
+        .map_err(Error::from)
 }
 
-pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
+pub fn save_save(window: &Window, params: DialogParams) -> Result<Option<PathBuf>> {
     let DialogParams { path, filters } = params;
 
-    let directory = path
-        .parent()
-        .and_then(|parent| parent.is_dir().then(|| parent.to_owned()))
-        .unwrap_or_else(bioware_dir);
+    let directory = path.parent().map(ToOwned::to_owned).unwrap_or_else(bioware_dir);
     let file_name = path.file_name().map(OsStr::to_string_lossy).unwrap_or_default();
 
-    let mut dialog = rfd::FileDialog::new()
-        .set_parent(window)
-        .set_directory(directory)
-        .set_file_name(&file_name);
+    let mut dialog = native_dialog::FileDialog::new()
+        .set_owner(window)
+        .set_location(&directory)
+        .set_filename(&file_name);
 
-    for (filter, extensions) in filters {
-        let extension: Vec<&str> = extensions.iter().map(String::as_str).collect();
-        dialog = dialog.add_filter(&filter, &extension);
+    let filters: Vec<(&str, Vec<&str>)> =
+        filters.iter().map(|(f, e)| (f.as_str(), e.iter().map(String::as_str).collect())).collect();
+    for (filter, extensions) in &filters {
+        dialog = dialog.add_filter(filter, extensions);
     }
-    dialog.save_file()
+    dialog.show_save_single_file().map_err(Error::from)
 }
 
-pub fn import_head_morph(window: &Window) -> Option<PathBuf> {
-    rfd::FileDialog::new()
-        .set_parent(window)
+pub fn import_head_morph(window: &Window) -> Result<Option<PathBuf>> {
+    native_dialog::FileDialog::new()
+        .set_owner(window)
         .add_filter("Head Morph", &["ron", "me2headmorph", "me3headmorph"])
         .add_filter("All Files", &["*"])
-        .pick_file()
+        .show_open_single_file()
+        .map_err(Error::from)
 }
 
-pub fn export_head_morph(window: &Window) -> Option<PathBuf> {
-    rfd::FileDialog::new().set_parent(window).add_filter("Head Morph", &["ron"]).save_file()
+pub fn export_head_morph(window: &Window) -> Result<Option<PathBuf>> {
+    native_dialog::FileDialog::new()
+        .set_owner(window)
+        .add_filter("Head Morph", &["ron"])
+        .show_save_single_file()
+        .map_err(Error::from)
 }
 
 #[cfg(target_os = "windows")]

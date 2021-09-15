@@ -73,15 +73,14 @@ pub fn save_file(_: &RpcUtils, rpc_file: RpcFile) -> Result<()> {
 }
 
 pub fn open_save(utils: &RpcUtils) -> Result<Option<RpcFile>> {
-    match dialog::open_save(utils.window) {
+    match dialog::open_save(utils.window)? {
         Some(path) => open_file(path).map(Some),
         None => Ok(None),
     }
 }
 
 pub fn save_save_dialog(utils: &RpcUtils, params: DialogParams) -> Result<Option<PathBuf>> {
-    let result = dialog::save_save(utils.window, params);
-    Ok(result)
+    dialog::save_save(utils.window, params)
 }
 
 pub fn reload_save(_: &RpcUtils, path: PathBuf) -> Result<RpcFile> {
@@ -89,15 +88,14 @@ pub fn reload_save(_: &RpcUtils, path: PathBuf) -> Result<RpcFile> {
 }
 
 pub fn import_head_morph(utils: &RpcUtils) -> Result<Option<RpcFile>> {
-    match dialog::import_head_morph(utils.window) {
+    match dialog::import_head_morph(utils.window)? {
         Some(path) => open_file(path).map(Some),
         None => Ok(None),
     }
 }
 
 pub fn export_head_morph_dialog(utils: &RpcUtils) -> Result<Option<PathBuf>> {
-    let result = dialog::export_head_morph(utils.window);
-    Ok(result)
+    dialog::export_head_morph(utils.window)
 }
 
 pub fn load_database(_: &RpcUtils, path: PathBuf) -> Result<RpcFile> {
