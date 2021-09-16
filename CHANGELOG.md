@@ -1,3 +1,6 @@
+## 2.1.1
+- Fixed `Open / Save` dialog not showing up for some people
+
 ## 2.1.0
 - Support for Gibbed's head morphs (.me2headmorph, .me3headmorph)
 
