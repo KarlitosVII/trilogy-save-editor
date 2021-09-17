@@ -1,3 +1,6 @@
+## 2.1.2
+- Fixed `Open / Save` dialog not showing up for some people (for real this time)
+
 ## 2.1.1
 - Fixed `Open / Save` dialog not showing up for some people
 

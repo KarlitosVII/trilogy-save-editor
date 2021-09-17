@@ -1,63 +1,66 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use anyhow::{Error, Result};
 use wry::application::window::Window;
 
 use super::command::DialogParams;
 
-pub fn open_save(window: &Window) -> Result<Option<PathBuf>> {
-    native_dialog::FileDialog::new()
-        .set_owner(window)
-        .set_location(&bioware_dir())
+pub fn open_save(window: &Window) -> Option<PathBuf> {
+    let mut dialog = rfd::FileDialog::new()
+        .set_parent(window)
         .add_filter("Mass Effect Trilogy Save", &["pcsav", "xbsav", "ps4sav", "MassEffectSave"])
-        .add_filter("All Files", &["*"])
-        .show_open_single_file()
-        .map_err(Error::from)
+        .add_filter("All Files", &["*"]);
+
+    if let Some(bioware_dir) = bioware_dir() {
+        dialog = dialog.set_directory(bioware_dir);
+    }
+
+    dialog.pick_file()
 }
 
-pub fn save_save(window: &Window, params: DialogParams) -> Result<Option<PathBuf>> {
+pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
     let DialogParams { path, filters } = params;
 
-    let directory = path.parent().map(ToOwned::to_owned).unwrap_or_else(bioware_dir);
     let file_name = path.file_name().map(OsStr::to_string_lossy).unwrap_or_default();
 
-    let mut dialog = native_dialog::FileDialog::new()
-        .set_owner(window)
-        .set_location(&directory)
-        .set_filename(&file_name);
+    let mut dialog = rfd::FileDialog::new().set_parent(window).set_file_name(&file_name);
 
     let filters: Vec<(&str, Vec<&str>)> =
         filters.iter().map(|(f, e)| (f.as_str(), e.iter().map(String::as_str).collect())).collect();
     for (filter, extensions) in &filters {
         dialog = dialog.add_filter(filter, extensions);
     }
-    dialog.show_save_single_file().map_err(Error::from)
+
+    let directory = path
+        .parent()
+        .and_then(|parent| parent.is_dir().then(|| parent.to_owned()))
+        .or_else(bioware_dir);
+
+    if let Some(bioware_dir) = directory {
+        dialog = dialog.set_directory(bioware_dir);
+    }
+
+    dialog.save_file()
 }
 
-pub fn import_head_morph(window: &Window) -> Result<Option<PathBuf>> {
-    native_dialog::FileDialog::new()
-        .set_owner(window)
+pub fn import_head_morph(window: &Window) -> Option<PathBuf> {
+    rfd::FileDialog::new()
+        .set_parent(window)
         .add_filter("Head Morph", &["ron", "me2headmorph", "me3headmorph"])
         .add_filter("All Files", &["*"])
-        .show_open_single_file()
-        .map_err(Error::from)
+        .pick_file()
 }
 
-pub fn export_head_morph(window: &Window) -> Result<Option<PathBuf>> {
-    native_dialog::FileDialog::new()
-        .set_owner(window)
-        .add_filter("Head Morph", &["ron"])
-        .show_save_single_file()
-        .map_err(Error::from)
+pub fn export_head_morph(window: &Window) -> Option<PathBuf> {
+    rfd::FileDialog::new().set_parent(window).add_filter("Head Morph", &["ron"]).save_file()
 }
 
 #[cfg(target_os = "windows")]
-fn bioware_dir() -> PathBuf {
-    match dirs::document_dir() {
-        Some(path) => path.join("BioWare\\"),
-        None => PathBuf::default(),
-    }
+fn bioware_dir() -> Option<PathBuf> {
+    dirs::document_dir().and_then(|mut path| {
+        path.push("BioWare\\");
+        path.is_dir().then(|| path)
+    })
 }
 
 // FIXME: Find some nicer way of finding where the game saves are.
@@ -65,16 +68,14 @@ fn bioware_dir() -> PathBuf {
 // Mass Effect games installed in the default steam library, in
 // the user's home directory.
 #[cfg(target_os = "linux")]
-fn bioware_dir() -> PathBuf {
-    match dirs::home_dir() {
-        Some(path) => {
-            path.join(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare/")
-        }
-        None => PathBuf::default(),
-    }
+fn bioware_dir() -> Option<PathBuf> {
+    dirs::home_dir().and_then(|mut path| {
+        path.push(".steam/root/steamapps/compatdata/1328670/pfx/drive_c/users/steamuser/My Documents/BioWare/");
+        path.is_dir().then(|| path)
+    })
 }
 
 #[cfg(all(not(target_os = "linux"), not(target_os = "windows")))]
-fn bioware_dir() -> PathBuf {
-    dirs::home_dir().unwrap_or_default()
+fn bioware_dir() -> Option<PathBuf> {
+    None
 }
