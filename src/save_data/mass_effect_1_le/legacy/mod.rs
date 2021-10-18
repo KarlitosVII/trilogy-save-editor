@@ -18,15 +18,15 @@ use crate::save_data::{
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, Default, RawUi, RawUiChildren)]
 pub struct Map {
-    pub levels: IndexMap<String, Level>,
-    pub world: Option<BaseObject>,
+    levels: IndexMap<String, Level>,
+    world: Option<BaseObject>,
 }
 
 #[rcize_fields]
 #[derive(Deserialize, Serialize, Clone, Default, RawUi, RawUiChildren)]
 pub struct Level {
-    pub objects: Vec<BaseObject>,
-    pub actors: Vec<String>,
+    objects: Vec<BaseObject>,
+    actors: Vec<String>,
 }
 
 #[rcize_fields]

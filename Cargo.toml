@@ -27,7 +27,7 @@ derive_more = { version = "0.99", features = [
 ], default-features = false }
 bitvec = { version = "0.22", features = ["std"], default-features = false }
 indexmap = { version = "1.6", features = ["std"], default-features = false }
-encoding_rs = { version = "0.8", default-features = false }
+encoding_rs = "0.8"
 # Sync
 # flume = { version = "0.10", features = ["async"], default-features = false }
 # Utils
@@ -49,6 +49,7 @@ web-sys = { version = "0.3", features = [
     "CustomEvent",
     "DataTransfer",
     "DomRect",
+    "DomTokenList",
     "History",
     "PopStateEvent",
     "PopStateEventInit",
@@ -59,5 +60,5 @@ serde-wasm-bindgen = "0.3"
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.6", features = ["indexmap"], default-features = false }
 # Yew
-yew = { git = "https://github.com/yewstack/yew/", rev = "60c08736f1034f9402dddae4335584c103ffd7f0", default-features = false }
-yew-agent = { git = "https://github.com/yewstack/yew/", rev = "60c08736f1034f9402dddae4335584c103ffd7f0" }
+yew = { git = "https://github.com/yewstack/yew/", rev = "98821c4018b524e439bdf9b05e2f8372e37ef1bd", default-features = false }
+yew-agent = { git = "https://github.com/yewstack/yew/", rev = "98821c4018b524e439bdf9b05e2f8372e37ef1bd" }

@@ -16,7 +16,7 @@
     // Window events
     const MAIN_BUTTON = 1;
     const DOUBLE_CLICK = 2;
-    document.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("load", () => {
         // Title bar events
         const drag_zone = document.getElementById("drag_zone");
         drag_zone.addEventListener('mousedown', (e) => {

@@ -79,7 +79,7 @@ impl Component for Helper {
                         "border-default-border",
                         "px-2",
                         "py-1",
-                        "w-[480px]",
+                        "w-[515px]",
                         "z-30",
                         (!self.hovered).then(|| "hidden" ),
                     ]}

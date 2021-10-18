@@ -91,7 +91,7 @@ impl Component for TabBar {
             html! {
                 <a class={classes![
                         "rounded-b-none",
-                        "rounded-t-[3px]",
+                        "rounded-t-[0.2rem]",
                         "cursor-pointer",
                         "select-none",
                         "leading-[19px]",

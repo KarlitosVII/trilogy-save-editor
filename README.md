@@ -45,7 +45,7 @@ Without them I could not have done anything.
 
 ```sh
 rustup target add wasm32-unknown-unknown
-npm update
+npm install
 cargo install cargo-make
 cargo make release
 ```

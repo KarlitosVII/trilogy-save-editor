@@ -280,7 +280,7 @@ impl Component for RawPlot {
                         { "Filter" }
                     </label>
                     <form class="flex gap-1"
-                        onsubmit={ctx.link().callback(|e: Event| {
+                        onsubmit={ctx.link().callback(|e: FocusEvent| {
                             e.prevent_default();
                             Msg::Add
                         })}

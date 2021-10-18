@@ -104,6 +104,9 @@ async fn main() -> Result<()> {
             _ => (),
         }
     });
+
+    #[allow(unreachable_code)]
+    Ok(())
 }
 
 fn protocol(request: &http::Request) -> wry::Result<http::Response> {

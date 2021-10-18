@@ -36,7 +36,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       if: matrix.target == 'x86_64-unknown-linux-gnu'
-      run: sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev
+      run: sudo apt update && sudo apt install libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev
     - name: Install latest stable rust
       uses: actions-rs/toolchain@v1
       with:
@@ -51,9 +51,9 @@ jobs:
       run: npm update
     - name: Run tailwind
       run: npm run build
+    - name: Run tests
+      run: cargo test --all
     - name: Trunk build
       run: trunk build --dist "target/dist"
     - name: App Build
       run: cargo build -p app
-    - name: Run tests
-      run: cargo test --all

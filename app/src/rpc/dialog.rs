@@ -25,10 +25,9 @@ pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
 
     let mut dialog = rfd::FileDialog::new().set_parent(window).set_file_name(&file_name);
 
-    let filters: Vec<(&str, Vec<&str>)> =
-        filters.iter().map(|(f, e)| (f.as_str(), e.iter().map(String::as_str).collect())).collect();
-    for (filter, extensions) in &filters {
-        dialog = dialog.add_filter(filter, extensions);
+    for (filter, extensions) in filters {
+        let extensions: Vec<&str> = extensions.iter().map(String::as_str).collect();
+        dialog = dialog.add_filter(&filter, &extensions);
     }
 
     let directory = path
