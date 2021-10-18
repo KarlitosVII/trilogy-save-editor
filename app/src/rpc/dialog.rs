@@ -7,9 +7,10 @@ use super::command::DialogParams;
 
 pub fn open_save(window: &Window) -> Option<PathBuf> {
     let mut dialog = rfd::FileDialog::new()
-        .set_parent(window)
         .add_filter("Mass Effect Trilogy Save", &["pcsav", "xbsav", "ps4sav", "MassEffectSave"])
         .add_filter("All Files", &["*"]);
+
+    dialog = with_parent(dialog, window);
 
     if let Some(bioware_dir) = bioware_dir() {
         dialog = dialog.set_directory(bioware_dir);
@@ -23,7 +24,8 @@ pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
 
     let file_name = path.file_name().map(OsStr::to_string_lossy).unwrap_or_default();
 
-    let mut dialog = rfd::FileDialog::new().set_parent(window).set_file_name(&file_name);
+    let mut dialog = rfd::FileDialog::new().set_file_name(&file_name);
+    dialog = with_parent(dialog, window);
 
     for (filter, extensions) in filters {
         let extensions: Vec<&str> = extensions.iter().map(String::as_str).collect();
@@ -43,15 +45,16 @@ pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
 }
 
 pub fn import_head_morph(window: &Window) -> Option<PathBuf> {
-    rfd::FileDialog::new()
-        .set_parent(window)
+    let dialog = rfd::FileDialog::new()
         .add_filter("Head Morph", &["ron", "me2headmorph", "me3headmorph"])
-        .add_filter("All Files", &["*"])
-        .pick_file()
+        .add_filter("All Files", &["*"]);
+
+    with_parent(dialog, window).pick_file()
 }
 
 pub fn export_head_morph(window: &Window) -> Option<PathBuf> {
-    rfd::FileDialog::new().set_parent(window).add_filter("Head Morph", &["ron"]).save_file()
+    let dialog = rfd::FileDialog::new().add_filter("Head Morph", &["ron"]);
+    with_parent(dialog, window).save_file()
 }
 
 #[cfg(target_os = "windows")]
@@ -77,4 +80,15 @@ fn bioware_dir() -> Option<PathBuf> {
 #[cfg(all(not(target_os = "linux"), not(target_os = "windows")))]
 fn bioware_dir() -> Option<PathBuf> {
     None
+}
+
+// FIXME: Remove this and set directly `set_parent` when `tao` will implement `raw_window_handle` for linux
+#[cfg(not(target_os = "linux"))]
+fn with_parent(dialog: rfd::FileDialog, window: &Window) -> rfd::FileDialog {
+    dialog.set_parent(window)
+}
+
+#[cfg(target_os = "linux")]
+fn with_parent(dialog: rfd::FileDialog, _: &Window) -> rfd::FileDialog {
+    dialog
 }
