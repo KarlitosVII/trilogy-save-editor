@@ -51,9 +51,9 @@ jobs:
       run: npm update
     - name: Run tailwind
       run: npm run build
-    - name: Run tests
-      run: cargo test --all
     - name: Trunk build
       run: trunk build --dist "target/dist"
     - name: App Build
       run: cargo build -p app
+    - name: Run tests
+      run: cargo test --all
