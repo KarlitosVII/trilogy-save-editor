@@ -3,7 +3,8 @@ name = "trilogy-save-editor"
 version = "2.1.2"
 authors = ["Karlitos"]
 license = "CECILL-2.1"
-edition = "2018"
+edition = "2021"
+rust-version = "1.56.0"
 
 [profile.release]
 lto = true

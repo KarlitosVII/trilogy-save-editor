@@ -1,7 +1,6 @@
 mod command;
 mod dialog;
 
-use std::array::IntoIter;
 use std::env;
 use std::path::PathBuf;
 
@@ -45,7 +44,7 @@ macro_rules! call_commands_with_param {
             if $req.method == stringify!($command) {
                 let params = $req.params.take().context("argument required")?;
                 let value: [_; 1] = serde_json::from_value(params)?;
-                let value = IntoIter::new(value).next().unwrap_or_default();
+                let value = value.into_iter().next().unwrap_or_default();
                 let response = command::$command(&$utils, value)?;
                 let js_value = serde_json::to_value(&response).map(Some)?;
                 return Ok(js_value);
