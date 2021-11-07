@@ -1,3 +1,6 @@
+## Unreleased
+- Reverted color values to float so you can use values higher than 1.0 for emissive colors
+
 ## 2.1.2
 - Fixed `Open / Save` dialog not showing up for some people (for real this time)
 

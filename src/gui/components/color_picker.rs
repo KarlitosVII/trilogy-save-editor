@@ -46,20 +46,20 @@ impl Component for ColorPicker {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::R(CallbackType::Byte(value)) => {
-                ctx.props().color_mut().r = value as f32 / 255.0;
+            Msg::R(CallbackType::Float(value)) => {
+                ctx.props().color_mut().r = value;
                 true
             }
-            Msg::G(CallbackType::Byte(value)) => {
-                ctx.props().color_mut().g = value as f32 / 255.0;
+            Msg::G(CallbackType::Float(value)) => {
+                ctx.props().color_mut().g = value;
                 true
             }
-            Msg::B(CallbackType::Byte(value)) => {
-                ctx.props().color_mut().b = value as f32 / 255.0;
+            Msg::B(CallbackType::Float(value)) => {
+                ctx.props().color_mut().b = value;
                 true
             }
-            Msg::A(CallbackType::Byte(value)) => {
-                ctx.props().color_mut().a = value as f32 / 255.0;
+            Msg::A(CallbackType::Float(value)) => {
+                ctx.props().color_mut().a = value;
                 true
             }
             Msg::Change(event) => {
@@ -92,21 +92,23 @@ impl Component for ColorPicker {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let (r, g, b, a) = {
             let colors = ctx.props().color();
-            (
-                (colors.r * 255.0) as u8,
-                (colors.g * 255.0) as u8,
-                (colors.b * 255.0) as u8,
-                (colors.a * 255.0) as u8,
-            )
+            (colors.r, colors.g, colors.b, colors.a)
         };
-        let hex_color = format!("#{:02X}{:02X}{:02X}", r, g, b);
+        let hex_color = {
+            let max_color = r.max(g.max(b));
+            let ratio = max_color.max(1.0);
+            let r = (r * 255.0 / ratio) as u8;
+            let g = (g * 255.0 / ratio) as u8;
+            let b = (b * 255.0 / ratio) as u8;
+            format!("#{:02X}{:02X}{:02X}", r, g, b)
+        };
 
         html! {
             <div class="flex gap-2">
-                <InputNumber label="R" value={NumberType::Byte(r.into())} onchange={ctx.link().callback(Msg::R)} />
-                <InputNumber label="G" value={NumberType::Byte(g.into())} onchange={ctx.link().callback(Msg::G)} />
-                <InputNumber label="B" value={NumberType::Byte(b.into())} onchange={ctx.link().callback(Msg::B)} />
-                <InputNumber label="A" value={NumberType::Byte(a.into())} onchange={ctx.link().callback(Msg::A)} />
+                <InputNumber label="R" value={NumberType::Float(r.into())} onchange={ctx.link().callback(Msg::R)} />
+                <InputNumber label="G" value={NumberType::Float(g.into())} onchange={ctx.link().callback(Msg::G)} />
+                <InputNumber label="B" value={NumberType::Float(b.into())} onchange={ctx.link().callback(Msg::B)} />
+                <InputNumber label="A" value={NumberType::Float(a.into())} onchange={ctx.link().callback(Msg::A)} />
                 <label class="flex-auto flex items-center gap-1">
                     <span class="border border-default-border w-5 h-5" style={format!("background-color: {}", hex_color)}>
                         <input type="color"
