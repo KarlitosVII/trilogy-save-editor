@@ -14,6 +14,8 @@ use crate::gui::{
 };
 use crate::save_data::shared::plot::RawPlotDb;
 
+const LABEL_LIST_MAX_LEN: usize = 10_000_000;
+
 pub enum Msg {
     Scrolled,
     ChangeBool(usize, bool),
@@ -361,14 +363,16 @@ impl RawPlot {
 
         let mut label_list: IndexMap<usize, Option<String>> = match plots {
             PlotType::Boolean(ref bitvec) => {
+                let len = bitvec.borrow().len().min(LABEL_LIST_MAX_LEN);
                 let label_list = plot_db.booleans.iter().map(|(&k, v)| (k, Some(v.clone())));
-                (0..bitvec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
+                (0..len).map(|idx| (idx, None)).chain(label_list).collect()
             }
             PlotType::Int(ref integers) => {
                 let label_list = plot_db.integers.iter().map(|(&k, v)| (k, Some(v.clone())));
                 match integers {
                     IntPlotType::Vec(ref vec) => {
-                        (0..vec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
+                        let len = vec.borrow().len().min(LABEL_LIST_MAX_LEN);
+                        (0..len).map(|idx| (idx, None)).chain(label_list).collect()
                     }
                     IntPlotType::IndexMap(ref index_map) => index_map
                         .borrow()
@@ -382,7 +386,8 @@ impl RawPlot {
                 let label_list = plot_db.floats.iter().map(|(&k, v)| (k, Some(v.clone())));
                 match floats {
                     FloatPlotType::Vec(ref vec) => {
-                        (0..vec.borrow().len()).map(|idx| (idx, None)).chain(label_list).collect()
+                        let len = vec.borrow().len().min(LABEL_LIST_MAX_LEN);
+                        (0..len).map(|idx| (idx, None)).chain(label_list).collect()
                     }
                     FloatPlotType::IndexMap(ref index_map) => index_map
                         .borrow()
