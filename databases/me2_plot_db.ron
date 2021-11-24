@@ -340,6 +340,7 @@ Me2PlotDb(
                 1248: "Legion sent to Cerberus",
             },
             integers: {
+                // FIXME: Number of missions after IFF (maybe 23?)
                 166: "Number of missions after IFF activation",
             },
         ),

@@ -51,9 +51,6 @@ async fn main() -> Result<()> {
                 anyhow::bail!(err)
             }
         }
-
-        // Clear WebView2 Code Cache
-        windows::clear_code_cache_if_more_than_20mo().await;
     }
 
     let args = parse_args();
@@ -101,6 +98,11 @@ async fn main() -> Result<()> {
                 _ => (),
             },
             Event::UserEvent(event) => rpc::event_handler(event, &webview, control_flow),
+            Event::LoopDestroyed => {
+                // Clear WebView2 Code Cache
+                #[cfg(target_os = "windows")]
+                windows::clear_code_cache();
+            }
             _ => (),
         }
     });
