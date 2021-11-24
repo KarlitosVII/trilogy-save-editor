@@ -3,6 +3,7 @@ use std::mem;
 
 use anyhow::{Error, Result};
 use gloo::timers::future::TimeoutFuture;
+use gloo_utils as utils;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
@@ -489,7 +490,7 @@ impl App {
                 SaveGame::MassEffect3 { .. } => Theme::MassEffect3,
             };
 
-            let body = yew::utils::document().body().unwrap();
+            let body = utils::document().body().unwrap();
             let classes = body.class_list();
 
             let _ = classes.remove_3(&Theme::MassEffect1, &Theme::MassEffect2, &Theme::MassEffect3);

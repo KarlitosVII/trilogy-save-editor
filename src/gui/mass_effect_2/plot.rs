@@ -106,23 +106,19 @@ impl Component for Me2Plot {
             ];
 
             let categories = categories.iter().map(|(tab, categories)| {
-                // Workaround for unused_braces warning
-                #[allow(unused_braces)]
-                (html_nested! {
+                html_nested! {
                     <Tab title={tab.to_owned()}>
                         <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>
                     </Tab>
-                })
+                }
             });
 
             let mass_effect_1 = me1_booleans.as_ref().map(|me1_booleans| {
                 if !me1_booleans.borrow().is_empty() {
                     let me1_integers = me1_integers.as_ref().unwrap();
-                    // Workaround for unused_braces warning
-                    #[allow(unused_braces)]
-                    (html_nested! {
+                    html_nested! {
                         <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                             <div class="flex-auto flex flex-col gap-1">
                                 <div>
@@ -136,16 +132,14 @@ impl Component for Me2Plot {
                                 />
                             </div>
                         </Tab>
-                    })
+                    }
                 } else {
-                    // Workaround for unused_braces warning
-                    #[allow(unused_braces)]
-                    (html_nested! {
+                    html_nested! {
                         <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                             { "You cannot edit ME1 plot if you have not imported a ME1 save." }
                             <hr class="border-t border-default-border" />
                         </Tab>
-                    })
+                    }
                 }
             }).into_iter();
 

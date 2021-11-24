@@ -108,15 +108,13 @@ impl Component for Me3Plot {
             ];
 
             let categories = categories.iter().map(|(tab, categories)| {
-                // Workaround for unused_braces warning
-                #[allow(unused_braces)]
-                (html_nested! {
+                html_nested! {
                     <Tab title={tab.to_owned()}>
                         <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>
                     </Tab>
-                })
+                }
             });
 
             let weapons_powers = weapons_powers.iter().map(|(title, variable)| {

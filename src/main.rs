@@ -14,7 +14,7 @@ mod unreal;
 use gui::App;
 
 fn main() {
-    let document = yew::utils::document();
+    let document = gloo_utils::document();
     let body = document.body().unwrap();
     let mount_point = body.last_element_child().unwrap();
 

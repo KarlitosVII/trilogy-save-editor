@@ -1,4 +1,5 @@
 use gloo::events::EventListener;
+use gloo_utils as utils;
 use wasm_bindgen::JsCast;
 use web_sys::PopStateEvent;
 use yew::{html::Scope, prelude::*};
@@ -138,7 +139,7 @@ impl Component for TabBar {
 
 impl TabBar {
     fn event_listener(link: Scope<Self>) -> EventListener {
-        EventListener::new(&yew::utils::window(), "popstate", {
+        EventListener::new(&utils::window(), "popstate", {
             move |event| {
                 if let Some(event) = event.dyn_ref::<PopStateEvent>() {
                     let main_tab: String =

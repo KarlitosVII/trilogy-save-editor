@@ -396,9 +396,8 @@ impl SaveHandler {
                 let has_path = rpc::export_head_morph_dialog().await?;
                 let cancelled = match has_path {
                     Some(path) => {
-                        let pretty_config = PrettyConfig::new()
-                            .with_enumerate_arrays(true)
-                            .with_new_line(String::from('\n'));
+                        let pretty_config =
+                            PrettyConfig::new().enumerate_arrays(true).new_line(String::from('\n'));
 
                         let output = ron::ser::to_string_pretty(&head_morph, pretty_config)?;
                         let rpc_file = RpcFile {

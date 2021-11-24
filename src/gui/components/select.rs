@@ -1,3 +1,4 @@
+use gloo_utils as utils;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
@@ -75,8 +76,7 @@ impl Component for Select {
     fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
         // Drop down open upward if bottom > viewport_height
         if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
-            let viewport_height =
-                yew::utils::document().document_element().unwrap().client_height();
+            let viewport_height = utils::document().document_element().unwrap().client_height();
             let rect = drop_down.get_bounding_client_rect();
             let top = rect.top() as i32;
             let bottom = rect.bottom() as i32;

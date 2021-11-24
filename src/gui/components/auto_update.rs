@@ -3,6 +3,7 @@ use gloo::{
     events::EventListener,
     storage::{LocalStorage, Storage},
 };
+use gloo_utils as utils;
 use js_sys::Date;
 use serde::Deserialize;
 use wasm_bindgen::JsCast;
@@ -44,14 +45,14 @@ impl Component for AutoUpdate {
     fn create(ctx: &Context<Self>) -> Self {
         let update_listener = {
             let link = ctx.link().clone();
-            EventListener::new(&yew::utils::document(), "tse_update_available", move |_| {
+            EventListener::new(&utils::document(), "tse_update_available", move |_| {
                 link.send_message(Msg::UpdateAvailable);
             })
         };
 
         let progress_listener = {
             let link = ctx.link().clone();
-            EventListener::new(&yew::utils::document(), "tse_update_progress", move |event| {
+            EventListener::new(&utils::document(), "tse_update_progress", move |event| {
                 if let Some(event) = event.dyn_ref::<CustomEvent>() {
                     #[derive(Deserialize)]
                     struct Progress {
@@ -67,7 +68,7 @@ impl Component for AutoUpdate {
 
         let error_listener = {
             let link = ctx.link().clone();
-            EventListener::new(&yew::utils::document(), "tse_update_error", move |event| {
+            EventListener::new(&utils::document(), "tse_update_error", move |event| {
                 if let Some(event) = event.dyn_ref::<CustomEvent>() {
                     #[derive(Deserialize)]
                     struct Error {

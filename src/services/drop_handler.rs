@@ -2,8 +2,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use anyhow::{Context, Result};
-use gloo::events::{EventListener, EventListenerOptions};
-use gloo::file::{self, callbacks::FileReader, FileList};
+use gloo::{
+    events::{EventListener, EventListenerOptions},
+    file::{self, callbacks::FileReader, FileList},
+};
+use gloo_utils as utils;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
@@ -15,7 +18,7 @@ pub struct DropHandler {
 
 impl DropHandler {
     pub fn new(ondrop: Callback<Result<(String, Vec<u8>)>>) -> Self {
-        let document = yew::utils::document();
+        let document = utils::document();
         let options = EventListenerOptions::enable_prevent_default();
 
         let drag_over_listener =

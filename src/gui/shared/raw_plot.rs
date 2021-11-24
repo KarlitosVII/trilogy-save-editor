@@ -2,6 +2,7 @@ use std::cell::{Ref, RefMut};
 use std::rc::Rc;
 
 use gloo::{events::EventListener, timers::future::TimeoutFuture};
+use gloo_utils as utils;
 use indexmap::{map::Entry, IndexMap};
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
@@ -66,7 +67,7 @@ impl Component for RawPlot {
     fn create(ctx: &Context<Self>) -> Self {
         let _resize_listener = {
             let link = ctx.link().clone();
-            EventListener::new(&yew::utils::window(), "resize", move |_| {
+            EventListener::new(&utils::window(), "resize", move |_| {
                 link.send_message(Msg::Scrolled)
             })
         };

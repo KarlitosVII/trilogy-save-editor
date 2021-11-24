@@ -1,3 +1,4 @@
+use gloo_utils as utils;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
@@ -40,7 +41,7 @@ impl Component for Helper {
     fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
         // Keep the popup in the viewport
         if let Some(popup) = self.popup_ref.cast::<HtmlElement>() {
-            let viewport_width = yew::utils::document().document_element().unwrap().client_width();
+            let viewport_width = utils::document().document_element().unwrap().client_width();
             let client_rect = popup.get_bounding_client_rect();
             let width = client_rect.width() as i32;
             let left = client_rect.left() as i32;

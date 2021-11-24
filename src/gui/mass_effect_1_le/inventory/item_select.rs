@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use gloo::timers::future::TimeoutFuture;
+use gloo_utils as utils;
 use indexmap::IndexMap;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
@@ -172,7 +173,7 @@ impl Component for ItemSelect {
             }
 
             if let Some(drop_down) = self.drop_down_ref.cast::<HtmlElement>() {
-                let document = yew::utils::document().document_element().unwrap();
+                let document = utils::document().document_element().unwrap();
                 let viewport_height = document.client_height();
                 let client_rect = drop_down.get_bounding_client_rect();
 

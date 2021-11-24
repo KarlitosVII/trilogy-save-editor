@@ -90,15 +90,13 @@ impl Component for Me1Plot {
             let categories = [("Player / Crew", player_crew), ("Missions", missions)];
 
             let categories = categories.iter().map(|(tab, categories)| {
-                // Workaround for unused_braces warning
-                #[allow(unused_braces)]
-                (html_nested! {
+                html_nested! {
                     <Tab title={tab.to_owned()}>
                         <div class="flex-auto flex flex-col gap-1">
                             { for view_categories(categories) }
                         </div>
                     </Tab>
-                })
+                }
             });
 
             html! {

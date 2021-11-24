@@ -1,3 +1,4 @@
+use gloo_utils as utils;
 use wasm_bindgen::JsValue;
 use web_sys::{PopStateEvent, PopStateEventInit};
 use yew::prelude::*;
@@ -25,7 +26,7 @@ impl Component for Link {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Clicked => {
-                let window = yew::utils::window();
+                let window = utils::window();
 
                 let main_tab = JsValue::from_str(&ctx.props().tab);
                 // let history = window.history().expect("no history");
