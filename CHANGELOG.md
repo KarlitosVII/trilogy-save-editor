@@ -1,3 +1,6 @@
+## Unreleased
+- Fix for ME2 ship upgrade plots
+
 ## 2.1.3
 - Reverted color values to float so you can use values higher than 1.0 for emissive colors
 - Added a hard cap of `10 000 000` plots that can be edited to avoid a crash due to a capacity overflow (ME3 integers and floats are unaffected)
