@@ -1,12 +1,13 @@
 ## Unreleased
-- Always opens the dialogs in the last directory.
-- Fixed ME2 ship upgrade plots
-- //TODO: Fixed number of missions after IFF activation
+- Always opens the dialogs in the last opened save directory
+- ME2: Fixed ship upgrade plots
+- ME2: Fixed number of missions after crew abducted
+- ME2: Added number of missions since last main story mission (useful to avoid being forced to do Collector ship, IFF activation, etc.)
+- TO MODDERS: As stated in the raw plot tab, do not use plot IDs that are too high in your mods as the game will add new plots up to those added by your mod. For example, ME3 has `~40 000` booleans and if you add the plot `1 000 000` the game will add `960 000` plots in every saves that use your mod. The plot table is now `25x bigger` than before by just adding one plot!
 
 ## 2.1.3
 - Reverted color values to float so you can use values higher than 1.0 for emissive colors
 - Added a hard cap of `10 000 000` plots that can be edited to avoid a crash due to a capacity overflow (ME3 integers and floats are unaffected)
-- TO MODDERS: As stated in the raw plot tab, do not use plot IDs that are too high in your mods as the game will add new plots up to those added by your mod. For example, ME3 has `~40 000` booleans and if you add the plot `1 000 000` the game will add `960 000` plots in every saves that use your mod. The plot table is now `25x bigger` than before by just adding one plot!
 
 ## 2.1.2
 - Fixed `Open / Save` dialog not showing up for some people (for real this time)

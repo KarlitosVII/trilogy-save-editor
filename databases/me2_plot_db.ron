@@ -11,6 +11,7 @@ Me2PlotDb(
         integers: {
             2: "Paragon points",
             3: "Renegade points",
+            23: "Number of missions since last main story mission (Freedom's Progress, Horizon, etc.)",
         },
     ),
     crew: {
@@ -184,16 +185,17 @@ Me2PlotDb(
         ),
         "Crew": PlotCategory(
             booleans: {
-                3351: "All Crew Survived",
-                3515: "Mess Sgt. Rupert Gardner died",
-                3629: "Kelly Chambers died",
-                3630: "Dr. Karin Chakwas died",
-                3631: "Kenneth Donnelly died",
-                3632: "Gabriella Daniels died",
-                3349: "Had casualties",
+                3515: "Mess Sgt. Rupert Gardner is dead",
+                3629: "Kelly Chambers is dead",
+                3631: "Kenneth Donnelly is dead",
+                3632: "Gabriella Daniels is dead",
+                3630: "Dr. Karin Chakwas is dead",
+                3351: "Crew survived when escorted",
+                3349: "Crew died when escorted",
             },
             integers: {
-                166: "Number of missions after crew abducted (1-3 = half crew dead / 4 = all crew dead)",
+                23: "Number of missions after crew abducted (1-3 = half dead / 4 = all dead. Change this BEFORE Omega 4 Relay)",
+                166: "Number of missions after crew abducted (1-3 = half dead / 4 = all dead. Change this AFTER Omega 4 Relay)",
             },
         ),
     },
@@ -339,10 +341,7 @@ Me2PlotDb(
                 1247: "Legion activated",
                 1248: "Legion sent to Cerberus",
             },
-            integers: {
-                // FIXME: Number of missions after IFF (maybe 23?)
-                166: "Number of missions after IFF activation",
-            },
+            integers: {},
         ),
         "Collector Base": PlotCategory(
             booleans: {
