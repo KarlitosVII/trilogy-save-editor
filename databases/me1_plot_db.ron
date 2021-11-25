@@ -1,6 +1,6 @@
 Me1PlotDb(
     player_crew: {
-        "Player": PlotCategory(
+        "Player": (
             booleans: {
                 7156: "Rich Achievement (to unlock Spectre Master gear)",
                 4639: "Player is female"
@@ -12,7 +12,7 @@ Me1PlotDb(
                 46: "Renegade points",
             },
         ),
-        "Crew": PlotCategory(
+        "Crew": (
             booleans: {
                 3939: "Kaidan in party",
                 4509: "Sided against Vrynnus while speaking to Kaidan",
@@ -29,7 +29,7 @@ Me1PlotDb(
                 38: "Garrus Spectres progress (renegade) (set to 6)",
             },
         ),
-        "Romance": PlotCategory(
+        "Romance": (
             booleans: {
                 6528: "Romanced somebody",
                 4281: "[Ashley] Romance active",
@@ -47,7 +47,7 @@ Me1PlotDb(
         ),
     },
     missions: {
-        "Citadel": PlotCategory(
+        "Citadel": (
             booleans: {
                 3979: "[Harkin] Talked to him",
                 3980: "[Barla Von] Met him",
@@ -81,7 +81,7 @@ Me1PlotDb(
                 39: "[Scan the Keepers] Keepers scanned (0-21)",
             },
         ),
-        "Feros": PlotCategory(
+        "Feros": (
             booleans: {
                 4378: "Charmed Ethan Jeong",
                 4377: "Intimidated Ethan Jeong",
@@ -96,7 +96,7 @@ Me1PlotDb(
             },
             integers: {},
         ),
-        "Noveria": PlotCategory(
+        "Noveria": (
             booleans: {
                 2687: "Gave evidence to Lorik Qui'in",
                 2690: "Gave evidence to Gianna Parasini",
@@ -107,7 +107,7 @@ Me1PlotDb(
             },
             integers: {},
         ),
-        "Virmire": PlotCategory(
+        "Virmire": (
             booleans: {
                 3827: "Rescued Ashley",
                 3828: "Rescued Kaidan",
@@ -120,7 +120,7 @@ Me1PlotDb(
             },
             integers: {},
         ),
-        "End": PlotCategory(
+        "End": (
             booleans: {
                 3001: "Saved the Council",
                 3002: "Abandoned the Council",
@@ -129,7 +129,7 @@ Me1PlotDb(
             },
             integers: {},
         ),
-        "UNC": PlotCategory(
+        "UNC": (
             booleans: {
                 5885: "[Cerberus] Heard of Cerberus",
                 4608: "[Cerberus] Found Cerberus files",
@@ -158,7 +158,7 @@ Me1PlotDb(
                 56: "[Locate Signs of Battle] Salarian ID Tags",
             },
         ),
-        "DLC": PlotCategory(
+        "DLC": (
             booleans: {
                 7291: "[Bring Down the Sky] Completed mission",
                 7317: "[Bring Down the Sky] Hostages rescued (Balak alive)",

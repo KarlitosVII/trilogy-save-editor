@@ -1,5 +1,5 @@
 Me2PlotDb(
-    player: PlotCategory(
+    player: (
         booleans: {
             2279: "Played Mass Effect 1",
             1456: "Game done",
@@ -15,7 +15,7 @@ Me2PlotDb(
         },
     ),
     crew: {
-        "Garrus": PlotCategory(
+        "Garrus": (
             booleans: {
                 38: "Garrus in party",
                 183: "Garrus is loyal",
@@ -29,7 +29,7 @@ Me2PlotDb(
                 318: "Garrus appearance (0 = Default, 1 = Alternate, 2 = DLC)",
             },
         ),
-        "Grunt": PlotCategory(
+        "Grunt": (
             booleans: {
                 42: "Grunt in party",
                 189: "Grunt is loyal",
@@ -43,7 +43,7 @@ Me2PlotDb(
                 322: "Grunt appearance (0 = Default, 1 = Alternate, 2 = DLC)",
             },
         ),
-        "Jack": PlotCategory(
+        "Jack": (
             booleans: {
                 35: "Jack in party",
                 179: "Jack is loyal",
@@ -57,7 +57,7 @@ Me2PlotDb(
                 314: "Jack appearance (0 = Default, 1 = Alternate, 2 = DLC)",
             },
         ),
-        "Jacob": PlotCategory(
+        "Jacob": (
             booleans: {
                 34: "Jacob in party",
                 178: "Jacob is loyal",
@@ -71,7 +71,7 @@ Me2PlotDb(
                 313: "Jacob appearance (0 = Default, 1 = Alternate)",
             },
         ),
-        "Kasumi": PlotCategory(
+        "Kasumi": (
             booleans: {
                 37: "Kasumi in party",
                 182: "Kasumi is loyal",
@@ -85,7 +85,7 @@ Me2PlotDb(
                 317: "Kasumi appearance (0 = Default, 1 = Alternate)",
             },
         ),
-        "Legion": PlotCategory(
+        "Legion": (
             booleans: {
                 36: "Legion in party",
                 180: "Legion is loyal",
@@ -99,7 +99,7 @@ Me2PlotDb(
                 315: "Legion appearance (0 = Default, 1 = Alternate)",
             },
         ),
-        "Miranda": PlotCategory(
+        "Miranda": (
             booleans: {
                 33: "Miranda in party",
                 177: "Miranda is loyal",
@@ -113,7 +113,7 @@ Me2PlotDb(
                 312: "Miranda appearance (0 = Default, 1 = Alternate, 2 = DLC)",
             },
         ),
-        "Mordin": PlotCategory(
+        "Mordin": (
             booleans: {
                 41: "Mordin in party",
                 188: "Mordin is loyal",
@@ -127,7 +127,7 @@ Me2PlotDb(
                 321: "Mordin appearance (0 = Default, 1 = Alternate)",
             },
         ),
-        "Samara": PlotCategory(
+        "Samara": (
             booleans: {
                 43: "Samara in party",
                 191: "Samara is loyal",
@@ -141,7 +141,7 @@ Me2PlotDb(
                 323: "Samara appearance (0 = Default, 1 = Alternate)",
             },
         ),
-        "Tali": PlotCategory(
+        "Tali": (
             booleans: {
                 40: "Tali in party",
                 186: "Tali is loyal",
@@ -155,7 +155,7 @@ Me2PlotDb(
                 320: "Tali appearance (0 = Default, 1 = Alternate, 2 = DLC)",
             },
         ),
-        "Thane": PlotCategory(
+        "Thane": (
             booleans: {
                 39: "Thane in party",
                 185: "Thane is loyal",
@@ -169,7 +169,7 @@ Me2PlotDb(
                 319: "Thane appearance (0 = Default, 1 = Alternate, 2 = DLC)",
             },
         ),
-        "Zaeed": PlotCategory(
+        "Zaeed": (
             booleans: {
                 44: "Zaeed in party",
                 192: "Zaeed is loyal",
@@ -183,7 +183,7 @@ Me2PlotDb(
                 324: "Zaeed appearance (0 = Default, 1 = Alternate)",
             },
         ),
-        "Crew": PlotCategory(
+        "Crew": (
             booleans: {
                 3515: "Mess Sgt. Rupert Gardner is dead",
                 3629: "Kelly Chambers is dead",
@@ -200,7 +200,7 @@ Me2PlotDb(
         ),
     },
     romance: {
-        "Garrus": PlotCategory(
+        "Garrus": (
             booleans: {
                 3423: "[Flirt] Garrus",
                 5207: "[Romanced] Had sex with Garrus",
@@ -211,7 +211,7 @@ Me2PlotDb(
                 270: "Garrus progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Jack": PlotCategory(
+        "Jack": (
             booleans: {
                 5208: "[Romanced] Had sex with Jack",
                 6035: "[Romanced] No sex with Jack",
@@ -221,7 +221,7 @@ Me2PlotDb(
                 213: "Jack progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Jacob": PlotCategory(
+        "Jacob": (
             booleans: {
                 3892: "[Romanced] Had sex with Jacob",
                 3887: "[Romanced] No sex with Jacob",
@@ -231,7 +231,7 @@ Me2PlotDb(
                 267: "Jacob progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Miranda": PlotCategory(
+        "Miranda": (
             booleans: {
                 3487: "[Flirt] Miranda",
                 5209: "[Romanced] Had sex with Miranda",
@@ -242,7 +242,7 @@ Me2PlotDb(
                 266: "Miranda progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Samara": PlotCategory(
+        "Samara": (
             booleans: {
                 5751: "Encouraged romance",
             },
@@ -250,7 +250,7 @@ Me2PlotDb(
                 275: "Samara progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Tali": PlotCategory(
+        "Tali": (
             booleans: {
                 3926: "[Romanced] Had sex with Tali",
                 6033: "[Romanced] No sex with Tali",
@@ -260,7 +260,7 @@ Me2PlotDb(
                 272: "Tali progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Thane": PlotCategory(
+        "Thane": (
             booleans: {
                 5206: "[Romanced] Had sex with Thane",
                 6037: "[Romanced] No sex with Thane",
@@ -270,7 +270,7 @@ Me2PlotDb(
                 271: "Thane progress (1-4 = friends, 5 = romance, 6 = cancelled romance)",
             },
         ),
-        "Liara": PlotCategory(
+        "Liara": (
             booleans: {
                 6929: "Discussed relationship on Hagalaz",
                 6923: "[Romanced] Kissed Liara",
@@ -283,7 +283,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Kelly Chambers": PlotCategory(
+        "Kelly Chambers": (
             booleans: {
                 3817: "Had dinner",
                 5083: "Feeds the fishes",
@@ -297,19 +297,19 @@ Me2PlotDb(
         ),
     },
     missions: {
-        "Normandy": PlotCategory(
+        "Normandy": (
             booleans: {
                 3872: "Listened to Mordin singing",
             },
             integers: {},
         ),
-        "Freedom's Progress": PlotCategory(
+        "Freedom's Progress": (
             booleans: {
                 2375: "Sent Veetor'Nara to Cerberus",
             },
             integers: {},
         ),
-        "Citadel": PlotCategory(
+        "Citadel": (
             booleans: {
                 4424: "Punched Khalisa Bint Sinan al-Jilani",
                 2168: "[The Council] Declined reinstatement as Spectre",
@@ -317,13 +317,13 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Haestrom": PlotCategory(
+        "Haestrom": (
             booleans: {
                 75: "[Dossier: Tali] Kal'Reegar dead",
             },
             integers: {},
         ),
-        "Illium": PlotCategory(
+        "Illium": (
             booleans: {
                 3117: "[Blue Rose] Encouraged relationship",
                 3213: "[Matriarch Aethyta] Met her",
@@ -335,7 +335,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Reaper IFF": PlotCategory(
+        "Reaper IFF": (
             booleans: {
                 1256: "IFF acquired from Collector ship",
                 1247: "Legion activated",
@@ -343,7 +343,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Collector Base": PlotCategory(
+        "Collector Base": (
             booleans: {
                 2882: "[Infiltration] Garrus hacked the vents",
                 2878: "[Infiltration] Jacob hacked the vents",
@@ -403,7 +403,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "DLCs": PlotCategory(
+        "DLCs": (
             booleans: {
                 6815: "[Lair of the Shadow Broker] Mission completed",
                 7151: "[Lair of the Shadow Broker] Had drone intro conversation",
@@ -417,13 +417,13 @@ Me2PlotDb(
         ),
     },
     loyalty_missions: {
-        "Garrus": PlotCategory(
+        "Garrus": (
             booleans: {
                 1501: "[Eye for an Eye] Mission completed",
             },
             integers: {},
         ),
-        "Grunt": PlotCategory(
+        "Grunt": (
             booleans: {
                 1505: "[Rite of Passage] Mission completed",
                 126: "[Rite of Passage] Thresher Maw killed",
@@ -431,7 +431,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Jack": PlotCategory(
+        "Jack": (
             booleans: {
                 1498: "[Subject Zero] Mission completed",
                 281: "[Subject Zero] Survivor killed",
@@ -442,7 +442,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Jacob": PlotCategory(
+        "Jacob": (
             booleans: {
                 1497: "[The Gift of Greatness] Mission completed",
                 360: "[The Gift of Greatness] Dad marooned",
@@ -451,7 +451,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Kasumi": PlotCategory(
+        "Kasumi": (
             booleans: {
                 1500: "[Stealing Memory] Mission completed",
                 6637: "[Stealing Memory] Destroyed graybox",
@@ -459,7 +459,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Legion": PlotCategory(
+        "Legion": (
             booleans: {
                 1499: "[A House Divided] Mission completed",
                 757: "[A House Divided] Heretics destroyed",
@@ -470,7 +470,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Miranda": PlotCategory(
+        "Miranda": (
             booleans: {
                 1496: "[The Prodigal] Mission completed",
                 1288: "[The Prodigal] Saved Oriana",
@@ -481,7 +481,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Mordin": PlotCategory(
+        "Mordin": (
             booleans: {
                 1504: "[Old Blood] Mission completed",
                 2050: "[Old Blood] Maelon killed",
@@ -491,7 +491,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Samara": PlotCategory(
+        "Samara": (
             booleans: {
                 1506: "[The Ardat-Yakshi] Mission completed",
                 3559: "[The Ardat-Yakshi] Failed mission",
@@ -499,7 +499,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Thane": PlotCategory(
+        "Thane": (
             booleans: {
                 1502: "[Sins of the Father] Mission completed",
                 3426: "[Sins of the Father] Thane reunited with Kolyat",
@@ -507,7 +507,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Tali": PlotCategory(
+        "Tali": (
             booleans: {
                 1503: "[Treason] Mission completed",
                 668: "[Treason] Legion was part of Tali's loyalty mission",
@@ -521,7 +521,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Zaeed": PlotCategory(
+        "Zaeed": (
             booleans: {
                 1507: "[The Price of Revenge] Mission completed",
                 6423: "[The Price of Revenge] Saved the trapped workers and Vido got away",
@@ -531,7 +531,7 @@ Me2PlotDb(
         ),
     },
     research_upgrades: {
-        "Weapons": PlotCategory(
+        "Weapons": (
             booleans: {
                 4993: "ML-77 Missile Launcher discovered",
                 5137: "ML-77 Missile Launcher unlocked",
@@ -569,7 +569,7 @@ Me2PlotDb(
                 851: "[Heavy Weapon] M-490 Blackstorm",
             },
         ),
-        "Armors": PlotCategory(
+        "Armors": (
             booleans: {
                 7596: "[Parts] Kestrel Helmet",
                 7597: "[Parts] Kestrel Chest",
@@ -609,7 +609,7 @@ Me2PlotDb(
                 849: "[Full Body] Collector armor",
             },
         ),
-        "Assault Rifle": PlotCategory(
+        "Assault Rifle": (
             booleans: {
                 6038: "Damage discovered",
                 6051: "Damage unlocked",
@@ -624,7 +624,7 @@ Me2PlotDb(
                 453: "Penetration upgrade",
             },
         ),
-        "SMG": PlotCategory(
+        "SMG": (
             booleans: {
                 6040: "Damage discovered",
                 6052: "Damage unlocked",
@@ -639,7 +639,7 @@ Me2PlotDb(
                 457: "Extra Rounds upgrade",
             },
         ),
-        "Heavy Pistol": PlotCategory(
+        "Heavy Pistol": (
             booleans: {
                 6044: "Damage discovered",
                 6056: "Damage unlocked",
@@ -654,7 +654,7 @@ Me2PlotDb(
                 463: "Critical upgrade",
             },
         ),
-        "Shotgun": PlotCategory(
+        "Shotgun": (
             booleans: {
                 6049: "Damage discovered",
                 6061: "Damage unlocked",
@@ -669,7 +669,7 @@ Me2PlotDb(
                 471: "Extra Rounds upgrade",
             },
         ),
-        "Sniper Rifle": PlotCategory(
+        "Sniper Rifle": (
             booleans: {
                 6050: "Damage discovered",
                 6062: "Damage unlocked",
@@ -684,7 +684,7 @@ Me2PlotDb(
                 475: "Headshot Damage upgrade",
             },
         ),
-        "Heavy Weapon": PlotCategory(
+        "Heavy Weapon": (
             booleans: {
                 6043: "Ammo discovered",
                 6055: "Ammo unlocked",
@@ -693,7 +693,7 @@ Me2PlotDb(
                 428: "Ammo upgrades",
             },
         ),
-        "Medi-Gel": PlotCategory(
+        "Medi-Gel": (
             booleans: {
                 6046: "Capacity discovered",
                 6058: "Capacity unlocked",
@@ -708,7 +708,7 @@ Me2PlotDb(
                 465: "Emergency Shielding upgrade",
             },
         ),
-        "Shield": PlotCategory(
+        "Shield": (
             booleans: {
                 6048: "Damage Protection discovered",
                 6060: "Damage Protection unlocked",
@@ -725,7 +725,7 @@ Me2PlotDb(
                 433: "Quarian Shield Capacitor (can't be normally obtained, set 1 to unlock)",
             },
         ),
-        "Biotic": PlotCategory(
+        "Biotic": (
             booleans: {
                 6041: "Damage discovered",
                 6053: "Damage unlocked",
@@ -740,7 +740,7 @@ Me2PlotDb(
                 458: "Duration upgrade",
             },
         ),
-        "Tech": PlotCategory(
+        "Tech": (
             booleans: {
                 6039: "Damage discovered",
                 6063: "Damage unlocked",
@@ -755,14 +755,14 @@ Me2PlotDb(
                 472: "Duration upgrade",
             },
         ),
-        "Power": PlotCategory(
+        "Power": (
             booleans: {
                 5459: "Advanced Training discovered",
                 5458: "Retrain discovered",
             },
             integers: {},
         ),
-        "Player": PlotCategory(
+        "Player": (
             booleans: {
                 6141: "Med-Bay upgrade discovered (Dermal Regeneration)",
                 6144: "Med-Bay upgrade unlocked (Dermal Regeneration)",
@@ -780,7 +780,7 @@ Me2PlotDb(
                 467: "Heavy Muscle Weave upgrade",
             },
         ),
-        "Squadmates": PlotCategory(
+        "Squadmates": (
             booleans: {
                 6042: "[Grunt] Krogan Vitality discovered",
                 6054: "[Grunt] Krogan Vitality unlocked",
@@ -804,7 +804,7 @@ Me2PlotDb(
                 432: "[Mordin] Mordin's Omni-tool upgrade",
             },
         ),
-        "Ship": PlotCategory(
+        "Ship": (
             booleans: {
                 1183: "Heavy Ship Armor discovered",
                 5642: "Heavy Ship Armor unlocked",
@@ -832,7 +832,7 @@ Me2PlotDb(
             },
         ),
     },
-    rewards: PlotCategory(
+    rewards: (
         booleans: {
             5794: "Prologue: Awakening",
             5795: "Freedom's Progress",
@@ -918,7 +918,7 @@ Me2PlotDb(
         },
         integers: {},
     ),
-    captains_cabin: PlotCategory(
+    captains_cabin: (
         booleans: {
             3321: "[Pet] Space Hamster",
             3326: "[Model] Normandy SR1",
@@ -945,7 +945,7 @@ Me2PlotDb(
         },
     ),
     imported_me1: {
-        "Player": PlotCategory(
+        "Player": (
             booleans: {
                 1533: "[Origin] Spacer",
                 1535: "[Origin] Colonist",
@@ -956,7 +956,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Crew": PlotCategory(
+        "Crew": (
             booleans: {
                 2659: "[Garrus] in party",
                 3922: "[Garrus] Paragon (C-Sec)",
@@ -966,7 +966,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Romance": PlotCategory(
+        "Romance": (
             booleans: {
                 1926: "No romance",
                 1528: "Romanced Ashley",
@@ -975,7 +975,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Citadel": PlotCategory(
+        "Citadel": (
             booleans: {
                 5210: "[Harkin] Talked to him",
                 5382: "[Doctor Michel] Persuaded blackmailer",
@@ -1004,7 +1004,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Feros": PlotCategory(
+        "Feros": (
             booleans: {
                 3046: "[The Thorian] Zhu's Hope saved",
                 3197: "[The Thorian] Shiala survived",
@@ -1015,7 +1015,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Noveria": PlotCategory(
+        "Noveria": (
             booleans: {
                 5374: "Gave evidence to Lorik Quin",
                 3149: "Gave evidence to Gianna Parasini",
@@ -1025,7 +1025,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "Virmire": PlotCategory(
+        "Virmire": (
             booleans: {
                 1541: "Rescued Ashley",
                 1540: "Rescued Kaidan",
@@ -1036,7 +1036,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "End": PlotCategory(
+        "End": (
             booleans: {
                 1554: "Saved the council",
                 1553: "Abandoned the council",
@@ -1045,7 +1045,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "UNC": PlotCategory(
+        "UNC": (
             booleans: {
                 2365: "[Cerberus] Heard of Cerberus",
                 2366: "[Cerberus] Fought Cerberus",
@@ -1061,7 +1061,7 @@ Me2PlotDb(
             },
             integers: {},
         ),
-        "DLC": PlotCategory(
+        "DLC": (
             booleans: {
                 5361: "[Bring Down the Sky] Hostages rescued (Balak alive)",
             },

@@ -1,5 +1,5 @@
 Me3PlotDb(
-    general: PlotCategory(
+    general: (
         booleans: {
             22226: "ME1 Import",
             21554: "ME2 Import",
@@ -18,7 +18,7 @@ Me3PlotDb(
         },
     ),
     crew: {
-        "Ashley": PlotCategory(
+        "Ashley": (
             booleans: {
                 17680: "Ashley in party",
                 17665: "Ashley is in squad",
@@ -29,7 +29,7 @@ Me3PlotDb(
                 10330: "Ashley mission count",
             },
         ),
-        "EDI": PlotCategory(
+        "EDI": (
             booleans: {
                 17682: "EDI in party",
                 17667: "EDI is in squad",
@@ -40,7 +40,7 @@ Me3PlotDb(
                 10332: "EDI mission count",
             },
         ),
-        "Garrus": PlotCategory(
+        "Garrus": (
             booleans: {
                 17681: "Garrus in party",
                 17666: "Garrus is in squad",
@@ -51,7 +51,7 @@ Me3PlotDb(
                 10331: "Garrus mission count",
             },
         ),
-        "James": PlotCategory(
+        "James": (
             booleans: {
                 17694: "James in party",
                 17692: "James is in squad",
@@ -62,7 +62,7 @@ Me3PlotDb(
                 10334: "James mission count",
             },
         ),
-        "Javik": PlotCategory(
+        "Javik": (
             booleans: {
                 17683: "Javik in party",
                 17668: "Javik is in squad",
@@ -73,7 +73,7 @@ Me3PlotDb(
                 10333: "Javik mission count",
             },
         ),
-        "Kaidan": PlotCategory(
+        "Kaidan": (
             booleans: {
                 17679: "Kaidan in party",
                 17664: "Kaidan is in squad",
@@ -84,7 +84,7 @@ Me3PlotDb(
                 10329: "Kaidan mission count",
             },
         ),
-        "Liara": PlotCategory(
+        "Liara": (
             booleans: {
                 17678: "Liara in party",
                 17663: "Liara is in squad",
@@ -95,7 +95,7 @@ Me3PlotDb(
                 10328: "Liara mission count",
             },
         ),
-        "Tali": PlotCategory(
+        "Tali": (
             booleans: {
                 17838: "Tali in party",
                 17836: "Tali is in squad",
@@ -108,7 +108,7 @@ Me3PlotDb(
         ),
     },
     romance: {
-        "Ashley": PlotCategory(
+        "Ashley": (
             booleans: {
                 19724: "[Romanced] Ashley",
                 19729: "[Rejected] Ashley",
@@ -118,7 +118,7 @@ Me3PlotDb(
                 10322: "[Romance] Ashley progress",
             },
         ),
-        "Garrus": PlotCategory(
+        "Garrus": (
             booleans: {
                 19715: "[Flirt] Still romancing Garrus",
                 19725: "[Romanced] Garrus",
@@ -129,7 +129,7 @@ Me3PlotDb(
                 10323: "[Romance] Garrus progress",
             },
         ),
-        "Kaidan": PlotCategory(
+        "Kaidan": (
             booleans: {
                 19723: "[Romanced] Kaidan",
                 19728: "[Rejected] Kaidan",
@@ -139,7 +139,7 @@ Me3PlotDb(
                 10321: "[Romance] Kaidan progress",
             },
         ),
-        "Liara": PlotCategory(
+        "Liara": (
             booleans: {
                 21758: "[Flirt] Continuing ME1 romance",
                 19722: "[Romanced] Liara",
@@ -150,7 +150,7 @@ Me3PlotDb(
                 10320: "[Romance] Liara progress",
             },
         ),
-        "Tali": PlotCategory(
+        "Tali": (
             booleans: {
                 17796: "[Flirt] Tali",
                 19726: "[Romanced] Tali",
@@ -161,7 +161,7 @@ Me3PlotDb(
                 10327: "[Romance] Tali progress",
             },
         ),
-        "Samantha": PlotCategory(
+        "Samantha": (
             booleans: {
                 19835: "[Romanced] Samantha",
                 19836: "[Rejected] Samantha",
@@ -171,7 +171,7 @@ Me3PlotDb(
                 10337: "[Romance] Samantha progress",
             },
         ),
-        "Steve": PlotCategory(
+        "Steve": (
             booleans: {
                 19838: "[Romanced] Steve",
                 19839: "[Rejected] Steve",
@@ -181,14 +181,14 @@ Me3PlotDb(
                 10341: "[Romance] Steve progress",
             },
         ),
-        "Diana Allers": PlotCategory(
+        "Diana Allers": (
             booleans: {
                 20628: "[Flirt] Diana Allers (after Cerberus coup)",
                 20630: "[Romanced] Diana Allers (after Rannoch)",
             },
             integers: {},
         ),
-        "Other": PlotCategory(
+        "Other": (
             booleans: {
                 19846: "[Romanced] Jack",
                 19847: "[Rejected] Jack",
@@ -206,7 +206,7 @@ Me3PlotDb(
         ),
     },
     missions: {
-        "Normandy": PlotCategory(
+        "Normandy": (
             booleans: {
                 19578: "James refers to Shepard as 'Loco'",
                 19579: "James refers to Shepard as 'Lola'",
@@ -217,7 +217,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Citadel": PlotCategory(
+        "Citadel": (
             booleans: {
                 19297: "[Medi-Gel Sabotage] Mission completed",
                 19629: "[Inspirational Stories] Mission completed",
@@ -237,13 +237,13 @@ Me3PlotDb(
                 10311: "[Inspirational Stories] No. of Photos",
             },
         ),
-        "Eden Prime": PlotCategory(
+        "Eden Prime": (
             booleans: {
                 22595: "Helped colony resistance",
             },
             integers: {},
         ),
-        "Priority: Citadel I": PlotCategory(
+        "Priority: Citadel I": (
             booleans: {
                 19181: "Dr. Chakwas in party",
                 19182: "Dr. Michel in party",
@@ -256,13 +256,13 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Benning: Evidence": PlotCategory(
+        "Benning: Evidence": (
             booleans: {
                 19616: "Found the dogtags of Ambassador Dominic Osoba's son",
             },
             integers: {},
         ),
-        "Attican Traverse: Krogan Team": PlotCategory(
+        "Attican Traverse: Krogan Team": (
             booleans: {
                 17900: "Rachi Queen saved",
                 17901: "Rachi Queen killed",
@@ -273,7 +273,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Priority: Tuchanka": PlotCategory(
+        "Priority: Tuchanka": (
             booleans: {
                 18926: "Genophage is cured",
                 18927: "Genophage is sabotaged",
@@ -284,7 +284,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Priority: Citadel II": PlotCategory(
+        "Priority: Citadel II": (
             booleans: {
                 19186: "Kai Leng mortally wounded Salarian Councilor",
                 19188: "Kai Leng mortally wounded Thane",
@@ -311,7 +311,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Arrae: Ex-Cerberus Scientists": PlotCategory(
+        "Arrae: Ex-Cerberus Scientists": (
             booleans: {
                 18261: "Talked with Brynn",
                 18090: "Shepard disapproves of Jacob protecting scientists",
@@ -321,27 +321,27 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Kallini: Ardat-Yakshi Monastery": PlotCategory(
+        "Kallini: Ardat-Yakshi Monastery": (
             booleans: {
                 19303: "Samara committed suicide",
                 19921: "Samara's suicide was prevented",
             },
             integers: {},
         ),
-        "Priority: Geth Dreadnought": PlotCategory(
+        "Priority: Geth Dreadnought": (
             booleans: {
                 17795: "Shepard agrees counterattacking the Geth Dreadnought",
                 17800: "Punched Han'Gerrel",
             },
             integers: {},
         ),
-        "Rannoch: Admiral Koris": PlotCategory(
+        "Rannoch: Admiral Koris": (
             booleans: {
                 18184: "Saved Admiral Koris",
             },
             integers: {},
         ),
-        "Priority: Rannoch": PlotCategory(
+        "Priority: Rannoch": (
             booleans: {
                 17787: "Geth destroyed",
                 17788: "Quarians destroyed",
@@ -351,7 +351,7 @@ Me3PlotDb(
                 10212: "Points toward Geth and Quarian peace (>= 5 points to enable paragon / renegade dialogue)",
             },
         ),
-        "Priority: Citadel III": PlotCategory(
+        "Priority: Citadel III": (
             booleans: {
                 19769: "Wrex/Wreav was killed on Citadel",
                 20185: "[Miranda] Met her at Presidium appartment",
@@ -360,20 +360,20 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Priority: Horizon": PlotCategory(
+        "Priority: Horizon": (
             booleans: {
                 20278: "Miranda killed by Kai Leng",
                 20687: "Miranda survived",
             },
             integers: {},
         ),
-        "Priority: Earth": PlotCategory(
+        "Priority: Earth": (
             booleans: {},
             integers: {
                 10665: "The Illusive Man progress (>= 6 points to enable all paragon / renegade dialogues)",
             },
         ),
-        "DLC: Omega": PlotCategory(
+        "DLC: Omega": (
             booleans: {
                 24082: "[Assist the Hacker] Mission completed",
                 23205: "[Assist the Mechanic] Found the Kehri power inverter",
@@ -383,7 +383,7 @@ Me3PlotDb(
         ),
     },
     citadel_dlc: {
-        "Castle Arcade": PlotCategory(
+        "Castle Arcade": (
             booleans: {
                 24935: "[Claw] Assault Rifle Ultra-Light Mod",
                 24936: "[Claw] Pistol Power Damage Mod",
@@ -413,7 +413,7 @@ Me3PlotDb(
                 11203: "[Shattered Eezo] Shifty Cow",
             },
         ),
-        "Furniture Store": PlotCategory(
+        "Furniture Store": (
             booleans: {
                 24499: "Polished Vanity",
                 24500: "Deluxe Vanity",
@@ -430,7 +430,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Appartment Decorations": PlotCategory(
+        "Appartment Decorations": (
             booleans: {
                 24270: "[Bathroom] Standard Vanity",
                 24271: "[Bathroom] Polished Vanity",
@@ -457,14 +457,14 @@ Me3PlotDb(
         ),
     },
     normandy: {
-        "Pets": PlotCategory(
+        "Pets": (
             booleans: {
                 21041: "Space Hamster",
                 21187: "KEI-9",
             },
             integers:{},
         ),
-        "Fish": PlotCategory(
+        "Fish": (
             booleans: {
                 21038: "Illium Skald Fish",
                 21039: "Prejek Paddle Fish",
@@ -485,7 +485,7 @@ Me3PlotDb(
                 10737: "Striped Dartfish State (0 = alive, 3 = dead)",
             },
         ),
-        "Model Ships": PlotCategory(
+        "Model Ships": (
             booleans: {
                 21042: "Normandy SR-1",
                 21044: "Destiny Ascension",
@@ -508,13 +508,13 @@ Me3PlotDb(
         ),
     },
     appearances: {
-        "Casual": PlotCategory(
+        "Casual": (
             booleans: {
                 22590: "N7 Hoodie",
             },
             integers: {},
         ),
-        "Parts": PlotCategory(
+        "Parts": (
             booleans: {
                 18988: "Kuwashii Visor (Head)",
                 18995: "Death Mask (Head)",
@@ -554,7 +554,7 @@ Me3PlotDb(
             },
             integers: {},
         ),
-        "Full Body": PlotCategory(
+        "Full Body": (
             booleans: {
                 20984: "Cerberus Armor",
                 20985: "Inferno Armor",
@@ -571,7 +571,7 @@ Me3PlotDb(
         ),
     },
     weapons_powers: {
-        "Assault Rifles": PlotVariable(
+        "Assault Rifles": (
             booleans: {
                 25098: "Adas Anti-Synthetic Rifle",
                 25099: "Adas Anti-Synthetic Rifle (New Game Plus)",
@@ -639,7 +639,7 @@ Me3PlotDb(
                 "SFXGameContentDLC_EXP_Pack003.SFXWeaponMod_AssaultRifleultralight": "Assault Rifle Ultralight Materials",
             },
         ),
-        "Pistols": PlotVariable(
+        "Pistols": (
             booleans: {
                 25130: "Acolyte",
                 25131: "Acolyte (New Game Plus)",
@@ -684,7 +684,7 @@ Me3PlotDb(
                 "SFXGameContentDLC_Shared.SFXWeaponMod_PistolUltraLight": "Pistol Ultralight Materials",
             },
         ),
-        "Shotguns": PlotVariable(
+        "Shotguns": (
             booleans: {
                 25124: "AT-12 Raider",
                 25125: "AT-12 Raider (New Game Plus)",
@@ -730,7 +730,7 @@ Me3PlotDb(
                 "sfxgamecontentdlc_exp_pack003.sfxweaponmod_shotgunultralight": "Shotgun Ultralight Materials",
             },
         ),
-        "SMGs": PlotVariable(
+        "SMGs": (
             booleans: {
                 25134: "Blood Pack Punisher",
                 25135: "Blood Pack Punisher (New Game Plus)",
@@ -766,7 +766,7 @@ Me3PlotDb(
                 "SFXGameContent.SFXWeaponMod_SMGStability": "SMG Ultralight Materials",
             },
         ),
-        "Sniper Rifles": PlotVariable(
+        "Sniper Rifles": (
             booleans: {
                 21246: "Black Widow",
                 21236: "Javelin",
@@ -813,7 +813,7 @@ Me3PlotDb(
                 "sfxgamecontentdlc_exp_pack003.sfxweaponmod_sniperrifleultralight": "Sniper Rifle Ultralight Materials",
             },
         ),
-        "Powers": PlotVariable(
+        "Powers": (
             booleans: {
                 22100: "Energy Drain",
                 22101: "Defense Drone",
@@ -838,7 +838,7 @@ Me3PlotDb(
             variables: {},
         ),
     },
-    intel: PlotCategory(
+    intel: (
         booleans: {
             21531: "Weapon Upgrade Kit (Unlocked)",
             21532: "Weapon Upgrade Kit (Purchased)",
