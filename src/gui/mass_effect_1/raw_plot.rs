@@ -81,7 +81,7 @@ impl Component for Me1RawPlot {
         } else {
             html! {
                 <>
-                    { "Loading database..." }
+                    <p>{ "Loading database..." }</p>
                     <hr class="border-t border-default-border" />
                 </>
             }

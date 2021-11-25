@@ -1,8 +1,7 @@
 use std::cell::{Ref, RefMut};
 use std::rc::Rc;
 
-use gloo::{events::EventListener, timers::future::TimeoutFuture};
-use gloo_utils as utils;
+use gloo::{events::EventListener, timers::future::TimeoutFuture, utils};
 use indexmap::{map::Entry, IndexMap};
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;

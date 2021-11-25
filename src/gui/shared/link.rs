@@ -1,4 +1,4 @@
-use gloo_utils as utils;
+use gloo::utils;
 use wasm_bindgen::JsValue;
 use web_sys::{PopStateEvent, PopStateEventInit};
 use yew::prelude::*;

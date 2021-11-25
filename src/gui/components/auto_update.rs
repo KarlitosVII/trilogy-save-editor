@@ -2,8 +2,8 @@ use anyhow::{anyhow, Error};
 use gloo::{
     events::EventListener,
     storage::{LocalStorage, Storage},
+    utils,
 };
-use gloo_utils as utils;
 use js_sys::Date;
 use serde::Deserialize;
 use wasm_bindgen::JsCast;

@@ -170,7 +170,7 @@ impl Component for Me3Plot {
         } else {
             html! {
                 <>
-                    { "Loading database..." }
+                    <p>{ "Loading database..." }</p>
                     <hr class="border-t border-default-border" />
                 </>
             }

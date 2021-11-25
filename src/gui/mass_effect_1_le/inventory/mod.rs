@@ -115,7 +115,7 @@ impl Component for Me1LeInventory {
         } else {
             html! {
                 <>
-                    { "Loading database..." }
+                    <p>{ "Loading database..." }</p>
                     <hr class="border-t border-default-border" />
                 </>
             }
@@ -172,7 +172,7 @@ impl Me1LeInventory {
         html! {
             <div class="flex flex-col gap-1">
                 <div>
-                    {"Player"}
+                    <p>{"Player"}</p>
                     <hr class="border-t border-default-border" />
                 </div>
                 <Table title="Equipement">
@@ -207,7 +207,7 @@ impl Me1LeInventory {
             html! {
                 <div class="flex flex-col gap-1 mt-1">
                     <div>
-                        { name }
+                        <p>{ name }</p>
                         <hr class="border-t border-default-border" />
                     </div>
                     <Table title="Equipement">

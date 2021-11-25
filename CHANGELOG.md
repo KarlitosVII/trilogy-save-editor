@@ -1,4 +1,4 @@
-## Unreleased
+## 2.1.4
 - Always opens the dialogs in the last opened save directory
 - ME2: Fixed ship upgrade plots
 - ME2: Fixed number of missions after crew abducted

@@ -5,8 +5,8 @@ use anyhow::{Context, Result};
 use gloo::{
     events::{EventListener, EventListenerOptions},
     file::{self, callbacks::FileReader, FileList},
+    utils,
 };
-use gloo_utils as utils;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 

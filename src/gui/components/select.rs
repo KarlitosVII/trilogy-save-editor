@@ -1,4 +1,4 @@
-use gloo_utils as utils;
+use gloo::utils;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 

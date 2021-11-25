@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
-use gloo::timers::future::TimeoutFuture;
-use gloo_utils as utils;
+use gloo::{timers::future::TimeoutFuture, utils};
 use indexmap::IndexMap;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;

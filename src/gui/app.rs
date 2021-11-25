@@ -2,8 +2,7 @@ use std::cell::Ref;
 use std::mem;
 
 use anyhow::{Error, Result};
-use gloo::timers::future::TimeoutFuture;
-use gloo_utils as utils;
+use gloo::{timers::future::TimeoutFuture, utils};
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
@@ -417,7 +416,7 @@ impl App {
         html! {
             <section class="flex-auto flex flex-col gap-1 p-1">
                 <div>
-                    { "Changelog" }
+                    <p>{ "Changelog" }</p>
                     <hr class="border-t border-default-border" />
                 </div>
                 <div class="flex-auto flex flex-col gap-1 h-0 overflow-y-auto">

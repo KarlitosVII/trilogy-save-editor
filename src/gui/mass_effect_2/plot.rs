@@ -192,7 +192,7 @@ impl Component for Me2Plot {
         } else {
             html! {
                 <>
-                    { "Loading database..." }
+                    <p>{ "Loading database..." }</p>
                     <hr class="border-t border-default-border" />
                 </>
             }

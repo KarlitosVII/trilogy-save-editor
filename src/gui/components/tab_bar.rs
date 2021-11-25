@@ -1,5 +1,4 @@
-use gloo::events::EventListener;
-use gloo_utils as utils;
+use gloo::{events::EventListener, utils};
 use wasm_bindgen::JsCast;
 use web_sys::PopStateEvent;
 use yew::{html::Scope, prelude::*};
