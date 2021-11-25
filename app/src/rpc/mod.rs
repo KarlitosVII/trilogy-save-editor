@@ -86,13 +86,13 @@ pub fn rpc_handler(mut req: RpcRequest, utils: RpcUtils) -> Option<RpcResponse> 
         call_commands!(req, utils => [
             command::check_for_update,
             command::download_and_install_update,
-            command::open_save,
             command::import_head_morph,
             command::export_head_morph_dialog,
         ]);
 
         call_commands_with_param!(req, utils => [
             command::open_external_link,
+            command::open_save,
             command::save_file,
             command::save_save_dialog,
             command::reload_save,

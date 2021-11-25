@@ -82,7 +82,8 @@ impl Component for App {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::OpenSave => {
-                self.save_handler.send(Request::OpenSave);
+                let last_dir = self.save_game.is_some();
+                self.save_handler.send(Request::OpenSave(last_dir));
                 false
             }
             Msg::SaveDropped(result) => {

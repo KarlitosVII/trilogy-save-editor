@@ -5,15 +5,17 @@ use wry::application::window::Window;
 
 use super::command::DialogParams;
 
-pub fn open_save(window: &Window) -> Option<PathBuf> {
+pub fn open_save(window: &Window, last_dir: bool) -> Option<PathBuf> {
     let mut dialog = rfd::FileDialog::new()
         .add_filter("Mass Effect Trilogy Save", &["pcsav", "xbsav", "ps4sav", "MassEffectSave"])
         .add_filter("All Files", &["*"]);
 
     dialog = with_parent(dialog, window);
 
-    if let Some(bioware_dir) = bioware_dir() {
-        dialog = dialog.set_directory(bioware_dir);
+    if !last_dir {
+        if let Some(bioware_dir) = bioware_dir() {
+            dialog = dialog.set_directory(bioware_dir);
+        }
     }
 
     dialog.pick_file()
@@ -37,8 +39,8 @@ pub fn save_save(window: &Window, params: DialogParams) -> Option<PathBuf> {
         .and_then(|parent| parent.is_dir().then(|| parent.to_owned()))
         .or_else(bioware_dir);
 
-    if let Some(bioware_dir) = directory {
-        dialog = dialog.set_directory(bioware_dir);
+    if let Some(directory) = directory {
+        dialog = dialog.set_directory(directory);
     }
 
     dialog.save_file()

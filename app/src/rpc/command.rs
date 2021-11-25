@@ -72,8 +72,8 @@ pub fn save_file(_: &RpcUtils, rpc_file: RpcFile) -> Result<()> {
     write_file(rpc_file)
 }
 
-pub fn open_save(utils: &RpcUtils) -> Result<Option<RpcFile>> {
-    match dialog::open_save(utils.window) {
+pub fn open_save(utils: &RpcUtils, last_dir: bool) -> Result<Option<RpcFile>> {
+    match dialog::open_save(utils.window, last_dir) {
         Some(path) => open_file(path).map(Some),
         None => Ok(None),
     }

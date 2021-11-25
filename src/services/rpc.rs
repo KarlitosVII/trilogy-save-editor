@@ -62,8 +62,8 @@ pub async fn save_file(rpc_file: RpcFile) -> Result<()> {
     call_with_params("save_file", rpc_file).await
 }
 
-pub async fn open_save() -> Result<Option<RpcFile>> {
-    call("open_save").await
+pub async fn open_save(last_dir: bool) -> Result<Option<RpcFile>> {
+    call_with_params("open_save", last_dir).await
 }
 
 pub async fn open_command_line_save() -> Result<Option<RpcFile>> {

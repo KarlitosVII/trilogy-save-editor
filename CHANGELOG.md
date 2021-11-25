@@ -1,5 +1,7 @@
 ## Unreleased
-- Fix for ME2 ship upgrade plots
+- Always opens the dialogs in the last directory.
+- Fixed ME2 ship upgrade plots
+- //TODO: Fixed number of missions after IFF activation
 
 ## 2.1.3
 - Reverted color values to float so you can use values higher than 1.0 for emissive colors

@@ -40,7 +40,7 @@ pub enum Msg {
 }
 
 pub enum Request {
-    OpenSave,
+    OpenSave(bool),
     OpenCommandLineSave,
     SaveDropped(String, Vec<u8>),
     SaveSave(SaveGame),
@@ -91,7 +91,7 @@ impl Agent for SaveHandler {
 
     fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
         match msg {
-            Request::OpenSave => self.open_save(who),
+            Request::OpenSave(last_dir) => self.open_save(who, last_dir),
             Request::OpenCommandLineSave => self.open_command_line_save(who),
             Request::SaveDropped(file_name, bytes) => self.open_dropped_file(who, file_name, bytes),
             Request::SaveSave(save_game) => self.save_save(who, save_game),
@@ -103,10 +103,10 @@ impl Agent for SaveHandler {
 }
 
 impl SaveHandler {
-    fn open_save(&self, who: HandlerId) {
+    fn open_save(&self, who: HandlerId, last_dir: bool) {
         self.link.send_future(async move {
             let handle_save = async {
-                let has_rpc_file = rpc::open_save().await?;
+                let has_rpc_file = rpc::open_save(last_dir).await?;
                 let result = match has_rpc_file {
                     Some(rpc_file) => {
                         let RpcFile { path, file } = rpc_file;
