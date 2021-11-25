@@ -12,7 +12,6 @@ use crate::rpc;
 
 const GITHUB_API: &str =
     "https://api.github.com/repos/KarlitosVII/trilogy-save-editor/releases/latest";
-// const GITHUB_API: &str = "https://api.github.com/repos/KarlitosVII/Test/releases/latest";
 
 #[derive(Deserialize, Debug)]
 struct GithubResponse {

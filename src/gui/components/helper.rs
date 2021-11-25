@@ -2,6 +2,8 @@ use gloo_utils as utils;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
+use crate::gui::format_code;
+
 pub enum Msg {
     Hover,
     Out,
@@ -60,7 +62,7 @@ impl Component for Helper {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let text = ctx.props().text.split_terminator('\n').map(|text| {
-            html! { <p>{ text }</p> }
+            html! { <p>{ format_code(text) }</p> }
         });
         html! {
             <div class="relative">

@@ -5,17 +5,20 @@ use indexmap::IndexMap;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 
-use crate::gui::{
-    components::{Helper, Tab, TabBar},
-    mass_effect_1::Me1Plot,
-    shared::{IntPlotType, PlotCategory},
-    RcUi, Theme,
+use crate::{
+    gui::{
+        components::{Helper, Tab, TabBar},
+        format_code,
+        mass_effect_1::Me1Plot,
+        shared::{IntPlotType, PlotCategory},
+        RcUi, Theme,
+    },
+    save_data::{
+        mass_effect_2::plot_db::Me2PlotDb,
+        shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
+    },
+    services::database::{Database, DatabaseService, Request, Response, Type},
 };
-use crate::save_data::{
-    mass_effect_2::plot_db::Me2PlotDb,
-    shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-};
-use crate::services::database::{Database, DatabaseService, Request, Response, Type};
 
 pub enum Msg {
     PlotDb(Rc<Me2PlotDb>),
@@ -122,7 +125,7 @@ impl Component for Me2Plot {
                         <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                             <div class="flex-auto flex flex-col gap-1">
                                 <div>
-                                    { "If you change these plots this will ONLY take effect after a new game +." }
+                                    <p>{ "If you change these plots this will ONLY take effect after a new game +." }</p>
                                     <hr class="border-t border-default-border" />
                                 </div>
                                 <Me1Plot
@@ -136,7 +139,7 @@ impl Component for Me2Plot {
                 } else {
                     html_nested! {
                         <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
-                            { "You cannot edit ME1 plot if you have not imported a ME1 save." }
+                            <p>{ "You cannot edit ME1 plot if you have not imported a ME1 save." }</p>
                             <hr class="border-t border-default-border" />
                         </Tab>
                     }
@@ -171,7 +174,7 @@ impl Component for Me2Plot {
                         <div class="flex-auto flex flex-col gap-1">
                             <div>
                                 <div class="flex items-center gap-1">
-                                    { "For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix :" }
+                                    <p>{ format_code("For proper ME3 import change the same plot flags in `Mass Effect 1` tab. Conrad Verner paragon fix :") }</p>
                                     <Helper text=
                                         "• Untick `[The Fan] Intimidated him`\n\
                                         • Tick `[The Fan] Met Conrad Verner` and `[The Fan] Charmed him`\n\

@@ -10,6 +10,7 @@ use yew_agent::{Bridge, Bridged};
 use crate::{
     gui::{
         components::{AutoUpdate, NavBar, Tab, TabBar, Table},
+        format_code,
         mass_effect_1::{Me1General, Me1Plot, Me1RawData, Me1RawPlot},
         mass_effect_1_le::{Me1LeGeneral, Me1LeInventory},
         mass_effect_2::{Me2General, Me2Plot, Me2RawPlot, Me2Type},
@@ -404,8 +405,9 @@ impl App {
         };
 
         let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
+            let changes = changes.into_iter().map(format_code);
             html! {
-                <Table title={version.to_owned()} opened={i==0}>
+                <Table title={version} opened={i==0}>
                     { for changes }
                 </Table>
             }
@@ -452,7 +454,7 @@ impl App {
         let chain = error.chain().skip(1).map(|error| {
             let text = error.to_string();
             let error = text.split_terminator('\n').map(|text| {
-                html! { <p>{ text }</p> }
+                html! { <p>{ format_code(text) }</p> }
             });
             html! {
                 <>
@@ -466,7 +468,7 @@ impl App {
                 <div class="border border-default-border bg-default-bg max-w-xl">
                     <div class="px-1 bg-theme-tab select-none">{"Error"}</div>
                     <div class="p-1 pt-0.5">
-                        { error }
+                        { format_code(error.to_string()) }
                         { for chain }
                         <hr class="my-0.5 border-t border-default-border" />
                         <button class="button w-12"

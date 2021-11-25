@@ -15,6 +15,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use yew::{html, Html};
 
 // RcUi
 #[derive(Clone, Default)]
@@ -94,4 +95,15 @@ impl From<Theme> for yew::Classes {
     fn from(theme: Theme) -> Self {
         theme.to_string().into()
     }
+}
+
+pub fn format_code(text: impl AsRef<str>) -> Html {
+    let text = text.as_ref().split('`').enumerate().map(|(i, text)| {
+        if i % 2 != 0 {
+            html! { <span class="bg-default-border px-1 py-px rounded-sm">{ text }</span>}
+        } else {
+            html! { text }
+        }
+    });
+    html! { for text }
 }
