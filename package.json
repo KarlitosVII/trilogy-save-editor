@@ -3,11 +3,7 @@
   "author": "Karlitos",
   "license": "CECILL-2.1",
   "description": "A save editor for Mass Effect Trilogy (and Legendary)",
-  "dependencies": {
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.1",
-    "tailwindcss": "^2.2.19"
-  },
+  "dependencies": {},
   "scripts": {
     "build": "tailwindcss -i index.css -o target/index.css --jit",
     "release": "tailwindcss -i index.css -o target/index.css --jit --minify",
@@ -15,5 +11,10 @@
   },
   "repository": {
     "type": "git"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.5",
+    "tailwindcss": "^3.0.7"
   }
 }

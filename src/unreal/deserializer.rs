@@ -214,20 +214,20 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor.visit_newtype_struct(self)
     }
 
-    fn deserialize_seq<V>(mut self, visitor: V) -> Result<V::Value>
+    fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
         let len: u32 = de::Deserialize::deserialize(&mut *self)?;
-        visitor.visit_seq(SizedSeqMap::new(&mut self, len as usize))
+        visitor.visit_seq(SizedSeqMap::new(self, len as usize))
     }
 
-    fn deserialize_map<V>(mut self, visitor: V) -> Result<V::Value>
+    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
         let len: u32 = de::Deserialize::deserialize(&mut *self)?;
-        visitor.visit_map(SizedSeqMap::new(&mut self, len as usize))
+        visitor.visit_map(SizedSeqMap::new(self, len as usize))
     }
 
     fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value>

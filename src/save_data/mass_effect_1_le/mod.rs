@@ -33,11 +33,11 @@ struct ChunkHeader {
 pub struct Me1LeSaveGame {
     magic_number: Me1LeMagicNumber,
     block_size: u32,
-    headers: List<ChunkHeader>,
+    _headers: List<ChunkHeader>,
     pub save_data: RcUi<Me1LeSaveData>,
     checksum: u32,
     compression_flag: u32, // 1 = ZLIB
-    uncompressed_size: u32,
+    _uncompressed_size: u32,
 }
 
 impl<'de> Deserialize<'de> for Me1LeSaveGame {
@@ -106,11 +106,11 @@ impl<'de> Deserialize<'de> for Me1LeSaveGame {
                 Ok(Me1LeSaveGame {
                     magic_number,
                     block_size,
-                    headers: headers.into(),
+                    _headers: headers.into(),
                     save_data: save_data.into(),
                     checksum,
                     compression_flag,
-                    uncompressed_size,
+                    _uncompressed_size: uncompressed_size,
                 })
             }
         }
@@ -126,11 +126,11 @@ impl serde::Serialize for Me1LeSaveGame {
         let Me1LeSaveGame {
             magic_number,
             block_size,
-            headers: _,
+            _headers,
             save_data,
             checksum,
             compression_flag,
-            uncompressed_size: _,
+            _uncompressed_size,
         } = self;
 
         let mut headers = Vec::new();

@@ -1,12 +1,10 @@
 const defaultTheme = require("tailwindcss/defaultTheme")
 
 module.exports = {
-  mode: "jit",
-  purge: [
+  content: [
     "./index.html",
     "./src/**/*.rs",
   ],
-  darkMode: false, // or "media" or "class"
   theme: {
     fontFamily: {
       default: [defaultTheme.fontFamily.mono],

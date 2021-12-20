@@ -1,4 +1,4 @@
-use heck::TitleCase;
+use heck::ToTitleCase;
 use quote::{quote, quote_spanned};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;

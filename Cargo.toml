@@ -55,11 +55,11 @@ web-sys = { version = "0.3", features = [
     "PopStateEvent",
     "PopStateEventInit",
 ] }
-gloo = { version = "0.4", features = ["futures"], default-features = false }
+gloo = { version = "0.5", features = ["futures"], default-features = false }
 # (De)Serialization
 serde-wasm-bindgen = "0.3"
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.7", features = ["indexmap"], default-features = false }
 # Yew
-yew = { git = "https://github.com/yewstack/yew/", rev = "47fad81f19581b947ef90e955f67f2e652ec51f5", default-features = false }
-yew-agent = { git = "https://github.com/yewstack/yew/", rev = "47fad81f19581b947ef90e955f67f2e652ec51f5" }
+yew = "0.19"
+yew-agent = "0.1"
