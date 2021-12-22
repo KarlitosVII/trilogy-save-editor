@@ -12,7 +12,7 @@ This software is similar to Gibbed's save editors (and forks) but adds a lot of 
 - Bioware's plot database
 - Import / Export head morph
 - ME1LE inventory management
-- Multiple bonus powers for ME2/3
+- Multiple bonus powers for ME1LE/ME2(LE)/ME3(LE)
 - Xbox 360 and PS4 support
 - Free (as freedom) and open-source software with [CeCILL license](https://en.wikipedia.org/wiki/CeCILL)
 

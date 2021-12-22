@@ -56,12 +56,12 @@ impl Component for Me1LeInventory {
     fn create(ctx: &Context<Self>) -> Self {
         let mut database_service =
             DatabaseService::bridge(ctx.link().callback(|response| match response {
-                Response::Database(Database::Me1ItemDb(db)) => Msg::ItemDb(db),
+                Response::Database(Database::Me1Items(db)) => Msg::ItemDb(db),
                 Response::Error(err) => Msg::Error(err),
                 _ => unreachable!(),
             }));
 
-        database_service.send(Request::Database(Type::Me1ItemDb));
+        database_service.send(Request::Database(Type::Me1Items));
 
         Me1LeInventory { _database_service: database_service, item_db: None }
     }

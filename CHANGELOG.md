@@ -1,3 +1,8 @@
+## Unreleased
+- Long-standing requests have finally been implemented (Yay !)
+- ME1LE: Added the ability to change `player class` and `specialization`
+- ME1LE: Added `bonus talents` selector
+
 ## 2.1.4
 - Always opens the dialogs in the last opened save directory
 - ME2: Fixed ship upgrade plots

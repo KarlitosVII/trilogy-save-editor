@@ -17,16 +17,16 @@ use crate::{
 
 #[derive(Clone, RawUi)]
 enum Me3Class {
-    Adept,
-    AdeptNonCombat,
+    Soldier,
+    SoldierNonCombat,
     Engineer,
     EngineerNonCombat,
+    Adept,
+    AdeptNonCombat,
     Infiltrator,
     InfiltratorNonCombat,
     Sentinel,
     SentinelNonCombat,
-    Soldier,
-    SoldierNonCombat,
     Vanguard,
     VanguardNonCombat,
 }
@@ -34,16 +34,16 @@ enum Me3Class {
 impl Me3Class {
     fn names() -> &'static [&'static str] {
         &[
-            "SFXGame.SFXPawn_PlayerAdept",
-            "SFXGame.SFXPawn_PlayerAdeptNonCombat",
+            "SFXGame.SFXPawn_PlayerSoldier",
+            "SFXGame.SFXPawn_PlayerSoldierNonCombat",
             "SFXGame.SFXPawn_PlayerEngineer",
             "SFXGame.SFXPawn_PlayerEngineerNonCombat",
+            "SFXGame.SFXPawn_PlayerAdept",
+            "SFXGame.SFXPawn_PlayerAdeptNonCombat",
             "SFXGame.SFXPawn_PlayerInfiltrator",
             "SFXGame.SFXPawn_PlayerInfiltratorNonCombat",
             "SFXGame.SFXPawn_PlayerSentinel",
             "SFXGame.SFXPawn_PlayerSentinelNonCombat",
-            "SFXGame.SFXPawn_PlayerSoldier",
-            "SFXGame.SFXPawn_PlayerSoldierNonCombat",
             "SFXGame.SFXPawn_PlayerVanguard",
             "SFXGame.SFXPawn_PlayerVanguardNonCombat",
         ]

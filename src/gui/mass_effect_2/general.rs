@@ -20,22 +20,22 @@ use crate::save_data::{
 
 #[derive(Clone, RawUi)]
 enum Me2Class {
-    Adept,
+    Soldier,
     Engineer,
+    Adept,
     Infiltrator,
     Sentinel,
-    Soldier,
     Vanguard,
 }
 
 impl Me2Class {
     fn names() -> &'static [&'static str] {
         &[
-            "SFXGame.SFXPawn_PlayerAdept",
+            "SFXGame.SFXPawn_PlayerSoldier",
             "SFXGame.SFXPawn_PlayerEngineer",
+            "SFXGame.SFXPawn_PlayerAdept",
             "SFXGame.SFXPawn_PlayerInfiltrator",
             "SFXGame.SFXPawn_PlayerSentinel",
-            "SFXGame.SFXPawn_PlayerSoldier",
             "SFXGame.SFXPawn_PlayerVanguard",
         ]
     }

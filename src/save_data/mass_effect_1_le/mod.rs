@@ -1,6 +1,7 @@
 pub mod item_db;
 pub mod legacy;
 pub mod player;
+pub mod player_class_db;
 pub mod squad;
 
 use self::{legacy::*, player::*, squad::*};

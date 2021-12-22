@@ -80,6 +80,12 @@ command = "cargo"
 args = ["run", "-p", "app"]
 dependencies = ["tailwind-build", "trunk-build"]
 
+[tasks.me1le]
+clear = true
+command = "cargo"
+args = ["run", "-p", "app", "--", "test/ME1LeSave.pcsav"]
+dependencies = ["tailwind-build", "trunk-build"]
+
 # Release
 [tasks.tailwind-release]
 command = "npm"

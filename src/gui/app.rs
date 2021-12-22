@@ -248,7 +248,10 @@ impl App {
             <section class="flex-auto flex p-1">
                 <TabBar is_main_tab_bar=true>
                     <Tab title="General">
-                        <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
+                        <Me1LeGeneral
+                            save_game={RcUi::clone(&save_game)}
+                            onerror={link.callback(Msg::Error)}
+                        />
                     </Tab>
                     <Tab title="Plot">
                         <Me1Plot
