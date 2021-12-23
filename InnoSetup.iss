@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define AppName "Trilogy Save Editor"
-#define AppVersion "2.1.4"
+#define AppVersion "2.2.0"
 #define AppPublisher "Karlitos"
 #define AppURL "https://github.com/KarlitosVII/trilogy-save-editor"
 #define AppExeName "trilogy-save-editor.exe"

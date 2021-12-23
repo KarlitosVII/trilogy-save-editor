@@ -63,7 +63,7 @@ pub struct Player {
     secondary_weapon: String,
 }
 
-#[derive(Deserialize, Serialize, Clone, RawUi)]
+#[derive(Deserialize, Serialize, Clone, RawUi, PartialEq)]
 pub enum Me1LeClass {
     Soldier,
     Engineer,
@@ -88,9 +88,9 @@ pub struct ComplexTalent {
     pub talent_id: i32,
     pub current_rank: i32,
     pub max_rank: i32,
-    level_offset: i32,
-    levels_per_rank: i32,
-    visual_order: i32,
+    pub level_offset: i32,
+    pub levels_per_rank: i32,
+    pub visual_order: i32,
     prereq_talent_ids: Vec<i32>,
     prereq_talent_ranks: Vec<i32>,
 }

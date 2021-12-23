@@ -1,4 +1,4 @@
-## Unreleased
+## 2.2.0
 - Long-standing requests have finally been implemented (Yay !)
 - ME1LE: Added the ability to change `player class` and `specialization`
 - ME1LE: Added `bonus talents` selector

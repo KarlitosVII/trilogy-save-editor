@@ -11,6 +11,7 @@ use yew_agent::{Bridge, Bridged};
 use crate::{
     gui::{
         components::{CallbackType, Helper, InputNumber, InputText, NumberType, Select, Table},
+        mass_effect_1_le::bonus_talents::BonusTalents,
         raw_ui::RawUi,
         RcUi,
     },
@@ -118,6 +119,7 @@ pub enum Msg {
     ResetTalents(Option<&'static str>),
     PlayerClass(usize),
     PlayerSpecialization(usize),
+    BonusTalent(Option<i32>),
 }
 
 #[derive(Properties, PartialEq)]
@@ -385,12 +387,19 @@ impl Component for Me1LeGeneral {
                 }
                 true
             }
+            Msg::BonusTalent(has_talent_points) => {
+                if let Some(talent_points) = has_talent_points {
+                    *player.talent_points_mut() += talent_points;
+                }
+
+                true
+            }
             _ => unreachable!(),
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        if let Some(ref _player_class_db) = self.player_class_db {
+        if let Some(ref player_class_db) = self.player_class_db {
             let save_game = ctx.props().save_game();
 
             html! {
@@ -398,6 +407,7 @@ impl Component for Me1LeGeneral {
                     <div class="flex-1 pr-1 flex flex-col gap-1">
                         { self.role_play(ctx, save_game.player()) }
                         { self.gameplay(ctx, save_game.player()) }
+                        { self.bonus_talents(ctx, player_class_db, save_game.player()) }
                     </div>
                     <div class="flex-1 pl-1 flex flex-col gap-1">
                         { self.general(ctx, save_game.player().game_options()) }
@@ -523,6 +533,31 @@ impl Me1LeGeneral {
                     { "Reset player's talents" }
                 </button>
             </Table>
+        }
+    }
+
+    fn bonus_talents(
+        &self, ctx: &Context<Self>, class_db: &Rc<Me1LePlayerClassDb>, player: Ref<'_, Player>,
+    ) -> Html {
+        let player_class = player.player_class();
+        let player_talents = RcUi::clone(&player.complex_talents);
+
+        let talent_list = class_db
+            .iter()
+            .find_map(|class| {
+                (class.player_class == *player_class).then(|| RcUi::clone(&class.bonus_talents))
+            })
+            .unwrap_or_default();
+
+        html! {
+            <BonusTalents {talent_list} {player_talents} helper=
+                "You can use as many bonus powers as you want and customize your build \
+                to your liking.\n\
+                The only restriction is that the game will only allow you to use around \
+                5-6 offensive abilities for use in game, no matter how many abilities \
+                you add. So, don't add talent points in abilities you're not going to use."
+                onselect={ctx.link().callback(Msg::BonusTalent)}
+            />
         }
     }
 

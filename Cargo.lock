@@ -46,7 +46,7 @@ checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
 
 [[package]]
 name = "app"
-version = "2.1.4"
+version = "2.2.0"
 dependencies = [
  "anyhow",
  "base64",
@@ -2335,9 +2335,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.82"
+version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8daf5dd0bb60cbd4137b1b587d2fc0ae729bc07cf01cd70b36a1ed5ade3b9d59"
+checksum = "23a1dfb999630e338648c83e91c59a4e9fb7620f520c3194b6b89e276f2f1959"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2571,7 +2571,7 @@ dependencies = [
 
 [[package]]
 name = "trilogy-save-editor"
-version = "2.1.4"
+version = "2.2.0"
 dependencies = [
  "anyhow",
  "base64",

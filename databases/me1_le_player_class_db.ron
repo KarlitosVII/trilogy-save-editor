@@ -804,7 +804,6 @@
             57, // Singularity
             63, // Barrier
             64, // Stasis
-            86, // Damping
             91, // Hacking
             99, // Medicine
             15, // Shotguns

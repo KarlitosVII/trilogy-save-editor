@@ -10,6 +10,7 @@ use crate::save_data::mass_effect_1_le::{
     Me1LeSaveData, NoExport,
 };
 
+mod bonus_talents;
 mod general;
 mod inventory;
 
