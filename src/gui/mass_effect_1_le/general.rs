@@ -31,44 +31,80 @@ use crate::{
 
 #[derive(Clone, RawUi)]
 enum SoldierSpec {
-    None = 119,
-    ShockTrooper = 137,
-    Commando = 141,
+    None,
+    ShockTrooper,
+    Commando,
+}
+
+impl SoldierSpec {
+    fn ids() -> &'static [i32] {
+        &[119, 137, 141]
+    }
 }
 
 #[derive(Clone, RawUi)]
 enum EngineerSpec {
-    None = 122,
-    Operative = 145,
-    Medic = 149,
+    None,
+    Operative,
+    Medic,
+}
+
+impl EngineerSpec {
+    fn ids() -> &'static [i32] {
+        &[122, 145, 149]
+    }
 }
 
 #[derive(Clone, RawUi)]
 enum AdeptSpec {
-    None = 126,
-    Nemesis = 153,
-    Bastion = 157,
+    None,
+    Nemesis,
+    Bastion,
+}
+
+impl AdeptSpec {
+    fn ids() -> &'static [i32] {
+        &[126, 153, 157]
+    }
 }
 
 #[derive(Clone, RawUi)]
 enum InfiltratorSpec {
-    None = 128,
-    Commando = 142,
-    Operative = 146,
+    None,
+    Commando,
+    Operative,
+}
+
+impl InfiltratorSpec {
+    fn ids() -> &'static [i32] {
+        &[128, 142, 146]
+    }
 }
 
 #[derive(Clone, RawUi)]
 enum SentinelSpec {
-    None = 131,
-    Medic = 150,
-    Bastion = 158,
+    None,
+    Medic,
+    Bastion,
+}
+
+impl SentinelSpec {
+    fn ids() -> &'static [i32] {
+        &[131, 150, 158]
+    }
 }
 
 #[derive(Clone, RawUi)]
 enum VanguardSpec {
-    None = 134,
-    ShockTrooper = 138,
-    Nemesis = 154,
+    None,
+    ShockTrooper,
+    Nemesis,
+}
+
+impl VanguardSpec {
+    fn ids() -> &'static [i32] {
+        &[134, 138, 154]
+    }
 }
 
 pub enum Msg {
@@ -209,6 +245,7 @@ impl Component for Me1LeGeneral {
                             armor,
                             omni_tool,
                             bio_amp,
+                            bonus_talents: _,
                         } = new_class_data;
 
                         *player.player_class_mut() = player_class.clone();
@@ -315,36 +352,12 @@ impl Component for Me1LeGeneral {
             }
             Msg::PlayerSpecialization(spec_idx) => {
                 let specs = match *player.player_class() {
-                    Me1LeClass::Soldier => [
-                        SoldierSpec::None as i32,
-                        SoldierSpec::ShockTrooper as i32,
-                        SoldierSpec::Commando as i32,
-                    ],
-                    Me1LeClass::Engineer => [
-                        EngineerSpec::None as i32,
-                        EngineerSpec::Operative as i32,
-                        EngineerSpec::Medic as i32,
-                    ],
-                    Me1LeClass::Adept => [
-                        AdeptSpec::None as i32,
-                        AdeptSpec::Nemesis as i32,
-                        AdeptSpec::Bastion as i32,
-                    ],
-                    Me1LeClass::Infiltrator => [
-                        InfiltratorSpec::None as i32,
-                        InfiltratorSpec::Commando as i32,
-                        InfiltratorSpec::Operative as i32,
-                    ],
-                    Me1LeClass::Sentinel => [
-                        SentinelSpec::None as i32,
-                        SentinelSpec::Medic as i32,
-                        SentinelSpec::Bastion as i32,
-                    ],
-                    Me1LeClass::Vanguard => [
-                        VanguardSpec::None as i32,
-                        VanguardSpec::ShockTrooper as i32,
-                        VanguardSpec::Nemesis as i32,
-                    ],
+                    Me1LeClass::Soldier => SoldierSpec::ids(),
+                    Me1LeClass::Engineer => EngineerSpec::ids(),
+                    Me1LeClass::Adept => AdeptSpec::ids(),
+                    Me1LeClass::Infiltrator => InfiltratorSpec::ids(),
+                    Me1LeClass::Sentinel => SentinelSpec::ids(),
+                    Me1LeClass::Vanguard => VanguardSpec::ids(),
                 };
 
                 let complex_talents = player.complex_talents.borrow_mut();
@@ -452,58 +465,22 @@ impl Me1LeGeneral {
 
         let player_class = player_class.borrow();
         let current_player_class = player_class.clone() as usize;
-        let specialization_id = *specialization_bonus_id.borrow();
+        let current_spec_id = *specialization_bonus_id.borrow();
 
-        let (specialization_variant, current_specialization) = match *player_class {
-            Me1LeClass::Soldier => {
-                let current = match specialization_id {
-                    id if id == SoldierSpec::ShockTrooper as i32 => 1,
-                    id if id == SoldierSpec::Commando as i32 => 2,
-                    _ => 0,
-                };
-                (SoldierSpec::variants(), current)
-            }
-            Me1LeClass::Engineer => {
-                let current = match specialization_id {
-                    id if id == EngineerSpec::Operative as i32 => 1,
-                    id if id == EngineerSpec::Medic as i32 => 2,
-                    _ => 0,
-                };
-                (EngineerSpec::variants(), current)
-            }
-            Me1LeClass::Adept => {
-                let current = match specialization_id {
-                    id if id == AdeptSpec::Nemesis as i32 => 1,
-                    id if id == AdeptSpec::Bastion as i32 => 2,
-                    _ => 0,
-                };
-                (AdeptSpec::variants(), current)
-            }
-            Me1LeClass::Infiltrator => {
-                let current = match specialization_id {
-                    id if id == InfiltratorSpec::Commando as i32 => 1,
-                    id if id == InfiltratorSpec::Operative as i32 => 2,
-                    _ => 0,
-                };
-                (InfiltratorSpec::variants(), current)
-            }
-            Me1LeClass::Sentinel => {
-                let current = match specialization_id {
-                    id if id == SentinelSpec::Medic as i32 => 1,
-                    id if id == SentinelSpec::Bastion as i32 => 2,
-                    _ => 0,
-                };
-                (SentinelSpec::variants(), current)
-            }
-            Me1LeClass::Vanguard => {
-                let current = match specialization_id {
-                    id if id == VanguardSpec::ShockTrooper as i32 => 1,
-                    id if id == VanguardSpec::Nemesis as i32 => 2,
-                    _ => 0,
-                };
-                (VanguardSpec::variants(), current)
-            }
+        let (spec_variants, spec_ids) = match *player_class {
+            Me1LeClass::Soldier => (SoldierSpec::variants(), SoldierSpec::ids()),
+            Me1LeClass::Engineer => (EngineerSpec::variants(), EngineerSpec::ids()),
+            Me1LeClass::Adept => (AdeptSpec::variants(), AdeptSpec::ids()),
+            Me1LeClass::Infiltrator => (InfiltratorSpec::variants(), InfiltratorSpec::ids()),
+            Me1LeClass::Sentinel => (SentinelSpec::variants(), SentinelSpec::ids()),
+            Me1LeClass::Vanguard => (VanguardSpec::variants(), VanguardSpec::ids()),
         };
+
+        let current_spec_idx = spec_ids
+            .iter()
+            .enumerate()
+            .find_map(|(i, &spec_id)| (current_spec_id == spec_id).then(|| i))
+            .unwrap_or_default();
 
         html! {
             <Table title="Gameplay">
@@ -519,13 +496,14 @@ impl Me1LeGeneral {
                         • Your talent points will be reset\n\
                         • Your specialization will be set to `None`\n\
                         • Your bonus talents will be removed\n\
+                        • Your gear will be unequipped\n\
                         • You will have to put them back manually after that"
                     />
                 </div>
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
-                        options={specialization_variant}
-                        current_idx={current_specialization}
+                        options={spec_variants}
+                        current_idx={current_spec_idx}
                         onselect={ctx.link().callback(Msg::PlayerSpecialization)}
                     />
                     { "Specialization" }

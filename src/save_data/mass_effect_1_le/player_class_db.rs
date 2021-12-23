@@ -20,6 +20,7 @@ pub struct Me1LePlayerClass {
     pub armor: Item,
     pub omni_tool: Item,
     pub bio_amp: Item,
+    pub bonus_talents: Vec<i32>,
 }
 
 #[derive(Deserialize, Deref)]

@@ -189,6 +189,19 @@
             junk: false,
             attached_mods: [],
         ),
+        bonus_talents: [
+            50, // Lift
+            49, // Throw
+            56, // Warp
+            57, // Singularity
+            63, // Barrier
+            64, // Stasis
+            86, // Damping
+            91, // Hacking
+            84, // Electronics
+            93, // Decryption
+            99, // Medicine
+        ],
     ),
     // Engineer
     (
@@ -380,6 +393,17 @@
             junk: false,
             attached_mods: [],
         ),
+        bonus_talents: [
+            50, // Lift
+            49, // Throw
+            56, // Warp
+            57, // Singularity
+            63, // Barrier
+            64, // Stasis
+            15, // Shotguns
+            7, // Assault Rifles
+            21, // Sniper Rifles
+        ],
     ),
     // Adept
     (
@@ -571,6 +595,17 @@
             junk: false,
             attached_mods: [],
         ),
+        bonus_talents: [
+            86, // Damping
+            91, // Hacking
+            84, // Electronics
+            93, // Decryption
+            98, // First Aid
+            99, // Medicine
+            15, // Shotguns
+            7, // Assault Rifles
+            21, // Sniper Rifles
+        ],
     ),
     // Infiltrator
     (
@@ -762,6 +797,19 @@
             junk: false,
             attached_mods: [],
         ),
+        bonus_talents: [
+            50, // Lift
+            49, // Throw
+            56, // Warp
+            57, // Singularity
+            63, // Barrier
+            64, // Stasis
+            86, // Damping
+            91, // Hacking
+            99, // Medicine
+            15, // Shotguns
+            7, // Assault Rifles
+        ],
     ),
     // Sentinel
     (
@@ -953,6 +1001,15 @@
             junk: false,
             attached_mods: [],
         ),
+        bonus_talents: [
+            56, // Warp
+            57, // Singularity
+            86, // Damping
+            91, // Hacking
+            15, // Shotguns
+            7, // Assault Rifles
+            21, // Sniper Rifles
+        ],
     ),
     // Vanguard
     (
@@ -1144,5 +1201,17 @@
             junk: false,
             attached_mods: [],
         ),
+        bonus_talents: [
+            57, // Singularity
+            64, // Stasis
+            86, // Damping
+            91, // Hacking
+            84, // Electronics
+            93, // Decryption
+            98, // First Aid
+            99, // Medicine
+            7, // Assault Rifles
+            21, // Sniper Rifles
+        ],
     ),
 ])
