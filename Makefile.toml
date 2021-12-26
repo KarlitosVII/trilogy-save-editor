@@ -96,7 +96,7 @@ command = "powershell"
 args = ["-Command", "npm", "run", "release"]
 
 [tasks.trunk-release]
-install_crate = "trunk"
+install_script = "cargo install trunk"
 command = "trunk"
 args = ["build", "--dist", "target/dist", "--release"]
 
