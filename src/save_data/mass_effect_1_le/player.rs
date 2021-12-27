@@ -77,8 +77,8 @@ pub enum Me1LeClass {
 #[derive(Deserialize, Serialize, Clone, Default, Display, RawUi)]
 #[display(fmt = "{}", talent_id)]
 pub struct SimpleTalent {
-    talent_id: i32,
-    current_rank: i32,
+    pub talent_id: i32,
+    pub current_rank: i32,
 }
 
 #[rcize_fields]

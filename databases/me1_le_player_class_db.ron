@@ -25,34 +25,6 @@
                 talent_id: 294,
                 current_rank: 1,
             ),
-            (
-                talent_id: 250,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 262,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 263,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 266,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 265,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 267,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 264,
-                current_rank: 1,
-            ),
         ],
         complex_talents: [
             (
@@ -229,34 +201,6 @@
                 talent_id: 220,
                 current_rank: 1,
             ),
-            (
-                talent_id: 249,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 262,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 263,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 266,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 265,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 267,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 264,
-                current_rank: 1,
-            ),
         ],
         complex_talents: [
             (
@@ -431,34 +375,6 @@
                 talent_id: 219,
                 current_rank: 1,
             ),
-            (
-                talent_id: 246,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 262,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 263,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 266,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 265,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 267,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 264,
-                current_rank: 1,
-            ),
         ],
         complex_talents: [
             (
@@ -631,34 +547,6 @@
             ),
             (
                 talent_id: 222,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 249,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 262,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 263,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 266,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 265,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 267,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 264,
                 current_rank: 1,
             ),
         ],
@@ -836,34 +724,6 @@
                 talent_id: 223,
                 current_rank: 1,
             ),
-            (
-                talent_id: 246,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 262,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 263,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 266,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 265,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 267,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 264,
-                current_rank: 1,
-            ),
         ],
         complex_talents: [
             (
@@ -1034,34 +894,6 @@
             ),
             (
                 talent_id: 221,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 246,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 262,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 263,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 266,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 265,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 267,
-                current_rank: 1,
-            ),
-            (
-                talent_id: 264,
                 current_rank: 1,
             ),
         ],

@@ -1,3 +1,6 @@
+## 2.2.1
+- ME1LE: Fixed `bonus talents` abilities that did not appear in the HUD
+
 ## 2.2.0
 - Long-standing requests have finally been implemented (Yay !)
 - ME1LE: Added the ability to change `player class` and `specialization`

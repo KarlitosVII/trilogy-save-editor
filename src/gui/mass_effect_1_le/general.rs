@@ -255,33 +255,54 @@ impl Component for Me1LeGeneral {
                         *player.localized_class_name_mut() = *localized_class_name;
                         *player.auto_levelup_template_id_mut() = *auto_levelup_template_id;
 
-                        *player.simple_talents_mut() = simple_talents.clone();
+                        // Simple talents
+                        {
+                            let mut player_simple_talents = player.simple_talents_mut();
+
+                            // New Game + things
+                            const IGNORED_SIMPLES: &[i32] = &[262, 263, 266, 265, 267, 264];
+
+                            player_simple_talents.retain(|talent| {
+                                let talent = talent.borrow();
+                                let talent_id = talent.talent_id();
+                                IGNORED_SIMPLES.contains(&talent_id)
+                            });
+
+                            // Append the new class talents
+                            let mut new_simple_talents = simple_talents.clone();
+                            player_simple_talents.append(&mut new_simple_talents);
+                        }
 
                         // Complex talents
+                        let mut spent_talent_points = 0;
                         {
-                            let mut current_complex_talents = player.complex_talents.borrow_mut();
+                            let mut player_complex_talents = player.complex_talents_mut();
 
-                            const IGNORED_TALENTS: &[i32] = &[
+                            const IGNORED_COMPLEXES: &[i32] = &[
                                 108, // Charm
                                 109, // Intimidate
                                 259, // Spectre
                             ];
 
-                            current_complex_talents.retain(|talent| {
+                            player_complex_talents.retain(|talent| {
                                 let talent = talent.borrow();
                                 let talent_id = talent.talent_id();
-                                let is_ignored = IGNORED_TALENTS.contains(&talent_id);
+                                let is_ignored = IGNORED_COMPLEXES.contains(&talent_id);
 
                                 // Reset non-ignored talent points before deleting it
                                 if !is_ignored {
-                                    *player.talent_points.borrow_mut() += *talent.current_rank();
+                                    spent_talent_points += *talent.current_rank();
                                 }
                                 is_ignored
                             });
 
                             // Append the new class talents
                             let mut new_complex_talents = complex_talents.clone();
-                            current_complex_talents.append(&mut new_complex_talents);
+                            player_complex_talents.append(&mut new_complex_talents);
+                        }
+
+                        if spent_talent_points > 0 {
+                            *player.talent_points_mut() += spent_talent_points;
                         }
 
                         // Gear
@@ -540,7 +561,8 @@ impl Me1LeGeneral {
         &self, ctx: &Context<Self>, class_db: &Rc<Me1LePlayerClassDb>, player: Ref<'_, Player>,
     ) -> Html {
         let player_class = player.player_class();
-        let player_talents = RcUi::clone(&player.complex_talents);
+        let simple_talents = RcUi::clone(&player.simple_talents);
+        let complex_talents = RcUi::clone(&player.complex_talents);
 
         let talent_list = class_db
             .iter()
@@ -550,7 +572,7 @@ impl Me1LeGeneral {
             .unwrap_or_default();
 
         html! {
-            <BonusTalents {talent_list} {player_talents} helper=
+            <BonusTalents {talent_list} {simple_talents} {complex_talents} helper=
                 "You can use as many bonus powers as you want and customize your build \
                 to your liking.\n\
                 The only restriction is that the game will only allow you to use around \
