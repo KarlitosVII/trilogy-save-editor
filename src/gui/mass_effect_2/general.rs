@@ -226,14 +226,14 @@ impl Component for Me2General {
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
-                    { self.role_play(ctx, player.borrow()) }
-                    { self.morality(plot.borrow()) }
-                    { self.gameplay(ctx, player.borrow()) }
-                    { self.resources(player.borrow()) }
+                    { Self::role_play(ctx, player.borrow()) }
+                    { Self::morality(plot.borrow()) }
+                    { Self::gameplay(ctx, player.borrow()) }
+                    { Self::resources(player.borrow()) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
-                    { self.general(difficulty, end_game_state) }
-                    { self.bonus_powers(player.borrow()) }
+                    { Self::general(difficulty, end_game_state) }
+                    { Self::bonus_powers(player.borrow()) }
                 </div>
             </div>
         }
@@ -241,7 +241,7 @@ impl Component for Me2General {
 }
 
 impl Me2General {
-    fn role_play(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+    fn role_play(ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let link = ctx.link();
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
@@ -285,7 +285,7 @@ impl Me2General {
         }
     }
 
-    fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
+    fn morality(plot: Ref<'_, PlotTable>) -> Html {
         html! {
             <Table title="Morality">
                 { for plot.integers().get(2).map(|paragon| paragon.view("Paragon")) }
@@ -294,7 +294,7 @@ impl Me2General {
         }
     }
 
-    fn gameplay(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+    fn gameplay(ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let Player { level, current_xp, talent_points, credits, medigel, .. } = &*player;
 
         let class_idx = Me2Class::names()
@@ -322,7 +322,7 @@ impl Me2General {
         }
     }
 
-    fn resources(&self, player: Ref<'_, Player>) -> Html {
+    fn resources(player: Ref<'_, Player>) -> Html {
         let Player { eezo, iridium, palladium, platinum, probes, current_fuel, .. } = &*player;
 
         html! {
@@ -337,7 +337,7 @@ impl Me2General {
         }
     }
 
-    fn general(&self, difficulty: RcUi<Difficulty>, end_game_state: RcUi<EndGameState>) -> Html {
+    fn general(difficulty: RcUi<Difficulty>, end_game_state: RcUi<EndGameState>) -> Html {
         html! {
             <Table title="General">
                 { difficulty.view("Difficulty") }
@@ -346,7 +346,7 @@ impl Me2General {
         }
     }
 
-    fn bonus_powers(&self, player: Ref<'_, Player>) -> Html {
+    fn bonus_powers(player: Ref<'_, Player>) -> Html {
         let power_list: &'static [(&'static str, &'static str, &'static str)] = &[
             ("Slam", "SFXGameContent_Powers.SFXPower_Crush_Player", "Slam"),
             ("Barrier", "SFXGameContent_Powers.SFXPower_Barrier_Player", "Barrier"),

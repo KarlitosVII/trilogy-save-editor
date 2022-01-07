@@ -80,10 +80,28 @@ command = "cargo"
 args = ["run", "-p", "app"]
 dependencies = ["tailwind-build", "trunk-build"]
 
+[tasks.me1]
+clear = true
+command = "cargo"
+args = ["run", "-p", "app", "--", "test/ME1Save.MassEffectSave"]
+dependencies = ["tailwind-build", "trunk-build"]
+
 [tasks.me1le]
 clear = true
 command = "cargo"
 args = ["run", "-p", "app", "--", "test/ME1LeSave.pcsav"]
+dependencies = ["tailwind-build", "trunk-build"]
+
+[tasks.me2]
+clear = true
+command = "cargo"
+args = ["run", "-p", "app", "--", "test/ME2Save.pcsav"]
+dependencies = ["tailwind-build", "trunk-build"]
+
+[tasks.me3]
+clear = true
+command = "cargo"
+args = ["run", "-p", "app", "--", "test/ME3Save.pcsav"]
 dependencies = ["tailwind-build", "trunk-build"]
 
 # Release

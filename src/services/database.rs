@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use anyhow::{Context as AnyhowContext, Error, Result};
-use yew_agent::{Agent, AgentLink, Context, HandlerId};
+use anyhow::{Context as ErrorContext, Error, Result};
+use yew::{prelude::*, ContextProvider};
 
 use crate::{
     save_data::{
@@ -24,32 +24,24 @@ pub enum Type {
 }
 
 pub enum Database {
-    Me1LePlayerClasses(Rc<Me1LePlayerClassDb>),
-    Me1Plot(Rc<Me1PlotDb>),
-    Me1RawPlot(Rc<RawPlotDb>),
-    Me1Items(Rc<Me1ItemDb>),
-    Me2Plot(Rc<Me2PlotDb>),
-    Me2RawPlot(Rc<RawPlotDb>),
-    Me3Plot(Rc<Me3PlotDb>),
-    Me3RawPlot(Rc<RawPlotDb>),
+    Me1LePlayerClasses(Me1LePlayerClassDb),
+    Me1Plot(Me1PlotDb),
+    Me1RawPlot(RawPlotDb),
+    Me1Items(Me1ItemDb),
+    Me2Plot(Me2PlotDb),
+    Me2RawPlot(RawPlotDb),
+    Me3Plot(Me3PlotDb),
+    Me3RawPlot(RawPlotDb),
 }
 
 pub enum Msg {
-    DatabaseLoaded(HandlerId, Database),
-    Error(HandlerId, Error),
-}
-
-pub enum Request {
-    Database(Type),
-}
-
-pub enum Response {
-    Database(Database),
+    LoadDatabase(Type),
+    DatabaseLoaded(Box<Database>),
     Error(Error),
 }
 
-#[derive(Default)]
-struct Databases {
+#[derive(Clone, Default)]
+pub struct Databases {
     me1_le_player_classes: Option<Rc<Me1LePlayerClassDb>>,
     me1_plot: Option<Rc<Me1PlotDb>>,
     me1_raw_plot: Option<Rc<RawPlotDb>>,
@@ -58,142 +50,222 @@ struct Databases {
     me2_raw_plot: Option<Rc<RawPlotDb>>,
     me3_plot: Option<Rc<Me3PlotDb>>,
     me3_raw_plot: Option<Rc<RawPlotDb>>,
+    load_callback: Callback<Type>,
 }
 
-pub struct DatabaseService {
-    link: AgentLink<Self>,
+impl Databases {
+    pub fn get_me1_le_player_classes(self) -> Option<Rc<Me1LePlayerClassDb>> {
+        if self.me1_le_player_classes.is_none() {
+            self.load_database(Type::Me1LePlayerClasses);
+        }
+        self.me1_le_player_classes
+    }
+
+    pub fn get_me1_plot(self) -> Option<Rc<Me1PlotDb>> {
+        if self.me1_plot.is_none() {
+            self.load_database(Type::Me1Plot);
+        }
+        self.me1_plot
+    }
+
+    pub fn get_me1_raw_plot(self) -> Option<Rc<RawPlotDb>> {
+        if self.me1_raw_plot.is_none() {
+            self.load_database(Type::Me1RawPlot);
+        }
+        self.me1_raw_plot
+    }
+
+    pub fn get_me1_item_db(self) -> Option<Rc<Me1ItemDb>> {
+        if self.me1_item_db.is_none() {
+            self.load_database(Type::Me1Items);
+        }
+        self.me1_item_db
+    }
+
+    pub fn get_me2_plot(self) -> Option<Rc<Me2PlotDb>> {
+        if self.me2_plot.is_none() {
+            self.load_database(Type::Me2Plot);
+        }
+        self.me2_plot
+    }
+
+    pub fn get_me2_raw_plot(self) -> Option<Rc<RawPlotDb>> {
+        if self.me2_raw_plot.is_none() {
+            self.load_database(Type::Me2RawPlot);
+        }
+        self.me2_raw_plot
+    }
+
+    pub fn get_me3_plot(self) -> Option<Rc<Me3PlotDb>> {
+        if self.me3_plot.is_none() {
+            self.load_database(Type::Me3Plot);
+        }
+        self.me3_plot
+    }
+
+    pub fn get_me3_raw_plot(self) -> Option<Rc<RawPlotDb>> {
+        if self.me3_raw_plot.is_none() {
+            self.load_database(Type::Me3RawPlot);
+        }
+        self.me3_raw_plot
+    }
+
+    fn load_database(&self, db_type: Type) {
+        self.load_callback.emit(db_type);
+    }
+}
+
+impl PartialEq for Databases {
+    fn eq(&self, other: &Self) -> bool {
+        let Databases {
+            me1_le_player_classes,
+            me1_plot,
+            me1_raw_plot,
+            me1_item_db,
+            me2_plot,
+            me2_raw_plot,
+            me3_plot,
+            me3_raw_plot,
+            load_callback: _,
+        } = self;
+        me1_le_player_classes.is_some() == other.me1_le_player_classes.is_some()
+            && me1_plot.is_some() == other.me1_plot.is_some()
+            && me1_raw_plot.is_some() == other.me1_raw_plot.is_some()
+            && me1_item_db.is_some() == other.me1_item_db.is_some()
+            && me2_plot.is_some() == other.me2_plot.is_some()
+            && me2_raw_plot.is_some() == other.me2_raw_plot.is_some()
+            && me3_plot.is_some() == other.me3_plot.is_some()
+            && me3_raw_plot.is_some() == other.me3_raw_plot.is_some()
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    pub children: Children,
+    pub onerror: Callback<Error>,
+}
+
+#[derive(Clone)]
+pub struct DatabaseProvider {
     dbs: Databases,
 }
 
-impl Agent for DatabaseService {
-    type Reach = Context<Self>;
+impl Component for DatabaseProvider {
     type Message = Msg;
-    type Input = Request;
-    type Output = Response;
+    type Properties = Props;
 
-    fn create(link: AgentLink<Self>) -> Self {
-        Self { link, dbs: Default::default() }
+    fn create(ctx: &Context<Self>) -> Self {
+        let load_callback = ctx.link().callback(Msg::LoadDatabase);
+        let dbs = Databases { load_callback, ..Default::default() };
+        Self { dbs }
     }
 
-    fn update(&mut self, msg: Self::Message) {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::DatabaseLoaded(who, db) => {
-                match db {
-                    Database::Me1LePlayerClasses(ref db) => {
-                        self.dbs.me1_le_player_classes = Some(Rc::clone(db));
+            Msg::LoadDatabase(db_type) => {
+                match db_type {
+                    Type::Me1LePlayerClasses => {
+                        Self::load_db(ctx, "databases/me1_le_player_class_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me1LePlayerClasses(db))
+                        })
                     }
-                    Database::Me1Plot(ref db) => {
-                        self.dbs.me1_plot = Some(Rc::clone(db));
+                    Type::Me1Plot => Self::load_db(ctx, "databases/me1_plot_db.ron", |response| {
+                        let db = ron::from_str(&response)?;
+                        Ok(Database::Me1Plot(db))
+                    }),
+                    Type::Me1RawPlot => {
+                        Self::load_db(ctx, "databases/me1_raw_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me1RawPlot(db))
+                        })
                     }
-                    Database::Me1RawPlot(ref db) => {
-                        self.dbs.me1_raw_plot = Some(Rc::clone(db));
+                    Type::Me1Items => Self::load_db(ctx, "databases/me1_item_db.ron", |response| {
+                        let db = ron::from_str(&response)?;
+                        Ok(Database::Me1Items(db))
+                    }),
+                    Type::Me2Plot => Self::load_db(ctx, "databases/me2_plot_db.ron", |response| {
+                        let db = ron::from_str(&response)?;
+                        Ok(Database::Me2Plot(db))
+                    }),
+                    Type::Me2RawPlot => {
+                        Self::load_db(ctx, "databases/me2_raw_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me2RawPlot(db))
+                        })
                     }
-                    Database::Me1Items(ref db) => {
-                        self.dbs.me1_item_db = Some(Rc::clone(db));
-                    }
-                    Database::Me2Plot(ref db) => {
-                        self.dbs.me2_plot = Some(Rc::clone(db));
-                    }
-                    Database::Me2RawPlot(ref db) => {
-                        self.dbs.me2_raw_plot = Some(Rc::clone(db));
-                    }
-                    Database::Me3Plot(ref db) => {
-                        self.dbs.me3_plot = Some(Rc::clone(db));
-                    }
-                    Database::Me3RawPlot(ref db) => {
-                        self.dbs.me3_raw_plot = Some(Rc::clone(db));
+                    Type::Me3Plot => Self::load_db(ctx, "databases/me3_plot_db.ron", |response| {
+                        let db = ron::from_str(&response)?;
+                        Ok(Database::Me3Plot(db))
+                    }),
+                    Type::Me3RawPlot => {
+                        Self::load_db(ctx, "databases/me3_raw_plot_db.ron", |response| {
+                            let db = ron::from_str(&response)?;
+                            Ok(Database::Me3RawPlot(db))
+                        })
                     }
                 }
-                self.respond_db(who, db);
+                false
             }
-            Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
+            Msg::DatabaseLoaded(db) => {
+                match *db {
+                    Database::Me1LePlayerClasses(db) => {
+                        self.dbs.me1_le_player_classes = Some(db.into());
+                    }
+                    Database::Me1Plot(db) => {
+                        self.dbs.me1_plot = Some(db.into());
+                    }
+                    Database::Me1RawPlot(db) => {
+                        self.dbs.me1_raw_plot = Some(db.into());
+                    }
+                    Database::Me1Items(db) => {
+                        self.dbs.me1_item_db = Some(db.into());
+                    }
+                    Database::Me2Plot(db) => {
+                        self.dbs.me2_plot = Some(db.into());
+                    }
+                    Database::Me2RawPlot(db) => {
+                        self.dbs.me2_raw_plot = Some(db.into());
+                    }
+                    Database::Me3Plot(db) => {
+                        self.dbs.me3_plot = Some(db.into());
+                    }
+                    Database::Me3RawPlot(db) => {
+                        self.dbs.me3_raw_plot = Some(db.into());
+                    }
+                }
+                true
+            }
+            Msg::Error(err) => {
+                ctx.props().onerror.emit(err);
+                false
+            }
         }
     }
 
-    fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        match msg {
-            Request::Database(db_type) => match db_type {
-                Type::Me1LePlayerClasses => match self.dbs.me1_le_player_classes {
-                    Some(ref db) => {
-                        self.respond_db(who, Database::Me1LePlayerClasses(Rc::clone(db)))
-                    }
-                    None => self.load_db(who, "databases/me1_le_player_class_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me1LePlayerClasses(Rc::new(db)))
-                    }),
-                },
-                Type::Me1Plot => match self.dbs.me1_plot {
-                    Some(ref db) => self.respond_db(who, Database::Me1Plot(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me1_plot_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me1Plot(Rc::new(db)))
-                    }),
-                },
-                Type::Me1RawPlot => match self.dbs.me1_raw_plot {
-                    Some(ref db) => self.respond_db(who, Database::Me1RawPlot(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me1_raw_plot_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me1RawPlot(Rc::new(db)))
-                    }),
-                },
-                Type::Me1Items => match self.dbs.me1_item_db {
-                    Some(ref db) => self.respond_db(who, Database::Me1Items(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me1_item_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me1Items(Rc::new(db)))
-                    }),
-                },
-                Type::Me2Plot => match self.dbs.me2_plot {
-                    Some(ref db) => self.respond_db(who, Database::Me2Plot(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me2_plot_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me2Plot(Rc::new(db)))
-                    }),
-                },
-                Type::Me2RawPlot => match self.dbs.me2_raw_plot {
-                    Some(ref db) => self.respond_db(who, Database::Me2RawPlot(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me2_raw_plot_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me2RawPlot(Rc::new(db)))
-                    }),
-                },
-                Type::Me3Plot => match self.dbs.me3_plot {
-                    Some(ref db) => self.respond_db(who, Database::Me3Plot(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me3_plot_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me3Plot(Rc::new(db)))
-                    }),
-                },
-                Type::Me3RawPlot => match self.dbs.me3_raw_plot {
-                    Some(ref db) => self.respond_db(who, Database::Me3RawPlot(Rc::clone(db))),
-                    None => self.load_db(who, "databases/me3_raw_plot_db.ron", |response| {
-                        let db = ron::from_str(&response)?;
-                        Ok(Database::Me3RawPlot(Rc::new(db)))
-                    }),
-                },
-            },
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        html! {
+            <ContextProvider<Databases> context={self.dbs.clone()}>
+                { ctx.props().children.clone() }
+            </ContextProvider<Databases>>
         }
     }
 }
 
-impl DatabaseService {
-    fn respond_db(&self, who: HandlerId, db: Database) {
-        self.link.respond(who, Response::Database(db))
-    }
-
-    fn load_db<F>(&mut self, who: HandlerId, path: &'static str, deserialize: F)
+impl DatabaseProvider {
+    fn load_db<F>(ctx: &Context<Self>, path: &'static str, deserialize: F)
     where
         F: Fn(String) -> Result<Database> + 'static,
     {
-        self.link.send_future(async move {
+        ctx.link().send_future(async move {
             let handle_db = async {
                 let rpc_file = rpc::load_database(path).await?;
                 let file = String::from_utf8(rpc_file.file.decode()?)?;
                 deserialize(file)
             };
             match handle_db.await.context(format!("Failed to parse `/{}`", path)) {
-                Ok(db) => Msg::DatabaseLoaded(who, db),
-                Err(err) => Msg::Error(who, err),
+                Ok(db) => Msg::DatabaseLoaded(Box::new(db)),
+                Err(err) => Msg::Error(err),
             }
         });
     }

@@ -229,13 +229,13 @@ impl Component for Me3General {
         html! {
             <div class="flex divide-solid divide-x divide-default-border">
                 <div class="flex-1 pr-1 flex flex-col gap-1">
-                    { self.role_play(ctx, save_game.player()) }
-                    { self.morality(save_game.plot()) }
-                    { self.gameplay(ctx, save_game.player()) }
+                    { Self::role_play(ctx, save_game.player()) }
+                    { Self::morality(save_game.plot()) }
+                    { Self::gameplay(ctx, save_game.player()) }
                 </div>
                 <div class="flex-1 pl-1 flex flex-col gap-1">
-                    { self.general(&save_game) }
-                    { self.bonus_powers(save_game.player()) }
+                    { Self::general(&save_game) }
+                    { Self::bonus_powers(save_game.player()) }
                 </div>
             </div>
         }
@@ -243,7 +243,7 @@ impl Component for Me3General {
 }
 
 impl Me3General {
-    fn role_play(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+    fn role_play(ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let link = ctx.link();
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
@@ -287,7 +287,7 @@ impl Me3General {
         }
     }
 
-    fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
+    fn morality(plot: Ref<'_, PlotTable>) -> Html {
         html! {
             <Table title="Morality">
                 { for plot.integers().get(&10159).map(|paragon| paragon.view("Paragon")) }
@@ -298,7 +298,7 @@ impl Me3General {
         }
     }
 
-    fn gameplay(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+    fn gameplay(ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let Player {
             level,
             current_xp,
@@ -337,7 +337,7 @@ impl Me3General {
         }
     }
 
-    fn general(&self, save_game: &Ref<Me3SaveGame>) -> Html {
+    fn general(save_game: &Ref<Me3SaveGame>) -> Html {
         let Me3SaveGame { difficulty, end_game_state, conversation_mode, .. } = &**save_game;
         html! {
             <Table title="General">
@@ -348,7 +348,7 @@ impl Me3General {
         }
     }
 
-    fn bonus_powers(&self, player: Ref<'_, Player>) -> Html {
+    fn bonus_powers(player: Ref<'_, Player>) -> Html {
         let power_list: &'static [(&'static str, &'static str, &'static str)] = &[
             ("EnergyDrain", "SFXGameContent.SFXPowerCustomAction_EnergyDrain", "Energy Drain"),
             (

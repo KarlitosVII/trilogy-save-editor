@@ -4,9 +4,7 @@ use std::{
     rc::Rc,
 };
 
-use anyhow::Error;
-use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
+use yew::{context::ContextHandle, prelude::*};
 
 use crate::{
     gui::{
@@ -27,7 +25,7 @@ use crate::{
             plot::PlotTable,
         },
     },
-    services::database::{Database, DatabaseService, Request, Response, Type},
+    services::database::Databases,
 };
 
 #[derive(Clone, RawUi)]
@@ -109,8 +107,7 @@ impl VanguardSpec {
 }
 
 pub enum Msg {
-    PlayerClassDb(Rc<Me1LePlayerClassDb>),
-    Error(Error),
+    DatabaseLoaded(Databases),
     Gender(usize),
     Origin(usize),
     Notoriety(usize),
@@ -125,7 +122,6 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub save_game: RcUi<Me1LeSaveData>,
-    pub onerror: Callback<Error>,
 }
 
 impl Props {
@@ -139,7 +135,7 @@ impl Props {
 }
 
 pub struct Me1LeGeneral {
-    _database_service: Box<dyn Bridge<DatabaseService>>,
+    _db_handle: ContextHandle<Databases>,
     player_class_db: Option<Rc<Me1LePlayerClassDb>>,
 }
 
@@ -148,29 +144,21 @@ impl Component for Me1LeGeneral {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let mut database_service =
-            DatabaseService::bridge(ctx.link().callback(|response| match response {
-                Response::Database(Database::Me1LePlayerClasses(db)) => Msg::PlayerClassDb(db),
-                Response::Error(err) => Msg::Error(err),
-                _ => unreachable!(),
-            }));
+        let (databases, _db_handle) = ctx
+            .link()
+            .context::<Databases>(ctx.link().callback(Msg::DatabaseLoaded))
+            .expect("no database provider");
 
-        database_service.send(Request::Database(Type::Me1LePlayerClasses));
-
-        Me1LeGeneral { _database_service: database_service, player_class_db: None }
+        Me1LeGeneral { _db_handle, player_class_db: databases.get_me1_le_player_classes() }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         let Me1LeSaveData { player, squad, plot, .. } = &mut *ctx.props().save_game_mut();
         let (mut player, mut plot) = (player.borrow_mut(), plot.borrow_mut());
         match msg {
-            Msg::PlayerClassDb(db) => {
-                self.player_class_db = Some(db);
+            Msg::DatabaseLoaded(dbs) => {
+                self.player_class_db = dbs.get_me1_le_player_classes();
                 true
-            }
-            Msg::Error(err) => {
-                ctx.props().onerror.emit(err);
-                false
             }
             Msg::Gender(gender) => {
                 let gender = gender != 0;
@@ -426,15 +414,15 @@ impl Component for Me1LeGeneral {
             html! {
                 <div class="flex divide-solid divide-x divide-default-border">
                     <div class="flex-1 pr-1 flex flex-col gap-1">
-                        { self.role_play(ctx, save_game.player()) }
-                        { self.gameplay(ctx, save_game.player()) }
-                        { self.bonus_talents(ctx, player_class_db, save_game.player()) }
+                        { Self::role_play(ctx, save_game.player()) }
+                        { Self::gameplay(ctx, save_game.player()) }
+                        { Self::bonus_talents(ctx, player_class_db, save_game.player()) }
                     </div>
                     <div class="flex-1 pl-1 flex flex-col gap-1">
-                        { self.general(ctx, save_game.player().game_options()) }
-                        { self.morality(save_game.plot()) }
-                        { self.resources(save_game.player()) }
-                        { self.squad(ctx, save_game.squad()) }
+                        { Self::general(ctx, save_game.player().game_options()) }
+                        { Self::morality(save_game.plot()) }
+                        { Self::resources(save_game.player()) }
+                        { Self::squad(ctx, save_game.squad()) }
                     </div>
                 </div>
             }
@@ -447,7 +435,7 @@ impl Component for Me1LeGeneral {
 }
 
 impl Me1LeGeneral {
-    fn role_play(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+    fn role_play(ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let link = ctx.link();
         let genders: &'static [&'static str] = &["Male", "Female"];
         html! {
@@ -491,7 +479,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn gameplay(&self, ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
+    fn gameplay(ctx: &Context<Self>, player: Ref<'_, Player>) -> Html {
         let Player { level, current_xp, player_class, specialization_bonus_id, .. } = &*player;
 
         let player_class = player_class.borrow();
@@ -558,7 +546,7 @@ impl Me1LeGeneral {
     }
 
     fn bonus_talents(
-        &self, ctx: &Context<Self>, class_db: &Rc<Me1LePlayerClassDb>, player: Ref<'_, Player>,
+        ctx: &Context<Self>, class_db: &Rc<Me1LePlayerClassDb>, player: Ref<'_, Player>,
     ) -> Html {
         let player_class = player.player_class();
         let simple_talents = RcUi::clone(&player.simple_talents);
@@ -583,7 +571,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn general(&self, ctx: &Context<Self>, game_options: Ref<'_, Vec<RcUi<i32>>>) -> Html {
+    fn general(ctx: &Context<Self>, game_options: Ref<'_, Vec<RcUi<i32>>>) -> Html {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
         let current_difficulty =
@@ -602,7 +590,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn morality(&self, plot: Ref<'_, PlotTable>) -> Html {
+    fn morality(plot: Ref<'_, PlotTable>) -> Html {
         html! {
             <Table title="Morality">
                 { for plot.integers().get(47).map(|paragon| paragon.view("Paragon")) }
@@ -611,7 +599,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn resources(&self, player: Ref<'_, Player>) -> Html {
+    fn resources(player: Ref<'_, Player>) -> Html {
         let Player { credits, medigel, grenades, omnigel, .. } = &*player;
         html! {
             <Table title="Resources">
@@ -623,7 +611,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn squad(&self, ctx: &Context<Self>, squad: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
+    fn squad(ctx: &Context<Self>, squad: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
         let characters = [
             ("hench_humanfemale", "Ashley"),
             ("hench_turian", "Garrus"),

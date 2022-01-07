@@ -1,26 +1,25 @@
 use std::{cell::Ref, rc::Rc};
 
-use anyhow::Error;
-use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
+use yew::{context::ContextHandle, prelude::*};
 
-use crate::gui::{
-    components::{Select, Table},
-    RcUi,
+use crate::{
+    gui::{
+        components::{Select, Table},
+        RcUi,
+    },
+    save_data::mass_effect_1_le::{
+        item_db::{DbItem, Me1ItemDb},
+        player::{Inventory, Item, ItemLevel, Player},
+        squad::Henchman,
+    },
+    services::database::Databases,
 };
-use crate::save_data::mass_effect_1_le::{
-    item_db::{DbItem, Me1ItemDb},
-    player::{Inventory, Item, ItemLevel, Player},
-    squad::Henchman,
-};
-use crate::services::database::{Database, DatabaseService, Request, Response, Type};
 
 mod item_select;
 pub use self::item_select::*;
 
 pub enum Msg {
-    ItemDb(Rc<Me1ItemDb>),
-    Error(Error),
+    DatabaseLoaded(Databases),
     ChangeItem(RcUi<Item>, DbItem),
     ChangeItemLevel(RcUi<Item>, usize),
     RemoveItem(RcUi<Vec<RcUi<Item>>>, usize),
@@ -31,7 +30,6 @@ pub enum Msg {
 pub struct Props {
     pub player: RcUi<Player>,
     pub squad: RcUi<Vec<RcUi<Henchman>>>,
-    pub onerror: Callback<Error>,
 }
 
 impl Props {
@@ -45,7 +43,7 @@ impl Props {
 }
 
 pub struct Me1LeInventory {
-    _database_service: Box<dyn Bridge<DatabaseService>>,
+    _db_handle: ContextHandle<Databases>,
     item_db: Option<Rc<Me1ItemDb>>,
 }
 
@@ -54,27 +52,19 @@ impl Component for Me1LeInventory {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let mut database_service =
-            DatabaseService::bridge(ctx.link().callback(|response| match response {
-                Response::Database(Database::Me1Items(db)) => Msg::ItemDb(db),
-                Response::Error(err) => Msg::Error(err),
-                _ => unreachable!(),
-            }));
+        let (databases, _db_handle) = ctx
+            .link()
+            .context::<Databases>(ctx.link().callback(Msg::DatabaseLoaded))
+            .expect("no database provider");
 
-        database_service.send(Request::Database(Type::Me1Items));
-
-        Me1LeInventory { _database_service: database_service, item_db: None }
+        Me1LeInventory { _db_handle, item_db: databases.get_me1_item_db() }
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::ItemDb(db) => {
-                self.item_db = Some(db);
+            Msg::DatabaseLoaded(dbs) => {
+                self.item_db = dbs.get_me1_item_db();
                 true
-            }
-            Msg::Error(err) => {
-                ctx.props().onerror.emit(err);
-                false
             }
             Msg::ChangeItem(item, new_item) => {
                 let mut item = item.borrow_mut();
