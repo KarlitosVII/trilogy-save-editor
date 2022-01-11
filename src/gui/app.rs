@@ -16,10 +16,10 @@ use crate::{
         raw_ui::RawUi,
         shared::HeadMorph,
         shared::{FloatPlotType, IntPlotType},
-        RcUi,
     },
     save_data::{
         mass_effect_1::Me1SaveGame, mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame,
+        RcRef,
     },
     services::{
         database::DatabaseProvider,
@@ -163,19 +163,19 @@ fn save_content() -> Html {
         match save_game.as_ref() {
             SaveGame::MassEffect1 { save_game, .. } => mass_effect_1(save_game.borrow()),
             SaveGame::MassEffect1Le { save_game, .. } => {
-                mass_effect_1_le(RcUi::clone(&save_game.borrow().save_data))
+                mass_effect_1_le(RcRef::clone(&save_game.borrow().save_data))
             }
             SaveGame::MassEffect1LePs4 { save_game, .. } => {
-                mass_effect_1_le(RcUi::clone(save_game))
+                mass_effect_1_le(RcRef::clone(save_game))
             }
             SaveGame::MassEffect2 { save_game, .. } => {
-                mass_effect_2(Me2Type::Vanilla(RcUi::clone(save_game)))
+                mass_effect_2(Me2Type::Vanilla(RcRef::clone(save_game)))
             }
             SaveGame::MassEffect2Le { save_game, .. } => {
-                mass_effect_2(Me2Type::Legendary(RcUi::clone(save_game)))
+                mass_effect_2(Me2Type::Legendary(RcRef::clone(save_game)))
             }
 
-            SaveGame::MassEffect3 { save_game, .. } => mass_effect_3(RcUi::clone(save_game)),
+            SaveGame::MassEffect3 { save_game, .. } => mass_effect_3(RcRef::clone(save_game)),
         }
     } else {
         changelog()
@@ -191,24 +191,24 @@ fn mass_effect_1(save_game: Ref<'_, Me1SaveGame>) -> Html {
             <TabBar is_main_tab_bar=true>
                 <Tab title="General">
                     <Me1General
-                        player={RcUi::clone(&save_game.player)}
-                        plot={RcUi::clone(&state.plot)}
+                        player={RcRef::clone(&save_game.player)}
+                        plot={RcRef::clone(&state.plot)}
                     />
                 </Tab>
                 <Tab title="Plot">
                     <Me1Plot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcRef::clone(&plot.integers))}
                     />
                 </Tab>
                 <Tab title="Raw Data">
-                    <Me1RawData player={RcUi::clone(&save_game.player)} />
+                    <Me1RawData player={RcRef::clone(&save_game.player)} />
                 </Tab>
                 <Tab title="Raw Plot">
                     <Me1RawPlot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                        floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcRef::clone(&plot.integers))}
+                        floats={FloatPlotType::Vec(RcRef::clone(&plot.floats))}
                     />
                 </Tab>
             </TabBar>
@@ -216,27 +216,27 @@ fn mass_effect_1(save_game: Ref<'_, Me1SaveGame>) -> Html {
     }
 }
 
-fn mass_effect_1_le(save_game: RcUi<Me1LeSaveData>) -> Html {
+fn mass_effect_1_le(save_game: RcRef<Me1LeSaveData>) -> Html {
     let me1 = save_game.borrow();
     let plot = me1.plot();
-    let head_morph = RcUi::clone(&me1.player().head_morph);
+    let head_morph = RcRef::clone(&me1.player().head_morph);
 
     html! {
         <section class="flex-auto flex p-1">
             <TabBar is_main_tab_bar=true>
                 <Tab title="General">
-                    <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
+                    <Me1LeGeneral save_game={RcRef::clone(&save_game)} />
                 </Tab>
                 <Tab title="Plot">
                     <Me1Plot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcRef::clone(&plot.integers))}
                     />
                 </Tab>
                 <Tab title="Inventory">
                     <Me1LeInventory
-                        player={RcUi::clone(&me1.player)}
-                        squad={RcUi::clone(&me1.squad)}
+                        player={RcRef::clone(&me1.player)}
+                        squad={RcRef::clone(&me1.squad)}
                     />
                 </Tab>
                 <Tab title="Head Morph">
@@ -247,9 +247,9 @@ fn mass_effect_1_le(save_game: RcUi<Me1LeSaveData>) -> Html {
                 </Tab>
                 <Tab title="Raw Plot">
                     <Me1RawPlot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                        floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcRef::clone(&plot.integers))}
+                        floats={FloatPlotType::Vec(RcRef::clone(&plot.floats))}
                     />
                 </Tab>
             </TabBar>
@@ -261,15 +261,15 @@ fn mass_effect_2(save_game: Me2Type) -> Html {
     let (raw_data, plot, me1_plot, head_morph) = match save_game {
         Me2Type::Vanilla(ref me2) => (
             me2.view_opened("Mass Effect 2", true),
-            RcUi::clone(&me2.borrow().plot),
-            RcUi::clone(&me2.borrow().me1_plot),
-            RcUi::clone(&me2.borrow().player().appearance().head_morph),
+            RcRef::clone(&me2.borrow().plot),
+            RcRef::clone(&me2.borrow().me1_plot),
+            RcRef::clone(&me2.borrow().player().appearance().head_morph),
         ),
         Me2Type::Legendary(ref me2) => (
             me2.view_opened("Mass Effect 2", true),
-            RcUi::clone(&me2.borrow().plot),
-            RcUi::clone(&me2.borrow().me1_plot),
-            RcUi::clone(&me2.borrow().player().appearance().head_morph),
+            RcRef::clone(&me2.borrow().plot),
+            RcRef::clone(&me2.borrow().me1_plot),
+            RcRef::clone(&me2.borrow().player().appearance().head_morph),
         ),
     };
     let (plot, me1_plot) = (plot.borrow(), me1_plot.borrow());
@@ -282,10 +282,10 @@ fn mass_effect_2(save_game: Me2Type) -> Html {
                 </Tab>
                 <Tab title="Plot">
                     <Me2Plot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                        me1_booleans={RcUi::clone(&me1_plot.booleans)}
-                        me1_integers={IntPlotType::Vec(RcUi::clone(&me1_plot.integers))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcRef::clone(&plot.integers))}
+                        me1_booleans={RcRef::clone(&me1_plot.booleans)}
+                        me1_integers={IntPlotType::Vec(RcRef::clone(&me1_plot.integers))}
                     />
                 </Tab>
                 <Tab title="Head Morph">
@@ -296,9 +296,9 @@ fn mass_effect_2(save_game: Me2Type) -> Html {
                 </Tab>
                 <Tab title="Raw Plot">
                     <Me2RawPlot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                        floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcRef::clone(&plot.integers))}
+                        floats={FloatPlotType::Vec(RcRef::clone(&plot.floats))}
                     />
                 </Tab>
             </TabBar>
@@ -306,22 +306,22 @@ fn mass_effect_2(save_game: Me2Type) -> Html {
     }
 }
 
-fn mass_effect_3(save_game: RcUi<Me3SaveGame>) -> Html {
+fn mass_effect_3(save_game: RcRef<Me3SaveGame>) -> Html {
     let me3 = save_game.borrow();
     let plot = me3.plot();
-    let head_morph = RcUi::clone(&me3.player().appearance().head_morph);
+    let head_morph = RcRef::clone(&me3.player().appearance().head_morph);
 
     html! {
         <section class="flex-auto flex p-1">
             <TabBar is_main_tab_bar=true>
                 <Tab title="General">
-                    <Me3General save_game={RcUi::clone(&save_game)} />
+                    <Me3General save_game={RcRef::clone(&save_game)} />
                 </Tab>
                 <Tab title="Plot">
                     <Me3Plot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
-                        variables={RcUi::clone(&me3.player_variables)}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::IndexMap(RcRef::clone(&plot.integers))}
+                        variables={RcRef::clone(&me3.player_variables)}
                     />
                 </Tab>
                 <Tab title="Head Morph">
@@ -332,9 +332,9 @@ fn mass_effect_3(save_game: RcUi<Me3SaveGame>) -> Html {
                 </Tab>
                 <Tab title="Raw Plot">
                     <Me3RawPlot
-                        booleans={RcUi::clone(&plot.booleans)}
-                        integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
-                        floats={FloatPlotType::IndexMap(RcUi::clone(&plot.floats))}
+                        booleans={RcRef::clone(&plot.booleans)}
+                        integers={IntPlotType::IndexMap(RcRef::clone(&plot.integers))}
+                        floats={FloatPlotType::IndexMap(RcRef::clone(&plot.floats))}
                     />
                 </Tab>
             </TabBar>

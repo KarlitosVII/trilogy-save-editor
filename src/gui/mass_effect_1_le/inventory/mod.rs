@@ -3,14 +3,14 @@ use std::{cell::Ref, rc::Rc};
 use yew::{context::ContextHandle, prelude::*};
 
 use crate::{
-    gui::{
-        components::{Select, Table},
-        RcUi,
-    },
-    save_data::mass_effect_1_le::{
-        item_db::{DbItem, Me1ItemDb},
-        player::{Inventory, Item, ItemLevel, Player},
-        squad::Henchman,
+    gui::components::{Select, Table},
+    save_data::{
+        mass_effect_1_le::{
+            item_db::{DbItem, Me1ItemDb},
+            player::{Inventory, Item, ItemLevel, Player},
+            squad::Henchman,
+        },
+        RcRef,
     },
     services::database::Databases,
 };
@@ -20,16 +20,16 @@ pub use self::item_select::*;
 
 pub enum Msg {
     DatabaseLoaded(Databases),
-    ChangeItem(RcUi<Item>, DbItem),
-    ChangeItemLevel(RcUi<Item>, usize),
-    RemoveItem(RcUi<Vec<RcUi<Item>>>, usize),
-    AddItem(RcUi<Vec<RcUi<Item>>>),
+    ChangeItem(RcRef<Item>, DbItem),
+    ChangeItemLevel(RcRef<Item>, usize),
+    RemoveItem(RcRef<Vec<RcRef<Item>>>, usize),
+    AddItem(RcRef<Vec<RcRef<Item>>>),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub player: RcUi<Player>,
-    pub squad: RcUi<Vec<RcUi<Henchman>>>,
+    pub player: RcRef<Player>,
+    pub squad: RcRef<Vec<RcRef<Henchman>>>,
 }
 
 impl Props {
@@ -37,7 +37,7 @@ impl Props {
         self.player.borrow()
     }
 
-    fn squad(&self) -> Ref<'_, Vec<RcUi<Henchman>>> {
+    fn squad(&self) -> Ref<'_, Vec<RcRef<Henchman>>> {
         self.squad.borrow()
     }
 }
@@ -114,7 +114,7 @@ impl Component for Me1LeInventory {
 }
 
 impl Me1LeInventory {
-    fn item_view(&self, ctx: &Context<Self>, item: &RcUi<Item>) -> Html {
+    fn item_view(&self, ctx: &Context<Self>, item: &RcRef<Item>) -> Html {
         html! {
             <div class="flex items-center gap-1 min-w-0">
                 {self.item_view_no_flex(ctx, item)}
@@ -122,19 +122,19 @@ impl Me1LeInventory {
         }
     }
 
-    fn item_view_no_flex(&self, ctx: &Context<Self>, item: &RcUi<Item>) -> Html {
+    fn item_view_no_flex(&self, ctx: &Context<Self>, item: &RcRef<Item>) -> Html {
         let current_item = DbItem {
             item_id: *item.borrow().item_id(),
             manufacturer_id: *item.borrow().manufacturer_id(),
         };
         let current_level = *item.borrow().item_level() as usize;
         let onselect_item = {
-            let item = RcUi::clone(item);
-            ctx.link().callback(move |new_item| Msg::ChangeItem(RcUi::clone(&item), new_item))
+            let item = RcRef::clone(item);
+            ctx.link().callback(move |new_item| Msg::ChangeItem(RcRef::clone(&item), new_item))
         };
         let onselect_level = {
-            let item = RcUi::clone(item);
-            ctx.link().callback(move |idx| Msg::ChangeItemLevel(RcUi::clone(&item), idx))
+            let item = RcRef::clone(item);
+            ctx.link().callback(move |idx| Msg::ChangeItemLevel(RcRef::clone(&item), idx))
         };
         html! {
             <>
@@ -175,7 +175,7 @@ impl Me1LeInventory {
         }
     }
 
-    fn squad(&self, ctx: &Context<Self>, inventory: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
+    fn squad(&self, ctx: &Context<Self>, inventory: Ref<'_, Vec<RcRef<Henchman>>>) -> Html {
         let squad = inventory.iter().map(|henchman| {
             let henchman = henchman.borrow();
 
@@ -216,12 +216,12 @@ impl Me1LeInventory {
     fn inventory(&self, ctx: &Context<Self>, player_inventory: Ref<'_, Inventory>) -> Html {
         let link = ctx.link();
         let inventory_add = {
-            let inventory = RcUi::clone(&player_inventory.inventory);
-            link.callback(move |_| Msg::AddItem(RcUi::clone(&inventory)))
+            let inventory = RcRef::clone(&player_inventory.inventory);
+            link.callback(move |_| Msg::AddItem(RcRef::clone(&inventory)))
         };
         let buy_pack_add = {
-            let buy_pack = RcUi::clone(&player_inventory.buy_pack);
-            link.callback(move |_| Msg::AddItem(RcUi::clone(&buy_pack)))
+            let buy_pack = RcRef::clone(&player_inventory.buy_pack);
+            link.callback(move |_| Msg::AddItem(RcRef::clone(&buy_pack)))
         };
 
         let item_remove_view = |item_list, idx, item| {
@@ -240,7 +240,7 @@ impl Me1LeInventory {
                                 "py-0",
                                 "cursor-pointer",
                             ]}
-                            onclick={link.callback(move |_| Msg::RemoveItem(RcUi::clone(&item_list), idx))}
+                            onclick={link.callback(move |_| Msg::RemoveItem(RcRef::clone(&item_list), idx))}
                         >
                             {"remove"}
                         </a>
@@ -252,12 +252,12 @@ impl Me1LeInventory {
 
         let buy_pack = player_inventory.buy_pack();
         let buy_pack = buy_pack.iter().enumerate().map(|(idx, item)| {
-            item_remove_view(RcUi::clone(&player_inventory.buy_pack), idx, item)
+            item_remove_view(RcRef::clone(&player_inventory.buy_pack), idx, item)
         });
 
         let inventory2 = player_inventory.inventory();
         let inventory = inventory2.iter().enumerate().map(|(idx, item)| {
-            item_remove_view(RcUi::clone(&player_inventory.inventory), idx, item)
+            item_remove_view(RcRef::clone(&player_inventory.inventory), idx, item)
         });
         html! {
             <>

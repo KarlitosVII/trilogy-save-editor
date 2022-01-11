@@ -8,7 +8,7 @@ use serde::Deserialize;
 use yew::{prelude::*, ContextProvider};
 
 use crate::{
-    gui::{RcUi, Theme},
+    gui::Theme,
     save_data::mass_effect_1_le::Me1LeMagicNumber,
     save_data::{
         mass_effect_1::{Me1MagicNumber, Me1SaveGame},
@@ -16,6 +16,7 @@ use crate::{
         mass_effect_2::{Me2LeSaveGame, Me2LeVersion, Me2SaveGame, Me2Version},
         mass_effect_3::{Me3SaveGame, Me3Version},
         shared::appearance::HeadMorph,
+        RcRef,
     },
     services::rpc::{self, Base64File, DialogParams, RpcFile},
     unreal,
@@ -25,12 +26,12 @@ use super::drop_handler::DropHandler;
 
 #[derive(Clone)]
 pub enum SaveGame {
-    MassEffect1 { file_path: PathBuf, save_game: RcUi<Me1SaveGame> },
-    MassEffect1Le { file_path: PathBuf, save_game: RcUi<Me1LeSaveGame> },
-    MassEffect1LePs4 { file_path: PathBuf, save_game: RcUi<Me1LeSaveData> },
-    MassEffect2 { file_path: PathBuf, save_game: RcUi<Me2SaveGame> },
-    MassEffect2Le { file_path: PathBuf, save_game: RcUi<Me2LeSaveGame> },
-    MassEffect3 { file_path: PathBuf, save_game: RcUi<Me3SaveGame> },
+    MassEffect1 { file_path: PathBuf, save_game: RcRef<Me1SaveGame> },
+    MassEffect1Le { file_path: PathBuf, save_game: RcRef<Me1LeSaveGame> },
+    MassEffect1LePs4 { file_path: PathBuf, save_game: RcRef<Me1LeSaveData> },
+    MassEffect2 { file_path: PathBuf, save_game: RcRef<Me2SaveGame> },
+    MassEffect2Le { file_path: PathBuf, save_game: RcRef<Me2LeSaveGame> },
+    MassEffect3 { file_path: PathBuf, save_game: RcRef<Me3SaveGame> },
 }
 
 pub enum Action {
@@ -38,7 +39,7 @@ pub enum Action {
     SaveSave,
     ReloadSave,
     ImportHeadMorph(Callback<HeadMorph>),
-    ExportHeadMorph(RcUi<HeadMorph>),
+    ExportHeadMorph(RcRef<HeadMorph>),
 }
 
 pub enum Msg {
@@ -470,7 +471,7 @@ impl SaveHandlerProvider {
         });
     }
 
-    fn export_head_morph(ctx: &Context<Self>, head_morph: RcUi<HeadMorph>) {
+    fn export_head_morph(ctx: &Context<Self>, head_morph: RcRef<HeadMorph>) {
         ctx.link().send_future(async move {
             let handle_save = async {
                 let has_path = rpc::export_head_morph_dialog().await?;

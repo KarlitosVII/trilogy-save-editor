@@ -3,13 +3,14 @@ use std::cell::RefMut;
 use indexmap::IndexMap;
 use yew::prelude::*;
 
-use crate::gui::{
-    components::{CheckBox, Table},
-    raw_ui::RawUi,
-    RcUi,
-};
-use crate::save_data::{
-    mass_effect_3::plot_db::PlotVariable as PlotVariableDb, shared::plot::BitVec,
+use crate::{
+    gui::{
+        components::{CheckBox, Table},
+        raw_ui::RawUi,
+    },
+    save_data::{
+        mass_effect_3::plot_db::PlotVariable as PlotVariableDb, shared::plot::BitVec, RcRef,
+    },
 };
 
 pub enum Msg {
@@ -19,8 +20,8 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: Option<String>,
-    pub booleans: RcUi<BitVec>,
-    pub variables: RcUi<IndexMap<String, RcUi<i32>>>,
+    pub booleans: RcRef<BitVec>,
+    pub variables: RcRef<IndexMap<String, RcRef<i32>>>,
     pub plot_variable: PlotVariableDb,
 }
 
@@ -66,7 +67,7 @@ impl Component for PlotVariable {
             Some(value) => html! {
                 <CheckBox
                     label={label.clone()}
-                    value={RcUi::new(*value)}
+                    value={RcRef::new(*value)}
                     onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                 />
             },
@@ -75,7 +76,7 @@ impl Component for PlotVariable {
 
         let variables = var_db.iter().map(|(db_key, label)| {
             let value = variables.borrow().iter().find_map(|(key, value)| {
-                db_key.eq_ignore_ascii_case(key).then(|| RcUi::clone(value))
+                db_key.eq_ignore_ascii_case(key).then(|| RcRef::clone(value))
             });
             match value {
                 Some(value) => value.view(label),

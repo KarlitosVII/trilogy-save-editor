@@ -3,20 +3,26 @@ use std::{any::Any, marker::PhantomData};
 use indexmap::IndexMap;
 use yew::prelude::*;
 
-use crate::gui::{
-    components::{raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table},
-    raw_ui::{RawUi, RawUiChildren},
-    RcUi,
+use crate::{
+    gui::{
+        components::{
+            raw_ui::RawUiStruct, CallbackType, InputNumber, InputText, NumberType, Table,
+        },
+        raw_ui::{RawUi, RawUiChildren},
+    },
+    save_data::{
+        mass_effect_1_le::legacy::{Level, Map},
+        RcRef,
+    },
 };
-use crate::save_data::mass_effect_1_le::legacy::{Level, Map};
 
 #[derive(Clone, From)]
 pub enum IndexMapKeyType<T>
 where
     T: RawUi + Default,
 {
-    I32(RcUi<IndexMap<i32, T>>),
-    String(RcUi<IndexMap<String, T>>),
+    I32(RcRef<IndexMap<i32, T>>),
+    String(RcRef<IndexMap<String, T>>),
 }
 
 impl<T> PartialEq for IndexMapKeyType<T>
@@ -139,9 +145,9 @@ where
                 let view = |idx, label, key, value| {
                     // Exceptions
                     let any  = value as &dyn Any;
-                    let value = if let Some(map) = any.downcast_ref::<RcUi<Map>>() {
+                    let value = if let Some(map) = any.downcast_ref::<RcRef<Map>>() {
                         map.children()
-                    } else if let Some(level) = any.downcast_ref::<RcUi<Level>>() {
+                    } else if let Some(level) = any.downcast_ref::<RcRef<Level>>() {
                         level.children()
                     } else {
                         vec![RawUi::view(value, "Value")]
@@ -193,7 +199,7 @@ where
                         .enumerate()
                         .map(|(idx, (key, value))| {
                             let input_k = html! {
-                                <InputText label="Key" value={RcUi::new(key.clone())}
+                                <InputText label="Key" value={RcRef::new(key.clone())}
                                     oninput={ctx.link().callback(move |callback| Msg::EditKey(idx, callback))}
                                 />
                             };

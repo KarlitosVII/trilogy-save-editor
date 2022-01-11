@@ -7,11 +7,11 @@ use crate::{
         components::{Helper, InputText, Select, Table},
         raw_ui::RawUi,
         shared::{BonusPowerType, BonusPowers},
-        RcUi,
     },
     save_data::{
         mass_effect_3::{player::Player, plot::PlotTable, Me3SaveGame},
         shared::player::{Notoriety, Origin},
+        RcRef,
     },
 };
 
@@ -59,7 +59,7 @@ pub enum Msg {
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub save_game: RcUi<Me3SaveGame>,
+    pub save_game: RcRef<Me3SaveGame>,
 }
 
 impl Props {
@@ -277,7 +277,7 @@ impl Me3General {
                     />
                     {"Notoriety"}
                 </div>
-                <InputText label="Identity Code" value={RcUi::clone(&player.face_code)} helper=
+                <InputText label="Identity Code" value={RcRef::clone(&player.face_code)} helper=
                     "If you change this you can display whatever you want in the menus \
                     in place of your `Identity Code`.\n\
                     This will NOT change your face, you have to edit your head morph \
@@ -392,7 +392,7 @@ impl Me3General {
         ];
 
         html! {
-            <BonusPowers {power_list} powers={BonusPowerType::Me3(RcUi::clone(&player.powers))} helper=
+            <BonusPowers {power_list} powers={BonusPowerType::Me3(RcRef::clone(&player.powers))} helper=
                 "You can use as many bonus powers as you want and customize your build to your liking. \
                 The only restriction is the size of your screen !"
             />

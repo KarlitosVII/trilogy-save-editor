@@ -1,29 +1,29 @@
-use std::cell::Ref;
-use std::cmp::Ordering;
+use std::{cell::Ref, cmp::Ordering};
 
 use yew::prelude::*;
 
-use crate::gui::{
-    components::{raw_ui::RawUiStruct, CallbackType, InputText},
-    raw_ui::RawUi,
-    RcUi,
-};
-use crate::save_data::{
-    mass_effect_1::{
-        data::{ArrayType, Property as DataProperty, StructType},
-        player::Player,
+use crate::{
+    gui::{
+        components::{raw_ui::RawUiStruct, CallbackType, InputText},
+        raw_ui::RawUi,
     },
-    List,
+    save_data::{
+        mass_effect_1::{
+            data::{ArrayType, Property as DataProperty, StructType},
+            player::Player,
+        },
+        List, RcRef,
+    },
 };
 
 pub enum Msg {
-    DuplicateName(RcUi<u32>, CallbackType),
+    DuplicateName(RcRef<u32>, CallbackType),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub player: RcUi<Player>,
-    pub property: RcUi<DataProperty>,
+    pub player: RcRef<Player>,
+    pub property: RcRef<DataProperty>,
     pub label: Option<String>,
 }
 
@@ -56,7 +56,7 @@ impl Component for Property {
                 // Duplicate
                 let idx = *value_name_id.borrow() as usize;
                 let mut dupe = names[idx].clone();
-                dupe.string = RcUi::new(new_value);
+                dupe.string = RcRef::new(new_value);
                 dupe.is_duplicate = true;
                 names.push(dupe);
 
@@ -154,16 +154,16 @@ impl Component for Property {
 
                 if name.is_duplicate {
                     html! {
-                        <InputText {label} value={RcUi::clone(&name.string)} />
+                        <InputText {label} value={RcRef::clone(&name.string)} />
                     }
                 } else {
-                    let value_name_id = RcUi::clone(value_name_id);
+                    let value_name_id = RcRef::clone(value_name_id);
                     let oninput = ctx.link().callback(move |callback| {
-                        Msg::DuplicateName(RcUi::clone(&value_name_id), callback)
+                        Msg::DuplicateName(RcRef::clone(&value_name_id), callback)
                     });
                     html! {
                         <InputText {label}
-                            value={RcUi::new(name.string.borrow().clone())}
+                            value={RcRef::new(name.string.borrow().clone())}
                             {oninput}
                         />
                     }
@@ -222,15 +222,15 @@ impl Component for Property {
 
 impl Property {
     fn view_properties(
-        &self, ctx: &Context<Self>, label: String, properties: &List<RcUi<DataProperty>>,
+        &self, ctx: &Context<Self>, label: String, properties: &List<RcRef<DataProperty>>,
     ) -> Html {
         let len = properties.len();
         let take = if len > 0 { len - 1 } else { 0 };
         let properties = properties.iter().take(take).map(|property| {
             html! {
                 <Property
-                    player={RcUi::clone(&ctx.props().player)}
-                    property={RcUi::clone(property)}
+                    player={RcRef::clone(&ctx.props().player)}
+                    property={RcRef::clone(property)}
                 />
             }
         });

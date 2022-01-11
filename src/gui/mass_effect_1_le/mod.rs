@@ -1,13 +1,17 @@
 use yew::prelude::*;
 
-use super::RcUi;
-use crate::gui::{
-    components::{raw_ui::RawUiStruct, Table},
-    raw_ui::{RawUi, RawUiChildren},
-};
-use crate::save_data::mass_effect_1_le::{
-    legacy::{BaseObject, Object, OptionObjectProxy},
-    Me1LeSaveData, NoExport,
+use crate::{
+    gui::{
+        components::{raw_ui::RawUiStruct, Table},
+        raw_ui::{RawUi, RawUiChildren},
+    },
+    save_data::{
+        mass_effect_1_le::{
+            legacy::{BaseObject, Object, OptionObjectProxy},
+            Me1LeSaveData, NoExport,
+        },
+        RcRef,
+    },
 };
 
 mod bonus_talents;
@@ -16,7 +20,7 @@ mod inventory;
 
 pub use self::{general::*, inventory::*};
 
-impl RawUi for RcUi<Me1LeSaveData> {
+impl RawUi for RcRef<Me1LeSaveData> {
     fn view(&self, _: &str) -> yew::Html {
         let no_export = self
             .borrow()
@@ -37,13 +41,13 @@ impl RawUi for RcUi<Me1LeSaveData> {
     }
 }
 
-impl RawUi for RcUi<NoExport> {
+impl RawUi for RcRef<NoExport> {
     fn view(&self, _: &str) -> yew::Html {
         Default::default()
     }
 }
 
-impl RawUi for RcUi<BaseObject> {
+impl RawUi for RcRef<BaseObject> {
     fn view(&self, label: &str) -> yew::Html {
         let BaseObject { _class_name, owner_name, owner_class, _object } = &*self.borrow();
 
@@ -79,7 +83,7 @@ impl RawUi for RcUi<BaseObject> {
     }
 }
 
-impl RawUi for RcUi<OptionObjectProxy> {
+impl RawUi for RcRef<OptionObjectProxy> {
     fn view(&self, label: &str) -> yew::Html {
         self.borrow().proxy.view(label)
     }

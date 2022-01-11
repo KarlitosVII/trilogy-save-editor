@@ -4,11 +4,10 @@ use anyhow::ensure;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-use crate::gui::{
-    components::{CallbackType, InputNumber, NumberType},
-    RcUi,
+use crate::{
+    gui::components::{CallbackType, InputNumber, NumberType},
+    save_data::{shared::appearance::LinearColor, RcRef},
 };
-use crate::save_data::shared::appearance::LinearColor;
 
 pub enum Msg {
     R(CallbackType),
@@ -21,7 +20,7 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
-    pub color: RcUi<LinearColor>,
+    pub color: RcRef<LinearColor>,
 }
 
 impl Props {

@@ -17,12 +17,15 @@ use serde::de;
 use serde::ser::{self, SerializeStruct};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use super::shared::{
-    plot::{Codex, Journal, PlotTable},
-    Rotator, SaveTimeStamp, Vector,
+use crate::{save_data::RcRef, unreal};
+
+use super::{
+    shared::{
+        plot::{Codex, Journal, PlotTable},
+        Rotator, SaveTimeStamp, Vector,
+    },
+    List,
 };
-use super::List;
-use crate::{gui::RcUi, unreal};
 
 #[derive(Serialize, Clone)]
 struct ChunkHeader {
@@ -35,7 +38,7 @@ pub struct Me1LeSaveGame {
     magic_number: Me1LeMagicNumber,
     block_size: u32,
     _headers: List<ChunkHeader>,
-    pub save_data: RcUi<Me1LeSaveData>,
+    pub save_data: RcRef<Me1LeSaveData>,
     checksum: u32,
     compression_flag: u32, // 1 = ZLIB
     _uncompressed_size: u32,
@@ -236,10 +239,10 @@ impl<'de> Deserialize<'de> for Me1LeVersion {
 }
 
 #[derive(Clone)]
-pub struct NoExport(Option<RcUi<NoExportData>>);
+pub struct NoExport(Option<RcRef<NoExportData>>);
 
 impl NoExport {
-    pub fn as_ref(&self) -> Option<&RcUi<NoExportData>> {
+    pub fn as_ref(&self) -> Option<&RcRef<NoExportData>> {
         self.0.as_ref()
     }
 }

@@ -1,11 +1,16 @@
-use std::any::Any;
-use std::cell::{Ref, RefMut};
-use std::fmt::Display;
-use std::marker::PhantomData;
+use std::{
+    any::Any,
+    cell::{Ref, RefMut},
+    fmt::Display,
+    marker::PhantomData,
+};
 
 use yew::prelude::*;
 
-use crate::gui::{components::Table, raw_ui::RawUi, RcUi};
+use crate::{
+    gui::{components::Table, raw_ui::RawUi},
+    save_data::RcRef,
+};
 
 pub enum Msg {
     Toggle,
@@ -19,7 +24,7 @@ where
     T: RawUi + Default + Display,
 {
     pub label: String,
-    pub vec: RcUi<Vec<T>>,
+    pub vec: RcRef<Vec<T>>,
     #[prop_or(true)]
     pub is_editable: bool,
 }
@@ -93,7 +98,7 @@ where
                 // Exceptions
                 macro_rules! display_idx {
                     ($vec:ident => $($type:ty)*) => {
-                        $((&*$vec as &dyn Any).is::<Vec<RcUi<$type>>>()) ||*
+                        $((&*$vec as &dyn Any).is::<Vec<RcRef<$type>>>()) ||*
                     }
                 }
                 let display_idx = display_idx!(vec => u8 i32 f32 bool String);

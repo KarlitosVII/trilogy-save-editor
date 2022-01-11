@@ -23,7 +23,7 @@ pub fn rcize_fields(input: TokenStream) -> TokenStream {
             Data::Struct(DataStruct { fields: Fields::Named(ref mut fields), .. }) => {
                 fields.named.iter_mut().filter_map(|field| {
                     (!field.ident.as_ref().unwrap().to_string().starts_with('_')).then(|| {
-                        // Type<T> => Type<RcUi<T>>
+                        // Type<T> => Type<RcRef<T>>
                         rcize_inner_type(&mut field.ty);
 
                         let field_name = &field.ident;
@@ -44,7 +44,7 @@ pub fn rcize_fields(input: TokenStream) -> TokenStream {
                             quote_spanned! {field.span()=>}
                         };
 
-                        // T => RcUi<T>
+                        // T => RcRef<T>
                         rcize_full_type(&mut field.ty);
 
                         quote
@@ -79,7 +79,7 @@ fn rcize_inner_type(ty: &mut Type) {
             let old_type = &ty.ident;
             match old_type.to_string().as_str() {
                 "Vec" | "Option" => {
-                    // Vec<T> => Vec<RcUi<T>>
+                    // Vec<T> => Vec<RcRef<T>>
                     let mut punctuated = Punctuated::new();
                     punctuated.push(PathSegment {
                         ident: old_type.clone(),
@@ -91,7 +91,7 @@ fn rcize_inner_type(ty: &mut Type) {
                     *segments = punctuated;
                 }
                 "IndexMap" => {
-                    // IndexMap<K, V> => IndexMap<K, RcUi<V>>
+                    // IndexMap<K, V> => IndexMap<K, RcRef<V>>
                     let (k, v) = match ty.arguments {
                         PathArguments::AngleBracketed(ref args) => {
                             let mut args = args.args.iter();
@@ -122,7 +122,7 @@ fn rcize_inner_type(ty: &mut Type) {
 }
 
 fn rcize_full_type(ty: &mut Type) {
-    // T => RcUi<T>
+    // T => RcRef<T>
     match ty {
         Type::Path(path_type) => {
             let ty = path_type.path.segments.iter().next().unwrap().clone();
@@ -156,8 +156,8 @@ fn rc_ui(arguments: PathArguments) -> Punctuated<PathSegment, Colon2> {
     let mut punctuated = Punctuated::new();
     punctuated.extend([
         format_ident!("crate").into(),
-        format_ident!("gui").into(),
-        PathSegment { ident: format_ident!("RcUi"), arguments },
+        format_ident!("save_data").into(),
+        PathSegment { ident: format_ident!("RcRef"), arguments },
     ]);
     punctuated
 }

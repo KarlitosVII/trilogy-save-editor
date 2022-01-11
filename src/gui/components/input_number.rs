@@ -1,14 +1,15 @@
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
+use crate::{gui::components::Helper, save_data::RcRef};
+
 use super::CallbackType;
-use crate::gui::{components::Helper, RcUi};
 
 #[derive(Clone)]
 pub enum NumberType {
-    Byte(RcUi<u8>),
-    Int(RcUi<i32>),
-    Float(RcUi<f32>),
+    Byte(RcRef<u8>),
+    Int(RcRef<i32>),
+    Float(RcRef<f32>),
 }
 
 impl PartialEq for NumberType {

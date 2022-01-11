@@ -9,7 +9,7 @@ use std::fmt;
 use indexmap::IndexMap;
 use serde::{de, Deserialize, Deserializer, Serialize};
 
-use crate::gui::RcUi;
+use crate::save_data::RcRef;
 use crate::save_data::{
     shared::{Rotator, Vector},
     Dummy,
@@ -92,18 +92,18 @@ impl<'de> Deserialize<'de> for BaseObject {
 
 #[derive(Serialize, Clone)]
 pub enum Object {
-    PawnBehavior(RcUi<PawnBehavior>),
-    Pawn(RcUi<Pawn>),
-    BaseSquad(RcUi<BaseSquad>),
-    Shop(RcUi<Shop>),
-    Inventory(RcUi<Inventory>),
-    Item(RcUi<Item>),
-    ItemMod(RcUi<ItemMod>),
-    ArtPlaceableBehavior(RcUi<ArtPlaceableBehavior>),
-    ArtPlaceable(RcUi<ArtPlaceable>),
-    VehicleBehavior(RcUi<VehicleBehavior>),
-    Vehicle(RcUi<Vehicle>),
-    World(RcUi<World>),
+    PawnBehavior(RcRef<PawnBehavior>),
+    Pawn(RcRef<Pawn>),
+    BaseSquad(RcRef<BaseSquad>),
+    Shop(RcRef<Shop>),
+    Inventory(RcRef<Inventory>),
+    Item(RcRef<Item>),
+    ItemMod(RcRef<ItemMod>),
+    ArtPlaceableBehavior(RcRef<ArtPlaceableBehavior>),
+    ArtPlaceable(RcRef<ArtPlaceable>),
+    VehicleBehavior(RcRef<VehicleBehavior>),
+    Vehicle(RcRef<Vehicle>),
+    World(RcRef<World>),
     Default,
 }
 

@@ -4,8 +4,8 @@ use uuid::Uuid;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-use crate::gui::RcUi;
 use crate::save_data::Guid;
+use crate::save_data::RcRef;
 
 pub enum Msg {
     Change(Event),
@@ -14,7 +14,7 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
-    pub guid: RcUi<Guid>,
+    pub guid: RcRef<Guid>,
 }
 
 impl Props {

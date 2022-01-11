@@ -5,7 +5,7 @@ use std::{
 
 use yew::prelude::*;
 
-use crate::gui::{raw_ui::RawUi, RcUi};
+use crate::{gui::raw_ui::RawUi, save_data::RcRef};
 
 pub enum Msg {
     Remove,
@@ -17,7 +17,7 @@ where
     T: RawUi,
 {
     pub label: String,
-    pub option: RcUi<Option<T>>,
+    pub option: RcRef<Option<T>>,
 }
 
 impl<T> Props<T>

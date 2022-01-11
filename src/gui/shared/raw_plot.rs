@@ -1,18 +1,22 @@
-use std::cell::{Ref, RefMut};
-use std::rc::Rc;
+use std::{
+    cell::{Ref, RefMut},
+    rc::Rc,
+};
 
 use gloo::{events::EventListener, timers::future::TimeoutFuture, utils};
 use indexmap::{map::Entry, IndexMap};
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
-use super::{FloatPlotType, IntPlotType, PlotType};
-use crate::gui::{
-    components::{CheckBox, Helper, InputNumber, NumberType},
-    raw_ui::RawUi,
-    RcUi,
+use crate::{
+    gui::{
+        components::{CheckBox, Helper, InputNumber, NumberType},
+        raw_ui::RawUi,
+    },
+    save_data::{shared::plot::RawPlotDb, RcRef},
 };
-use crate::save_data::shared::plot::RawPlotDb;
+
+use super::{FloatPlotType, IntPlotType, PlotType};
 
 const LABEL_LIST_MAX_LEN: usize = 10_000_000;
 
@@ -29,9 +33,9 @@ pub struct Props {
     pub plots: PlotType,
     pub plot_db: Rc<RawPlotDb>,
     #[prop_or_default]
-    filter: RcUi<String>,
+    filter: RcRef<String>,
     #[prop_or_default]
-    add_id: RcUi<i32>,
+    add_id: RcRef<i32>,
 }
 
 impl Props {
@@ -229,7 +233,7 @@ impl Component for RawPlot {
                         html! {
                             <CheckBox
                                 {label}
-                                value={RcUi::new(*plot)}
+                                value={RcRef::new(*plot)}
                                 onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                             />
                         }
@@ -287,7 +291,7 @@ impl Component for RawPlot {
                             Msg::Add
                         })}
                     >
-                        <InputNumber label={String::default()} value={NumberType::Int(RcUi::clone(&ctx.props().add_id))} />
+                        <InputNumber label={String::default()} value={NumberType::Int(RcRef::clone(&ctx.props().add_id))} />
                         <input type="submit" class="button" value="Add" />
                         { add_helper }
                     </form>

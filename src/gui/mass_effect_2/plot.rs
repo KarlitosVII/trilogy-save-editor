@@ -7,20 +7,21 @@ use crate::{
         format_code,
         mass_effect_1::Me1Plot,
         shared::{IntPlotType, PlotCategory},
-        RcUi, Theme,
+        Theme,
     },
     save_data::{
         mass_effect_2::plot_db::Me2PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
+        RcRef,
     },
     services::database::Databases,
 };
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub booleans: RcUi<BitVec>,
+    pub booleans: RcRef<BitVec>,
     pub integers: IntPlotType,
-    pub me1_booleans: Option<RcUi<BitVec>>,
+    pub me1_booleans: Option<RcRef<BitVec>>,
     pub me1_integers: Option<IntPlotType>,
 }
 
@@ -48,7 +49,7 @@ pub fn me2_plot(props: &Props) -> Html {
                     html! {
                         <PlotCategory
                             title={title.clone()}
-                            booleans={RcUi::clone(booleans)}
+                            booleans={RcRef::clone(booleans)}
                             integers={IntPlotType::clone(integers)}
                             category={category.clone()}
                         />
@@ -86,7 +87,7 @@ pub fn me2_plot(props: &Props) -> Html {
                                     <hr class="border-t border-default-border" />
                                 </div>
                                 <Me1Plot
-                                    booleans={RcUi::clone(me1_booleans)}
+                                    booleans={RcRef::clone(me1_booleans)}
                                     integers={IntPlotType::clone(me1_integers)}
                                 />
                             </div>
@@ -106,7 +107,7 @@ pub fn me2_plot(props: &Props) -> Html {
             <TabBar>
                 <Tab title="Player">
                     <PlotCategory
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                         category={player.clone()}
                     />
@@ -114,14 +115,14 @@ pub fn me2_plot(props: &Props) -> Html {
                 { for categories }
                 <Tab title="Captain's cabin">
                     <PlotCategory
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                         category={captains_cabin.clone()}
                     />
                 </Tab>
                 <Tab title="Rewards">
                     <PlotCategory
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                         category={rewards.clone()}
                     />

@@ -2,21 +2,24 @@ use std::cell::Ref;
 
 use yew::prelude::*;
 
-use super::Me2Type;
-use crate::gui::{
-    components::{Helper, InputText, Select, Table},
-    raw_ui::RawUi,
-    shared::{BonusPowerType, BonusPowers},
-    RcUi,
-};
-use crate::save_data::{
-    mass_effect_2::{player::Player, Difficulty},
-    shared::{
-        player::{Notoriety, Origin},
-        plot::PlotTable,
-        EndGameState,
+use crate::{
+    gui::{
+        components::{Helper, InputText, Select, Table},
+        raw_ui::RawUi,
+        shared::{BonusPowerType, BonusPowers},
+    },
+    save_data::{
+        mass_effect_2::{player::Player, Difficulty},
+        shared::{
+            player::{Notoriety, Origin},
+            plot::PlotTable,
+            EndGameState,
+        },
+        RcRef,
     },
 };
+
+use super::Me2Type;
 
 #[derive(Clone, RawUi)]
 enum Me2Class {
@@ -67,11 +70,11 @@ impl Component for Me2General {
         let (player, me1_plot, plot) = match ctx.props().save_game {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
-                (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
+                (RcRef::clone(&me2.player), RcRef::clone(&me2.me1_plot), RcRef::clone(&me2.plot))
             }
             Me2Type::Legendary(ref me2) => {
                 let me2 = me2.borrow();
-                (RcUi::clone(&me2.player), RcUi::clone(&me2.me1_plot), RcUi::clone(&me2.plot))
+                (RcRef::clone(&me2.player), RcRef::clone(&me2.me1_plot), RcRef::clone(&me2.plot))
             }
         };
         let (mut player, mut me1_plot, mut plot) =
@@ -206,19 +209,19 @@ impl Component for Me2General {
             Me2Type::Vanilla(ref me2) => {
                 let me2 = me2.borrow();
                 (
-                    RcUi::clone(&me2.difficulty),
-                    RcUi::clone(&me2.end_game_state),
-                    RcUi::clone(&me2.player),
-                    RcUi::clone(&me2.plot),
+                    RcRef::clone(&me2.difficulty),
+                    RcRef::clone(&me2.end_game_state),
+                    RcRef::clone(&me2.player),
+                    RcRef::clone(&me2.plot),
                 )
             }
             Me2Type::Legendary(ref me2) => {
                 let me2 = me2.borrow();
                 (
-                    RcUi::clone(&me2.difficulty),
-                    RcUi::clone(&me2.end_game_state),
-                    RcUi::clone(&me2.player),
-                    RcUi::clone(&me2.plot),
+                    RcRef::clone(&me2.difficulty),
+                    RcRef::clone(&me2.end_game_state),
+                    RcRef::clone(&me2.player),
+                    RcRef::clone(&me2.plot),
                 )
             }
         };
@@ -275,7 +278,7 @@ impl Me2General {
                     />
                     {"Notoriety"}
                 </div>
-                <InputText label="Identity Code" value={RcUi::clone(&player.face_code)} helper=
+                <InputText label="Identity Code" value={RcRef::clone(&player.face_code)} helper=
                     "If you change this you can display whatever you want in the menus \
                     in place of your `Identity Code`.\n\
                     This will NOT change your face, you have to edit your head morph \
@@ -337,7 +340,7 @@ impl Me2General {
         }
     }
 
-    fn general(difficulty: RcUi<Difficulty>, end_game_state: RcUi<EndGameState>) -> Html {
+    fn general(difficulty: RcRef<Difficulty>, end_game_state: RcRef<EndGameState>) -> Html {
         html! {
             <Table title="General">
                 { difficulty.view("Difficulty") }
@@ -389,7 +392,7 @@ impl Me2General {
         ];
 
         html! {
-            <BonusPowers {power_list} powers={BonusPowerType::Me2(RcUi::clone(&player.powers))} helper=
+            <BonusPowers {power_list} powers={BonusPowerType::Me2(RcRef::clone(&player.powers))} helper=
                 "You can use as many bonus powers as you want and customize your build \
                 to your liking. The only restriction is the size of your screen !\n\
                 If you want to remove a bonus power you need to reset your talents \

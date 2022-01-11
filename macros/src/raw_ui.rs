@@ -34,7 +34,7 @@ pub fn impl_struct(
 
     match raw_ui_impl {
         Derive::RawUi => quote! {
-            impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
+            impl crate::gui::raw_ui::RawUi for crate::save_data::RcRef<#name> {
                 fn view(&self, label: &str) -> yew::Html {
                     self.view_opened(label, false)
                 }
@@ -51,7 +51,7 @@ pub fn impl_struct(
             }
         },
         Derive::RawUiRoot => quote! {
-            impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
+            impl crate::gui::raw_ui::RawUi for crate::save_data::RcRef<#name> {
                 fn view(&self, label: &str) -> yew::Html {
                     self.view_opened(label, false)
                 }
@@ -68,7 +68,7 @@ pub fn impl_struct(
             }
         },
         Derive::RawUiChildren => quote! {
-            impl crate::gui::raw_ui::RawUiChildren for crate::gui::RcUi<#name> {
+            impl crate::gui::raw_ui::RawUiChildren for crate::save_data::RcRef<#name> {
                 fn children(&self) -> Vec<yew::Html> {
                     vec![#(#view_fields),*]
                 }
@@ -132,7 +132,7 @@ pub fn impl_enum(
             }
         }
 
-        impl crate::gui::raw_ui::RawUi for crate::gui::RcUi<#name> {
+        impl crate::gui::raw_ui::RawUi for crate::save_data::RcRef<#name> {
             fn view(&self, label: &str) -> yew::Html {
                 use crate::gui::components::raw_ui::RawUiEnum;
 

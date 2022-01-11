@@ -2,13 +2,18 @@ use std::cell::RefMut;
 
 use yew::prelude::*;
 
-use super::IntPlotType;
-use crate::gui::{
-    components::{CheckBox, Table},
-    raw_ui::RawUi,
-    RcUi,
+use crate::{
+    gui::{
+        components::{CheckBox, Table},
+        raw_ui::RawUi,
+    },
+    save_data::{
+        shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
+        RcRef,
+    },
 };
-use crate::save_data::shared::plot::{BitVec, PlotCategory as PlotCategoryDb};
+
+use super::IntPlotType;
 
 pub enum Msg {
     ChangeBool(usize, bool),
@@ -17,7 +22,7 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub title: Option<String>,
-    pub booleans: RcUi<BitVec>,
+    pub booleans: RcRef<BitVec>,
     pub integers: IntPlotType,
     pub category: PlotCategoryDb,
     #[prop_or(false)]
@@ -71,7 +76,7 @@ impl Component for PlotCategory {
                 Some(value) => html! {
                     <CheckBox
                         label={label.clone()}
-                        value={RcUi::new(*value)}
+                        value={RcRef::new(*value)}
                         onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                     />
                 },
@@ -85,9 +90,9 @@ impl Component for PlotCategory {
                 idx += 10_000;
             }
             let value = match integers {
-                IntPlotType::Vec(vec) => vec.borrow().get(idx).map(RcUi::clone),
+                IntPlotType::Vec(vec) => vec.borrow().get(idx).map(RcRef::clone),
                 IntPlotType::IndexMap(index_map) => {
-                    index_map.borrow().get(&(idx as i32)).map(RcUi::clone)
+                    index_map.borrow().get(&(idx as i32)).map(RcRef::clone)
                 }
             };
             match value {

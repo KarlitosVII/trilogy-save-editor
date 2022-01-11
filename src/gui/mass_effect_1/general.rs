@@ -15,9 +15,8 @@ use crate::{
         components::{Select, Table},
         mass_effect_1::property::Property,
         raw_ui::RawUi,
-        RcUi,
     },
-    save_data::mass_effect_1::data::StructType,
+    save_data::{mass_effect_1::data::StructType, RcRef},
 };
 
 pub enum Msg {
@@ -26,8 +25,8 @@ pub enum Msg {
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub player: RcUi<Player>,
-    pub plot: RcUi<PlotTable>,
+    pub player: RcRef<Player>,
+    pub plot: RcRef<PlotTable>,
 }
 
 impl Props {
@@ -81,7 +80,9 @@ impl Component for Me1General {
                         .and_then(|properties| {
                             Self::find_property(ctx, properties, "m_nCombatDifficulty").and_then(
                                 |p| match *p.borrow() {
-                                    DataProperty::Int { ref value, .. } => Some(RcUi::clone(value)),
+                                    DataProperty::Int { ref value, .. } => {
+                                        Some(RcRef::clone(value))
+                                    }
                                     _ => None,
                                 },
                             )
@@ -189,7 +190,7 @@ impl Me1General {
         }
     }
 
-    fn general(ctx: &Context<Self>, current_game: &List<RcUi<DataProperty>>) -> Option<Html> {
+    fn general(ctx: &Context<Self>, current_game: &List<RcRef<DataProperty>>) -> Option<Html> {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
 
@@ -248,20 +249,20 @@ impl Me1General {
         }
     }
 
-    fn view_property(ctx: &Context<Self>, property: &RcUi<DataProperty>, label: &str) -> Html {
+    fn view_property(ctx: &Context<Self>, property: &RcRef<DataProperty>, label: &str) -> Html {
         let player = &ctx.props().player;
         html! {
             <Property
-                player={RcUi::clone(player)}
-                property={RcUi::clone(property)}
+                player={RcRef::clone(player)}
+                property={RcRef::clone(property)}
                 label={label.to_owned()}
             />
         }
     }
 
     fn find_property<'a>(
-        ctx: &Context<Self>, properties: &'a List<RcUi<DataProperty>>, property_name: &str,
-    ) -> Option<&'a RcUi<DataProperty>> {
+        ctx: &Context<Self>, properties: &'a List<RcRef<DataProperty>>, property_name: &str,
+    ) -> Option<&'a RcRef<DataProperty>> {
         let player = ctx.props().player();
         properties.iter().find_map(|property| match *property.borrow() {
             DataProperty::Array { name_id, .. }
@@ -281,7 +282,7 @@ impl Me1General {
     }
 
     fn find_object_id(
-        ctx: &Context<Self>, properties: &List<RcUi<DataProperty>>, property_name: &str,
+        ctx: &Context<Self>, properties: &List<RcRef<DataProperty>>, property_name: &str,
     ) -> Option<i32> {
         Self::find_property(ctx, properties, property_name).and_then(|property| {
             match *property.borrow() {

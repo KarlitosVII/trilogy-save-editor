@@ -2,7 +2,7 @@ use anyhow::Result;
 use serde::{de, Serialize};
 
 use super::{player::Name, List};
-use crate::gui::RcUi;
+use crate::save_data::RcRef;
 use crate::save_data::{
     shared::{appearance::LinearColor, Rotator, Vector},
     Dummy,
@@ -12,7 +12,7 @@ use crate::unreal;
 #[derive(Serialize, Clone)]
 pub struct Data {
     _osef: Dummy<4>,
-    pub properties: List<RcUi<Property>>,
+    pub properties: List<RcRef<Property>>,
 }
 
 impl Data {
@@ -21,7 +21,7 @@ impl Data {
         A: de::SeqAccess<'de>,
     {
         let _osef = seq.next_element()?.unwrap();
-        let properties = List::<RcUi<Property>>::visit_seq(names, seq)?;
+        let properties = List::<RcRef<Property>>::visit_seq(names, seq)?;
         Ok(Self { _osef, properties })
     }
 
@@ -38,7 +38,7 @@ fn get_name(names: &[Name], id: u32) -> String {
     names[id as usize].string.borrow().clone()
 }
 
-impl List<RcUi<Property>> {
+impl List<RcRef<Property>> {
     pub fn visit_seq<'de, A>(names: &[Name], seq: &mut A) -> Result<Self, A::Error>
     where
         A: de::SeqAccess<'de>,
@@ -78,7 +78,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcUi<bool>,
+        value: RcRef<bool>,
     },
     Byte {
         name_id: u32,
@@ -87,7 +87,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcUi<u8>,
+        value: RcRef<u8>,
     },
     Float {
         name_id: u32,
@@ -96,7 +96,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcUi<f32>,
+        value: RcRef<f32>,
     },
     Int {
         name_id: u32,
@@ -105,7 +105,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcUi<i32>,
+        value: RcRef<i32>,
     },
     Name {
         name_id: u32,
@@ -114,7 +114,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value_name_id: RcUi<u32>,
+        value_name_id: RcRef<u32>,
         _osef4: Dummy<4>,
     },
     Object {
@@ -133,7 +133,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        string: RcUi<String>,
+        string: RcRef<String>,
     },
     StringRef {
         name_id: u32,
@@ -142,7 +142,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcUi<i32>,
+        value: RcRef<i32>,
     },
     Struct {
         name_id: u32,
@@ -220,7 +220,7 @@ impl Property {
                     _ => {
                         for _ in 0..len {
                             let array_properties = ArrayType::Properties(
-                                List::<RcUi<Property>>::visit_seq(names, seq)?,
+                                List::<RcRef<Property>>::visit_seq(names, seq)?,
                             );
                             array.push(array_properties);
                         }
@@ -294,7 +294,7 @@ impl Property {
                     "LinearColor" => StructType::LinearColor(seq.next_element()?.unwrap()),
                     "Vector" => StructType::Vector(seq.next_element()?.unwrap()),
                     "Rotator" => StructType::Rotator(seq.next_element()?.unwrap()),
-                    _ => StructType::Properties(List::<RcUi<Property>>::visit_seq(names, seq)?),
+                    _ => StructType::Properties(List::<RcRef<Property>>::visit_seq(names, seq)?),
                 };
                 Property::Struct {
                     name_id,
@@ -342,11 +342,11 @@ impl Property {
 
 #[derive(Serialize, Clone)]
 pub enum ArrayType {
-    Int(RcUi<i32>),
+    Int(RcRef<i32>),
     Object(i32),
-    Vector(RcUi<Vector>),
-    String(RcUi<String>),
-    Properties(List<RcUi<Property>>),
+    Vector(RcRef<Vector>),
+    String(RcRef<String>),
+    Properties(List<RcRef<Property>>),
 }
 
 impl ArrayType {
@@ -372,10 +372,10 @@ impl ArrayType {
 
 #[derive(Serialize, Clone)]
 pub enum StructType {
-    LinearColor(RcUi<LinearColor>),
-    Vector(RcUi<Vector>),
-    Rotator(RcUi<Rotator>),
-    Properties(List<RcUi<Property>>),
+    LinearColor(RcRef<LinearColor>),
+    Vector(RcRef<Vector>),
+    Rotator(RcRef<Rotator>),
+    Properties(List<RcRef<Property>>),
 }
 
 impl StructType {

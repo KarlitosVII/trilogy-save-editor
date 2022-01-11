@@ -4,12 +4,14 @@ use std::cell::Ref;
 
 use yew::prelude::*;
 
-use crate::gui::{components::Table, mass_effect_1::raw_data::property::Property, RcUi};
-use crate::save_data::mass_effect_1::player::Player;
+use crate::{
+    gui::{components::Table, mass_effect_1::raw_data::property::Property},
+    save_data::{mass_effect_1::player::Player, RcRef},
+};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub player: RcUi<Player>,
+    pub player: RcRef<Player>,
 }
 
 impl Props {
@@ -45,8 +47,8 @@ impl Component for Me1RawData {
         let properties = properties.iter().take(take).map(|property| {
             html! {
                 <Property
-                    player={RcUi::clone(&ctx.props().player)}
-                    property={RcUi::clone(property)}
+                    player={RcRef::clone(&ctx.props().player)}
+                    property={RcRef::clone(property)}
                 />
             }
         });

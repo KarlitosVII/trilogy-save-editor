@@ -11,7 +11,6 @@ use crate::{
         components::{CallbackType, Helper, InputNumber, InputText, NumberType, Select, Table},
         mass_effect_1_le::bonus_talents::BonusTalents,
         raw_ui::RawUi,
-        RcUi,
     },
     save_data::{
         mass_effect_1_le::{
@@ -24,6 +23,7 @@ use crate::{
             player::{Notoriety, Origin},
             plot::PlotTable,
         },
+        RcRef,
     },
     services::database::Databases,
 };
@@ -121,7 +121,7 @@ pub enum Msg {
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub save_game: RcUi<Me1LeSaveData>,
+    pub save_game: RcRef<Me1LeSaveData>,
 }
 
 impl Props {
@@ -207,10 +207,13 @@ impl Component for Me1LeGeneral {
                         .find(|character| *character.borrow().tag() == tag)
                         .unwrap()
                         .borrow();
-                    (RcUi::clone(&character.talent_points), RcUi::clone(&character.complex_talents))
+                    (
+                        RcRef::clone(&character.talent_points),
+                        RcRef::clone(&character.complex_talents),
+                    )
                 } else {
                     // Player
-                    (RcUi::clone(&player.talent_points), RcUi::clone(&player.complex_talents))
+                    (RcRef::clone(&player.talent_points), RcRef::clone(&player.complex_talents))
                 };
 
                 for talent in complex_talents.borrow_mut().iter_mut() {
@@ -298,7 +301,7 @@ impl Component for Me1LeGeneral {
                             let inventory = player.inventory();
                             let equipment = inventory.equipment();
 
-                            let mut unequipped_items: Vec<RcUi<Item>> = vec![];
+                            let mut unequipped_items: Vec<RcRef<Item>> = vec![];
 
                             let mut unequip_item_and_mods = |mut base_item: Item| {
                                 if *base_item.item_id() == 0 {
@@ -469,7 +472,7 @@ impl Me1LeGeneral {
                     />
                     {"Notoriety"}
                 </div>
-                <InputText label="Identity Code" value={RcUi::clone(&player.face_code)} helper=
+                <InputText label="Identity Code" value={RcRef::clone(&player.face_code)} helper=
                     "If you change this you can display whatever you want in the menus \
                     in place of your `Identity Code`.\n\
                     This will NOT change your face, you have to edit your head morph \
@@ -529,7 +532,7 @@ impl Me1LeGeneral {
                 </div>
                 <InputNumber
                     label="Level"
-                    value={NumberType::Int(RcUi::clone(level))}
+                    value={NumberType::Int(RcRef::clone(level))}
                     helper="Classic mode (1 - 60)"
                 />
                 { current_xp.view("Current XP") }
@@ -549,13 +552,13 @@ impl Me1LeGeneral {
         ctx: &Context<Self>, class_db: &Rc<Me1LePlayerClassDb>, player: Ref<'_, Player>,
     ) -> Html {
         let player_class = player.player_class();
-        let simple_talents = RcUi::clone(&player.simple_talents);
-        let complex_talents = RcUi::clone(&player.complex_talents);
+        let simple_talents = RcRef::clone(&player.simple_talents);
+        let complex_talents = RcRef::clone(&player.complex_talents);
 
         let talent_list = class_db
             .iter()
             .find_map(|class| {
-                (class.player_class == *player_class).then(|| RcUi::clone(&class.bonus_talents))
+                (class.player_class == *player_class).then(|| RcRef::clone(&class.bonus_talents))
             })
             .unwrap_or_default();
 
@@ -571,7 +574,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn general(ctx: &Context<Self>, game_options: Ref<'_, Vec<RcUi<i32>>>) -> Html {
+    fn general(ctx: &Context<Self>, game_options: Ref<'_, Vec<RcRef<i32>>>) -> Html {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
         let current_difficulty =
@@ -611,7 +614,7 @@ impl Me1LeGeneral {
         }
     }
 
-    fn squad(ctx: &Context<Self>, squad: Ref<'_, Vec<RcUi<Henchman>>>) -> Html {
+    fn squad(ctx: &Context<Self>, squad: Ref<'_, Vec<RcRef<Henchman>>>) -> Html {
         let characters = [
             ("hench_humanfemale", "Ashley"),
             ("hench_turian", "Garrus"),

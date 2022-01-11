@@ -1,7 +1,7 @@
 use std::cell::{Ref, RefMut};
 use yew::prelude::*;
 
-use crate::gui::RcUi;
+use crate::save_data::RcRef;
 
 pub enum Msg {
     Toggle,
@@ -10,7 +10,7 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
-    pub value: RcUi<bool>,
+    pub value: RcRef<bool>,
     pub onchange: Option<Callback<bool>>,
 }
 

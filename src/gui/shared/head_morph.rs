@@ -3,8 +3,8 @@ use std::cell::{Ref, RefMut};
 use yew::{context::ContextHandle, prelude::*};
 
 use crate::{
-    gui::{components::Table, raw_ui::RawUiChildren, RcUi},
-    save_data::shared::appearance::HeadMorph as DataHeadMorph,
+    gui::{components::Table, raw_ui::RawUiChildren},
+    save_data::{shared::appearance::HeadMorph as DataHeadMorph, RcRef},
     services::save_handler::{Action, SaveHandler},
 };
 
@@ -17,15 +17,15 @@ pub enum Msg {
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub head_morph: RcUi<Option<RcUi<DataHeadMorph>>>,
+    pub head_morph: RcRef<Option<RcRef<DataHeadMorph>>>,
 }
 
 impl Props {
-    fn head_morph(&self) -> Ref<'_, Option<RcUi<DataHeadMorph>>> {
+    fn head_morph(&self) -> Ref<'_, Option<RcRef<DataHeadMorph>>> {
         self.head_morph.borrow()
     }
 
-    fn head_morph_mut(&self) -> RefMut<'_, Option<RcUi<DataHeadMorph>>> {
+    fn head_morph_mut(&self) -> RefMut<'_, Option<RcRef<DataHeadMorph>>> {
         self.head_morph.borrow_mut()
     }
 }
@@ -40,10 +40,8 @@ impl Component for HeadMorph {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let (save_handler, _db_handle) = ctx
-            .link()
-            .context::<SaveHandler>(Callback::noop())
-            .expect("no save handler provider");
+        let (save_handler, _db_handle) =
+            ctx.link().context::<SaveHandler>(Callback::noop()).expect("no save handler provider");
 
         HeadMorph { _db_handle, save_handler }
     }
@@ -61,7 +59,7 @@ impl Component for HeadMorph {
             }
             Msg::Export => {
                 if let Some(ref head_morph) = *ctx.props().head_morph() {
-                    self.save_handler.action(Action::ExportHeadMorph(RcUi::clone(head_morph)));
+                    self.save_handler.action(Action::ExportHeadMorph(RcRef::clone(head_morph)));
                 }
                 false
             }

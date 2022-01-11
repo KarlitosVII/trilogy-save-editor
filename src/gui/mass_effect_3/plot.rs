@@ -8,20 +8,21 @@ use crate::{
         mass_effect_2::Me2Plot,
         mass_effect_3::PlotVariable,
         shared::{IntPlotType, PlotCategory},
-        RcUi, Theme,
+        Theme,
     },
     save_data::{
         mass_effect_3::plot_db::Me3PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
+        RcRef,
     },
     services::database::Databases,
 };
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub booleans: RcUi<BitVec>,
+    pub booleans: RcRef<BitVec>,
     pub integers: IntPlotType,
-    pub variables: RcUi<IndexMap<String, RcUi<i32>>>,
+    pub variables: RcRef<IndexMap<String, RcRef<i32>>>,
 }
 
 #[function_component(Me3Plot)]
@@ -48,7 +49,7 @@ pub fn me3_plot(props: &Props) -> Html {
                     html! {
                         <PlotCategory
                             title={title.clone()}
-                            booleans={RcUi::clone(booleans)}
+                            booleans={RcRef::clone(booleans)}
                             integers={IntPlotType::clone(integers)}
                             category={category.clone()}
                         />
@@ -80,8 +81,8 @@ pub fn me3_plot(props: &Props) -> Html {
             html! {
                 <PlotVariable
                     title={title.clone()}
-                    booleans={RcUi::clone(booleans)}
-                    variables={RcUi::clone(variables)}
+                    booleans={RcRef::clone(booleans)}
+                    variables={RcRef::clone(variables)}
                     plot_variable={variable.clone()}
                 />
             }
@@ -91,7 +92,7 @@ pub fn me3_plot(props: &Props) -> Html {
             <TabBar>
                 <Tab title="General">
                     <PlotCategory
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                         category={general.clone()}
                     />
@@ -104,21 +105,21 @@ pub fn me3_plot(props: &Props) -> Html {
                 </Tab>
                 <Tab title="Intel">
                     <PlotCategory
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                         category={intel.clone()}
                     />
                 </Tab>
                 <Tab title="Mass Effect 2" theme={Theme::MassEffect2}>
                     <Me2Plot
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                     />
                 </Tab>
                 <Tab title="Mass Effect 1" theme={Theme::MassEffect1}>
                     <Me1Plot
                         me3_imported_me1={true}
-                        booleans={RcUi::clone(booleans)}
+                        booleans={RcRef::clone(booleans)}
                         integers={IntPlotType::clone(integers)}
                     />
                 </Tab>

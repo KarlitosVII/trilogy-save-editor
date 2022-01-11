@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use crate::gui::{components::Select, RcUi};
+use crate::{gui::components::Select, save_data::RcRef};
 
 #[derive(Properties)]
 pub struct Props<T>
@@ -9,7 +9,7 @@ where
 {
     pub label: String,
     pub items: &'static [&'static str],
-    pub value: RcUi<T>,
+    pub value: RcRef<T>,
 }
 
 impl<T> PartialEq for Props<T>
@@ -29,7 +29,7 @@ where
     let options = props.items;
     let current_idx: usize = props.value.borrow().clone().into();
     let onselect = {
-        let value = RcUi::clone(&props.value);
+        let value = RcRef::clone(&props.value);
         Callback::from(move |idx| *value.borrow_mut() = T::from(idx))
     };
     html! {

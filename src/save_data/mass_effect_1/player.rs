@@ -6,8 +6,8 @@ use serde::ser::SerializeTupleStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::{data::Data, List};
-use crate::gui::RcUi;
 use crate::save_data::Dummy;
+use crate::save_data::RcRef;
 use crate::unreal;
 
 #[derive(Clone)]
@@ -16,7 +16,7 @@ pub struct Player {
     _header_offset: u32,
     _no_mans_land1: List<u8>,
     header: Header,
-    pub names: RcUi<List<Name>>,
+    pub names: RcRef<List<Name>>,
     classes: List<Class>,
     pub objects: List<Object>,
     _no_mans_land2: List<u8>,
@@ -105,7 +105,7 @@ impl<'de> Deserialize<'de> for Player {
                     _header_offset: header_offset,
                     _no_mans_land1: no_mans_land1.into(),
                     header,
-                    names: RcUi::new(names.into()),
+                    names: RcRef::new(names.into()),
                     classes: classes.into(),
                     objects: objects.into(),
                     _no_mans_land2: no_mans_land2.into(),
@@ -196,7 +196,7 @@ struct Header {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Name {
-    pub string: RcUi<String>,
+    pub string: RcRef<String>,
     _osef: Dummy<8>,
     #[serde(skip)]
     pub is_duplicate: bool, // Special

@@ -6,15 +6,14 @@ use crate::{
     gui::{
         components::{Tab, TabBar},
         shared::{FloatPlotType, IntPlotType, PlotType, RawPlot},
-        RcUi,
     },
-    save_data::shared::plot::BitVec,
+    save_data::{shared::plot::BitVec, RcRef},
     services::database::Databases,
 };
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub booleans: RcUi<BitVec>,
+    pub booleans: RcRef<BitVec>,
     pub integers: IntPlotType,
     pub floats: FloatPlotType,
 }
@@ -27,7 +26,7 @@ pub fn me3_raw_plot(props: &Props) -> Html {
         html! {
             <TabBar>
                 <Tab title="Booleans">
-                    <RawPlot plots={PlotType::Boolean(RcUi::clone(booleans))} plot_db={Rc::clone(plot_db)} />
+                    <RawPlot plots={PlotType::Boolean(RcRef::clone(booleans))} plot_db={Rc::clone(plot_db)} />
                 </Tab>
                 <Tab title="Integers">
                     <RawPlot plots={PlotType::Int(integers.clone())} plot_db={Rc::clone(plot_db)} />

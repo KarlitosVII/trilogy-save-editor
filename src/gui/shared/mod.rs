@@ -10,13 +10,13 @@ use indexmap::IndexMap;
 use yew::prelude::*;
 
 use super::raw_ui::RawUi;
-use crate::gui::RcUi;
 use crate::save_data::shared::plot::{BitVec, PlotTable};
+use crate::save_data::RcRef;
 
 #[derive(Clone)]
 pub enum IntPlotType {
-    Vec(RcUi<Vec<RcUi<i32>>>),
-    IndexMap(RcUi<IndexMap<i32, RcUi<i32>>>),
+    Vec(RcRef<Vec<RcRef<i32>>>),
+    IndexMap(RcRef<IndexMap<i32, RcRef<i32>>>),
 }
 
 impl PartialEq for IntPlotType {
@@ -31,8 +31,8 @@ impl PartialEq for IntPlotType {
 
 #[derive(Clone)]
 pub enum FloatPlotType {
-    Vec(RcUi<Vec<RcUi<f32>>>),
-    IndexMap(RcUi<IndexMap<i32, RcUi<f32>>>),
+    Vec(RcRef<Vec<RcRef<f32>>>),
+    IndexMap(RcRef<IndexMap<i32, RcRef<f32>>>),
 }
 
 impl PartialEq for FloatPlotType {
@@ -49,7 +49,7 @@ impl PartialEq for FloatPlotType {
 
 #[derive(Clone)]
 pub enum PlotType {
-    Boolean(RcUi<BitVec>),
+    Boolean(RcRef<BitVec>),
     Int(IntPlotType),
     Float(FloatPlotType),
 }
@@ -65,7 +65,7 @@ impl PartialEq for PlotType {
     }
 }
 
-impl RawUi for RcUi<PlotTable> {
+impl RawUi for RcRef<PlotTable> {
     fn view(&self, _: &str) -> yew::Html {
         html! {
             <Link tab="Raw Plot">{ "Raw Plot" }</Link>

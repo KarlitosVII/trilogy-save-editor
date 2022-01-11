@@ -1,14 +1,16 @@
 use yew::prelude::*;
 
-use crate::gui::{components::Table, RcUi};
-use crate::save_data::{
-    mass_effect_2::player::Power as Me2Power, mass_effect_3::player::Power as Me3Power,
+use crate::{
+    gui::components::Table,
+    save_data::{
+        mass_effect_2::player::Power as Me2Power, mass_effect_3::player::Power as Me3Power, RcRef,
+    },
 };
 
 #[derive(Clone)]
 pub enum BonusPowerType {
-    Me2(RcUi<Vec<RcUi<Me2Power>>>),
-    Me3(RcUi<Vec<RcUi<Me3Power>>>),
+    Me2(RcRef<Vec<RcRef<Me2Power>>>),
+    Me3(RcRef<Vec<RcRef<Me3Power>>>),
 }
 
 impl PartialEq for BonusPowerType {

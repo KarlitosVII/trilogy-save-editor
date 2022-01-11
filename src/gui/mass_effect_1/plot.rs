@@ -5,18 +5,18 @@ use crate::{
     gui::{
         components::{Tab, TabBar},
         shared::{IntPlotType, PlotCategory},
-        RcUi,
     },
     save_data::{
         mass_effect_1::plot_db::Me1PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
+        RcRef,
     },
     services::database::Databases,
 };
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub booleans: RcUi<BitVec>,
+    pub booleans: RcRef<BitVec>,
     pub integers: IntPlotType,
     #[prop_or(false)]
     pub me3_imported_me1: bool,
@@ -36,7 +36,7 @@ pub fn me1_plot(props: &Props) -> Html {
                     html! {
                         <PlotCategory
                             title={title.clone()}
-                            booleans={RcUi::clone(booleans)}
+                            booleans={RcRef::clone(booleans)}
                             integers={IntPlotType::clone(integers)}
                             category={category.clone()}
                             me3_imported_me1={props.me3_imported_me1}

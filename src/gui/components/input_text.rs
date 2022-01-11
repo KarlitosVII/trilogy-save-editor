@@ -2,8 +2,9 @@ use std::cell::{Ref, RefMut};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
+use crate::{gui::components::Helper, save_data::RcRef};
+
 use super::CallbackType;
-use crate::gui::{components::Helper, RcUi};
 
 pub enum Msg {
     Input(InputEvent),
@@ -12,7 +13,7 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
-    pub value: RcUi<String>,
+    pub value: RcRef<String>,
     pub helper: Option<&'static str>,
     pub oninput: Option<Callback<CallbackType>>,
 }

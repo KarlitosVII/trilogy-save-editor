@@ -1,8 +1,11 @@
 use yew::prelude::*;
 
 use crate::{
-    gui::{components::Table, RcUi},
-    save_data::mass_effect_1_le::player::{ComplexTalent, SimpleTalent},
+    gui::components::Table,
+    save_data::{
+        mass_effect_1_le::player::{ComplexTalent, SimpleTalent},
+        RcRef,
+    },
 };
 
 const BONUS_TALENTS: &[(i32, &[i32], &str)] = &[
@@ -29,9 +32,9 @@ pub enum Msg {
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub talent_list: RcUi<Vec<i32>>,
-    pub simple_talents: RcUi<Vec<RcUi<SimpleTalent>>>,
-    pub complex_talents: RcUi<Vec<RcUi<ComplexTalent>>>,
+    pub talent_list: RcRef<Vec<i32>>,
+    pub simple_talents: RcRef<Vec<RcRef<SimpleTalent>>>,
+    pub complex_talents: RcRef<Vec<RcRef<ComplexTalent>>>,
     pub helper: Option<&'static str>,
     pub onselect: Callback<Option<i32>>,
 }
