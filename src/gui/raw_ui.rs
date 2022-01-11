@@ -6,7 +6,7 @@ use yew::prelude::*;
 use crate::{
     gui::components::{raw_ui::*, *},
     save_data::{
-        mass_effect_1_le::legacy::BaseObject, shared::appearance::LinearColor, Guid, RcRef,
+        mass_effect_1_le::legacy::BaseObject, shared::appearance::LinearColor, Guid, RcCell, RcRef,
     },
 };
 
@@ -28,34 +28,34 @@ where
 }
 
 // Implémentation des types std
-impl RawUi for RcRef<u8> {
+impl RawUi for RcCell<u8> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label={label.to_owned()} value={NumberType::Byte(RcRef::clone(self))} />
+            <InputNumber label={label.to_owned()} value={NumberType::Byte(RcCell::clone(self))} />
         }
     }
 }
 
-impl RawUi for RcRef<i32> {
+impl RawUi for RcCell<i32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label={label.to_owned()} value={NumberType::Int(RcRef::clone(self))} />
+            <InputNumber label={label.to_owned()} value={NumberType::Int(RcCell::clone(self))} />
         }
     }
 }
 
-impl RawUi for RcRef<f32> {
+impl RawUi for RcCell<f32> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <InputNumber label={label.to_owned()} value={NumberType::Float(RcRef::clone(self))} />
+            <InputNumber label={label.to_owned()} value={NumberType::Float(RcCell::clone(self))} />
         }
     }
 }
 
-impl RawUi for RcRef<bool> {
+impl RawUi for RcCell<bool> {
     fn view(&self, label: &str) -> yew::Html {
         html! {
-            <CheckBox label={label.to_owned()} value={RcRef::clone(self)} />
+            <CheckBox label={label.to_owned()} value={RcCell::clone(self)} />
         }
     }
 }

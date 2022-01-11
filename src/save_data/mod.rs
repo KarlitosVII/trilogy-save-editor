@@ -5,7 +5,7 @@ pub mod mass_effect_3;
 pub mod shared;
 
 use std::{
-    cell::{Ref, RefCell, RefMut},
+    cell::{Cell, Ref, RefCell, RefMut},
     fmt::{self, Display},
     rc::Rc,
 };
@@ -14,7 +14,70 @@ use anyhow::Result;
 use serde::{de, ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
 use uuid::Uuid;
 
-// RcRef
+// RcCell & RcRef
+#[derive(Clone, Default)]
+pub struct RcCell<T: Copy>(Rc<Cell<T>>);
+
+impl<T: Copy> RcCell<T> {
+    pub fn new(inner: T) -> Self {
+        RcCell(Rc::new(Cell::new(inner)))
+    }
+
+    pub fn get(&self) -> T {
+        self.0.get()
+    }
+
+    pub fn set(&self, val: T) {
+        self.0.set(val)
+    }
+
+    pub fn update<F>(&self, f: F)
+    where
+        F: FnOnce(T) -> T,
+    {
+        let old = self.0.get();
+        let new = f(old);
+        self.0.set(new);
+    }
+}
+
+impl<T: Copy> From<T> for RcCell<T> {
+    fn from(from: T) -> Self {
+        Self::new(from)
+    }
+}
+
+impl<'de, T: Copy + Deserialize<'de>> Deserialize<'de> for RcCell<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let inner: T = Deserialize::deserialize(deserializer)?;
+        Ok(inner.into())
+    }
+}
+
+impl<T: Copy + Serialize> serde::Serialize for RcCell<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.0.get().serialize(serializer)
+    }
+}
+
+impl<T: Copy> PartialEq for RcCell<T> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl<T: Copy + Display> Display for RcCell<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.get().fmt(f)
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct RcRef<T>(Rc<RefCell<T>>);
 

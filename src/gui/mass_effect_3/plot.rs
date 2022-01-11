@@ -13,7 +13,7 @@ use crate::{
     save_data::{
         mass_effect_3::plot_db::Me3PlotDb,
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-        RcRef,
+        RcCell, RcRef,
     },
     services::database::Databases,
 };
@@ -22,7 +22,7 @@ use crate::{
 pub struct Props {
     pub booleans: RcRef<BitVec>,
     pub integers: IntPlotType,
-    pub variables: RcRef<IndexMap<String, RcRef<i32>>>,
+    pub variables: RcRef<IndexMap<String, RcCell<i32>>>,
 }
 
 #[function_component(Me3Plot)]

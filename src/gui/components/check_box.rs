@@ -1,7 +1,6 @@
-use std::cell::{Ref, RefMut};
 use yew::prelude::*;
 
-use crate::save_data::RcRef;
+use crate::save_data::RcCell;
 
 pub enum Msg {
     Toggle,
@@ -10,18 +9,8 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub label: String,
-    pub value: RcRef<bool>,
+    pub value: RcCell<bool>,
     pub onchange: Option<Callback<bool>>,
-}
-
-impl Props {
-    fn value(&self) -> Ref<'_, bool> {
-        self.value.borrow()
-    }
-
-    fn value_mut(&self) -> RefMut<'_, bool> {
-        self.value.borrow_mut()
-    }
 }
 
 pub struct CheckBox;
@@ -37,8 +26,8 @@ impl Component for CheckBox {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Toggle => {
-                let value = !*ctx.props().value();
-                *ctx.props().value_mut() = value;
+                let value = !ctx.props().value.get();
+                ctx.props().value.set(value);
 
                 if let Some(ref callback) = ctx.props().onchange {
                     callback.emit(value);
@@ -49,7 +38,7 @@ impl Component for CheckBox {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let checked = *ctx.props().value();
+        let checked = ctx.props().value.get();
         let onchange = ctx.link().callback(|_| Msg::Toggle);
         html! {
             <label class="flex items-center gap-1">

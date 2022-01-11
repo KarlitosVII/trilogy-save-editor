@@ -2,12 +2,14 @@ use anyhow::Result;
 use serde::{de, Serialize};
 
 use super::{player::Name, List};
-use crate::save_data::RcRef;
-use crate::save_data::{
-    shared::{appearance::LinearColor, Rotator, Vector},
-    Dummy,
+use crate::{
+    save_data::{
+        shared::{appearance::LinearColor, Rotator, Vector},
+        Dummy,
+    },
+    save_data::{RcCell, RcRef},
+    unreal,
 };
-use crate::unreal;
 
 #[derive(Serialize, Clone)]
 pub struct Data {
@@ -78,7 +80,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcRef<bool>,
+        value: RcCell<bool>,
     },
     Byte {
         name_id: u32,
@@ -87,7 +89,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcRef<u8>,
+        value: RcCell<u8>,
     },
     Float {
         name_id: u32,
@@ -96,7 +98,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcRef<f32>,
+        value: RcCell<f32>,
     },
     Int {
         name_id: u32,
@@ -105,7 +107,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcRef<i32>,
+        value: RcCell<i32>,
     },
     Name {
         name_id: u32,
@@ -114,7 +116,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value_name_id: RcRef<u32>,
+        value_name_id: RcCell<u32>,
         _osef4: Dummy<4>,
     },
     Object {
@@ -142,7 +144,7 @@ pub enum Property {
         _osef2: Dummy<4>,
         size: u32,
         _osef3: Dummy<4>,
-        value: RcRef<i32>,
+        value: RcCell<i32>,
     },
     Struct {
         name_id: u32,
@@ -342,7 +344,7 @@ impl Property {
 
 #[derive(Serialize, Clone)]
 pub enum ArrayType {
-    Int(RcRef<i32>),
+    Int(RcCell<i32>),
     Object(i32),
     Vector(RcRef<Vector>),
     String(RcRef<String>),

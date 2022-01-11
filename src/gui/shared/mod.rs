@@ -9,14 +9,17 @@ pub use self::{bonus_powers::*, head_morph::*, link::*, plot_category::*, raw_pl
 use indexmap::IndexMap;
 use yew::prelude::*;
 
+use crate::save_data::{
+    shared::plot::{BitVec, PlotTable},
+    RcCell, RcRef,
+};
+
 use super::raw_ui::RawUi;
-use crate::save_data::shared::plot::{BitVec, PlotTable};
-use crate::save_data::RcRef;
 
 #[derive(Clone)]
 pub enum IntPlotType {
-    Vec(RcRef<Vec<RcRef<i32>>>),
-    IndexMap(RcRef<IndexMap<i32, RcRef<i32>>>),
+    Vec(RcRef<Vec<RcCell<i32>>>),
+    IndexMap(RcRef<IndexMap<i32, RcCell<i32>>>),
 }
 
 impl PartialEq for IntPlotType {
@@ -31,8 +34,8 @@ impl PartialEq for IntPlotType {
 
 #[derive(Clone)]
 pub enum FloatPlotType {
-    Vec(RcRef<Vec<RcRef<f32>>>),
-    IndexMap(RcRef<IndexMap<i32, RcRef<f32>>>),
+    Vec(RcRef<Vec<RcCell<f32>>>),
+    IndexMap(RcRef<IndexMap<i32, RcCell<f32>>>),
 }
 
 impl PartialEq for FloatPlotType {

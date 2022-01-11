@@ -9,7 +9,7 @@ use crate::{
         raw_ui::RawUi,
     },
     save_data::{
-        mass_effect_3::plot_db::PlotVariable as PlotVariableDb, shared::plot::BitVec, RcRef,
+        mass_effect_3::plot_db::PlotVariable as PlotVariableDb, shared::plot::BitVec, RcCell, RcRef,
     },
 };
 
@@ -21,7 +21,7 @@ pub enum Msg {
 pub struct Props {
     pub title: Option<String>,
     pub booleans: RcRef<BitVec>,
-    pub variables: RcRef<IndexMap<String, RcRef<i32>>>,
+    pub variables: RcRef<IndexMap<String, RcCell<i32>>>,
     pub plot_variable: PlotVariableDb,
 }
 
@@ -67,7 +67,7 @@ impl Component for PlotVariable {
             Some(value) => html! {
                 <CheckBox
                     label={label.clone()}
-                    value={RcRef::new(*value)}
+                    value={RcCell::new(*value)}
                     onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                 />
             },
@@ -76,7 +76,7 @@ impl Component for PlotVariable {
 
         let variables = var_db.iter().map(|(db_key, label)| {
             let value = variables.borrow().iter().find_map(|(key, value)| {
-                db_key.eq_ignore_ascii_case(key).then(|| RcRef::clone(value))
+                db_key.eq_ignore_ascii_case(key).then(|| RcCell::clone(value))
             });
             match value {
                 Some(value) => value.view(label),

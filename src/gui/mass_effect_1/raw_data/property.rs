@@ -12,12 +12,12 @@ use crate::{
             data::{ArrayType, Property as DataProperty, StructType},
             player::Player,
         },
-        List, RcRef,
+        List, RcCell, RcRef,
     },
 };
 
 pub enum Msg {
-    DuplicateName(RcRef<u32>, CallbackType),
+    DuplicateName(RcCell<u32>, CallbackType),
 }
 
 #[derive(Properties, PartialEq)]
@@ -54,14 +54,14 @@ impl Component for Property {
                 let mut names = player.names.borrow_mut();
 
                 // Duplicate
-                let idx = *value_name_id.borrow() as usize;
+                let idx = value_name_id.get() as usize;
                 let mut dupe = names[idx].clone();
                 dupe.string = RcRef::new(new_value);
                 dupe.is_duplicate = true;
                 names.push(dupe);
 
                 // Change value name id
-                *value_name_id.borrow_mut() = (names.len() - 1) as u32;
+                value_name_id.set((names.len() - 1) as u32);
 
                 true
             }
@@ -150,16 +150,16 @@ impl Component for Property {
             }
             DataProperty::Name { name_id, value_name_id, .. } => {
                 let label = get_name(name_id);
-                let name = &player.names.borrow()[*value_name_id.borrow() as usize];
+                let name = &player.names.borrow()[value_name_id.get() as usize];
 
                 if name.is_duplicate {
                     html! {
                         <InputText {label} value={RcRef::clone(&name.string)} />
                     }
                 } else {
-                    let value_name_id = RcRef::clone(value_name_id);
+                    let value_name_id = RcCell::clone(value_name_id);
                     let oninput = ctx.link().callback(move |callback| {
-                        Msg::DuplicateName(RcRef::clone(&value_name_id), callback)
+                        Msg::DuplicateName(RcCell::clone(&value_name_id), callback)
                     });
                     html! {
                         <InputText {label}

@@ -13,7 +13,7 @@ use crate::{
         components::{CheckBox, Helper, InputNumber, NumberType},
         raw_ui::RawUi,
     },
-    save_data::{shared::plot::RawPlotDb, RcRef},
+    save_data::{shared::plot::RawPlotDb, RcCell, RcRef},
 };
 
 use super::{FloatPlotType, IntPlotType, PlotType};
@@ -35,7 +35,7 @@ pub struct Props {
     #[prop_or_default]
     filter: RcRef<String>,
     #[prop_or_default]
-    add_id: RcRef<i32>,
+    add_id: RcCell<i32>,
 }
 
 impl Props {
@@ -47,8 +47,8 @@ impl Props {
         self.filter.borrow_mut()
     }
 
-    fn add_id(&self) -> Ref<'_, i32> {
-        self.add_id.borrow()
+    fn add_id(&self) -> i32 {
+        self.add_id.get()
     }
 }
 
@@ -143,7 +143,7 @@ impl Component for RawPlot {
                 false
             }
             Msg::Add => {
-                let new_plot = *ctx.props().add_id() as usize;
+                let new_plot = ctx.props().add_id() as usize;
                 let added = match ctx.props().plots {
                     PlotType::Boolean(ref booleans) => {
                         let mut booleans = booleans.borrow_mut();
@@ -233,7 +233,7 @@ impl Component for RawPlot {
                         html! {
                             <CheckBox
                                 {label}
-                                value={RcRef::new(*plot)}
+                                value={RcCell::new(*plot)}
                                 onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                             />
                         }
@@ -291,7 +291,7 @@ impl Component for RawPlot {
                             Msg::Add
                         })}
                     >
-                        <InputNumber label={String::default()} value={NumberType::Int(RcRef::clone(&ctx.props().add_id))} />
+                        <InputNumber label={String::default()} value={NumberType::Int(RcCell::clone(&ctx.props().add_id))} />
                         <input type="submit" class="button" value="Add" />
                         { add_helper }
                     </form>

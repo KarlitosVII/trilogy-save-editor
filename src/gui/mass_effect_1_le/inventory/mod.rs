@@ -68,8 +68,8 @@ impl Component for Me1LeInventory {
             }
             Msg::ChangeItem(item, new_item) => {
                 let mut item = item.borrow_mut();
-                *item.item_id_mut() = new_item.item_id;
-                *item.manufacturer_id_mut() = new_item.manufacturer_id;
+                item.set_item_id(new_item.item_id);
+                item.set_manufacturer_id(new_item.manufacturer_id);
                 false
             }
             Msg::ChangeItemLevel(item, item_level) => {
@@ -124,8 +124,8 @@ impl Me1LeInventory {
 
     fn item_view_no_flex(&self, ctx: &Context<Self>, item: &RcRef<Item>) -> Html {
         let current_item = DbItem {
-            item_id: *item.borrow().item_id(),
-            manufacturer_id: *item.borrow().manufacturer_id(),
+            item_id: item.borrow().item_id(),
+            manufacturer_id: item.borrow().manufacturer_id(),
         };
         let current_level = *item.borrow().item_level() as usize;
         let onselect_item = {

@@ -23,7 +23,7 @@ use crate::{
             player::{Notoriety, Origin},
             plot::PlotTable,
         },
-        RcRef,
+        RcCell, RcRef,
     },
     services::database::Databases,
 };
@@ -164,7 +164,7 @@ impl Component for Me1LeGeneral {
                 let gender = gender != 0;
 
                 // Player
-                *player.is_female_mut() = gender;
+                player.set_is_female(gender);
 
                 // Plot
                 if let Some(mut is_female) = plot.booleans_mut().get_mut(4639) {
@@ -178,7 +178,7 @@ impl Component for Me1LeGeneral {
 
                 // ME1 plot
                 if let Some(origin) = plot.integers_mut().get_mut(1) {
-                    *origin.borrow_mut() = origin_idx as i32;
+                    origin.set(origin_idx as i32);
                 }
                 false
             }
@@ -188,13 +188,13 @@ impl Component for Me1LeGeneral {
 
                 // ME1 plot
                 if let Some(notoriety) = plot.integers_mut().get_mut(2) {
-                    *notoriety.borrow_mut() = notoriety_idx as i32;
+                    notoriety.set(notoriety_idx as i32);
                 }
                 false
             }
             Msg::Difficulty(difficulty_idx) => {
                 if let Some(difficulty) = player.game_options_mut().get_mut(0) {
-                    *difficulty.borrow_mut() = difficulty_idx as i32;
+                    difficulty.set(difficulty_idx as i32);
                 }
                 false
             }
@@ -208,22 +208,22 @@ impl Component for Me1LeGeneral {
                         .unwrap()
                         .borrow();
                     (
-                        RcRef::clone(&character.talent_points),
+                        RcCell::clone(&character.talent_points),
                         RcRef::clone(&character.complex_talents),
                     )
                 } else {
                     // Player
-                    (RcRef::clone(&player.talent_points), RcRef::clone(&player.complex_talents))
+                    (RcCell::clone(&player.talent_points), RcRef::clone(&player.complex_talents))
                 };
 
                 for talent in complex_talents.borrow_mut().iter_mut() {
-                    *talent_points.borrow_mut() += *talent.borrow().current_rank();
-                    *talent.borrow_mut().current_rank_mut() = 0;
+                    talent_points.update(|tp| tp + talent.borrow().current_rank());
+                    talent.borrow_mut().set_current_rank(0);
                 }
                 true
             }
             Msg::TalentPoints(CallbackType::Int(talent_points)) => {
-                *player.talent_points_mut() = talent_points;
+                player.set_talent_points(talent_points);
                 true
             }
             Msg::PlayerClass(class_idx) => {
@@ -242,9 +242,9 @@ impl Component for Me1LeGeneral {
                         } = new_class_data;
 
                         *player.player_class_mut() = player_class.clone();
-                        *player.specialization_bonus_id_mut() = -1;
-                        *player.localized_class_name_mut() = *localized_class_name;
-                        *player.auto_levelup_template_id_mut() = *auto_levelup_template_id;
+                        player.set_specialization_bonus_id(-1);
+                        player.set_localized_class_name(*localized_class_name);
+                        player.set_auto_levelup_template_id(*auto_levelup_template_id);
 
                         // Simple talents
                         {
@@ -282,7 +282,7 @@ impl Component for Me1LeGeneral {
 
                                 // Reset non-ignored talent points before deleting it
                                 if !is_ignored {
-                                    spent_talent_points += *talent.current_rank();
+                                    spent_talent_points += talent.current_rank();
                                 }
                                 is_ignored
                             });
@@ -293,7 +293,7 @@ impl Component for Me1LeGeneral {
                         }
 
                         if spent_talent_points > 0 {
-                            *player.talent_points_mut() += spent_talent_points;
+                            player.talent_points.update(|tp| tp + spent_talent_points);
                         }
 
                         // Gear
@@ -304,7 +304,7 @@ impl Component for Me1LeGeneral {
                             let mut unequipped_items: Vec<RcRef<Item>> = vec![];
 
                             let mut unequip_item_and_mods = |mut base_item: Item| {
-                                if *base_item.item_id() == 0 {
+                                if base_item.item_id() == 0 {
                                     return;
                                 }
 
@@ -318,13 +318,13 @@ impl Component for Me1LeGeneral {
                                     item.manufacturer_id = detached_mod.manufacturer_id.clone();
                                     item.plot_conditional_id =
                                         detached_mod.plot_conditional_id.clone();
-                                    *item.new_item_mut() = true;
+                                    item.set_new_item(true);
 
                                     unequipped_items.push(item.into());
                                 }
 
                                 // Base item
-                                *base_item.new_item_mut() = true;
+                                base_item.set_new_item(true);
                                 unequipped_items.push(base_item.into());
                             };
 
@@ -385,23 +385,22 @@ impl Component for Me1LeGeneral {
                     let mut current_spec = current_spec.borrow_mut();
 
                     // Reset talent points
-                    *player.talent_points.borrow_mut() += *current_spec.current_rank();
+                    player.talent_points.update(|tp| tp + current_spec.current_rank());
 
                     // Set new spec
                     let new_spec = specs[spec_idx];
                     let max_rank = if spec_idx == 0 { 6 } else { 12 };
 
-                    *player.specialization_bonus_id.borrow_mut() =
-                        if spec_idx == 0 { -1 } else { new_spec };
-                    *current_spec.talent_id_mut() = new_spec;
-                    *current_spec.current_rank_mut() = 0;
-                    *current_spec.max_rank_mut() = max_rank;
+                    player.specialization_bonus_id.set(if spec_idx == 0 { -1 } else { new_spec });
+                    current_spec.set_talent_id(new_spec);
+                    current_spec.set_current_rank(0);
+                    current_spec.set_max_rank(max_rank);
                 }
                 true
             }
             Msg::BonusTalent(has_talent_points) => {
                 if let Some(talent_points) = has_talent_points {
-                    *player.talent_points_mut() += talent_points;
+                    player.talent_points.update(|tp| tp + talent_points);
                 }
 
                 true
@@ -447,7 +446,7 @@ impl Me1LeGeneral {
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={genders}
-                        current_idx={*player.is_female() as usize}
+                        current_idx={player.is_female() as usize}
                         onselect={link.callback(Msg::Gender)}
                     />
                     {"Gender"}
@@ -487,7 +486,7 @@ impl Me1LeGeneral {
 
         let player_class = player_class.borrow();
         let current_player_class = player_class.clone() as usize;
-        let current_spec_id = *specialization_bonus_id.borrow();
+        let current_spec_id = specialization_bonus_id.get();
 
         let (spec_variants, spec_ids) = match *player_class {
             Me1LeClass::Soldier => (SoldierSpec::variants(), SoldierSpec::ids()),
@@ -532,13 +531,13 @@ impl Me1LeGeneral {
                 </div>
                 <InputNumber
                     label="Level"
-                    value={NumberType::Int(RcRef::clone(level))}
+                    value={NumberType::Int(RcCell::clone(level))}
                     helper="Classic mode (1 - 60)"
                 />
                 { current_xp.view("Current XP") }
                 <InputNumber
                     label="Talent Points"
-                    value={NumberType::Int((*player.talent_points()).into())}
+                    value={NumberType::Int(player.talent_points().into())}
                     onchange={ctx.link().callback(Msg::TalentPoints)}
                 />
                 <button class="button" onclick={ctx.link().callback(|_| Msg::ResetTalents(None))}>
@@ -574,11 +573,10 @@ impl Me1LeGeneral {
         }
     }
 
-    fn general(ctx: &Context<Self>, game_options: Ref<'_, Vec<RcRef<i32>>>) -> Html {
+    fn general(ctx: &Context<Self>, game_options: Ref<'_, Vec<RcCell<i32>>>) -> Html {
         let difficulty: &'static [&'static str] =
             &["Casual", "Normal", "Veteran", "Hardcore", "Insanity"];
-        let current_difficulty =
-            game_options.get(0).map(|d| *d.borrow() as usize).unwrap_or_default();
+        let current_difficulty = game_options.get(0).map(|d| d.get() as usize).unwrap_or_default();
         html! {
             <Table title="General">
                 <div class="flex items-center gap-1 cursor-default">

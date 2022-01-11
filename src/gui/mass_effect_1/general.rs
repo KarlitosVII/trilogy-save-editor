@@ -8,7 +8,7 @@ use crate::save_data::{
         player::Player,
     },
     shared::plot::PlotTable,
-    List,
+    List, RcCell,
 };
 use crate::{
     gui::{
@@ -81,7 +81,7 @@ impl Component for Me1General {
                             Self::find_property(ctx, properties, "m_nCombatDifficulty").and_then(
                                 |p| match *p.borrow() {
                                     DataProperty::Int { ref value, .. } => {
-                                        Some(RcRef::clone(value))
+                                        Some(RcCell::clone(value))
                                     }
                                     _ => None,
                                 },
@@ -91,7 +91,7 @@ impl Component for Me1General {
 
                 // Then set new difficulty
                 if let Some(value) = value {
-                    *value.borrow_mut() = new_difficulty_idx as i32;
+                    value.set(new_difficulty_idx as i32);
                 }
 
                 true
@@ -204,7 +204,7 @@ impl Me1General {
         .and_then(|properties| {
             Self::find_property(ctx, properties, "m_nCombatDifficulty").and_then(|p| {
                 match *p.borrow() {
-                    DataProperty::Int { ref value, .. } => Some(*value.borrow() as usize),
+                    DataProperty::Int { ref value, .. } => Some(value.get() as usize),
                     _ => None,
                 }
             })

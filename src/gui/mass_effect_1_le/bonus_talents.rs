@@ -57,33 +57,33 @@ impl Component for BonusTalents {
                 let (complex_id, simple_ids, _) = BONUS_TALENTS[talent_idx];
 
                 let found = complex_talents.borrow().iter().enumerate().find_map(|(i, talent)| {
-                    (*talent.borrow().talent_id() == complex_id)
-                        .then(|| (i, *talent.borrow().current_rank()))
+                    (talent.borrow().talent_id() == complex_id)
+                        .then(|| (i, talent.borrow().current_rank()))
                 });
 
                 let callback = if let Some((idx, spent_points)) = found {
                     complex_talents.borrow_mut().remove(idx);
 
                     simple_talents.borrow_mut().retain(|talent| {
-                        let talent_id = *talent.borrow().talent_id();
+                        let talent_id = talent.borrow().talent_id();
                         !simple_ids.contains(&talent_id)
                     });
 
                     Some(spent_points)
                 } else {
                     let mut complex = ComplexTalent::default();
-                    *complex.talent_id_mut() = complex_id;
-                    *complex.max_rank_mut() = 12;
-                    *complex.level_offset_mut() = -1;
-                    *complex.levels_per_rank_mut() = 1;
-                    *complex.visual_order_mut() = 85;
+                    complex.set_talent_id(complex_id);
+                    complex.set_max_rank(12);
+                    complex.set_level_offset(-1);
+                    complex.set_levels_per_rank(1);
+                    complex.set_visual_order(85);
 
                     complex_talents.borrow_mut().push(complex.into());
 
                     for &simple_id in simple_ids {
                         let mut simple = SimpleTalent::default();
-                        *simple.talent_id_mut() = simple_id;
-                        *simple.current_rank_mut() = 1;
+                        simple.set_talent_id(simple_id);
+                        simple.set_current_rank(1);
 
                         simple_talents.borrow_mut().push(simple.into());
                     }
@@ -105,7 +105,7 @@ impl Component for BonusTalents {
                     let selected = complex_talents
                         .borrow()
                         .iter()
-                        .any(|talent| *talent.borrow().talent_id() == complex_id);
+                        .any(|talent| talent.borrow().talent_id() == complex_id);
 
                     html! {
                         <button

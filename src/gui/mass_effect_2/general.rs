@@ -85,7 +85,7 @@ impl Component for Me2General {
                 let gender = gender != 0;
 
                 // Player
-                *player.is_female_mut() = gender;
+                player.set_is_female(gender);
 
                 // Plot
                 // ME1
@@ -143,7 +143,7 @@ impl Component for Me2General {
 
                 // ME1 plot
                 if let Some(me1_origin) = me1_plot.integers_mut().get_mut(1) {
-                    *me1_origin.borrow_mut() = origin_idx as i32;
+                    me1_origin.set(origin_idx as i32);
                 }
 
                 false
@@ -192,7 +192,7 @@ impl Component for Me2General {
 
                 // ME1 plot
                 if let Some(me1_notoriety) = me1_plot.integers_mut().get_mut(2) {
-                    *me1_notoriety.borrow_mut() = notoriety_idx as i32;
+                    me1_notoriety.set(notoriety_idx as i32);
                 }
 
                 false
@@ -253,7 +253,7 @@ impl Me2General {
                 <div class="flex items-center gap-1 cursor-default">
                     <Select
                         options={genders}
-                        current_idx={*player.is_female() as usize}
+                        current_idx={player.is_female() as usize}
                         onselect={link.callback(Msg::Gender)}
                     />
                     {"Gender"}

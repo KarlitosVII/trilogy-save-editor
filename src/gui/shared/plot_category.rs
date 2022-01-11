@@ -9,7 +9,7 @@ use crate::{
     },
     save_data::{
         shared::plot::{BitVec, PlotCategory as PlotCategoryDb},
-        RcRef,
+        RcCell, RcRef,
     },
 };
 
@@ -76,7 +76,7 @@ impl Component for PlotCategory {
                 Some(value) => html! {
                     <CheckBox
                         label={label.clone()}
-                        value={RcRef::new(*value)}
+                        value={RcCell::new(*value)}
                         onchange={ctx.link().callback(move |value| Msg::ChangeBool(idx, value))}
                     />
                 },
@@ -90,9 +90,9 @@ impl Component for PlotCategory {
                 idx += 10_000;
             }
             let value = match integers {
-                IntPlotType::Vec(vec) => vec.borrow().get(idx).map(RcRef::clone),
+                IntPlotType::Vec(vec) => vec.borrow().get(idx).map(RcCell::clone),
                 IntPlotType::IndexMap(index_map) => {
-                    index_map.borrow().get(&(idx as i32)).map(RcRef::clone)
+                    index_map.borrow().get(&(idx as i32)).map(RcCell::clone)
                 }
             };
             match value {

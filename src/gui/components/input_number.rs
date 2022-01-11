@@ -1,15 +1,15 @@
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-use crate::{gui::components::Helper, save_data::RcRef};
+use crate::{gui::components::Helper, save_data::RcCell};
 
 use super::CallbackType;
 
 #[derive(Clone)]
 pub enum NumberType {
-    Byte(RcRef<u8>),
-    Int(RcRef<i32>),
-    Float(RcRef<f32>),
+    Byte(RcCell<u8>),
+    Int(RcCell<i32>),
+    Float(RcCell<f32>),
 }
 
 impl PartialEq for NumberType {
@@ -57,8 +57,8 @@ impl Component for InputNumber {
 
                     match ctx.props().value {
                         NumberType::Byte(ref byte) => {
-                            let value: u8 = value as u8;
-                            *byte.borrow_mut() = value;
+                            let value = value as u8;
+                            byte.set(value);
 
                             if let Some(ref callback) = ctx.props().onchange {
                                 callback.emit(CallbackType::Byte(value));
@@ -66,7 +66,7 @@ impl Component for InputNumber {
                         }
                         NumberType::Int(ref integer) => {
                             let value = value as i32;
-                            *integer.borrow_mut() = value;
+                            integer.set(value);
 
                             if let Some(ref callback) = ctx.props().onchange {
                                 callback.emit(CallbackType::Int(value));
@@ -74,7 +74,7 @@ impl Component for InputNumber {
                         }
                         NumberType::Float(ref float) => {
                             let value = value.clamp(f32::MIN as f64, f32::MAX as f64) as f32;
-                            *float.borrow_mut() = value;
+                            float.set(value);
 
                             if let Some(ref callback) = ctx.props().onchange {
                                 callback.emit(CallbackType::Float(value));
@@ -91,11 +91,11 @@ impl Component for InputNumber {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let (value, placeholder) = match ctx.props().value {
-            NumberType::Byte(ref byte) => (byte.borrow().to_string(), "<byte>"),
-            NumberType::Int(ref integer) => (integer.borrow().to_string(), "<integer>"),
+            NumberType::Byte(ref byte) => (byte.get().to_string(), "<byte>"),
+            NumberType::Int(ref integer) => (integer.get().to_string(), "<integer>"),
             NumberType::Float(ref float) => {
                 let mut ryu = ryu::Buffer::new();
-                (ryu.format(*float.borrow()).trim_end_matches(".0").to_owned(), "<float>")
+                (ryu.format(float.get()).trim_end_matches(".0").to_owned(), "<float>")
             }
         };
 
