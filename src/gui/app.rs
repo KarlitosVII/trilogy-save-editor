@@ -1,10 +1,9 @@
 use std::cell::Ref;
 use std::mem;
 
-use anyhow::{Error, Result};
-use gloo::{timers::future::TimeoutFuture, utils};
+use anyhow::Error;
+use gloo::timers::future::TimeoutFuture;
 use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
 
 use crate::{
     gui::{
@@ -17,25 +16,18 @@ use crate::{
         raw_ui::RawUi,
         shared::HeadMorph,
         shared::{FloatPlotType, IntPlotType},
-        RcUi, Theme,
+        RcUi,
     },
     save_data::{
         mass_effect_1::Me1SaveGame, mass_effect_1_le::Me1LeSaveData, mass_effect_3::Me3SaveGame,
     },
     services::{
         database::DatabaseProvider,
-        drop_handler::DropHandler,
-        save_handler::{Request, Response, SaveGame, SaveHandler},
+        save_handler::{SaveGame, SaveHandler, SaveHandlerProvider},
     },
 };
 
 pub enum Msg {
-    OpenSave,
-    SaveDropped(Result<(String, Vec<u8>)>),
-    SaveOpened(SaveGame),
-    SaveSave,
-    SaveSaved,
-    ReloadSave,
     Notification(&'static str),
     DismissNotification,
     Error(Error),
@@ -43,87 +35,20 @@ pub enum Msg {
 }
 
 pub struct App {
-    save_handler: Box<dyn Bridge<SaveHandler>>,
-    _drop_handler: DropHandler,
     notification: Option<&'static str>,
     error: Option<Error>,
-    save_game: Option<SaveGame>,
 }
 
 impl Component for App {
     type Message = Msg;
     type Properties = ();
 
-    fn create(ctx: &Context<Self>) -> Self {
-        let mut save_handler =
-            SaveHandler::bridge(ctx.link().callback(|response| match response {
-                Response::SaveOpened(save_game) => Msg::SaveOpened(save_game),
-                Response::SaveSaved => Msg::SaveSaved,
-                Response::Error(err) => Msg::Error(err),
-                _ => unreachable!(),
-            }));
-        save_handler.send(Request::OpenCommandLineSave);
-
-        let drop_handler = DropHandler::new(ctx.link().callback(Msg::SaveDropped));
-
-        App {
-            save_handler,
-            _drop_handler: drop_handler,
-            notification: None,
-            error: None,
-            save_game: None,
-        }
+    fn create(_ctx: &Context<Self>) -> Self {
+        App { notification: None, error: None }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::OpenSave => {
-                let last_dir = self.save_game.is_some();
-                self.save_handler.send(Request::OpenSave(last_dir));
-                false
-            }
-            Msg::SaveDropped(result) => {
-                match result {
-                    Ok((file_name, bytes)) => {
-                        self.save_handler.send(Request::SaveDropped(file_name, bytes))
-                    }
-                    Err(err) => ctx.link().send_message(Msg::Error(err)),
-                }
-                false
-            }
-            Msg::SaveOpened(save_game) => {
-                self.save_game = Some(save_game);
-                self.change_theme();
-                ctx.link().send_message(Msg::Notification("Opened"));
-                false
-            }
-            Msg::SaveSave => {
-                if let Some(ref save_game) = self.save_game {
-                    self.save_handler.send(Request::SaveSave(save_game.clone()));
-                }
-                false
-            }
-            Msg::SaveSaved => {
-                ctx.link().send_message(Msg::Notification("Saved"));
-                false
-            }
-            Msg::ReloadSave => {
-                #[allow(clippy::single_match)]
-                match self.save_game {
-                    Some(
-                        SaveGame::MassEffect1 { ref file_path, .. }
-                        | SaveGame::MassEffect1Le { ref file_path, .. }
-                        | SaveGame::MassEffect1LePs4 { ref file_path, .. }
-                        | SaveGame::MassEffect2 { ref file_path, .. }
-                        | SaveGame::MassEffect2Le { ref file_path, .. }
-                        | SaveGame::MassEffect3 { ref file_path, .. },
-                    ) => {
-                        self.save_handler.send(Request::ReloadSave(file_path.clone()));
-                    }
-                    None => (),
-                }
-                false
-            }
             Msg::Notification(notification) => {
                 self.notification = Some(notification);
                 ctx.link().send_future(async {
@@ -148,48 +73,24 @@ impl Component for App {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let content = if let Some(ref save_game) = self.save_game {
-            match save_game {
-                SaveGame::MassEffect1 { save_game, .. } => App::mass_effect_1(save_game.borrow()),
-                SaveGame::MassEffect1Le { save_game, .. } => {
-                    App::mass_effect_1_le(ctx, RcUi::clone(&save_game.borrow().save_data))
-                }
-                SaveGame::MassEffect1LePs4 { save_game, .. } => {
-                    App::mass_effect_1_le(ctx, RcUi::clone(save_game))
-                }
-                SaveGame::MassEffect2 { save_game, .. } => {
-                    App::mass_effect_2(ctx, Me2Type::Vanilla(RcUi::clone(save_game)))
-                }
-                SaveGame::MassEffect2Le { save_game, .. } => {
-                    App::mass_effect_2(ctx, Me2Type::Legendary(RcUi::clone(save_game)))
-                }
-
-                SaveGame::MassEffect3 { save_game, .. } => {
-                    App::mass_effect_3(ctx, RcUi::clone(save_game))
-                }
-            }
-        } else {
-            App::changelog()
-        };
-
         let notification =
-            self.notification.as_ref().map(|notification| App::notification(notification));
-        let error = self.error.as_ref().map(|error| App::error(ctx, error));
+            self.notification.as_ref().map(|notification| Self::notification(notification));
+        let error = self.error.as_ref().map(|error| Self::error(ctx, error));
 
         let link = ctx.link();
         html! {
             <div class="h-[calc(100vh-28px)] flex flex-col">
-                <NavBar
-                    save_loaded={self.save_game.is_some()}
-                    onopen={link.callback(|_| Msg::OpenSave)}
-                    onsave={link.callback(|_| Msg::SaveSave)}
-                    onreload={link.callback(|_| Msg::ReloadSave)}
+                <SaveHandlerProvider
+                    onnotification={link.callback(Msg::Notification)}
+                    onerror={link.callback(Msg::Error)}
                 >
-                    <AutoUpdate onerror={link.callback(Msg::Error)} />
-                </NavBar>
-                <DatabaseProvider onerror={link.callback(Msg::Error)}>
-                    { content }
-                </DatabaseProvider>
+                    <NavBar>
+                        <AutoUpdate onerror={link.callback(Msg::Error)} />
+                    </NavBar>
+                    <DatabaseProvider onerror={link.callback(Msg::Error)}>
+                        <SaveContent/>
+                    </DatabaseProvider>
+                </SaveHandlerProvider>
                 { for notification }
                 { for error }
             </div>
@@ -198,221 +99,6 @@ impl Component for App {
 }
 
 impl App {
-    fn mass_effect_1(save_game: Ref<'_, Me1SaveGame>) -> Html {
-        let state = save_game.state();
-        let plot = state.plot();
-
-        html! {
-            <section class="flex-auto flex p-1">
-                <TabBar is_main_tab_bar=true>
-                    <Tab title="General">
-                        <Me1General
-                            player={RcUi::clone(&save_game.player)}
-                            plot={RcUi::clone(&state.plot)}
-                        />
-                    </Tab>
-                    <Tab title="Plot">
-                        <Me1Plot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                        />
-                    </Tab>
-                    <Tab title="Raw Data">
-                        <Me1RawData player={RcUi::clone(&save_game.player)} />
-                    </Tab>
-                    <Tab title="Raw Plot">
-                        <Me1RawPlot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                            floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
-                        />
-                    </Tab>
-                </TabBar>
-            </section>
-        }
-    }
-
-    fn mass_effect_1_le(ctx: &Context<Self>, save_game: RcUi<Me1LeSaveData>) -> Html {
-        let me1 = save_game.borrow();
-        let plot = me1.plot();
-        let head_morph = RcUi::clone(&me1.player().head_morph);
-
-        let link = ctx.link();
-        html! {
-            <section class="flex-auto flex p-1">
-                <TabBar is_main_tab_bar=true>
-                    <Tab title="General">
-                        <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
-                    </Tab>
-                    <Tab title="Plot">
-                        <Me1Plot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                        />
-                    </Tab>
-                    <Tab title="Inventory">
-                        <Me1LeInventory
-                            player={RcUi::clone(&me1.player)}
-                            squad={RcUi::clone(&me1.squad)}
-                        />
-                    </Tab>
-                    <Tab title="Head Morph">
-                        <HeadMorph {head_morph}
-                            onnotification={link.callback(Msg::Notification)}
-                            onerror={link.callback(Msg::Error)}
-                        />
-                    </Tab>
-                    <Tab title="Raw Data">
-                        { save_game.view_opened("Mass Effect 1", true) }
-                    </Tab>
-                    <Tab title="Raw Plot">
-                        <Me1RawPlot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                            floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
-                        />
-                    </Tab>
-                </TabBar>
-            </section>
-        }
-    }
-
-    fn mass_effect_2(ctx: &Context<Self>, save_game: Me2Type) -> Html {
-        let (raw_data, plot, me1_plot, head_morph) = match save_game {
-            Me2Type::Vanilla(ref me2) => (
-                me2.view_opened("Mass Effect 2", true),
-                RcUi::clone(&me2.borrow().plot),
-                RcUi::clone(&me2.borrow().me1_plot),
-                RcUi::clone(&me2.borrow().player().appearance().head_morph),
-            ),
-            Me2Type::Legendary(ref me2) => (
-                me2.view_opened("Mass Effect 2", true),
-                RcUi::clone(&me2.borrow().plot),
-                RcUi::clone(&me2.borrow().me1_plot),
-                RcUi::clone(&me2.borrow().player().appearance().head_morph),
-            ),
-        };
-        let (plot, me1_plot) = (plot.borrow(), me1_plot.borrow());
-
-        let link = ctx.link();
-        html! {
-            <section class="flex-auto flex p-1">
-                <TabBar is_main_tab_bar=true>
-                    <Tab title="General">
-                        <Me2General save_game={Me2Type::clone(&save_game)} />
-                    </Tab>
-                    <Tab title="Plot">
-                        <Me2Plot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                            me1_booleans={RcUi::clone(&me1_plot.booleans)}
-                            me1_integers={IntPlotType::Vec(RcUi::clone(&me1_plot.integers))}
-                        />
-                    </Tab>
-                    <Tab title="Head Morph">
-                        <HeadMorph {head_morph}
-                            onnotification={link.callback(Msg::Notification)}
-                            onerror={link.callback(Msg::Error)}
-                        />
-                    </Tab>
-                    <Tab title="Raw Data">
-                        { raw_data }
-                    </Tab>
-                    <Tab title="Raw Plot">
-                        <Me2RawPlot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
-                            floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
-                        />
-                    </Tab>
-                </TabBar>
-            </section>
-        }
-    }
-
-    fn mass_effect_3(ctx: &Context<Self>, save_game: RcUi<Me3SaveGame>) -> Html {
-        let me3 = save_game.borrow();
-        let plot = me3.plot();
-        let head_morph = RcUi::clone(&me3.player().appearance().head_morph);
-
-        let link = ctx.link();
-        html! {
-            <section class="flex-auto flex p-1">
-                <TabBar is_main_tab_bar=true>
-                    <Tab title="General">
-                        <Me3General save_game={RcUi::clone(&save_game)} />
-                    </Tab>
-                    <Tab title="Plot">
-                        <Me3Plot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
-                            variables={RcUi::clone(&me3.player_variables)}
-                        />
-                    </Tab>
-                    <Tab title="Head Morph">
-                        <HeadMorph {head_morph}
-                            onnotification={link.callback(Msg::Notification)}
-                            onerror={link.callback(Msg::Error)}
-                        />
-                    </Tab>
-                    <Tab title="Raw Data">
-                        { save_game.view_opened("Mass Effect 3", true) }
-                    </Tab>
-                    <Tab title="Raw Plot">
-                        <Me3RawPlot
-                            booleans={RcUi::clone(&plot.booleans)}
-                            integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
-                            floats={FloatPlotType::IndexMap(RcUi::clone(&plot.floats))}
-                        />
-                    </Tab>
-                </TabBar>
-            </section>
-        }
-    }
-
-    fn changelog() -> Html {
-        let changelog = {
-            let file = include_str!("../../CHANGELOG.md");
-            let mut changelog = Vec::new();
-            let mut changes = Vec::new();
-            let mut version = "";
-
-            for line in file.split('\n') {
-                if let Some((prefix, text)) = line.split_once(' ') {
-                    match prefix {
-                        "##" => version = text,
-                        "-" | "*" => changes.push(text),
-                        _ => {}
-                    }
-                } else {
-                    changelog.push((version, mem::take(&mut changes)));
-                }
-            }
-            changelog
-        };
-
-        let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
-            let changes = changes.into_iter().map(format_code);
-            html! {
-                <Table title={version} opened={i==0}>
-                    { for changes }
-                </Table>
-            }
-        });
-
-        html! {
-            <section class="flex-auto flex flex-col gap-1 p-1">
-                <div>
-                    <p>{ "Changelog" }</p>
-                    <hr class="border-t border-default-border" />
-                </div>
-                <div class="flex-auto flex flex-col gap-1 h-0 overflow-y-auto">
-                    { for logs }
-                </div>
-            </section>
-        }
-    }
-
     fn notification(notification: &str) -> Html {
         html! {
             <div class={classes![
@@ -468,22 +154,233 @@ impl App {
             </div>
         }
     }
+}
 
-    fn change_theme(&self) {
-        if let Some(ref save_game) = self.save_game {
-            let theme = match save_game {
-                SaveGame::MassEffect1 { .. }
-                | SaveGame::MassEffect1Le { .. }
-                | SaveGame::MassEffect1LePs4 { .. } => Theme::MassEffect1,
-                SaveGame::MassEffect2 { .. } | SaveGame::MassEffect2Le { .. } => Theme::MassEffect2,
-                SaveGame::MassEffect3 { .. } => Theme::MassEffect3,
-            };
+#[function_component(SaveContent)]
+fn save_content() -> Html {
+    let save_handler = use_context::<SaveHandler>().expect("no save handler provider");
+    if let Some(save_game) = save_handler.save_game {
+        match save_game.as_ref() {
+            SaveGame::MassEffect1 { save_game, .. } => mass_effect_1(save_game.borrow()),
+            SaveGame::MassEffect1Le { save_game, .. } => {
+                mass_effect_1_le(RcUi::clone(&save_game.borrow().save_data))
+            }
+            SaveGame::MassEffect1LePs4 { save_game, .. } => {
+                mass_effect_1_le(RcUi::clone(save_game))
+            }
+            SaveGame::MassEffect2 { save_game, .. } => {
+                mass_effect_2(Me2Type::Vanilla(RcUi::clone(save_game)))
+            }
+            SaveGame::MassEffect2Le { save_game, .. } => {
+                mass_effect_2(Me2Type::Legendary(RcUi::clone(save_game)))
+            }
 
-            let body = utils::document().body().unwrap();
-            let classes = body.class_list();
-
-            let _ = classes.remove_3(&Theme::MassEffect1, &Theme::MassEffect2, &Theme::MassEffect3);
-            let _ = classes.add_1(&theme);
+            SaveGame::MassEffect3 { save_game, .. } => mass_effect_3(RcUi::clone(save_game)),
         }
+    } else {
+        changelog()
+    }
+}
+
+fn mass_effect_1(save_game: Ref<'_, Me1SaveGame>) -> Html {
+    let state = save_game.state();
+    let plot = state.plot();
+
+    html! {
+        <section class="flex-auto flex p-1">
+            <TabBar is_main_tab_bar=true>
+                <Tab title="General">
+                    <Me1General
+                        player={RcUi::clone(&save_game.player)}
+                        plot={RcUi::clone(&state.plot)}
+                    />
+                </Tab>
+                <Tab title="Plot">
+                    <Me1Plot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                    />
+                </Tab>
+                <Tab title="Raw Data">
+                    <Me1RawData player={RcUi::clone(&save_game.player)} />
+                </Tab>
+                <Tab title="Raw Plot">
+                    <Me1RawPlot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                        floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                    />
+                </Tab>
+            </TabBar>
+        </section>
+    }
+}
+
+fn mass_effect_1_le(save_game: RcUi<Me1LeSaveData>) -> Html {
+    let me1 = save_game.borrow();
+    let plot = me1.plot();
+    let head_morph = RcUi::clone(&me1.player().head_morph);
+
+    html! {
+        <section class="flex-auto flex p-1">
+            <TabBar is_main_tab_bar=true>
+                <Tab title="General">
+                    <Me1LeGeneral save_game={RcUi::clone(&save_game)} />
+                </Tab>
+                <Tab title="Plot">
+                    <Me1Plot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                    />
+                </Tab>
+                <Tab title="Inventory">
+                    <Me1LeInventory
+                        player={RcUi::clone(&me1.player)}
+                        squad={RcUi::clone(&me1.squad)}
+                    />
+                </Tab>
+                <Tab title="Head Morph">
+                    <HeadMorph {head_morph} />
+                </Tab>
+                <Tab title="Raw Data">
+                    { save_game.view_opened("Mass Effect 1", true) }
+                </Tab>
+                <Tab title="Raw Plot">
+                    <Me1RawPlot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                        floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                    />
+                </Tab>
+            </TabBar>
+        </section>
+    }
+}
+
+fn mass_effect_2(save_game: Me2Type) -> Html {
+    let (raw_data, plot, me1_plot, head_morph) = match save_game {
+        Me2Type::Vanilla(ref me2) => (
+            me2.view_opened("Mass Effect 2", true),
+            RcUi::clone(&me2.borrow().plot),
+            RcUi::clone(&me2.borrow().me1_plot),
+            RcUi::clone(&me2.borrow().player().appearance().head_morph),
+        ),
+        Me2Type::Legendary(ref me2) => (
+            me2.view_opened("Mass Effect 2", true),
+            RcUi::clone(&me2.borrow().plot),
+            RcUi::clone(&me2.borrow().me1_plot),
+            RcUi::clone(&me2.borrow().player().appearance().head_morph),
+        ),
+    };
+    let (plot, me1_plot) = (plot.borrow(), me1_plot.borrow());
+
+    html! {
+        <section class="flex-auto flex p-1">
+            <TabBar is_main_tab_bar=true>
+                <Tab title="General">
+                    <Me2General save_game={Me2Type::clone(&save_game)} />
+                </Tab>
+                <Tab title="Plot">
+                    <Me2Plot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                        me1_booleans={RcUi::clone(&me1_plot.booleans)}
+                        me1_integers={IntPlotType::Vec(RcUi::clone(&me1_plot.integers))}
+                    />
+                </Tab>
+                <Tab title="Head Morph">
+                    <HeadMorph {head_morph} />
+                </Tab>
+                <Tab title="Raw Data">
+                    { raw_data }
+                </Tab>
+                <Tab title="Raw Plot">
+                    <Me2RawPlot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::Vec(RcUi::clone(&plot.integers))}
+                        floats={FloatPlotType::Vec(RcUi::clone(&plot.floats))}
+                    />
+                </Tab>
+            </TabBar>
+        </section>
+    }
+}
+
+fn mass_effect_3(save_game: RcUi<Me3SaveGame>) -> Html {
+    let me3 = save_game.borrow();
+    let plot = me3.plot();
+    let head_morph = RcUi::clone(&me3.player().appearance().head_morph);
+
+    html! {
+        <section class="flex-auto flex p-1">
+            <TabBar is_main_tab_bar=true>
+                <Tab title="General">
+                    <Me3General save_game={RcUi::clone(&save_game)} />
+                </Tab>
+                <Tab title="Plot">
+                    <Me3Plot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
+                        variables={RcUi::clone(&me3.player_variables)}
+                    />
+                </Tab>
+                <Tab title="Head Morph">
+                    <HeadMorph {head_morph} />
+                </Tab>
+                <Tab title="Raw Data">
+                    { save_game.view_opened("Mass Effect 3", true) }
+                </Tab>
+                <Tab title="Raw Plot">
+                    <Me3RawPlot
+                        booleans={RcUi::clone(&plot.booleans)}
+                        integers={IntPlotType::IndexMap(RcUi::clone(&plot.integers))}
+                        floats={FloatPlotType::IndexMap(RcUi::clone(&plot.floats))}
+                    />
+                </Tab>
+            </TabBar>
+        </section>
+    }
+}
+
+fn changelog() -> Html {
+    let changelog = {
+        let file = include_str!("../../CHANGELOG.md");
+        let mut changelog = Vec::new();
+        let mut changes = Vec::new();
+        let mut version = "";
+
+        for line in file.split('\n') {
+            if let Some((prefix, text)) = line.split_once(' ') {
+                match prefix {
+                    "##" => version = text,
+                    "-" | "*" => changes.push(text),
+                    _ => {}
+                }
+            } else {
+                changelog.push((version, mem::take(&mut changes)));
+            }
+        }
+        changelog
+    };
+
+    let logs = changelog.into_iter().enumerate().map(|(i, (version, changes))| {
+        let changes = changes.into_iter().map(format_code);
+        html! {
+            <Table title={version} opened={i==0}>
+                { for changes }
+            </Table>
+        }
+    });
+
+    html! {
+        <section class="flex-auto flex flex-col gap-1 p-1">
+            <div>
+                <p>{ "Changelog" }</p>
+                <hr class="border-t border-default-border" />
+            </div>
+            <div class="flex-auto flex flex-col gap-1 h-0 overflow-y-auto">
+                { for logs }
+            </div>
+        </section>
     }
 }

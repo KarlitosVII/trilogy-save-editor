@@ -8,7 +8,7 @@ extern crate macros;
 
 mod gui;
 mod save_data;
-pub mod services;
+mod services;
 mod unreal;
 
 use gui::App;

@@ -145,7 +145,6 @@ pub struct Props {
     pub onerror: Callback<Error>,
 }
 
-#[derive(Clone)]
 pub struct DatabaseProvider {
     dbs: Databases,
 }

@@ -62,4 +62,3 @@ serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.7", features = ["indexmap"], default-features = false }
 # Yew
 yew = "0.19"
-yew-agent = "0.1"

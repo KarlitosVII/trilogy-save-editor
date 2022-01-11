@@ -1,10 +1,13 @@
 use wasm_bindgen_futures as futures;
 use web_sys::HtmlElement;
-use yew::prelude::*;
+use yew::{context::ContextHandle, prelude::*};
 
 use crate::{
     gui::components::{Tab, TabBar},
-    services::rpc,
+    services::{
+        rpc,
+        save_handler::{Action, SaveHandler},
+    },
 };
 
 const NEXUSMODS_LINK: &str = "https://www.nexusmods.com/masseffectlegendaryedition/mods/20";
@@ -12,6 +15,10 @@ const GITHUB_LINK: &str = "https://github.com/KarlitosVII/trilogy-save-editor";
 const DONATION_LINK: &str = "https://www.paypal.com/donate/?business=karlitos.vii@laposte.net";
 
 pub enum Msg {
+    SaveLoaded(SaveHandler),
+    OpenSave,
+    SaveSave,
+    ReloadSave,
     MenuOpen,
     MenuClose,
     MenuBlur,
@@ -22,13 +29,11 @@ pub enum Msg {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub children: Children,
-    pub save_loaded: bool,
-    pub onopen: Callback<()>,
-    pub onsave: Callback<()>,
-    pub onreload: Callback<()>,
 }
 
 pub struct NavBar {
+    _db_handle: ContextHandle<SaveHandler>,
+    save_handler: SaveHandler,
     about_ref: NodeRef,
     about_opened: bool,
     licenses_opened: bool,
@@ -38,12 +43,41 @@ impl Component for NavBar {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        NavBar { about_ref: Default::default(), about_opened: false, licenses_opened: false }
+    fn create(ctx: &Context<Self>) -> Self {
+        let (save_handler, _db_handle) = ctx
+            .link()
+            .context::<SaveHandler>(ctx.link().callback(Msg::SaveLoaded))
+            .expect("no save handler provider");
+
+        NavBar {
+            _db_handle,
+            save_handler,
+            about_ref: Default::default(),
+            about_opened: false,
+            licenses_opened: false,
+        }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            Msg::SaveLoaded(save_handler) => {
+                self.save_handler = save_handler;
+                true
+            }
+            // Buttons
+            Msg::OpenSave => {
+                self.save_handler.action(Action::OpenSave);
+                false
+            }
+            Msg::SaveSave => {
+                self.save_handler.action(Action::SaveSave);
+                false
+            }
+            Msg::ReloadSave => {
+                self.save_handler.action(Action::ReloadSave);
+                false
+            }
+            // Menus
             Msg::MenuOpen => {
                 self.about_opened = true;
                 true
@@ -73,13 +107,13 @@ impl Component for NavBar {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let loaded_buttons = ctx.props().save_loaded.then(|| {
+        let loaded_buttons = self.save_handler.save_game.is_some().then(|| {
             html! { <>
-                <button class="button" onclick={ctx.props().onsave.reform(|_| ())}>
+                <button class="button" onclick={ctx.link().callback(|_| Msg::SaveSave)}>
                     {"Save"}
                 </button>
                 <span>{"-"}</span>
-                <button class="button" onclick={ctx.props().onreload.reform(|_| ())}>
+                <button class="button" onclick={ctx.link().callback(|_| Msg::ReloadSave)}>
                     {"Reload"}
                 </button>
             </> }
@@ -88,7 +122,7 @@ impl Component for NavBar {
         html! {
             <nav class="bg-menu-bar select-none flex">
                 <div class="flex items-center gap-2 px-1">
-                    <button class="button" onclick={ctx.props().onopen.reform(|_| ())}>
+                    <button class="button" onclick={ctx.link().callback(|_| Msg::OpenSave)}>
                         {"Open"}
                     </button>
                     { for loaded_buttons }

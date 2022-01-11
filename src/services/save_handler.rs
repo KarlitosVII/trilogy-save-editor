@@ -1,13 +1,14 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, rc::Rc};
 
-use anyhow::{bail, Context, Error, Result};
+use anyhow::{bail, Context as ErrorContext, Error, Result};
 use crc::{Crc, CRC_32_BZIP2};
+use gloo::utils;
 use ron::ser::PrettyConfig;
 use serde::Deserialize;
-use yew_agent::{Agent, AgentLink, HandlerId, Job};
+use yew::{prelude::*, ContextProvider};
 
 use crate::{
-    gui::RcUi,
+    gui::{RcUi, Theme},
     save_data::mass_effect_1_le::Me1LeMagicNumber,
     save_data::{
         mass_effect_1::{Me1MagicNumber, Me1SaveGame},
@@ -20,6 +21,8 @@ use crate::{
     unreal,
 };
 
+use super::drop_handler::DropHandler;
+
 #[derive(Clone)]
 pub enum SaveGame {
     MassEffect1 { file_path: PathBuf, save_game: RcUi<Me1SaveGame> },
@@ -30,81 +33,156 @@ pub enum SaveGame {
     MassEffect3 { file_path: PathBuf, save_game: RcUi<Me3SaveGame> },
 }
 
-pub enum Msg {
-    SaveOpened(HandlerId, SaveGame),
-    SaveSaved(HandlerId),
-    HeadMorphImported(HandlerId, HeadMorph),
-    HeadMorphExported(HandlerId),
-    Noop,
-    Error(HandlerId, Error),
-}
-
-pub enum Request {
-    OpenSave(bool),
-    OpenCommandLineSave,
-    SaveDropped(String, Vec<u8>),
-    SaveSave(SaveGame),
-    ReloadSave(PathBuf),
-    ImportHeadMorph,
+pub enum Action {
+    OpenSave,
+    SaveSave,
+    ReloadSave,
+    ImportHeadMorph(Callback<HeadMorph>),
     ExportHeadMorph(RcUi<HeadMorph>),
 }
 
-pub enum Response {
+pub enum Msg {
+    Action(Action),
     SaveOpened(SaveGame),
+    SaveDropped(Result<(String, Vec<u8>)>),
     SaveSaved,
-    HeadMorphImported(HeadMorph),
+    HeadMorphImported(HeadMorph, Callback<HeadMorph>),
     HeadMorphExported,
     Error(Error),
+    Noop,
 }
 
+#[derive(Properties, PartialEq)]
+pub struct Props {
+    pub children: Children,
+    pub onnotification: Callback<&'static str>,
+    pub onerror: Callback<Error>,
+}
+
+#[derive(Clone)]
 pub struct SaveHandler {
-    link: AgentLink<Self>,
-}
-
-impl Agent for SaveHandler {
-    type Reach = Job<Self>;
-    type Message = Msg;
-    type Input = Request;
-    type Output = Response;
-
-    fn create(link: AgentLink<Self>) -> Self {
-        Self { link }
-    }
-
-    fn update(&mut self, msg: Self::Message) {
-        match msg {
-            Msg::SaveOpened(who, save_game) => {
-                self.link.respond(who, Response::SaveOpened(save_game))
-            }
-            Msg::SaveSaved(who) => self.link.respond(who, Response::SaveSaved),
-            Msg::HeadMorphImported(who, head_morph) => {
-                self.link.respond(who, Response::HeadMorphImported(head_morph))
-            }
-            Msg::HeadMorphExported(who) => self.link.respond(who, Response::HeadMorphExported),
-            Msg::Noop => {
-                #[cfg(debug_assertions)]
-                gloo::console::log!("No op");
-            }
-            Msg::Error(who, err) => self.link.respond(who, Response::Error(err)),
-        }
-    }
-
-    fn handle_input(&mut self, msg: Self::Input, who: HandlerId) {
-        match msg {
-            Request::OpenSave(last_dir) => self.open_save(who, last_dir),
-            Request::OpenCommandLineSave => self.open_command_line_save(who),
-            Request::SaveDropped(file_name, bytes) => self.open_dropped_file(who, file_name, bytes),
-            Request::SaveSave(save_game) => self.save_save(who, save_game),
-            Request::ReloadSave(path) => self.reload_save(who, path),
-            Request::ImportHeadMorph => self.import_head_morph(who),
-            Request::ExportHeadMorph(head_morph) => self.export_head_morph(who, head_morph),
-        }
-    }
+    pub save_game: Option<Rc<SaveGame>>,
+    callback: Callback<Action>,
 }
 
 impl SaveHandler {
-    fn open_save(&self, who: HandlerId, last_dir: bool) {
-        self.link.send_future(async move {
+    pub fn action(&self, action: Action) {
+        self.callback.emit(action);
+    }
+}
+
+impl PartialEq for SaveHandler {
+    fn eq(&self, other: &Self) -> bool {
+        match (&self.save_game, &other.save_game) {
+            (Some(this), Some(other)) => Rc::ptr_eq(this, other),
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+
+pub struct SaveHandlerProvider {
+    _drop_handler: DropHandler,
+    save_handler: SaveHandler,
+}
+
+impl Component for SaveHandlerProvider {
+    type Message = Msg;
+    type Properties = Props;
+
+    fn create(ctx: &Context<Self>) -> Self {
+        let _drop_handler = DropHandler::new(ctx.link().callback(Msg::SaveDropped));
+        let save_handler =
+            SaveHandler { save_game: None, callback: ctx.link().callback(Msg::Action) };
+        Self::open_command_line_save(ctx);
+
+        SaveHandlerProvider { _drop_handler, save_handler }
+    }
+
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            // Actions
+            Msg::Action(action) => {
+                match action {
+                    Action::OpenSave => {
+                        let last_dir = self.save_handler.save_game.is_some();
+                        Self::open_save(ctx, last_dir);
+                    }
+                    Action::SaveSave => {
+                        if let Some(ref save_game) = self.save_handler.save_game {
+                            Self::save_save(ctx, save_game);
+                        }
+                    }
+                    Action::ReloadSave => {
+                        if let Some(ref save_game) = self.save_handler.save_game {
+                            match save_game.as_ref() {
+                                SaveGame::MassEffect1 { file_path, .. }
+                                | SaveGame::MassEffect1Le { file_path, .. }
+                                | SaveGame::MassEffect1LePs4 { file_path, .. }
+                                | SaveGame::MassEffect2 { file_path, .. }
+                                | SaveGame::MassEffect2Le { file_path, .. }
+                                | SaveGame::MassEffect3 { file_path, .. } => {
+                                    Self::reload_save(ctx, file_path.clone())
+                                }
+                            }
+                        }
+                    }
+                    Action::ImportHeadMorph(callback) => Self::import_head_morph(ctx, callback),
+                    Action::ExportHeadMorph(head_morph) => Self::export_head_morph(ctx, head_morph),
+                }
+                false
+            }
+            // Messages
+            Msg::SaveOpened(save_game) => {
+                self.save_handler.save_game = Some(save_game.into());
+                self.change_theme();
+                ctx.props().onnotification.emit("Opened");
+                true
+            }
+            Msg::SaveDropped(result) => {
+                match result {
+                    Ok((file_name, bytes)) => Self::open_dropped_file(ctx, file_name, bytes),
+                    Err(err) => ctx.props().onerror.emit(err),
+                }
+                false
+            }
+            Msg::SaveSaved => {
+                ctx.props().onnotification.emit("Saved");
+                false
+            }
+            Msg::HeadMorphImported(head_morph, callback) => {
+                callback.emit(head_morph);
+                ctx.props().onnotification.emit("Imported");
+                false
+            }
+            Msg::HeadMorphExported => {
+                ctx.props().onnotification.emit("Exported");
+                false
+            }
+            Msg::Error(err) => {
+                ctx.props().onerror.emit(err);
+                false
+            }
+            Msg::Noop => {
+                #[cfg(debug_assertions)]
+                gloo::console::log!("No op");
+                false
+            }
+        }
+    }
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        html! {
+            <ContextProvider<SaveHandler> context={self.save_handler.clone()}>
+                { ctx.props().children.clone() }
+            </ContextProvider<SaveHandler>>
+        }
+    }
+}
+
+impl SaveHandlerProvider {
+    fn open_save(ctx: &Context<Self>, last_dir: bool) {
+        ctx.link().send_future(async move {
             let handle_save = async {
                 let has_rpc_file = rpc::open_save(last_dir).await?;
                 let result = match has_rpc_file {
@@ -118,15 +196,15 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to open the save") {
-                Ok(Some(save_game)) => Msg::SaveOpened(who, save_game),
+                Ok(Some(save_game)) => Msg::SaveOpened(save_game),
                 Ok(None) => Msg::Noop,
-                Err(err) => Msg::Error(who, err),
+                Err(err) => Msg::Error(err),
             }
         });
     }
 
-    fn open_command_line_save(&self, who: HandlerId) {
-        self.link.send_future(async move {
+    fn open_command_line_save(ctx: &Context<Self>) {
+        ctx.link().send_future(async move {
             let handle_save = async {
                 let has_rpc_file = rpc::open_command_line_save().await?;
                 let result = match has_rpc_file {
@@ -140,26 +218,26 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to open the save") {
-                Ok(Some(save_game)) => Msg::SaveOpened(who, save_game),
+                Ok(Some(save_game)) => Msg::SaveOpened(save_game),
                 Ok(None) => Msg::Noop,
-                Err(err) => Msg::Error(who, err),
+                Err(err) => Msg::Error(err),
             }
         });
     }
 
-    fn open_dropped_file(&self, who: HandlerId, file_name: String, bytes: Vec<u8>) {
-        self.link.send_message({
+    fn open_dropped_file(ctx: &Context<Self>, file_name: String, bytes: Vec<u8>) {
+        ctx.link().send_message({
             let deserialize = || Self::deserialize(file_name.into(), bytes);
 
             match deserialize().context("Failed to open the save") {
-                Ok(save_game) => Msg::SaveOpened(who, save_game),
-                Err(err) => Msg::Error(who, err),
+                Ok(save_game) => Msg::SaveOpened(save_game),
+                Err(err) => Msg::Error(err),
             }
         });
     }
 
-    fn save_save(&self, who: HandlerId, save_game: SaveGame) {
-        let (path, filters) = match save_game {
+    fn save_save(ctx: &Context<Self>, save_game: &Rc<SaveGame>) {
+        let (path, filters) = match save_game.as_ref() {
             SaveGame::MassEffect1 { ref file_path, .. } => {
                 (file_path.clone(), vec![("Mass Effect 1 save", vec!["MassEffectSave"])])
             }
@@ -187,7 +265,9 @@ impl SaveHandler {
                 ],
             ),
         };
-        self.link.send_future(async move {
+
+        let save_game = Rc::clone(save_game);
+        ctx.link().send_future(async move {
             let handle_save = async {
                 let has_path = rpc::save_save_dialog(DialogParams { path, filters }).await?;
                 let cancelled = match has_path {
@@ -202,15 +282,15 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to save the save") {
-                Ok(false) => Msg::SaveSaved(who),
+                Ok(false) => Msg::SaveSaved,
                 Ok(true) => Msg::Noop,
-                Err(err) => Msg::Error(who, err),
+                Err(err) => Msg::Error(err),
             }
         });
     }
 
-    fn reload_save(&self, who: HandlerId, path: PathBuf) {
-        self.link.send_future(async move {
+    fn reload_save(ctx: &Context<Self>, path: PathBuf) {
+        ctx.link().send_future(async move {
             let handle_save = async move {
                 let rpc_file = rpc::reload_save(path).await?;
                 let RpcFile { path, file } = rpc_file;
@@ -218,8 +298,8 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to reload the save") {
-                Ok(save_game) => Msg::SaveOpened(who, save_game),
-                Err(err) => Msg::Error(who, err),
+                Ok(save_game) => Msg::SaveOpened(save_game),
+                Err(err) => Msg::Error(err),
             }
         });
     }
@@ -278,8 +358,8 @@ impl SaveHandler {
         Ok(save_game)
     }
 
-    fn serialize(path: PathBuf, save_game: SaveGame) -> Result<RpcFile> {
-        let output = match save_game {
+    fn serialize(path: PathBuf, save_game: Rc<SaveGame>) -> Result<RpcFile> {
+        let output = match save_game.as_ref() {
             SaveGame::MassEffect1 { save_game, .. } => unreal::Serializer::to_vec(&save_game)?,
             SaveGame::MassEffect1Le { save_game, .. } => {
                 let mut output = unreal::Serializer::to_vec(&save_game)?;
@@ -359,8 +439,8 @@ impl SaveHandler {
         Ok(rpc_file)
     }
 
-    fn import_head_morph(&self, who: HandlerId) {
-        self.link.send_future(async move {
+    fn import_head_morph(ctx: &Context<Self>, callback: Callback<HeadMorph>) {
+        ctx.link().send_future(async move {
             let handle_save = async {
                 let has_rpc_file = rpc::import_head_morph().await?;
                 let result = match has_rpc_file {
@@ -383,15 +463,15 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to import the head morph") {
-                Ok(Some(head_morph)) => Msg::HeadMorphImported(who, head_morph),
+                Ok(Some(head_morph)) => Msg::HeadMorphImported(head_morph, callback),
                 Ok(None) => Msg::Noop,
-                Err(err) => Msg::Error(who, err),
+                Err(err) => Msg::Error(err),
             }
         });
     }
 
-    fn export_head_morph(&self, who: HandlerId, head_morph: RcUi<HeadMorph>) {
-        self.link.send_future(async move {
+    fn export_head_morph(ctx: &Context<Self>, head_morph: RcUi<HeadMorph>) {
+        ctx.link().send_future(async move {
             let handle_save = async {
                 let has_path = rpc::export_head_morph_dialog().await?;
                 let cancelled = match has_path {
@@ -416,10 +496,28 @@ impl SaveHandler {
             };
 
             match handle_save.await.context("Failed to export the head morph") {
-                Ok(false) => Msg::HeadMorphExported(who),
+                Ok(false) => Msg::HeadMorphExported,
                 Ok(true) => Msg::Noop,
-                Err(err) => Msg::Error(who, err),
+                Err(err) => Msg::Error(err),
             }
         });
+    }
+
+    fn change_theme(&self) {
+        if let Some(ref save_game) = self.save_handler.save_game {
+            let theme = match save_game.as_ref() {
+                SaveGame::MassEffect1 { .. }
+                | SaveGame::MassEffect1Le { .. }
+                | SaveGame::MassEffect1LePs4 { .. } => Theme::MassEffect1,
+                SaveGame::MassEffect2 { .. } | SaveGame::MassEffect2Le { .. } => Theme::MassEffect2,
+                SaveGame::MassEffect3 { .. } => Theme::MassEffect3,
+            };
+
+            let body = utils::document().body().unwrap();
+            let classes = body.class_list();
+
+            let _ = classes.remove_3(&Theme::MassEffect1, &Theme::MassEffect2, &Theme::MassEffect3);
+            let _ = classes.add_1(&theme);
+        }
     }
 }

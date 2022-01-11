@@ -1,26 +1,23 @@
-use anyhow::Error;
 use std::cell::{Ref, RefMut};
-use yew::prelude::*;
-use yew_agent::{Bridge, Bridged};
 
-use crate::gui::{components::Table, raw_ui::RawUiChildren, RcUi};
-use crate::save_data::shared::appearance::HeadMorph as DataHeadMorph;
-use crate::services::save_handler::{Request, Response, SaveHandler};
+use yew::{context::ContextHandle, prelude::*};
+
+use crate::{
+    gui::{components::Table, raw_ui::RawUiChildren, RcUi},
+    save_data::shared::appearance::HeadMorph as DataHeadMorph,
+    services::save_handler::{Action, SaveHandler},
+};
 
 pub enum Msg {
     Import,
     HeadMorphImported(DataHeadMorph),
     Export,
-    HeadMorphExported,
     RemoveHeadMorph,
-    Error(Error),
 }
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub head_morph: RcUi<Option<RcUi<DataHeadMorph>>>,
-    pub onnotification: Callback<&'static str>,
-    pub onerror: Callback<Error>,
 }
 
 impl Props {
@@ -34,7 +31,8 @@ impl Props {
 }
 
 pub struct HeadMorph {
-    save_handler: Box<dyn Bridge<SaveHandler>>,
+    _db_handle: ContextHandle<SaveHandler>,
+    save_handler: SaveHandler,
 }
 
 impl Component for HeadMorph {
@@ -42,43 +40,34 @@ impl Component for HeadMorph {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let save_handler = SaveHandler::bridge(ctx.link().callback(|response| match response {
-            Response::HeadMorphImported(head_morph) => Msg::HeadMorphImported(head_morph),
-            Response::HeadMorphExported => Msg::HeadMorphExported,
-            Response::Error(err) => Msg::Error(err),
-            _ => unreachable!(),
-        }));
-        HeadMorph { save_handler }
+        let (save_handler, _db_handle) = ctx
+            .link()
+            .context::<SaveHandler>(Callback::noop())
+            .expect("no save handler provider");
+
+        HeadMorph { _db_handle, save_handler }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::Import => {
-                self.save_handler.send(Request::ImportHeadMorph);
+                let callback = ctx.link().callback(Msg::HeadMorphImported);
+                self.save_handler.action(Action::ImportHeadMorph(callback));
                 false
             }
             Msg::HeadMorphImported(head_morph) => {
                 *ctx.props().head_morph_mut() = Some(head_morph.into());
-                ctx.props().onnotification.emit("Imported");
                 true
             }
             Msg::Export => {
                 if let Some(ref head_morph) = *ctx.props().head_morph() {
-                    self.save_handler.send(Request::ExportHeadMorph(RcUi::clone(head_morph)));
+                    self.save_handler.action(Action::ExportHeadMorph(RcUi::clone(head_morph)));
                 }
-                false
-            }
-            Msg::HeadMorphExported => {
-                ctx.props().onnotification.emit("Exported");
                 false
             }
             Msg::RemoveHeadMorph => {
                 ctx.props().head_morph_mut().take();
                 true
-            }
-            Msg::Error(err) => {
-                ctx.props().onerror.emit(err);
-                false
             }
         }
     }
