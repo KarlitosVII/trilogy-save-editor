@@ -55,9 +55,9 @@ web-sys = { version = "0.3", features = [
     "PopStateEvent",
     "PopStateEventInit",
 ] }
-gloo = { version = "0.5", features = ["futures"], default-features = false }
+gloo = { version = "0.6", features = ["futures"], default-features = false }
 # (De)Serialization
-serde-wasm-bindgen = "0.3"
+serde-wasm-bindgen = "0.4"
 serde = { version = "1.0", features = ["derive"], default-features = false }
 ron = { version = "0.7", features = ["indexmap"], default-features = false }
 # Yew

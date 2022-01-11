@@ -27,12 +27,12 @@ use wry::{
 #[folder = "../target/dist/"]
 struct Asset;
 
-fn parse_args() -> ArgMatches<'static> {
+fn parse_args() -> ArgMatches {
     let app = clap::App::new("Trilogy Save Editor")
         .version(env!("CARGO_PKG_VERSION"))
         .author("by Karlitos")
         .about("A save editor for Mass Effect Trilogy (and Legendary)")
-        .arg(Arg::with_name("SAVE").help("Mass Effect save file"));
+        .arg(Arg::new("SAVE").help("Mass Effect save file"));
 
     app.get_matches()
 }

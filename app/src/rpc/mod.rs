@@ -56,7 +56,7 @@ macro_rules! call_commands_with_param {
 pub struct RpcUtils<'a> {
     pub window: &'a Window,
     pub event_proxy: &'a EventLoopProxy<Event>,
-    pub args: &'a ArgMatches<'a>,
+    pub args: &'a ArgMatches,
 }
 
 pub fn rpc_handler(mut req: RpcRequest, utils: RpcUtils) -> Option<RpcResponse> {
