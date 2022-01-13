@@ -148,7 +148,7 @@ impl Component for RawPlot {
                     PlotType::Boolean(ref booleans) => {
                         let mut booleans = booleans.borrow_mut();
                         if new_plot >= booleans.len() {
-                            booleans.resize_with(new_plot + 1, Default::default);
+                            booleans.resize(new_plot + 1, false);
                             true
                         } else {
                             false
@@ -325,7 +325,7 @@ impl RawPlot {
                 if let Some(&max) = plot_db.booleans.keys().max() {
                     let mut booleans = booleans.borrow_mut();
                     if max >= booleans.len() {
-                        booleans.resize_with(max + 1, Default::default);
+                        booleans.resize(max + 1, false);
                     };
                 }
             }

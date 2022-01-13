@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Deref, DerefMut, Clone)]
-pub struct BitVec(bitvec::vec::BitVec<Lsb0, u32>);
+pub struct BitVec(bitvec::vec::BitVec<u32, Lsb0>);
 
 impl<'de> Deserialize<'de> for BitVec {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

@@ -26,8 +26,10 @@ derive_more = { version = "0.99", features = [
     "display",
     "from",
 ], default-features = false }
-bitvec = { version = "0.22", features = ["std"], default-features = false }
-indexmap = { version = "1.6", features = ["std"], default-features = false }
+bitvec = { version = "1.0", features = ["std"], default-features = false }
+indexmap = { version = "=1.7", features = [
+    "std",
+], default-features = false } # FIXME: remove `=` when indexmap panic on release will be fixed
 encoding_rs = "0.8"
 # Sync
 # flume = { version = "0.10", features = ["async"], default-features = false }

@@ -123,7 +123,7 @@ impl PlotCategory {
 
             let mut booleans = booleans.borrow_mut();
             if max >= booleans.len() {
-                booleans.resize_with(max + 1, Default::default);
+                booleans.resize(max + 1, false);
             };
         }
 
