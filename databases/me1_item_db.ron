@@ -176,6 +176,32 @@ Me1ItemDb({
         item_id: 10,
         manufacturer_id: 342,
     ): "[Armali Council] Prodigy Biotic Amp",
+    // Batarian State Arms
+	(
+        item_id: 3,
+        manufacturer_id: 598,
+    ): "[Batarian State Arms] Judgement Pistol",
+	// Cerberus Skunkworks
+	(
+		item_id: 249,
+		manufacturer_id: 591,
+	): "[Cerberus Skunkworks] Hoplite (Human Medium Armour)",
+	(
+		item_id: 291,
+		manufacturer_id: 591,
+	): "[Cerberus Skunkworks] Hoplite (Human Heavy Armour)",
+	(
+        item_id: 4,
+        manufacturer_id: 599,
+    ): "[Cerberus Skunkworks] Gorgon Assault Rifle",
+	(
+        item_id: 5,
+        manufacturer_id: 599,
+    ): "[Cerberus Skunkworks] Hydra Shotgun",
+	(
+		item_id: 52,
+		manufacturer_id: 599,
+	): "[Cerberus Skunkworks] Titan Sniper Rifle",
     // Devlon Industries
     (
         item_id: 287,
@@ -589,6 +615,40 @@ Me1ItemDb({
         item_id: 52,
         manufacturer_id: 327,
     ): "[Hahne-Kedar] Avenger Sniper Rifle",
+    // HK Shadow Works
+	(
+		item_id: 249,
+		manufacturer_id: 596,
+	): "[HK Shadow Works] Janissary (Human Medium Armour)",
+	(
+		item_id: 291,
+		manufacturer_id: 596,
+	): "[HK Shadow Works] Janissary (Human Heavy Armour)",
+	(
+		item_id: 4,
+		manufacturer_id: 601,
+	): "[HK Shadow Works] Diamond Back Assault Rifle",
+	(
+        item_id: 3,
+        manufacturer_id: 601,
+    ): "[HK Shadow Works] Cobra Pistol",
+	// Jormangund Technology
+	(
+		item_id: 249,
+		manufacturer_id: 593,
+	): "[Jormangund Technology] Crisis (Human Medium Armour)",
+	(
+		item_id: 291,
+		manufacturer_id: 594,
+	): "[Jormangund Technology] Hazard (Human Heavy Armour)",
+	(
+        item_id: 3,
+        manufacturer_id: 600,
+    ): "[Jormangund Technology] Pinnacle Pistol",
+	(
+        item_id: 52,
+        manufacturer_id: 600,
+    ): "[Jormangund Technology] Helix Sniper Rifle",
     // Kassa Fabrication
     (
         item_id: 287,
