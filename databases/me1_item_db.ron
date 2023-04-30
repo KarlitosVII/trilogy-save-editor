@@ -176,6 +176,148 @@ Me1ItemDb({
         item_id: 10,
         manufacturer_id: 342,
     ): "[Armali Council] Prodigy Biotic Amp",
+    // Batarian State Arms
+    (
+        item_id: 287,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Human Medium Armor)",
+    (
+        item_id: 285,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Human Heavy Armor)",
+    (
+        item_id: 293,
+        manufacturer_id: 588,
+    ): "[Batarian State Arms] Partisan (Krogan Heavy Armor)",
+    (
+        item_id: 287,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Human Medium Armor)",
+    (
+        item_id: 285,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Human Heavy Armor)",
+    (
+        item_id: 293,
+        manufacturer_id: 587,
+    ): "[Batarian State Arms] Skirmish (Krogan Heavy Armor)",
+    (
+        item_id: 4,
+        manufacturer_id: 598,
+    ): "[Batarian State Arms] Terminator Assault Rifle",
+    (
+        item_id: 5,
+        manufacturer_id: 598,
+    ): "[Batarian State Arms] Executioner Shotgun",
+    (
+        item_id: 3,
+        manufacturer_id: 598,
+    ): "[Batarian State Arms] Judgement Pistol",
+    (
+        item_id: 52,
+        manufacturer_id: 598,
+    ): "[Batarian State Arms] Lightning Strike Sniper Rifle",
+    // Cerberus Skunkworks
+    (
+        item_id: 287,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Human Medium Armor)",
+    (
+        item_id: 285,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Human Heavy Armor)",
+    (
+        item_id: 293,
+        manufacturer_id: 590,
+    ): "[Cerberus Skunkworks] Freedom (Krogan Heavy Armor)",
+    (
+        item_id: 287,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Human Medium Armour)",
+    (
+        item_id: 285,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Human Heavy Armour)",
+    (
+        item_id: 293,
+        manufacturer_id: 591,
+    ): "[Cerberus Skunkworks] Hoplite (Krogan Heavy Armor)",
+    (
+        item_id: 4,
+        manufacturer_id: 599,
+    ): "[Cerberus Skunkworks] Gorgon Assault Rifle",
+    (
+        item_id: 5,
+        manufacturer_id: 599,
+    ): "[Cerberus Skunkworks] Hydra Shotgun",
+    (
+        item_id: 52,
+        manufacturer_id: 599,
+    ): "[Cerberus Skunkworks] Titan Sniper Rifle",
     // Devlon Industries
     (
         item_id: 287,
@@ -452,6 +594,18 @@ Me1ItemDb({
         item_id: 435,
         manufacturer_id: 436,
     ): "[Geth Armory] Geth Pulse Rifle",
+    (
+        item_id: 23,
+        manufacturer_id: 436,
+    ): "[Geth Armory] Geth Assault Rifle", // Called a pistol in-game, but equips in assault rifle slot
+    (
+        item_id: 519,
+        manufacturer_id: 436,
+    ): "[Geth Armory] Geth Shotgun", // Called a pistol in-game, but equips in shotgun slot and fires 3 pellets
+    (
+        item_id: 350,
+        manufacturer_id: 436,
+    ): "[Geth Armory] Geth Sniper Rifle", // Called a shotgun in-game, but equips in Sniper rifle slot. Doesn't have scope, zooms in like a pistol
     // Hahne-Kedar
     (
         item_id: 288,
@@ -589,6 +743,169 @@ Me1ItemDb({
         item_id: 52,
         manufacturer_id: 327,
     ): "[Hahne-Kedar] Avenger Sniper Rifle",
+    // Hahne-Kedar weapons with 0 stats
+    (
+        item_id: 4,
+        manufacturer_id: 578,
+    ): "[Hahne-Kedar] Lancer Assault Rifle with 0 stats",
+    (
+        item_id: 5,
+        manufacturer_id: 578,
+    ): "[Hahne-Kedar] Storm Shotgun with 0 stats",
+    (
+        item_id: 3,
+        manufacturer_id: 578,
+    ): "[Hahne-Kedar] Kessler Pistol with 0 stats",
+    (
+        item_id: 52,
+        manufacturer_id: 578,
+    ): "[Hahne-Kedar] Avenger Sniper Rifle with 0 stats",
+    // HK Shadow Works
+    (
+        item_id: 287,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Human Medium Armour)",
+    (
+        item_id: 285,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Human Heavy Armour)",
+    (
+        item_id: 293,
+        manufacturer_id: 596,
+    ): "[HK Shadow Works] Janissary (Krogan Heavy Armor)",
+    (
+        item_id: 287,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Human Medium Armor)",
+    (
+        item_id: 285,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Human Heavy Armor)",
+    (
+        item_id: 293,
+        manufacturer_id: 597,
+    ): "[HK Shadow Works] Spectre Armor (Krogan Heavy Armor)",
+    (
+        item_id: 4,
+        manufacturer_id: 601,
+    ): "[HK Shadow Works] Diamond Back Assault Rifle",
+    (
+        item_id: 5,
+        manufacturer_id: 601,
+    ): "[HK Shadow Works] Viper Shotgun",
+    (
+        item_id: 3,
+        manufacturer_id: 601,
+    ): "[HK Shadow Works] Cobra Pistol",
+    (
+        item_id: 52,
+        manufacturer_id: 601,
+    ): "[HK Shadow Works] Python Sniper Rifle",
+    // Jormangund Technology
+    (
+        item_id: 287,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Human Medium Armour)",
+    (
+        item_id: 285,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Human Heavy Armor)",
+    (
+        item_id: 293,
+        manufacturer_id: 593,
+    ): "[Jormangund Technology] Crisis (Krogan Heavy Armor)",
+    (
+        item_id: 287,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Human Light Armor)",
+    (
+        item_id: 288,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Turian Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Human Medium Armor)",
+    (
+        item_id: 285,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Krogan Medium Armor)",
+    (
+        item_id: 284,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Turian Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Human Heavy Armour)",
+    (
+        item_id: 293,
+        manufacturer_id: 594,
+    ): "[Jormangund Technology] Hazard (Krogan Heavy Armor)",
+    (
+        item_id: 4,
+        manufacturer_id: 600,
+    ): "[Jormangund Technology] Torrent Assault Rifle",
+    (
+        item_id: 5,
+        manufacturer_id: 600,
+    ): "[Jormangund Technology] Savage Shotgun",
+    (
+        item_id: 3,
+        manufacturer_id: 600,
+    ): "[Jormangund Technology] Pinnacle Pistol",
+    (
+        item_id: 52,
+        manufacturer_id: 600,
+    ): "[Jormangund Technology] Helix Sniper Rifle",
     // Kassa Fabrication
     (
         item_id: 287,
@@ -762,6 +1079,80 @@ Me1ItemDb({
         item_id: 52,
         manufacturer_id: 525,
     ): "[Haliat Armory] Equalizer Sniper Rifle",
+    // Spectre Advanced Gear
+    (
+        item_id: 287,
+        manufacturer_id: 494,
+    ): "[Spectre Advanced Gear] HML (Human Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 494,
+    ): "[Spectre Advanced Gear] HMM (Human Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 494,
+    ): "[Spectre Advanced Gear] HMH (Human Heavy Armor)",
+    (
+        item_id: 4,
+        manufacturer_id: 503,
+    ): "[Spectre Advanced Gear] HMWA Assault Rifle",
+    (
+        item_id: 5,
+        manufacturer_id: 503,
+    ): "[Spectre Advanced Gear] HMWSG Shotgun",
+    (
+        item_id: 3,
+        manufacturer_id: 503,
+    ): "[Spectre Advanced Gear] HMWP Pistol",
+    (
+        item_id: 52,
+        manufacturer_id: 503,
+    ): "[Spectre Advanced Gear] HMWSR Sniper Rifle",
+    (
+        item_id: 110,
+        manufacturer_id: 500,
+    ): "[Spectre Advanced Gear] HMOT Omni-Tool",
+    (
+        item_id: 10,
+        manufacturer_id: 497,
+    ): "[Spectre Advanced Gear] HMBA Biotic Amp",
+    // Spectre Basic Gear
+    (
+        item_id: 287,
+        manufacturer_id: 493,
+    ): "[Spectre Basic Gear] HML (Human Light Armor)",
+    (
+        item_id: 249,
+        manufacturer_id: 493,
+    ): "[Spectre Basic Gear] HMM (Human Medium Armor)",
+    (
+        item_id: 291,
+        manufacturer_id: 493,
+    ): "[Spectre Basic Gear] HMH (Human Heavy Armor)",
+    (
+        item_id: 4,
+        manufacturer_id: 502,
+    ): "[Spectre Basic Gear] HMWA Assault Rifle",
+    (
+        item_id: 5,
+        manufacturer_id: 502,
+    ): "[Spectre Basic Gear] HMWSG Shotgun",
+    (
+        item_id: 3,
+        manufacturer_id: 502,
+    ): "[Spectre Basic Gear] HMWP Pistol",
+    (
+        item_id: 52,
+        manufacturer_id: 502,
+    ): "[Spectre Basic Gear] Sniper Rifle",
+    (
+        item_id: 110,
+        manufacturer_id: 499,
+    ): "[Spectre Basic Gear] HMOT Omni-Tool",
+    (
+        item_id: 10,
+        manufacturer_id: 496,
+    ): "[Spectre Basic Gear] HMBA Biotic Amp",
     // Spectre Master Gear
     (
         item_id: 287,
@@ -791,6 +1182,14 @@ Me1ItemDb({
         item_id: 52,
         manufacturer_id: 504,
     ): "[Spectre Master Gear] HMWSR Sniper Rifle",
+    (
+        item_id: 110,
+        manufacturer_id: 501,
+    ): "[Spectre Master Gear] HMOT Omni-Tool",
+    (
+        item_id: 10,
+        manufacturer_id: 498,
+    ): "[Spectre Master Gear] HMBA Biotic Amp",
     // Armor Mods
     (
         item_id: 536,
@@ -1028,4 +1427,12 @@ Me1ItemDb({
         item_id: 399,
         manufacturer_id: 508,
     ): "[Grenade]",
+    (
+        item_id: 506,
+        manufacturer_id: -1,
+    ): "[Cheat] Super Gun - Geth Pulse Rifle",
+    (
+        item_id: 522,
+        manufacturer_id: 376,
+    ): "[Cheat] Super Armor - Survivor (Human Light Armor)",
 })
